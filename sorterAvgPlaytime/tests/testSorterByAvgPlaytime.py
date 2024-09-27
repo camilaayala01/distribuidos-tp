@@ -1,7 +1,7 @@
 import unittest
 
-from sorterByAvgPlaytime import SorterByAvgPlaytime
-from entryNameAvgPlaytime import EntryNameAvgPlaytime
+from sorterAvgPlaytime.common.sorterByAvgPlaytime import SorterByAvgPlaytime
+from sorterAvgPlaytime.common.entryNameAvgPlaytime import EntryNameAvgPlaytime
 
 SMALL_TEST_TOP_AMOUNT = 3
 BIG_TEST_TOP_AMOUNT = 20

@@ -1,6 +1,6 @@
 import unittest
+from sorterAvgPlaytime.common.entryNameAvgPlaytime import EntryNameAvgPlaytime
 
-from entryNameAvgPlaytime import EntryNameAvgPlaytime
 
 class TestEntryNameAvgPlaytime(unittest.TestCase):
     def setUp(self):
