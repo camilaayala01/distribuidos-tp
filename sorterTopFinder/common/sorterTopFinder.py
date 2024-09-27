@@ -1,10 +1,11 @@
-from sorterIndiePositiveReviews.common.entryNameReviewCount import EntryNameReviewCount
+from .entrySorterTopFinder import EntrySorterTopFinder
 
 TOP_AMOUNT = 5
 
-class SorterByAvgPlaytime:
-    def __init__(self, topAmount: int = TOP_AMOUNT): # for testing purposes
-        self._type = "SorterPlaytime"
+class SorterTopFinder:
+    def __init__(self, type: str, entrySorter: type, topAmount: int):
+        self._type = type
+        self._entrySorter = entrySorter
         self._topAmount = topAmount
         self._partialTop = None
 
@@ -12,11 +13,11 @@ class SorterByAvgPlaytime:
         # communication is not developed
         print("work in progress")
 
-    def getBatchTop(self, batch: list[EntryNameReviewCount]) -> list[EntryNameReviewCount]:
-        sortedBatch = EntryNameReviewCount.sort(batch)
+    def getBatchTop(self, batch: list[EntrySorterTopFinder]) -> list[EntrySorterTopFinder]:
+        sortedBatch = self._entrySorter.sort(batch)
         return sortedBatch[:self._topAmount]
 
-    def mergeKeepTop(self, batch: list[EntryNameReviewCount]):
+    def mergeKeepTop(self, batch: list[EntrySorterTopFinder]):
         newBatchTop = self.getBatchTop(batch)
 
         if len(newBatchTop) == 0:

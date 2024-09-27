@@ -1,12 +1,12 @@
 import unittest
 
-from sorterIndiePositiveReviews.common.sorterIndiePositiveReviews import SorterByAvgPlaytime
-from sorterIndiePositiveReviews.common.entryNameReviewCount import EntryNameReviewCount
+from ..common.sorterIndiePositiveReviews import SorterIndiePositiveReviews
+from ..common.entryNameReviewCount import EntryNameReviewCount
 
 SMALL_TEST_TOP_AMOUNT = 3
 BIG_TEST_TOP_AMOUNT = 20
 
-class TestSorterByAvgPlaytime(unittest.TestCase):
+class TestSorterByReviewCount(unittest.TestCase):
     def setUp(self):
         self.entriesEqual = [
             EntryNameReviewCount("Game A", 100),
@@ -26,7 +26,7 @@ class TestSorterByAvgPlaytime(unittest.TestCase):
             EntryNameReviewCount("Game I", 250),
 
         ]
-        self.sorterFew = SorterByAvgPlaytime(SMALL_TEST_TOP_AMOUNT)
+        self.sorterFew = SorterIndiePositiveReviews(SMALL_TEST_TOP_AMOUNT)
 
     def test_get_batch_top_with_equal_entries_to_top(self):
         result = self.sorterFew.getBatchTop(self.entriesEqual)
@@ -63,7 +63,7 @@ class TestSorterByAvgPlaytime(unittest.TestCase):
         self.assertEqual(topNames, expectedNames)
 
     def test_merge_with_bigger_amount_than_top(self):
-        sorterBig = SorterByAvgPlaytime(BIG_TEST_TOP_AMOUNT)
+        sorterBig = SorterIndiePositiveReviews(BIG_TEST_TOP_AMOUNT)
         allEntries = self.entriesEqual + self.entriesLess + self.entriesMore
         ordered = sorterBig.getBatchTop(allEntries)
 

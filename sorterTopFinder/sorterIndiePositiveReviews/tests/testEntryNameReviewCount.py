@@ -1,6 +1,5 @@
 import unittest
-from sorterIndiePositiveReviews.common.entryNameReviewCount import EntryNameReviewCount
-
+from ..common.entryNameReviewCount import EntryNameReviewCount
 
 class TestEntryNameAvgPlaytime(unittest.TestCase):
     def setUp(self):
