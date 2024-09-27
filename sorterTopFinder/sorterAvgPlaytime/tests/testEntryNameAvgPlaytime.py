@@ -1,5 +1,5 @@
 import unittest
-from sorterAvgPlaytime.common.entryNameAvgPlaytime import EntryNameAvgPlaytime
+from ..common.entryNameAvgPlaytime import EntryNameAvgPlaytime
 
 
 class TestEntryNameAvgPlaytime(unittest.TestCase):

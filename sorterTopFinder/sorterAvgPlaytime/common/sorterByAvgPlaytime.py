@@ -1,4 +1,4 @@
-from sorterAvgPlaytime.common.entryNameAvgPlaytime import EntryNameAvgPlaytime
+from .entryNameAvgPlaytime import EntryNameAvgPlaytime
 
 TOP_AMOUNT = 10
 

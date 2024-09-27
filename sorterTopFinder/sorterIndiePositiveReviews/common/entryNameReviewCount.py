@@ -2,7 +2,6 @@ from typing import Tuple
 
 from sorterTopFinder.common.entrySorterTopFinder import EntrySorterTopFinder
 
-NAME_LEN = 1 
 REVIEW_COUNT_LEN = 4
 
 class EntryNameReviewCount(EntrySorterTopFinder):
@@ -13,6 +12,7 @@ class EntryNameReviewCount(EntrySorterTopFinder):
     def serialize(self) -> bytes:
         baseSerialized = super().serialize()
         reviewCountBytes = self._reviewCount.to_bytes(REVIEW_COUNT_LEN, 'big')
+        
         return baseSerialized + reviewCountBytes  
 
     def __str__(self):
