@@ -32,14 +32,14 @@ class TestSorterTopFinder(unittest.TestCase):
         self.sorterIndieFew = SorterIndiePositiveReviews(SMALL_TEST_TOP_AMOUNT)
         self.sorterShooter = SorterActionNegativeReviews()
 
-    def generate_entries(self):
+    def generateEntries(self):
         entries = []
         for i in range(500):
             entries.append(EntryNameReviewCount(f"Game {i}", random.randint(1, 1000)))
 
         return entries
 
-    def test_get_batch_top_in_ascending_order(self):
+    def testGetBatchTopInAscendingOrder(self):
         result = self.sorterShooter.getBatchTop(self.entriesMore)
         topNames = [entry._name for entry in result]
         expectedNames = ["Game F", "Game G", "Game I", "Game H"]
@@ -47,19 +47,17 @@ class TestSorterTopFinder(unittest.TestCase):
         self.assertEqual(len(result), len(self.entriesMore))
         self.assertEqual(topNames, expectedNames)
 
-
-    def test_get_batch_top_with_no_limit(self):
-        entries1=self.generate_entries()
-        entries2=self.generate_entries()
+    def testGetBatchTopWithNoLimit(self):
+        entries1 = self.generateEntries()
+        entries2 = self.generateEntries()
         self.sorterShooter.mergeKeepTop(entries1)
         self.sorterShooter.mergeKeepTop(entries2)
 
         for i in range(len(self.sorterShooter._partialTop) - 1):
-            self.assertFalse(self.sorterShooter._partialTop[i].isGreaterThan(self.sorterShooter._partialTop[i+1]))
+            self.assertFalse(self.sorterShooter._partialTop[i].isGreaterThan(self.sorterShooter._partialTop[i + 1]))
         self.assertEqual(len(self.sorterShooter._partialTop), len(entries1) + len(entries2))
 
-
-    def test_get_batch_top_with_equal_entries_to_top(self):
+    def testGetBatchTopWithEqualEntriesToTop(self):
         result = self.sorterIndieFew.getBatchTop(self.entriesEqual)
         topNames = [entry._name for entry in result]
         expectedNames = ["Game C", "Game B", "Game A"]
@@ -67,7 +65,7 @@ class TestSorterTopFinder(unittest.TestCase):
         self.assertEqual(len(result), len(self.entriesEqual))
         self.assertEqual(topNames, expectedNames)
 
-    def test_get_batch_top_with_less_entries_than_top(self):
+    def testGetBatchTopWithLessEntriesThanTop(self):
         result = self.sorterIndieFew.getBatchTop(self.entriesLess)
         topNames = [entry._name for entry in result]
         expectedNames = ["Game E", "Game D"]
@@ -75,7 +73,7 @@ class TestSorterTopFinder(unittest.TestCase):
         self.assertEqual(len(result), len(self.entriesLess))
         self.assertEqual(topNames, expectedNames)
 
-    def test_get_batch_top_more_than_top(self):
+    def testGetBatchTopMoreThanTop(self):
         result = self.sorterIndieFew.getBatchTop(self.entriesMore)
         topNames = [entry._name for entry in result]
         expectedNames = ["Game H", "Game I", "Game G"]
@@ -83,7 +81,7 @@ class TestSorterTopFinder(unittest.TestCase):
         self.assertEqual(len(result), SMALL_TEST_TOP_AMOUNT)
         self.assertEqual(topNames, expectedNames)
 
-    def test_merge_keeps_top(self):
+    def testMergeKeepsTop(self):
         self.sorterIndieFew.mergeKeepTop(self.entriesMore)
         self.sorterIndieFew.mergeKeepTop(self.entriesLess)
         self.sorterIndieFew.mergeKeepTop(self.entriesEqual)
@@ -93,7 +91,7 @@ class TestSorterTopFinder(unittest.TestCase):
         self.assertEqual(len(self.sorterIndieFew._partialTop), SMALL_TEST_TOP_AMOUNT)
         self.assertEqual(topNames, expectedNames)
 
-    def test_merge_with_bigger_amount_than_top(self):
+    def testMergeWithBiggerAmountThanTop(self):
         sorterBig = SorterIndiePositiveReviews(BIG_TEST_TOP_AMOUNT)
         allEntries = self.entriesEqual + self.entriesLess + self.entriesMore
         ordered = sorterBig.getBatchTop(allEntries)
