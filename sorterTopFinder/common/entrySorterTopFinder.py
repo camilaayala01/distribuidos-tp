@@ -50,5 +50,5 @@ class EntrySorterTopFinder(ABC):
         pass
 
     @classmethod
-    def sort(cls, entries: list['EntrySorterTopFinder']) -> list['EntrySorterTopFinder']:
-        return sorted(entries, key=lambda entry: entry.getSortingAtribute(), reverse=True)
+    def sort(cls, entries: list['EntrySorterTopFinder'], reversed: bool) -> list['EntrySorterTopFinder']:
+        return sorted(entries, key=lambda entry: entry.getSortingAtribute(), reverse=reversed)

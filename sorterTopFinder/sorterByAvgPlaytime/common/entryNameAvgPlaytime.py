@@ -28,3 +28,7 @@ class EntryNameAvgPlaytime(EntrySorterTopFinder):
     
     def getSortingAtribute(self) -> int:
         return self._avgPlaytime
+    
+    @classmethod
+    def sort(cls, entries: list['EntrySorterTopFinder']) -> list['EntrySorterTopFinder']:
+        return super().sort(entries, True)

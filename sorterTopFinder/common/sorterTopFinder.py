@@ -1,46 +1,58 @@
+from abc import ABC, abstractmethod
 from .entrySorterTopFinder import EntrySorterTopFinder
 
 TOP_AMOUNT = 5
 
-class SorterTopFinder:
+class SorterTopFinder(ABC):
     def __init__(self, type: str, entrySorter: type, topAmount: int):
         self._type = type
         self._entrySorter = entrySorter
-        self._topAmount = topAmount
         self._partialTop = None
+        self._topAmount = topAmount
 
     def execute(self, data: bytes):
         # communication is not developed
         print("work in progress")
 
+    @abstractmethod
     def getBatchTop(self, batch: list[EntrySorterTopFinder]) -> list[EntrySorterTopFinder]:
-        sortedBatch = self._entrySorter.sort(batch)
-        return sortedBatch[:self._topAmount]
+        pass
+
+    def topHasCapacity(self, mergedList):
+        return len(mergedList) < self._topAmount
+        
+    def updatePartialTop(self, newOrderedList):
+        self._partialTop = newOrderedList[:self._topAmount]
+
+    def mustElementGoFirst(self, first: EntrySorterTopFinder, other: EntrySorterTopFinder):
+        return first.isGreaterThan(other)
 
     def mergeKeepTop(self, batch: list[EntrySorterTopFinder]):
-        newBatchTop = self.getBatchTop(batch)
-
-        if len(newBatchTop) == 0:
+        if len(batch) == 0:
             return
         
+        newBatchTop = self.getBatchTop(batch)
+        
         if self._partialTop is None:
-            self._partialTop = newBatchTop[:self._topAmount]
+            self.updatePartialTop(newBatchTop)
             return
 
         i, j = 0, 0
         mergedList = []
 
         while i < len(self._partialTop) and j < len(newBatchTop):
-            if self._partialTop[i].isGreaterThan(newBatchTop[j]):
+            if self.mustElementGoFirst(self._partialTop[i], newBatchTop[j]):
                 mergedList.append(self._partialTop[i])
                 i += 1
             else:
                 mergedList.append(newBatchTop[j])
                 j += 1
-
-        if len(mergedList) < self._topAmount:
+        
+        if self.topHasCapacity(mergedList):
+            # only 1 will have elements
             mergedList.extend(self._partialTop[i:])
             mergedList.extend(newBatchTop[j:])
-        # no else: since i have all top elements needed, theres no need to entend merged list with the remainings
-        
-        self._partialTop = mergedList[:self._topAmount]
+
+        self.updatePartialTop(mergedList)
+            
+            

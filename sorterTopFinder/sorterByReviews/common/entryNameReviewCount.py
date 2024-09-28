@@ -12,7 +12,7 @@ class EntryNameReviewCount(EntrySorterTopFinder):
     def serialize(self) -> bytes:
         baseSerialized = super().serialize()
         reviewCountBytes = self._reviewCount.to_bytes(REVIEW_COUNT_LEN, 'big')
-        
+
         return baseSerialized + reviewCountBytes  
 
     def __str__(self):
@@ -28,3 +28,4 @@ class EntryNameReviewCount(EntrySorterTopFinder):
     
     def getSortingAtribute(self) -> int:
         return self._reviewCount
+
