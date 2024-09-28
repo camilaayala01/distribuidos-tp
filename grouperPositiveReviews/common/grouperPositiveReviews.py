@@ -1,17 +1,18 @@
-from grouperPositiveReviews.common.entryAppID import EntryAppID
-
+from entryParsing.common.entryAppID import EntryAppID
+import os
 class GrouperPositiveReviews:
     def __init__(self): # for testing purposes
-        self._type = "GrouperPositiveReviews"
+        self._type = os.getenv('GROUP_POS_REV')
 
-    def handleMessage(ch, method, properties, body):
+    def handleMessage(self, ch, method, properties, body):
         entries = EntryAppID.deserialize(body)
-        result = ch.count(entries)
+        result = self.count(entries)
+        print(result)
 
     def execute(self, data: bytes):
         print("work in progress")
 
-    def count(self, entries: list['EntryAppID']) -> dict[str, int]:
+    def count(self, entries):
         appIDCount = {}
         for entry in entries:
             if not appIDCount.get(entry._appID):

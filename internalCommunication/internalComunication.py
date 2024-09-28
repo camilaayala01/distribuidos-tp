@@ -1,8 +1,8 @@
 import pika
 import signal
-PREFETCH_COUNT = 1
-HOST = 'rabbitmq'
-
+import os
+PREFETCH_COUNT = 1 # break round robin
+DELIVERY_MODE = 1 # make message transient, es lo mismo por ahora
 class InternalCommunication:
     def __init__(self, name: str):
         self._executerName = name
@@ -12,7 +12,7 @@ class InternalCommunication:
     def startConnection(self) -> pika.BlockingConnection:
         signal.signal(signal.SIGTERM, self.stop)
         return pika.BlockingConnection(
-        pika.ConnectionParameters(host=HOST))
+        pika.ConnectionParameters(host=os.getenv('HOST')))
 
     def createChannel(self) -> pika.adapters.blocking_connection.BlockingChannel:
         channel = self._connection.channel()
@@ -28,7 +28,7 @@ class InternalCommunication:
         except pika.exceptions.ConnectionClosedByBroker:
             pass
     
-    def readFromQueue(self) -> bytes | None :
+    def readFromQueue(self) :
         # basic.get return type is a three-tuple; (None, None, None) if the queue was empty; otherwise (method, properties, body); NOTE: body may be None
         return self._channel.basic.get(self._executerName)[2]
 
@@ -42,7 +42,7 @@ class InternalCommunication:
             routing_key= queueName,
             body=message,
             properties=pika.BasicProperties(
-                delivery_mode=1,  # make message transient, es lo mismo por ahora
+                delivery_mode= DELIVERY_MODE, 
             ))
         
     
@@ -57,63 +57,63 @@ class InternalCommunication:
 
 
     def sendToActionFilter(self, message: bytes):
-        self.basicSend('actionFilter', message)
+        self.basicSend(os.getenv('FILT_ACT'), message)
     
     def sendToIndieFilter(self, message: bytes):
-        self.basicSend('indieFilter', message)
+        self.basicSend(os.getenv('FILT_INDIE'), message)
 
     def sendToDecadeFilter(self, message: bytes):
-        self.basicSend('decadeFilter', message)
+        self.basicSend(os.getenv('FILT_DEC'), message)
     
     def sentToEnglishFilter(self, message: bytes):
-        self.basicSend('englishFilter', message)
+        self.basicSend(os.getenv('FILT_ENG'), message)
         
     def sendToPositiveReviewsGrouper(self, message: bytes):
-        self.basicSend('positiveReviewsGrouper', message)
+        self.basicSend(os.getenv('GROUP_POS_REV'), message)
 
     def sendToNegativeReviewsGrouper(self, message: bytes):
-        self.basicSend('negativeReviewsGrouper', message)
+        self.basicSend(os.getenv('GROUP_NEG_REV'), message)
 
     def sendToOSCountsGrouper(self, message: bytes):
-        self.basicSend('OSCountsGrouper', message)
+        self.basicSend(os.getenv('GROUP_OS'), message)
         
     def sendToOSCountsJoiner(self, shardingKey: str, message: bytes):
-        self.directSend('OSCountsJoiner', shardingKey, message)
+        self.directSend(os.getenv('JOIN_OS'), shardingKey, message)
     def sendOSCountsJoinEOF(self, message: bytes):
-        self.fanoutSend('OSCountsJoiner', message)
+        self.fanoutSend(os.getenv('JOIN_OS'), message)
     
     def sendToPositiveReviewsActionGamesJoiner(self, shardingKey: str, message: bytes):
-        self.directSend('positiveReviewsActionGamesJoiner', shardingKey, message)
+        self.directSend(os.getenv('JOIN_ACT_POS_REV'), shardingKey, message)
     def sendPositiveReviewsActionGamesJoinEOF(self, message: bytes):
-        self.fanoutSend('positiveReviewAsctionGamesJoiner', message)
+        self.fanoutSend(os.getenv('JOIN_ACT_POS_REV'), message)
 
     def sendToNegativeReviewsActionGamesJoiner(self, shardingKey: str, message: bytes):
-        self.directSend('negativeReviewAsctionGamesJoiner', shardingKey, message)
+        self.directSend(os.getenv('JOIN_ACT_NEG_REV'), shardingKey, message)
     def sendNegativeReviewsActionGamesJoinEOF(self, message: bytes):
-        self.fanoutSend('negativeReviewAsctionGamesJoiner', message)
+        self.fanoutSend(os.getenv('JOIN_ACT_NEG_REV'), message)
 
 
     def sendToReviewsIndieGamesJoiner(self, shardingKey: str, message: bytes):
-        self.directSend('reviewsIndieGameJoiner', shardingKey, message)
+        self.directSend(os.getenv('JOIN_INDIE_REV'), shardingKey, message)
     def sendReviewsIndieGamesJoinEOF(self, message: bytes):
-        self.fanoutSend('reviewsIndieGamesJoiner', message)
+        self.fanoutSend(os.getenv('JOIN_INDIE_REV'), message)
 
     
     def sendToAvgPlaytimeSorter(self, shardingKey: str, message: bytes):
-        self.directSend('avgPlaytimeSorter', shardingKey, message)
+        self.directSend(os.getenv('SORT_AVG_PT'), shardingKey, message)
     def sendAvgPlaytimeSortEOF(self, message: bytes):
-        self.fanoutSend('avgPlaytimeSorter', message)
+        self.fanoutSend(os.getenv('SORT_AVG_PT'), message)
 
     
     def sendToPositiveReviewsSorter(self, shardingKey: str, message: bytes):
-        self.directSend('positiveReviewsSorter', shardingKey, message)
+        self.directSend(os.getenv('SORT_INDIE_POS_REV'), shardingKey, message)
     def sendPositiveReviewsSortEOF(self, message: bytes):
-        self.fanoutSend('positiveReviewsSorter', message)
+        self.fanoutSend(os.getenv('SORT_INDIE_POS_REV'), message)
     
 
     def sendToNegativeReviewsSorter(self, shardingKey: str, message: bytes):
-        self.directSend('negativeReviewsSorter', shardingKey, message) 
+        self.directSend(os.getenv('SORT_ACT_REV'), shardingKey, message) 
     def sendNegativeReviewsSortEOF(self, message: bytes):
-        self.fanoutSend('negativeReviewsSorter', message)
+        self.fanoutSend(os.getenv('SORT_ACT_REV'), message)
     
     

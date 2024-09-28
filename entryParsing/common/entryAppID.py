@@ -14,7 +14,7 @@ class EntryAppID:
         return f"EntryAppID(appID={self._appID})"
     
     @staticmethod
-    def deserialize(data: bytes) -> list['EntryAppID']:
+    def deserialize(data: bytes):
         curr = 0
         entries = []
 

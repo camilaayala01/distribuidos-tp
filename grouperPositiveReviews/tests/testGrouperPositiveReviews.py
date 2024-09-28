@@ -1,8 +1,7 @@
 import unittest
 
-from grouperPositiveReviews.common.entryAppID import EntryAppID
+from entryParsing.common.entryAppID import EntryAppID
 from grouperPositiveReviews.common.grouperPositiveReviews import *
-
 
 class TestGrouperPositiveReviews(unittest.TestCase):
     def setUp(self):
