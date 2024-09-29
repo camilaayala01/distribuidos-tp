@@ -24,13 +24,9 @@ class EntryAppID:
                 curr+=APP_ID_LEN
                 appID = data[curr:appIDLen+curr].decode()
                 curr += appIDLen
-
                 entries.append(EntryAppID(appID))
             except (IndexError, UnicodeDecodeError):
                 raise Exception("There was an error parsing data")
 
         return entries
-    
- 
-
     

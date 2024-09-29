@@ -28,7 +28,8 @@ class EntryAppIDReviewCount:
                 appID = data[curr:appIDLen+curr].decode()
                 curr += appIDLen
                 count = int.from_bytes(data[curr:curr+COUNT_LEN], 'big')
-                entries.append(EntryAppIDReviewCount(appID,count))
+                curr += COUNT_LEN
+                entries.append(EntryAppIDReviewCount(appID, count))
             except (IndexError, UnicodeDecodeError):
                 raise Exception("There was an error parsing data")
 
@@ -36,9 +37,7 @@ class EntryAppIDReviewCount:
     
  
     def _shardBatch(nodeCount: int, result: list['EntryAppIDReviewCount']) -> list[bytes]:
-        resultingBatches = []
-        for i in range(nodeCount):
-            resultingBatches[i] = bytes()
+        resultingBatches = [bytes() for _ in range(nodeCount)]
         for entry in result:
             shardResult = getShardingKey(entry._appID, nodeCount)
             resultingBatches[shardResult] =  resultingBatches[shardResult] + entry.serialize()

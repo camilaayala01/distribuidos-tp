@@ -1,4 +1,4 @@
-from entryParsing.common.utils import _boolToInt, _intToBool
+from entryParsing.common.utils import boolToInt, intToBool
 FRAGMENT_LEN = 4
 EOF_FLAG_LEN = 1
 
@@ -9,7 +9,7 @@ class Header:
 
     def serialize(self) -> bytes:
         fragmentBytes = self._fragment.to_bytes(FRAGMENT_LEN, 'big')
-        eofBytes = _boolToInt(self._eof).to_bytes(EOF_FLAG_LEN, 'big')
+        eofBytes = boolToInt(self._eof).to_bytes(EOF_FLAG_LEN, 'big')
         return fragmentBytes + eofBytes
 
     def __str__(self):
@@ -21,11 +21,11 @@ class Header:
         try:
             fragment = int.from_bytes(data[curr:curr+FRAGMENT_LEN], 'big')
             curr+=FRAGMENT_LEN
-            eof = data[curr:EOF_FLAG_LEN+curr].decode()
+            eof = int.from_bytes(data[curr:curr+EOF_FLAG_LEN], 'big')
             curr += EOF_FLAG_LEN
-            header = Header(fragment, _intToBool(eof))
+            header = Header(fragment, intToBool(eof))
         except (IndexError, UnicodeDecodeError):
-            raise Exception("There was an error parsing data")
+            raise Exception("There was an error parsing data in header")
         
         return header, data[curr:len(data)]
    

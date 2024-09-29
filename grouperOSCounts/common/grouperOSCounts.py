@@ -2,12 +2,11 @@ import os
 from entryParsing.common.entryOSParcialCount import EntryOSParcialCount
 from entryParsing.common.entryOSSupport import EntryOSSupport
 from entryParsing.common.header import Header
-from entryParsing.common.utils import getRandomShardingKey, getShardingKey
+from entryParsing.common.utils import getShardingKey
 from internalCommunication.internalComunication import InternalCommunication
 class GrouperOSCounts:
     def __init__(self): 
-        self._type = os.getenv('GROUP_OS')
-        self._internalComunnication = InternalCommunication(self._type)
+        self._internalComunnication = InternalCommunication(os.getenv('GROUP_OS'), os.getenv('NODE_ID'))
 
     def handleMessage(self, ch, method, properties, body):
         header, data = Header.deserialize(body)

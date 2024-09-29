@@ -4,10 +4,11 @@ import os
 PREFETCH_COUNT = 1 # break round robin
 DELIVERY_MODE = 1 # make message transient, es lo mismo por ahora
 class InternalCommunication:
-    def __init__(self, name: str):
+    def __init__(self, name: str, nodeID: str = None):
         self._executerName = name
         self._connection = self.startConnection()
         self._channel = self.createChannel()
+        self._nodeID = nodeID
 
     def startConnection(self) -> pika.BlockingConnection:
         signal.signal(signal.SIGTERM, self.stop)
@@ -19,9 +20,22 @@ class InternalCommunication:
         channel.basic_qos(prefetch_count=PREFETCH_COUNT)
         return channel
 
+    def declareExchange(self, exchangeName: str, routingKey: str) -> str:
+        self._channel.exchange_declare(exchange=exchangeName, exchange_type='direct')
+        result = self._channel.queue_declare(queue='', durable=True)
+        queueName = result.method.queue
+        self._channel.queue_bind(
+                exchange=exchangeName, queue=queueName, routing_key=routingKey)
+        return queueName
+
     def defineMessageHandler(self, callback):
-        self._channel.queue_declare(queue=self._executerName)
-        self._channel.basic_consume(queue=self._executerName, on_message_callback=callback)
+        queueName = ""
+        if self._nodeID:
+            queueName = self.declareExchange(self._executerName, self._nodeID)
+        else:
+            queueName = self._executerName
+            self._channel.queue_declare(queue=self._executerName)
+        self._channel.basic_consume(queue=queueName, on_message_callback=callback)
         try:
             self._channel.start_consuming() 
         # Don't recover connections closed by server
@@ -50,7 +64,7 @@ class InternalCommunication:
         self._channel.exchange_declare(exchange=exchangeName, exchange_type='fanout')
         self._channel.basic_publish(exchange=exchangeName, routing_key='', body=message)
 
-    # el exchange va a mandar los mensajes a solo los que estan conectados a ese routing key
+
     def directSend(self, exchangeName: str, routingKey: str, message: bytes):
         self._channel.exchange_declare(exchange=exchangeName, exchange_type='direct')
         self._channel.basic_publish(exchange=exchangeName, routing_key=routingKey, body=message)
