@@ -1,6 +1,4 @@
 import random
-
-
 def _boolToInt(boolean: bool) -> int:
     match boolean:
         case True:
@@ -16,8 +14,8 @@ def _intToBool(u8: int) -> bool:
         case _:
             raise Exception("There was an error parsing data")
         
-def getRandomShardingKey(nodeCount):
-    random.randint(0, nodeCount -1)
+def getRandomShardingKey(nodeCount) -> int:
+    return random.randint(0, nodeCount -1)
 
-def getShardingKey(id, nodeCount):
+def getShardingKey(id, nodeCount) -> int:
     return hash(id) % nodeCount

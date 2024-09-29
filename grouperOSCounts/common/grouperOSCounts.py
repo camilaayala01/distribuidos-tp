@@ -1,6 +1,7 @@
 import os
 from entryParsing.common.entryOSParcialCount import EntryOSParcialCount
 from entryParsing.common.entryOSSupport import EntryOSSupport
+from entryParsing.common.header import Header
 from entryParsing.common.utils import getRandomShardingKey
 from internalCommunication.internalComunication import InternalCommunication
 class GrouperOSCounts:
@@ -9,14 +10,16 @@ class GrouperOSCounts:
         self._internalComunnication = InternalCommunication(self._type)
 
     def handleMessage(self, ch, method, properties, body):
-        entries = EntryOSSupport.deserialize(body)
+        header, data = Header.deserialize(body)
+        entries = EntryOSSupport.deserialize(data)
         result = self._applyStep(entries)
-        self._internalComunnication.sendToOSCountsJoiner(getRandomShardingKey(os.getenv('JOIN_OS_COUNT')), result.serialize())
+        msg = header.serialize() + result.serialize()
+        self._internalComunnication.sendToOSCountsJoiner(getRandomShardingKey(os.getenv('JOIN_OS_COUNT')), msg)
 
     def _applyStep(self, entries: list['EntryOSSupport']) -> EntryOSParcialCount:
         return self._buildResult(self._count(entries))
     
-    def _count(self, entries: list['EntryOSSupport']):
+    def _count(self, entries: list['EntryOSSupport']) -> list[int, int, int]:
         windowsCount, macCount, linuxCount = 0, 0, 0 
         for entry in entries:
             if entry._windows:

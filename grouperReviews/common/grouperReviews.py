@@ -2,6 +2,7 @@ from entryParsing.common.entryAppID import EntryAppID
 from abc import ABC
 
 from entryParsing.common.entryAppIDReviewCount import EntryAppIDReviewCount
+from entryParsing.common.header import Header
 from internalCommunication.internalComunication import InternalCommunication
 
 class GrouperReviews(ABC):
@@ -11,6 +12,7 @@ class GrouperReviews(ABC):
 
     def _applyStep(self, entries: list['EntryAppID'])-> list['EntryAppIDReviewCount']:
         return self._buildResult(self._count(entries))
+    
     def _count(self, entries: list['EntryAppID']) -> dict[str, int]:
         appIDCount = {}
         for entry in entries:
@@ -27,11 +29,14 @@ class GrouperReviews(ABC):
         return result
     
     def handleMessage(self, ch, method, properties, body):
-        entries = EntryAppID.deserialize(body)
+        header, data = Header.deserialize(body)
+        entries = EntryAppID.deserialize(data)
         result = self._applyStep(entries)
         shardedResults = EntryAppIDReviewCount._shardBatch(result)
+        serializedHeader = header.serialize()
         for shardingKey in len(shardedResults):
-            self._internalComunnication.sendToPositiveReviewsActionGamesJoiner(shardingKey, shardedResults[shardingKey])
+            msg = serializedHeader + shardedResults[shardingKey]
+            self._internalComunnication.sendToPositiveReviewsActionGamesJoiner(shardingKey, msg)
 
     def execute(self):
         self._internalComunnication.defineMessageHandler(self.handleMessage)
