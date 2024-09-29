@@ -2,7 +2,7 @@ import os
 from entryParsing.common.entryOSParcialCount import EntryOSParcialCount
 from entryParsing.common.entryOSSupport import EntryOSSupport
 from entryParsing.common.header import Header
-from entryParsing.common.utils import getRandomShardingKey
+from entryParsing.common.utils import getRandomShardingKey, getShardingKey
 from internalCommunication.internalComunication import InternalCommunication
 class GrouperOSCounts:
     def __init__(self): 
@@ -14,7 +14,7 @@ class GrouperOSCounts:
         entries = EntryOSSupport.deserialize(data)
         result = self._applyStep(entries)
         msg = header.serialize() + result.serialize()
-        self._internalComunnication.sendToOSCountsJoiner(getRandomShardingKey(os.getenv('JOIN_OS_COUNT')), msg)
+        self._internalComunnication.sendToOSCountsJoiner(getShardingKey(header._fragment, os.getenv('JOIN_OS_COUNT')), msg)
 
     def _applyStep(self, entries: list['EntryOSSupport']) -> EntryOSParcialCount:
         return self._buildResult(self._count(entries))

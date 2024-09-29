@@ -14,8 +14,6 @@ def _intToBool(u8: int) -> bool:
         case _:
             raise Exception("There was an error parsing data")
         
-def getRandomShardingKey(nodeCount) -> int:
-    return random.randint(0, nodeCount -1)
 
 def getShardingKey(id, nodeCount) -> int:
     return hash(id) % nodeCount
