@@ -14,7 +14,7 @@ class EntryAppID:
         return f"EntryAppID(appID={self._appID})"
     
     @staticmethod
-    def deserialize(data: bytes):
+    def deserialize(data: bytes): 
         curr = 0
         entries = []
 
@@ -30,4 +30,7 @@ class EntryAppID:
                 raise Exception("There was an error parsing data")
 
         return entries
+    
+ 
+
     
