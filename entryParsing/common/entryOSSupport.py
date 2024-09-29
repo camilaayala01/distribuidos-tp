@@ -1,3 +1,6 @@
+from entryParsing.common.utils import _boolToInt, _boolToU8, _intToBool
+
+
 BOOLEAN_BYTES = 1
 
 class EntryOSSupport:
@@ -7,9 +10,9 @@ class EntryOSSupport:
         self._linux = linux
 
     def serialize(self) -> bytes:
-        windowsBytes = self._windows.to_bytes(BOOLEAN_BYTES,'big')
-        macBytes = self._mac.to_bytes(BOOLEAN_BYTES,'big')
-        linuxBytes = self._mac.to_bytes(BOOLEAN_BYTES, 'big')
+        windowsBytes = _boolToInt(self._windows).to_bytes(BOOLEAN_BYTES,'big')
+        macBytes = _boolToInt(self._mac).to_bytes(BOOLEAN_BYTES,'big')
+        linuxBytes = _boolToInt(self._linux).to_bytes(BOOLEAN_BYTES, 'big')
         return windowsBytes + macBytes + linuxBytes
 
     def __str__(self):
@@ -18,30 +21,18 @@ class EntryOSSupport:
 
     @staticmethod
     def deserialize(data: bytes): 
-        def _u8ToBool(u8: int) -> bool:
-            match u8:
-                case 1:
-                    return False
-                case 0:
-                    return True
-                case _:
-                    raise Exception("There was an error parsing data")
-                
         curr = 0
         entries = []
         while len(data) > curr:
             try:
-                windowsU8 = int.from_bytes(data[curr:curr+BOOLEAN_BYTES], 'big')
+                windows = int.from_bytes(data[curr:curr+BOOLEAN_BYTES], 'big')
                 curr+=BOOLEAN_BYTES
-                windows = _u8ToBool(windowsU8)
-                macU8 = int.from_bytes(data[curr:curr+BOOLEAN_BYTES], 'big')
+                mac = int.from_bytes(data[curr:curr+BOOLEAN_BYTES], 'big')
                 curr+=BOOLEAN_BYTES
-                mac = _u8ToBool(macU8)
-                linuxU8 = int.from_bytes(data[curr:curr+BOOLEAN_BYTES], 'big')
+                linux = int.from_bytes(data[curr:curr+BOOLEAN_BYTES], 'big')
                 curr+=BOOLEAN_BYTES
-                linux = _u8ToBool(linuxU8)
 
-                entries.append(EntryOSSupport(windows, mac, linux))
+                entries.append(EntryOSSupport(_intToBool(windows), _intToBool(mac), _intToBool(linux)))
 
             except (IndexError, UnicodeDecodeError):
                 raise Exception("There was an error parsing data")

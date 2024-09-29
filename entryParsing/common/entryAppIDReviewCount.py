@@ -1,3 +1,4 @@
+from entryParsing.common.utils import getShardingKey
 APP_ID_LEN = 1 
 COUNT_LEN = 1
 class EntryAppIDReviewCount:
@@ -39,7 +40,7 @@ class EntryAppIDReviewCount:
         for i in range(nodeCount):
             resultingBatches[i] = bytes()
         for entry in result:
-            shardResult = hash(entry._appID) % nodeCount
+            shardResult = getShardingKey(entry._appID, nodeCount)
             resultingBatches[shardResult] =  resultingBatches[shardResult] + entry.serialize()
         return resultingBatches
 
