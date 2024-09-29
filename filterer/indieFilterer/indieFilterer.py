@@ -1,6 +1,6 @@
 from .entryIndieFilterer import EntryIndieFilterer
 
-class FiltererIndie():
+class IndieFilterer():
     def __init__(self):
         self._genre = "Indie"
 
