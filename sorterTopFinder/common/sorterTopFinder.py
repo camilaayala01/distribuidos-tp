@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from .entrySorterTopFinder import EntrySorterTopFinder
+from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 
 TOP_AMOUNT = 5
 

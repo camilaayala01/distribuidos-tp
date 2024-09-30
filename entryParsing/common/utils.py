@@ -3,7 +3,8 @@ def boolToInt(boolean: bool) -> int:
         case True:
             return 0
         case False:
-            return 1  
+            return 1
+          
 def intToBool(u8: int) -> bool:
     match u8:
         case 1:

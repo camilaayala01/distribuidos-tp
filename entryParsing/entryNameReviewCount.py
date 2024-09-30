@@ -1,8 +1,7 @@
 from typing import Tuple
 
-from sorterTopFinder.common.entrySorterTopFinder import EntrySorterTopFinder
-
-REVIEW_COUNT_LEN = 4
+from entryParsing.common.fieldParsing import deserializeCount, deserializeVariableLenString, serializeCount, serializeVariableLenString
+from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 
 class EntryNameReviewCount(EntrySorterTopFinder):
     def __init__(self, name: str, reviewCount: int):
@@ -10,19 +9,18 @@ class EntryNameReviewCount(EntrySorterTopFinder):
         self._reviewCount = reviewCount
 
     def serialize(self) -> bytes:
-        baseSerialized = super().serialize()
-        reviewCountBytes = self._reviewCount.to_bytes(REVIEW_COUNT_LEN, 'big')
+        nameBytes = serializeVariableLenString(self._name)
+        reviewCountBytes = serializeCount(self._reviewCount)
 
-        return baseSerialized + reviewCountBytes  
+        return nameBytes + reviewCountBytes  
 
     def __str__(self):
         return f"EntryNameReviewCount(name={self._name}, reviewCount={self._reviewCount})"
     
     @classmethod
     def deserializeEntry(cls, curr: int, data: bytes) -> Tuple['EntryNameReviewCount', int]:
-        curr, name = super().deserializeName(curr, data)
-        reviewCount = int.from_bytes(data[curr:curr + REVIEW_COUNT_LEN], 'big')
-        curr += REVIEW_COUNT_LEN
+        name, curr = deserializeVariableLenString(curr, data)
+        reviewCount, curr = deserializeCount(curr, data)
 
         return cls(name, reviewCount), curr
     

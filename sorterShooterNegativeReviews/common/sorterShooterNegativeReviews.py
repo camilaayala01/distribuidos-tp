@@ -1,4 +1,4 @@
-from .entryNameReviewCount import EntryNameReviewCount
+from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from sorterTopFinder.common.sorterTopFinder import SorterTopFinder
 
 """in charge on finding the 90th percentile of negative reviews"""

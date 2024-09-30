@@ -1,6 +1,6 @@
 import os
-from entryParsing.common.entryAppID import EntryAppID
-from entryParsing.common.entryAppIDReviewCount import EntryAppIDReviewCount
+from entryParsing.entryAppID import EntryAppID
+from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from grouperReviews.common.grouperReviews import GrouperReviews
 from internalCommunication.internalComunication import InternalCommunication
 

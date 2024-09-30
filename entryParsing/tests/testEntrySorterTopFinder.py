@@ -1,6 +1,6 @@
 import unittest
-from ..sorterByReviews.common.entryNameReviewCount import EntryNameReviewCount
-from ..sorterByAvgPlaytime.common.entryNameAvgPlaytime import EntryNameAvgPlaytime
+from entryParsing.entryNameReviewCount import EntryNameReviewCount
+from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
 
 class TestEntrySorterTopFinder(unittest.TestCase):
     def setUp(self):

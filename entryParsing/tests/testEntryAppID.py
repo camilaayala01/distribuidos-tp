@@ -1,6 +1,6 @@
 import unittest
-
-from entryParsing.common.entryAppID import EntryAppID
+from entryParsing.entryAppID import EntryAppID
+from entryParsing.common.fieldParsing import STRING_LEN
 
 class TestEntryAppID(unittest.TestCase):
     def setUp(self):
@@ -10,12 +10,12 @@ class TestEntryAppID(unittest.TestCase):
         
     def testSerialize(self):
         serialized = self._entry1.serialize()
-        expectedLen = 1 + len(self._entry1._appID.encode())
+        expectedLen = STRING_LEN + len(self._entry1._appID.encode())
         self.assertEqual(len(serialized), expectedLen)
 
     def testSerializeAndDeserialize(self):
         serialized = self._entry1.serialize() + self._entry2.serialize() + self._entry3.serialize()
-        expectedLen = 1 + len(self._entry1._appID.encode()) +  1 + len(self._entry2._appID.encode())  + 1 + len(self._entry3._appID.encode())
+        expectedLen = STRING_LEN + len(self._entry1._appID.encode()) +  STRING_LEN + len(self._entry2._appID.encode()) + STRING_LEN + len(self._entry3._appID.encode())
         deserialized = EntryAppID.deserialize(serialized)
         self.assertEqual(len(serialized), expectedLen)
         self.assertEqual(deserialized[0]._appID, self._entry1._appID)

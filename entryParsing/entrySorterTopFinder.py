@@ -9,19 +9,9 @@ class EntrySorterTopFinder(ABC):
     def __init__(self, name: str):
         self._name = name
 
+    @abstractmethod
     def serialize(self) -> bytes:
-        nameBytes = self._name.encode()
-        nameLenByte = len(nameBytes).to_bytes(NAME_LEN, 'big')
-        return nameLenByte + nameBytes
-    
-    @staticmethod
-    def deserializeName(curr: int, data: bytes) -> Tuple[int, str]:
-        nameLen = int.from_bytes(data[curr:curr + NAME_LEN], 'big')
-        curr += NAME_LEN
-        name = data[curr:nameLen + curr].decode()
-        curr += nameLen
-
-        return curr, name
+        pass
 
     @classmethod
     @abstractmethod
