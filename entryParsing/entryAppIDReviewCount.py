@@ -1,5 +1,5 @@
 from entryParsing.common.utils import getShardingKey
-from .common.fieldParsing import deserializeAppID, deserializeReviewCount, serializeAppID, serializeReviewCount
+from .common.fieldParsing import deserializeVariableLenString, deserializeCount, serializeVariableLenString, serializeCount
 
 APP_ID_LEN = 1 
 COUNT_LEN = 4
@@ -10,8 +10,8 @@ class EntryAppIDReviewCount:
         self._count = count
 
     def serialize(self) -> bytes:
-        appIDBytes = serializeAppID(self._appID)
-        countBytes = serializeReviewCount(self._count)
+        appIDBytes = serializeVariableLenString(self._appID)
+        countBytes = serializeCount(self._count)
 
         return appIDBytes + countBytes
 
@@ -25,8 +25,8 @@ class EntryAppIDReviewCount:
 
         while len(data) > curr:
             try:
-                appID, curr= deserializeAppID(curr, data)
-                reviewCount, curr = deserializeReviewCount(curr, data)
+                appID, curr= deserializeVariableLenString(curr, data)
+                reviewCount, curr = deserializeCount(curr, data)
                 entries.append(EntryAppIDReviewCount(appID, reviewCount))
             except (IndexError, UnicodeDecodeError):
                 raise Exception("There was an error parsing data")
@@ -40,5 +40,3 @@ class EntryAppIDReviewCount:
             shardResult = getShardingKey(entry._appID, nodeCount)
             resultingBatches[shardResult] =  resultingBatches[shardResult] + entry.serialize()
         return resultingBatches
-
-    

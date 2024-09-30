@@ -1,3 +1,4 @@
+from entryParsing.common.fieldParsing import deserializeCount, serializeCount
 from entryParsing.common.utils import boolToInt, intToBool
 
 COUNT_BYTES = 4
@@ -8,10 +9,10 @@ class EntryOSCount:
         self._mac = mac
         self._linux = linux
 
-    def serialize(self) -> bytes:
-        windowsBytes = boolToInt(self._windows).to_bytes(COUNT_BYTES,'big')
-        macBytes = boolToInt(self._mac).to_bytes(COUNT_BYTES,'big')
-        linuxBytes = boolToInt(self._linux).to_bytes(COUNT_BYTES, 'big')
+    def serialize(self) -> bytes: 
+        windowsBytes = serializeCount(self._windows)
+        macBytes = serializeCount(self._mac)
+        linuxBytes = serializeCount(self._linux)
         return windowsBytes + macBytes + linuxBytes
 
     def __str__(self):
@@ -21,14 +22,11 @@ class EntryOSCount:
     def deserialize(data: bytes):      
         curr = 0
         try:
-            windows = int.from_bytes(data[curr:curr+COUNT_BYTES], 'big')
-            curr+=COUNT_BYTES
-            mac = int.from_bytes(data[curr:curr+COUNT_BYTES], 'big')
-            curr+=COUNT_BYTES
-            linux= int.from_bytes(data[curr:curr+COUNT_BYTES], 'big')
-            curr+=COUNT_BYTES
+            windows, curr = deserializeCount(curr, data)
+            mac, curr = deserializeCount(curr, data)
+            linux, curr = deserializeCount(curr, data)
 
-            return EntryOSCount(intToBool(windows),intToBool(mac), intToBool(linux))
+            return EntryOSCount(windows, mac, linux)
 
         except (IndexError, UnicodeDecodeError):
             raise Exception("There was an error parsing data")

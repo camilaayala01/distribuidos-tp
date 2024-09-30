@@ -1,6 +1,6 @@
 import unittest
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
-from entryParsing.common.fieldParsing import APP_ID_LEN, REVIEW_COUNT_LEN
+from entryParsing.common.fieldParsing import STRING_LEN, COUNT_LEN
 
 class TestEntryAppID(unittest.TestCase):
     def setUp(self):
@@ -10,12 +10,12 @@ class TestEntryAppID(unittest.TestCase):
         
     def testSerialize(self):
         serialized = self._entry1.serialize()
-        expectedLen = APP_ID_LEN + len(self._entry1._appID.encode()) + REVIEW_COUNT_LEN
+        expectedLen = STRING_LEN + len(self._entry1._appID.encode()) + COUNT_LEN
         self.assertEqual(len(serialized), expectedLen)
 
     def testSerializeAndDeserialize(self):
         serialized = self._entry1.serialize() + self._entry2.serialize() + self._entry3.serialize()
-        expectedLen = APP_ID_LEN + len(self._entry1._appID.encode()) + REVIEW_COUNT_LEN + APP_ID_LEN + len(self._entry2._appID.encode()) + REVIEW_COUNT_LEN + APP_ID_LEN + len(self._entry3._appID.encode()) + REVIEW_COUNT_LEN
+        expectedLen = STRING_LEN + len(self._entry1._appID.encode()) + COUNT_LEN + STRING_LEN + len(self._entry2._appID.encode()) + COUNT_LEN + STRING_LEN + len(self._entry3._appID.encode()) + COUNT_LEN
         deserialized = EntryAppIDReviewCount.deserialize(serialized)
         self.assertEqual(len(serialized), expectedLen)
         self.assertEqual(deserialized[0]._appID, self._entry1._appID)
