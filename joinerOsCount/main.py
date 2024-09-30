@@ -1,8 +1,8 @@
 from .common.joinerOSCount import JoinerOSCount
 
 def main():
-    grouper = JoinerOSCount()
-    grouper.execute()
+    joiner = JoinerOSCount()
+    print("initialized joiner")
 
 if __name__ == "__main__":
     main()

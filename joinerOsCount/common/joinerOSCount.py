@@ -1,7 +1,7 @@
 import os
 from entryParsing.common.header import Header
 from entryParsing.entryOSCount import EntryOSCount
-from internalCommunication.internalComunication import InternalCommunication
+from internalCommunication.internalCommunication import InternalCommunication
 
 class JoinerOSCount:
     def __init__(self):

@@ -1,31 +1,26 @@
 import unittest
+from unittest.mock import MagicMock, patch
+from entryParsing.entryOSCount import EntryOSCount
+from ..common.joinerOSCount import JoinerOSCount
 
-from entryParsing.entryAppID import EntryAppID
-from grouperReviews.common.grouperReviews import GrouperReviews
-
-class TestGrouperPositiveReviews(unittest.TestCase):
+class TestJoinerOSCount(unittest.TestCase):
+    @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
     def setUp(self):
         self._entries = [
-            EntryAppID('1'),
-            EntryAppID('2'),
-            EntryAppID('3'),
-            EntryAppID('4'),
-            EntryAppID('1'),
-            EntryAppID('2'),
-            EntryAppID('3'),
-            EntryAppID('1'),
-            EntryAppID('2'),
-            EntryAppID('1'),
+            EntryOSCount(1, 2, 3),
+            EntryOSCount(1, 2, 3),
+            EntryOSCount(1, 2, 3),
+            EntryOSCount(1, 2, 3),
         ]
-        self._grouper = GrouperReviews("test")
+        self._joiner = JoinerOSCount()
 
     def testCountEntries(self):
-        result = self._grouper.count(self._entries)
-        self.assertEqual(result[self._entries[0]._appID], 4)
-        self.assertEqual(result[self._entries[1]._appID], 3)
-        self.assertEqual(result[self._entries[2]._appID], 2)
-        self.assertEqual(result[self._entries[3]._appID], 1)
-        self.assertEqual(result.get(5), None)
+        for entry in self._entries:
+            self._joiner._sum(entry)
+        result = self._joiner._buildResult()
+        self.assertEqual(result._windows, 4)
+        self.assertEqual(result._mac, 8)
+        self.assertEqual(result._linux, 12)
 
 if __name__ == '__main__':
     unittest.main()

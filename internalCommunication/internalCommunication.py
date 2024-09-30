@@ -1,8 +1,10 @@
 import pika
 import signal
 import os
+
 PREFETCH_COUNT = 1 # break round robin
 DELIVERY_MODE = 1 # make message transient, es lo mismo por ahora
+
 class InternalCommunication:
     def __init__(self, name: str, nodeID: str = None):
         self._executerName = name
