@@ -1,8 +1,7 @@
 import unittest
-
 from entryParsing.common.utils import boolToInt, intToBool
 
-class TestEntryAppID(unittest.TestCase):
+class TestBoolIntConversion(unittest.TestCase):
 
     def testIntToBool(self):
         self.assertEqual(intToBool(0), True)
