@@ -1,6 +1,5 @@
 from entryParsing.common.utils import boolToInt, intToBool
 
-
 BOOLEAN_BYTES = 1
 
 class EntryOSSupport:

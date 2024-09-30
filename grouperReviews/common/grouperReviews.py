@@ -24,14 +24,12 @@ class GrouperReviews(ABC):
     
     def _buildResult(self, appIDCount: dict[str, int]) -> list['EntryAppIDReviewCount']:
         result = []
-        print(appIDCount)
         for (key, value) in appIDCount.items():
             result.append(EntryAppIDReviewCount(key, value))
         return result
     
     def handleMessage(self, ch, method, properties, body):
         header, data = Header.deserialize(body)
-        print("receive msg with fragment number : ", header._fragment)
         entries = EntryAppID.deserialize(data)
         result = self._applyStep(entries)
         nodeCount = int(os.getenv('JOIN_ACT_POS_REV_COUNT'))

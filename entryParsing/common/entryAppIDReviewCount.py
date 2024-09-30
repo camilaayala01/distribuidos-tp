@@ -1,6 +1,8 @@
 from entryParsing.common.utils import getShardingKey
+
 APP_ID_LEN = 1 
-COUNT_LEN = 1
+COUNT_LEN = 4
+
 class EntryAppIDReviewCount:
     def __init__(self, appID: str, count: int):
         self._appID =  appID
@@ -9,9 +11,9 @@ class EntryAppIDReviewCount:
     def serialize(self) -> bytes:
         appIDBytes = self._appID.encode()
         appIDLenByte = len(appIDBytes).to_bytes(APP_ID_LEN, 'big')
-        countByte = self._count.to_bytes(COUNT_LEN,'big')
+        countBytes = self._count.to_bytes(COUNT_LEN,'big')
 
-        return appIDLenByte + appIDBytes + countByte
+        return appIDLenByte + appIDBytes + countBytes
 
     def __str__(self):
         return f"EntryAppIDReviewCount(appID={self._appID}, count={self._count})"
