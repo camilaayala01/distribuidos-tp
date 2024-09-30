@@ -9,6 +9,15 @@ class EntryOSCount:
         self._mac = mac
         self._linux = linux
 
+    def getWindowsCount(self):
+        return self._windows
+    
+    def getMacCount(self):
+        return self._mac
+    
+    def getLinuxCount(self):
+        return self._linux
+
     def serialize(self) -> bytes: 
         windowsBytes = serializeCount(self._windows)
         macBytes = serializeCount(self._mac)
