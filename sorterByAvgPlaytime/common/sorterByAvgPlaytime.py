@@ -1,4 +1,4 @@
-from .entryNameAvgPlaytime import EntryNameAvgPlaytime
+from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
 from sorterTopFinder.common.sorterTopFinder import SorterTopFinder
 
 TOP_AMOUNT = 10

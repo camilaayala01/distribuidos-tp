@@ -1,4 +1,4 @@
-from .entryNameReviewCount import EntryNameReviewCount
+from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from sorterTopFinder.common.sorterTopFinder import SorterTopFinder
 
 TOP_AMOUNT = 5

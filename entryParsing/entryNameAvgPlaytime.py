@@ -1,6 +1,6 @@
 from typing import Tuple
 from entryParsing.common.fieldParsing import deserializePlaytime, deserializeVariableLenString, serializePlaytime, serializeVariableLenString
-from sorterTopFinder.common.entrySorterTopFinder import EntrySorterTopFinder
+from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 
 class EntryNameAvgPlaytime(EntrySorterTopFinder):
     def __init__(self, name: str, avgPlaytime: int):

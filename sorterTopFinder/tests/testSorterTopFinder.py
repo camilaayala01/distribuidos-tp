@@ -1,9 +1,9 @@
 import random
 import unittest
 
-from ..sorterByReviews.common.sorterIndiePositiveReviews import SorterIndiePositiveReviews
-from ..sorterByReviews.common.sorterShooterNegativeReviews import SorterActionNegativeReviews
-from ..sorterByReviews.common.entryNameReviewCount import EntryNameReviewCount
+from sorterIndiePositiveReviews.common.sorterIndiePositiveReviews import SorterIndiePositiveReviews
+from sorterShooterNegativeReviews.common.sorterShooterNegativeReviews import SorterActionNegativeReviews
+from entryParsing.entryNameReviewCount import EntryNameReviewCount
 
 SMALL_TEST_TOP_AMOUNT = 3
 BIG_TEST_TOP_AMOUNT = 20

@@ -1,9 +1,7 @@
 from typing import Tuple
 
 from entryParsing.common.fieldParsing import deserializeCount, deserializeVariableLenString, serializeCount, serializeVariableLenString
-from sorterTopFinder.common.entrySorterTopFinder import EntrySorterTopFinder
-
-REVIEW_COUNT_LEN = 4
+from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 
 class EntryNameReviewCount(EntrySorterTopFinder):
     def __init__(self, name: str, reviewCount: int):
