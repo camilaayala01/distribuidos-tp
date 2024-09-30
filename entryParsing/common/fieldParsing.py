@@ -1,7 +1,9 @@
 from typing import Tuple
+from .utils import boolToInt, intToBool
 
 APP_ID_LEN = 1 
 REVIEW_COUNT_LEN = 4
+BOOLEAN_BYTES = 1
 
 def serializeAppID(appId: str):
     appIDBytes = appId.encode()
@@ -20,3 +22,9 @@ def serializeReviewCount(reviewCount: int):
 def deserializeReviewCount(curr: int, data: bytes)-> Tuple[str, int]:
     count = int.from_bytes(data[curr:curr+REVIEW_COUNT_LEN], 'big')
     return count, curr + REVIEW_COUNT_LEN
+
+def serializeBoolean(os: bool):
+    return boolToInt(os).to_bytes(BOOLEAN_BYTES,'big')
+
+def deserializeBoolean(curr: int, data: bytes)-> Tuple[str, int]:
+    return intToBool(int.from_bytes(data[curr:curr+BOOLEAN_BYTES], 'big')), curr + BOOLEAN_BYTES

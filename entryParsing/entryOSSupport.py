@@ -1,6 +1,5 @@
-from entryParsing.common.utils import boolToInt, intToBool
-
-BOOLEAN_BYTES = 1
+from .common.utils import boolToInt, intToBool
+from .common.fieldParsing import deserializeBoolean, serializeBoolean
 
 class EntryOSSupport:
     def __init__(self, windows: bool, mac: bool, linux: bool):
@@ -9,9 +8,9 @@ class EntryOSSupport:
         self._linux = linux
 
     def serialize(self) -> bytes:
-        windowsBytes = boolToInt(self._windows).to_bytes(BOOLEAN_BYTES,'big')
-        macBytes = boolToInt(self._mac).to_bytes(BOOLEAN_BYTES,'big')
-        linuxBytes = boolToInt(self._linux).to_bytes(BOOLEAN_BYTES, 'big')
+        windowsBytes = serializeBoolean(self._windows)
+        macBytes = serializeBoolean(self._mac)
+        linuxBytes = serializeBoolean(self._linux)
         return windowsBytes + macBytes + linuxBytes
 
     def __str__(self):
@@ -24,14 +23,11 @@ class EntryOSSupport:
         entries = []
         while len(data) > curr:
             try:
-                windows = int.from_bytes(data[curr:curr+BOOLEAN_BYTES], 'big')
-                curr+=BOOLEAN_BYTES
-                mac = int.from_bytes(data[curr:curr+BOOLEAN_BYTES], 'big')
-                curr+=BOOLEAN_BYTES
-                linux = int.from_bytes(data[curr:curr+BOOLEAN_BYTES], 'big')
-                curr+=BOOLEAN_BYTES
+                windows, curr = deserializeBoolean(curr, data)
+                mac, curr = deserializeBoolean(curr, data)
+                linux, curr = deserializeBoolean(curr, data)
 
-                entries.append(EntryOSSupport(intToBool(windows), intToBool(mac), intToBool(linux)))
+                entries.append(EntryOSSupport(windows, mac, linux))
 
             except (IndexError, UnicodeDecodeError):
                 raise Exception("There was an error parsing data")
