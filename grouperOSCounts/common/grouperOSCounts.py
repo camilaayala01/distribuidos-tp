@@ -1,6 +1,6 @@
 import os
-from entryParsing.common.entryOSCount import EntryOSCount
-from entryParsing.common.entryOSSupport import EntryOSSupport
+from entryParsing.entryOSCount import EntryOSCount
+from entryParsing.entryOSSupport import EntryOSSupport
 from entryParsing.common.header import Header
 from entryParsing.common.utils import getShardingKey
 from internalCommunication.internalComunication import InternalCommunication

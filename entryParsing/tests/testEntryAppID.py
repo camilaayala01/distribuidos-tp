@@ -1,6 +1,6 @@
 import unittest
 
-from entryParsing.common.entryAppID import EntryAppID
+from entryParsing.entryAppID import EntryAppID
 
 class TestEntryAppID(unittest.TestCase):
     def setUp(self):

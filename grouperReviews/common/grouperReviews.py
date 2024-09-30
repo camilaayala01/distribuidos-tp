@@ -1,7 +1,7 @@
-from entryParsing.common.entryAppID import EntryAppID
+from entryParsing.entryAppID import EntryAppID
 from abc import ABC
 import os
-from entryParsing.common.entryAppIDReviewCount import EntryAppIDReviewCount
+from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from entryParsing.common.header import Header
 from internalCommunication.internalComunication import InternalCommunication
 
