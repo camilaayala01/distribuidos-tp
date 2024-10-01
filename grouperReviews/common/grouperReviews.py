@@ -3,7 +3,7 @@ from abc import ABC
 import os
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from entryParsing.common.header import Header
-from internalCommunication.internalComunication import InternalCommunication
+from internalCommunication.internalCommunication import InternalCommunication
 
 class GrouperReviews(ABC):
     def __init__(self, type: str): 

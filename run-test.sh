@@ -22,3 +22,12 @@ if [ $? -eq 0 ]; then
 else
     echo -e "${RED}Sorter tests failed :( ${NO_COLOR}"
 fi
+
+# execute joiner os tests
+echo -e "${BLUE}Running tests for Joiner that counts OS support${NO_COLOR}"
+python3 -m unittest discover -s ./joinerOsCount/tests -p "test*.py" -t .
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Joiner OS tests passed successfully!${NO_COLOR}"
+else
+    echo -e "${RED}Joiner Os tests failed :( ${NO_COLOR}"
+fi
