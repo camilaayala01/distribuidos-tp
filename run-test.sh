@@ -27,7 +27,7 @@ fi
 echo -e "${BLUE}Running tests for Joiner that counts OS support${NO_COLOR}"
 python3 -m unittest discover -s ./joinerOsCount/tests -p "test*.py" -t .
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Entry parsing tests passed successfully!${NO_COLOR}"
+    echo -e "${GREEN}Joiner OS tests passed successfully!${NO_COLOR}"
 else
-    echo -e "${RED}Entry parsing tests failed :( ${NO_COLOR}"
+    echo -e "${RED}Joiner Os tests failed :( ${NO_COLOR}"
 fi
