@@ -47,8 +47,8 @@ class JoinerByAppIDNegativeReviews:
         # has to send header with fragments and his own id, as
         # well as body with name and reviewCount
         # partition results into packets like in sorter
-        self._internalComunnication.sendToPositiveReviewsActionGamesJoiner("message not created")
         print("not implemented!")
+        self._internalComunnication.sendToNegativeReviewsSorter("message not created")
 
     def handleMessage(self, ch, method, properties, body):
         header, batch = HeaderWithTable.deserialize(body)

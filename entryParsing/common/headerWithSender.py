@@ -13,6 +13,9 @@ class HeaderWithSender(Header):
     def size(cls):
         return SENDER_ID_LEN + super().size()
 
+    def getSenderID(self) -> int:
+        return self._sender
+    
     @staticmethod
     def deserialize(data: bytes) -> tuple['HeaderWithSender', bytes]:
         curr = 0
