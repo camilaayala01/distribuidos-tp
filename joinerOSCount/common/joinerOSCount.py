@@ -5,6 +5,7 @@ from entryParsing.entryOSCount import EntryOSCount
 from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.defaultTracker import DefaultTracker
 
+"""Just one entity that sums one clients sums"""
 class JoinerOSCount:
     def __init__(self):
         self._internalComunnication = InternalCommunication(os.getenv('JOIN_OS'))

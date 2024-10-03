@@ -8,6 +8,9 @@ class EntryNameReviewCount(EntrySorterTopFinder):
         super().__init__(name)
         self._reviewCount = reviewCount
 
+    def addToCount(self, count: int):
+        self._reviewCount += count
+
     def serialize(self) -> bytes:
         nameBytes = serializeVariableLenString(self._name)
         reviewCountBytes = serializeCount(self._reviewCount)
