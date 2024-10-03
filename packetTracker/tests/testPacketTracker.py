@@ -1,12 +1,13 @@
 import unittest
 from entryParsing.common.header import Header
 from ..packetTracker import PacketTracker
+from ..defaultTracker import DefaultTracker
 
 class TestPacketTracker(unittest.TestCase):
-    
     def setUp(self):
         # this tracker expects even numbers
         self.tracker = PacketTracker(nodesInCluster=2, module=0)
+        self.defaultTracker = DefaultTracker()
     
     def testisDuplicateBiggerThanPriorBiggest(self):
         header = Header(fragment=5, eof=False)
@@ -15,7 +16,7 @@ class TestPacketTracker(unittest.TestCase):
         # bigger than the biggest received
         self.assertFalse(self.tracker.isDuplicate(header))
     
-    def testisDuplicateSmallerThanPriorBiggest(self):
+    def testIsDuplicateSmallerThanPriorBiggest(self):
         header = Header(fragment=2, eof=False)
         self.tracker._biggestFragment = 5
         self.tracker._pending = set([2, 3])
@@ -27,14 +28,25 @@ class TestPacketTracker(unittest.TestCase):
         self.tracker._pending.discard(2)
         self.assertTrue(self.tracker.isDuplicate(header))
     
-
+    def testUpdateWithNewFragmentBiggerInDefault(self):
+        header = Header(fragment=5, eof=False)
+        self.defaultTracker._biggestFragment = 2
+        
+        self.defaultTracker.update(header)
+        
+        self.assertEqual(self.defaultTracker._biggestFragment, 5)
+        self.assertIn(3, self.defaultTracker._pending)
+        self.assertIn(4, self.defaultTracker._pending)
+        self.assertFalse(self.defaultTracker._receivedEnd)
+    
     def testUpdateWithNewFragmentBigger(self):
         header = Header(fragment=6, eof=False)
-        self.tracker._biggestFragment = 2
+        self.tracker._biggestFragment=2
         
         self.tracker.update(header)
         
         self.assertEqual(self.tracker._biggestFragment, 6)
+        self.assertNotIn(2, self.tracker._pending)
         self.assertNotIn(3, self.tracker._pending)
         self.assertIn(4, self.tracker._pending)
         self.assertNotIn(5, self.tracker._pending)
@@ -46,7 +58,7 @@ class TestPacketTracker(unittest.TestCase):
         
         self.tracker.update(header)
         self.assertEqual(self.tracker._biggestFragment, 8)
-        self.assertTrue(len(self.tracker._pending), 0)
+        self.assertEqual(len(self.tracker._pending), 0)
         self.assertTrue(self.tracker._receivedEnd)
     
     def testUpdateDiscardPending(self):

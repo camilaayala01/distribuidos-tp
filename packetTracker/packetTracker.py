@@ -16,7 +16,7 @@ class PacketTracker:
         newFrag = header.getFragmentNumber()
 
         if newFrag > self._biggestFragment:
-            for num in range (self._biggestFragment, newFrag):
+            for num in range (self._biggestFragment + 1, newFrag):
                 if num % self._nodesInCluster == self._module:
                     self._pending.add(num)
 
