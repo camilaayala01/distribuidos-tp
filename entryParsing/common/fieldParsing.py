@@ -7,6 +7,7 @@ AVG_PLAYTIME_LEN = 4
 BOOLEAN_LEN = 1
 TOP_BYTES_LEN = 1
 SENDER_ID_LEN = 1
+QUERY_NUMBER_LEN = 1
 
 def serializeVariableLenString(field: str):
     fieldBytes = field.encode()
@@ -52,3 +53,10 @@ def serializeTopCount(top: int):
 def deserializeTopCount(curr: int, data: bytes)-> Tuple[int, int]:
     top = int.from_bytes(data[curr:curr + TOP_BYTES_LEN], 'big')
     return top, curr + TOP_BYTES_LEN
+
+def serializeQueryNumber(queryNumber: int):
+    return queryNumber.to_bytes(QUERY_NUMBER_LEN,'big')
+
+def deserializeQueryNumber(curr: int, data: bytes)-> Tuple[int, int]:
+    top = int.from_bytes(data[curr:curr + QUERY_NUMBER_LEN], 'big')
+    return top, curr + QUERY_NUMBER_LEN

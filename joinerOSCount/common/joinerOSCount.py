@@ -1,21 +1,48 @@
 import os
 from entryParsing.common.header import Header
+from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from entryParsing.entryOSCount import EntryOSCount
 from internalCommunication.internalCommunication import InternalCommunication
+from packetTracker.defaultTracker import DefaultTracker
 
 class JoinerOSCount:
     def __init__(self):
-        self._internalComunnication = InternalCommunication(os.getenv('JOIN_OS'), os.getenv('NODE_ID'))
+        self._internalComunnication = InternalCommunication(os.getenv('JOIN_OS'))
+        self._packetTracker = DefaultTracker()
         self._windows = 0
         self._mac = 0
         self._linux = 0
 
-    def _processMessage(self, data: bytes):
-        header, rest = Header.deserialize(data)
-        osCount = EntryOSCount.deserialize(rest)
+    def reset(self):
+        self._packetTracker.reset()
+        self._windows = 0
+        self._mac = 0
+        self._linux = 0
+
+    def execute(self):
+        self._internalComunnication.defineMessageHandler(self.handleMessage())
+
+    def handleMessage(self, ch, method, properties, body):
+        header, data = Header.deserialize(body)
+        if self._packetTracker.isDuplicate(header):
+            ch.basic_ack(delivery_tag = method.delivery_tag)
+            return
+        osCount = EntryOSCount.deserialize(data)
         self._sum(osCount)
-        # add extra logic to see if it was the last step or not, or if it was the last fragment
-        # but still need to get some that got missing in the middle
+        self._sendToNextStep()
+        ch.basic_ack(delivery_tag = method.delivery_tag)
+        
+    def _sendToNextStep(self, data: bytes):
+        self._internalComunnication.sendToDispatcher(data)
+
+    def _handleSending(self):
+        if not self._packetTracker.isDone():
+            return
+        # only one node is in charge of calculating counts
+        headerBytes = HeaderWithQueryNumber(fragment=1, eof=True, queryNumber=1).serialize()
+        countsBytes = self._buildResult().serialize()
+        self._sendToNextStep(headerBytes + countsBytes)
+        self.reset()
 
     def _sum(self, entry: EntryOSCount):
         self._windows += entry.getWindowsCount()
