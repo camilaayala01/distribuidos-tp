@@ -1,7 +1,8 @@
 from entryParsing.common.headerWithSender import HeaderWithSender
 from packetTracker.defaultTracker import DefaultTracker
+from packetTracker.tracker import TrackerInterface
 
-class MultiTracker:
+class MultiTracker(TrackerInterface):
     def __init__(self, priorNodeCount: int):
         self._trackers = [DefaultTracker() for _ in range(priorNodeCount)]
 
