@@ -1,7 +1,5 @@
 from .common.fieldParsing import deserializeVariableLenString, serializeVariableLenString
 
-APP_ID_LEN = 1 
-
 class EntryAppID:
     def __init__(self, appID: str):
         self._appID =  appID

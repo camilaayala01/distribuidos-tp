@@ -1,18 +1,24 @@
 import unittest
-from entryParsing.common.header import EOF_FLAG_LEN, FRAGMENT_LEN, Header
+from entryParsing.common.fieldParsing import BOOLEAN_LEN, COUNT_LEN
+from entryParsing.common.header import Header
+from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entryOSCount import EntryOSCount
 
 class TestHeader(unittest.TestCase):
     def setUp(self):
         self._entrySome = Header(2, False)
         self._entryLast = Header(10, True)
-        
-    def testSerialize(self):
-        serialized = self._entrySome.serialize()
-        expectedLen = FRAGMENT_LEN + EOF_FLAG_LEN
-        self.assertEqual(len(serialized), expectedLen)
+        self._headerWithSender = HeaderWithSender(1, 2, False)
 
-    def testSerializeAndDeserialize(self):
+    def testSerializeDefault(self):
+        serialized = self._entrySome.serialize()
+        self.assertEqual(len(serialized), Header.size())
+
+    def testSerializeWithSender(self):
+        serialized = self._headerWithSender.serialize()
+        self.assertEqual(len(serialized), HeaderWithSender.size())
+
+    def testSerializeAndDeserializeHeader(self):
         serializedSome = self._entrySome.serialize()
         serializedLast = self._entryLast.serialize()
         deserializedSome, _ = Header.deserialize(serializedSome)
@@ -21,6 +27,13 @@ class TestHeader(unittest.TestCase):
         self.assertFalse(deserializedSome._eof)
         self.assertEqual(deserializedLast._fragment, 10)
         self.assertTrue(deserializedLast._eof)
+
+    def testSerializeAndDeserializeHeaderWithSender(self):
+        serialized = self._headerWithSender.serialize()
+        deserialized, _ = HeaderWithSender.deserialize(serialized)
+        self.assertEqual(deserialized._sender, 1)
+        self.assertEqual(deserialized._fragment, 2)
+        self.assertFalse(deserialized._eof)
 
     def testSerializeAndDeserializeWithExtraData(self):
         serializedHeader = self._entryLast.serialize()

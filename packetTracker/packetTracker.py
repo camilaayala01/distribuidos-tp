@@ -10,7 +10,7 @@ class PacketTracker:
 
     def isDuplicate(self, header: Header):
         newFrag = header.getFragmentNumber()
-        return newFrag < self._biggestFragment and newFrag not in self._pending
+        return newFrag <= self._biggestFragment and newFrag not in self._pending
 
     def update(self, header: Header):
         newFrag = header.getFragmentNumber()

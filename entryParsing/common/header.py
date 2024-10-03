@@ -1,7 +1,4 @@
-from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, serializeBoolean, serializeCount
-from entryParsing.common.utils import boolToInt, intToBool
-FRAGMENT_LEN = 4
-EOF_FLAG_LEN = 1
+from .fieldParsing import BOOLEAN_LEN, COUNT_LEN, deserializeBoolean, deserializeCount, serializeBoolean, serializeCount
 
 class Header:
     def __init__(self, fragment: int, eof: bool):
@@ -21,7 +18,11 @@ class Header:
     
     def isEOF(self) -> bool:
         return self._eof
-    
+
+    @classmethod
+    def size(cls):
+        return COUNT_LEN + BOOLEAN_LEN
+
     @staticmethod
     def deserialize(data: bytes) -> tuple['Header', bytes]: 
         curr = 0

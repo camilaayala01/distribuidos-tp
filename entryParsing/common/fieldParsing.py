@@ -4,7 +4,7 @@ from .utils import boolToInt, intToBool
 STRING_LEN = 1
 COUNT_LEN = 4
 AVG_PLAYTIME_LEN = 4
-BOOLEAN_BYTES = 1
+BOOLEAN_LEN = 1
 TOP_BYTES_LEN = 1
 SENDER_ID_LEN = 1
 
@@ -34,10 +34,10 @@ def deserializeSenderID(curr: int, data: bytes) -> Tuple[int, int]:
     return senderID, curr + SENDER_ID_LEN
 
 def serializeBoolean(os: bool):
-    return boolToInt(os).to_bytes(BOOLEAN_BYTES,'big')
+    return boolToInt(os).to_bytes(BOOLEAN_LEN,'big')
 
 def deserializeBoolean(curr: int, data: bytes)-> Tuple[bool, int]:
-    return intToBool(int.from_bytes(data[curr:curr+BOOLEAN_BYTES], 'big')), curr + BOOLEAN_BYTES
+    return intToBool(int.from_bytes(data[curr:curr+BOOLEAN_LEN], 'big')), curr + BOOLEAN_LEN
 
 def serializePlaytime(avgPlaytime: int)-> Tuple[int, int]:
     return avgPlaytime.to_bytes(AVG_PLAYTIME_LEN,'big')

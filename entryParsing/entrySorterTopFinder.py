@@ -1,9 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 
-# Amount of bytes dedicated to stating the length of the name
-NAME_LEN = 1 
-
 class EntrySorterTopFinder(ABC):
 
     def __init__(self, name: str):

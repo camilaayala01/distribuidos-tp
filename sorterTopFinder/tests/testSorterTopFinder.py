@@ -2,6 +2,7 @@ import random
 import unittest
 from unittest.mock import MagicMock, patch
 
+from entryParsing.common.headerWithSender import HeaderWithSender
 from sorterIndiePositiveReviews.common.sorterIndiePositiveReviews import SorterIndiePositiveReviews
 from sorterActionNegativeReviews.common.sorterActionNegativeReviews import SorterActionNegativeReviews
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
@@ -32,7 +33,7 @@ class TestSorterTopFinder(unittest.TestCase):
         ]
         
         self.sorterIndieFew = SorterIndiePositiveReviews(SMALL_TEST_TOP_AMOUNT)
-        self.sorterShooter = SorterActionNegativeReviews()
+        self.sorterAction = SorterActionNegativeReviews()
         self.sorterBig = SorterIndiePositiveReviews(BIG_TEST_TOP_AMOUNT)
 
     def generateEntries(self):
@@ -43,7 +44,7 @@ class TestSorterTopFinder(unittest.TestCase):
         return entries
 
     def testGetBatchTopInAscendingOrder(self):
-        result = self.sorterShooter.getBatchTop(self.entriesMore)
+        result = self.sorterAction.getBatchTop(self.entriesMore)
         topNames = [entry._name for entry in result]
         expectedNames = ["Game F", "Game G", "Game I", "Game H"]
 
@@ -53,12 +54,12 @@ class TestSorterTopFinder(unittest.TestCase):
     def testGetBatchTopWithNoLimit(self):
         entries1 = self.generateEntries()
         entries2 = self.generateEntries()
-        self.sorterShooter.mergeKeepTop(entries1)
-        self.sorterShooter.mergeKeepTop(entries2)
+        self.sorterAction.mergeKeepTop(entries1)
+        self.sorterAction.mergeKeepTop(entries2)
 
-        for i in range(len(self.sorterShooter._partialTop) - 1):
-            self.assertFalse(self.sorterShooter._partialTop[i].isGreaterThan(self.sorterShooter._partialTop[i + 1]))
-        self.assertEqual(len(self.sorterShooter._partialTop), len(entries1) + len(entries2))
+        for i in range(len(self.sorterAction._partialTop) - 1):
+            self.assertFalse(self.sorterAction._partialTop[i].isGreaterThan(self.sorterAction._partialTop[i + 1]))
+        self.assertEqual(len(self.sorterAction._partialTop), len(entries1) + len(entries2))
 
     def testGetBatchTopWithEqualEntriesToTop(self):
         result = self.sorterIndieFew.getBatchTop(self.entriesEqual)
@@ -104,6 +105,49 @@ class TestSorterTopFinder(unittest.TestCase):
 
         self.assertEqual(len(self.sorterBig._partialTop), len(allEntries))
         self.assertEqual(self.sorterBig._partialTop, ordered)
+
+    def testSerializeDataWithSmallMaxDataBytes(self):
+        self.sorterAction._partialTop = self.entriesEqual
+        self.sorterAction._id = 1
+        packets = self.sorterAction.serializeTop(15)
+        self.assertEqual(len(packets), 3)
+        deserialized = []
+
+        for pack in packets:
+            header, _ = HeaderWithSender.deserialize(pack)
+            deserialized.append(header)
+
+        self.assertEqual(deserialized[0]._eof, False)
+        self.assertEqual(deserialized[0]._fragment, 1)
+        self.assertEqual(deserialized[1]._eof, False)
+        self.assertEqual(deserialized[1]._fragment, 2)
+        self.assertEqual(deserialized[2]._eof, True)
+        self.assertEqual(deserialized[2]._fragment, 3)
+        
+    def testSerializeDataWithBigMaxDataBytes(self):
+        self.sorterAction._partialTop = self.entriesEqual
+        self.sorterAction._id = 1
+        packets = self.sorterAction.serializeTop(1000)
+        self.assertEqual(len(packets), 1)
+        header, _ = HeaderWithSender.deserialize(packets[0])
+
+        self.assertEqual(header._eof, True)
+        self.assertEqual(header._fragment, 1)
+
+    def testSerializeDataWithExactMaxDataBytes(self):
+        self.sorterAction._partialTop = self.entriesEqual
+        entriesLen = 0
+        for entry in self.sorterAction._partialTop:
+            entriesLen += len(entry.serialize())
+
+        self.sorterAction._id = 1
+        packets = self.sorterAction.serializeTop(entriesLen)
+        self.assertEqual(len(packets), 1)
+        header, _ = HeaderWithSender.deserialize(packets[0])
+
+        self.assertEqual(header._eof, True)
+        self.assertEqual(header._fragment, 1)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -16,7 +16,7 @@ class EntryNameReviewCount(EntrySorterTopFinder):
 
     def __str__(self):
         return f"EntryNameReviewCount(name={self._name}, reviewCount={self._reviewCount})"
-    
+
     @classmethod
     def deserializeEntry(cls, curr: int, data: bytes) -> Tuple['EntryNameReviewCount', int]:
         name, curr = deserializeVariableLenString(curr, data)
