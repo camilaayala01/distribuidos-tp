@@ -1,13 +1,15 @@
 from abc import ABC, abstractmethod
+import os
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
+from internalCommunication.internalCommunication import InternalCommunication
 
 TOP_AMOUNT = 5
 
 class SorterTopFinder(ABC):
     def __init__(self, type: str, entrySorter: type, topAmount: int):
-        self._type = type
+        self._internalComunnication = InternalCommunication(os.getenv(type), os.getenv('NODE_ID'))
         self._entrySorter = entrySorter
-        self._partialTop = None
+        self._partialTop = []
         self._topAmount = topAmount
 
     def execute(self, data: bytes):
@@ -17,6 +19,9 @@ class SorterTopFinder(ABC):
     @abstractmethod
     def getBatchTop(self, batch: list[EntrySorterTopFinder]) -> list[EntrySorterTopFinder]:
         pass
+
+    def reset(self):
+        self._partialTop = []
 
     def topHasCapacity(self, mergedList):
         return len(mergedList) < self._topAmount
@@ -32,10 +37,6 @@ class SorterTopFinder(ABC):
             return
         
         newBatchTop = self.getBatchTop(batch)
-        
-        if self._partialTop is None:
-            self.updatePartialTop(newBatchTop)
-            return
 
         i, j = 0, 0
         mergedList = []

@@ -1,8 +1,9 @@
 import random
 import unittest
+from unittest.mock import MagicMock, patch
 
 from sorterIndiePositiveReviews.common.sorterIndiePositiveReviews import SorterIndiePositiveReviews
-from sorterShooterNegativeReviews.common.sorterShooterNegativeReviews import SorterActionNegativeReviews
+from sorterActionNegativeReviews.common.sorterActionNegativeReviews import SorterActionNegativeReviews
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 
 SMALL_TEST_TOP_AMOUNT = 3
@@ -10,6 +11,7 @@ BIG_TEST_TOP_AMOUNT = 20
 
 # sorter by average playtime is not included, since it acts the same way as sorter by positive reviews
 class TestSorterTopFinder(unittest.TestCase):
+    @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
     def setUp(self):
         self.entriesEqual = [
             EntryNameReviewCount("Game A", 100),
@@ -31,6 +33,7 @@ class TestSorterTopFinder(unittest.TestCase):
         
         self.sorterIndieFew = SorterIndiePositiveReviews(SMALL_TEST_TOP_AMOUNT)
         self.sorterShooter = SorterActionNegativeReviews()
+        self.sorterBig = SorterIndiePositiveReviews(BIG_TEST_TOP_AMOUNT)
 
     def generateEntries(self):
         entries = []
@@ -92,16 +95,15 @@ class TestSorterTopFinder(unittest.TestCase):
         self.assertEqual(topNames, expectedNames)
 
     def testMergeWithBiggerAmountThanTop(self):
-        sorterBig = SorterIndiePositiveReviews(BIG_TEST_TOP_AMOUNT)
         allEntries = self.entriesEqual + self.entriesLess + self.entriesMore
-        ordered = sorterBig.getBatchTop(allEntries)
+        ordered = self.sorterBig.getBatchTop(allEntries)
 
-        sorterBig.mergeKeepTop(self.entriesMore)
-        sorterBig.mergeKeepTop(self.entriesLess)
-        sorterBig.mergeKeepTop(self.entriesEqual)
+        self.sorterBig.mergeKeepTop(self.entriesMore)
+        self.sorterBig.mergeKeepTop(self.entriesLess)
+        self.sorterBig.mergeKeepTop(self.entriesEqual)
 
-        self.assertEqual(len(sorterBig._partialTop), len(allEntries))
-        self.assertEqual(sorterBig._partialTop, ordered)
+        self.assertEqual(len(self.sorterBig._partialTop), len(allEntries))
+        self.assertEqual(self.sorterBig._partialTop, ordered)
 
 if __name__ == '__main__':
     unittest.main()
