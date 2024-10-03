@@ -1,3 +1,4 @@
+import os
 import random
 import unittest
 from unittest.mock import MagicMock, patch
@@ -32,6 +33,9 @@ class TestSorterTopFinder(unittest.TestCase):
             EntryNameReviewCount("Game I", 250),
         ]
         
+        os.environ['SORT_ACT_REV'] = 'sorterAction'
+        os.environ['SORT_INDIE_POS_REV'] = 'sorterIndie'
+
         self.sorterIndieFew = SorterIndiePositiveReviews(SMALL_TEST_TOP_AMOUNT)
         self.sorterAction = SorterActionNegativeReviews()
         self.sorterBig = SorterIndiePositiveReviews(BIG_TEST_TOP_AMOUNT)

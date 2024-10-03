@@ -19,8 +19,7 @@ class SorterTopFinder(ABC):
         self._packetTracker = PacketTracker(nodeCount, id)
 
     def execute(self, data: bytes):
-        # communication is not developed
-        print("work in progress")
+        self._internalComunnication.defineMessageHandler(self.handleMessage())
 
     @abstractmethod
     def getBatchTop(self, batch: list[EntrySorterTopFinder]) -> list[EntrySorterTopFinder]:
@@ -82,18 +81,26 @@ class SorterTopFinder(ABC):
         packets.append(HeaderWithSender(self._id, fragment, True).serialize() + currPacket)
         return packets
 
-    def _sendToNextStep(self):
+    @abstractmethod
+    def _sendToNextStep(self, data: bytes):
+        pass
+
+    def _handleSending(self):
         if not self._packetTracker.isDone():
             return
         packets = self.serializeTop(maxDataBytes(HeaderWithSender))
-        # send packets
+        for pack in packets:
+            self._sendToNextStep(pack)
         self.reset()
 
-    def _processBatch(self, batch: bytes):
-        header, batch = Header.deserialize(batch)
+    def handleMessage(self, ch, method, properties, body):
+        header, batch = Header.deserialize(body)
         if self._packetTracker.isDuplicate(header):
+            ch.basic_ack(delivery_tag = method.delivery_tag)
             return
         self._packetTracker.update(header)
         entries = self._entrySorter.deserialize(batch)
         self.mergeKeepTop(entries)
         self._sendToNextStep()
+        ch.basic_ack(delivery_tag = method.delivery_tag)
+
