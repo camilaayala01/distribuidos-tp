@@ -23,5 +23,8 @@ class GrouperReviews(ABC):
         for (key, value) in appIDCount.items():
             result.append(EntryAppIDReviewCount(key, value))
         return result
+    
+    def execute(self):
+        self._internalCommunication.defineMessageHandler(self.handleMessage)
 
    

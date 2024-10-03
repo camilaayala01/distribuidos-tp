@@ -21,8 +21,6 @@ class GrouperPositiveReviews(GrouperReviews):
             self._internalCommunication.sendToPositiveReviewsActionGamesJoiner(str(i), msg)
         ch.basic_ack(delivery_tag = method.delivery_tag)
 
-    def execute(self):
-        self._internalCommunication.defineMessageHandler(self.handleMessage)
     
 
     
