@@ -6,6 +6,12 @@ class EntryAppIDReviewCount:
         self._appID =  appID
         self._count = count
 
+    def getAppID(self):
+        return self._appID
+    
+    def getCount(self):
+        return self._count
+    
     def serialize(self) -> bytes:
         appIDBytes = serializeVariableLenString(self._appID)
         countBytes = serializeCount(self._count)

@@ -16,6 +16,7 @@ class SorterTopFinder(ABC):
         self._partialTop = []
         self._topAmount = topAmount
         self._id = id
+        # gonna have to add multiple trackers if senders are joiners
         self._packetTracker = PacketTracker(nodeCount, id)
 
     def execute(self):

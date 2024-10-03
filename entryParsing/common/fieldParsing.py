@@ -1,4 +1,6 @@
 from typing import Tuple
+
+from .table import Table
 from .utils import boolToInt, intToBool
 
 STRING_LEN = 1
@@ -8,6 +10,15 @@ BOOLEAN_LEN = 1
 TOP_BYTES_LEN = 1
 SENDER_ID_LEN = 1
 QUERY_NUMBER_LEN = 1
+TABLE_LEN = 1
+
+# 0 for games, 1 for reviews
+def serializeTable(table: Table): 
+    return table.value.to_bytes(TABLE_LEN,'big')
+
+def deserializeTable(curr: int, data: bytes)-> Tuple[Table, int]:
+    tableNum = int.from_bytes(data[curr:curr+TABLE_LEN], 'big')
+    return Table(tableNum), curr + TABLE_LEN
 
 def serializeVariableLenString(field: str):
     fieldBytes = field.encode()
