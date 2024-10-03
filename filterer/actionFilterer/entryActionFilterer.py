@@ -1,5 +1,6 @@
-# amount of bytes dedicated to stating the length of the name
 from typing import Tuple
+from entryParsing.common.utils import getShardingKey
+
 ID_LEN = 1
 NAME_LEN = 1
 GENRES_LEN = 1
@@ -20,9 +21,14 @@ class EntryActionFilterer():
         serialized += len(genresBytes).to_bytes(GENRES_LEN, 'big') + genresBytes
         return serialized
 
-    #def __str__(self):
-    #    return f"EntryIndieFilterer(name={self._name}, avgPlaytime={self._avgPlaytime})"
-    
+    def serializeForQuery4And5(self) -> bytes:
+        serialized = bytes()
+        idBytes = self._id.encode()
+        serialized += len(idBytes).to_bytes(ID_LEN, 'big') + idBytes
+        nameBytes = self._name.encode()
+        serialized += len(nameBytes).to_bytes(NAME_LEN, 'big') + nameBytes
+        return serialized
+
     @classmethod
     def deserializeEntry(cls, curr: int, data: bytes) -> Tuple['EntryActionFilterer', int]:
         idLen = int.from_bytes(data[curr:curr + ID_LEN], 'big')
@@ -37,8 +43,13 @@ class EntryActionFilterer():
         curr += GENRES_LEN
         genres = data[curr:genresLen + curr].decode()
         curr += genresLen
-
         return cls(id, name, genres), curr
     
+    def shardBatch(nodeCount: int, result: list['EntryActionFilterer']) -> list[bytes]:
+        resultingBatches = [bytes() for _ in range(nodeCount)]
+        for entry in result:
+            shardResult = getShardingKey(entry._id, nodeCount)
+            resultingBatches[shardResult] = resultingBatches[shardResult] + entry.serializeForQuery4And5()
+
     def getGenres(self) -> list[str]:
         return self._genres

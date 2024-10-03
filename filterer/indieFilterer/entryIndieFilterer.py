@@ -27,8 +27,21 @@ class EntryIndieFilterer():
         avgPlaytimeForeverBytes = self._avgPlaytimeForever.to_bytes(AVG_PLAYTIME_FOREVER_LEN, 'big')
         return serialized + releaseDateBytes + avgPlaytimeForeverBytes
 
-    #def __str__(self):
-    #    return f"EntryIndieFilterer(name={self._name}, avgPlaytime={self._avgPlaytime})"
+    def serializeForQuery2(self) -> bytes:
+        serialized = bytes()
+        nameBytes = self._name.encode()
+        serialized += len(nameBytes).to_bytes(NAME_LEN, 'big') + nameBytes
+        releaseDateBytes = self._releaseDate.strftime("%Y-%m-%d").encode()
+        avgPlaytimeForeverBytes = self._avgPlaytimeForever.to_bytes(AVG_PLAYTIME_FOREVER_LEN, 'big')
+        return serialized + releaseDateBytes + avgPlaytimeForeverBytes
+    
+    def serializeForQuery3(self) -> bytes:
+        serialized = bytes()
+        idBytes = self._id.encode()
+        serialized += len(idBytes).to_bytes(ID_LEN, 'big') + idBytes
+        nameBytes = self._name.encode()
+        serialized += len(nameBytes).to_bytes(NAME_LEN, 'big') + nameBytes
+        return serialized
     
     @classmethod
     def deserializeEntry(cls, curr: int, data: bytes) -> Tuple['EntryIndieFilterer', int]:

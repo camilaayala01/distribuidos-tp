@@ -21,6 +21,14 @@ class EntryEnglishFilterer():
         serialized += len(reviewTextBytes).to_bytes(REVIEW_TEXT_LEN, 'big') + reviewTextBytes
         return serialized
 
+    def serializeForQuery4(self) -> bytes:
+        serialized = bytes()
+        idBytes = self._id.encode()
+        serialized += len(idBytes).to_bytes(ID_LEN, 'big') + idBytes
+        nameBytes = self._name.encode()
+        serialized += len(nameBytes).to_bytes(NAME_LEN, 'big') + nameBytes
+        return serialized  
+
     @classmethod
     def deserializeEntry(cls, curr: int, data: bytes) -> Tuple['EntryEnglishFilterer', int]:
         idLen = int.from_bytes(data[curr:curr + ID_LEN], 'big')
@@ -38,5 +46,11 @@ class EntryEnglishFilterer():
 
         return cls(id, name, reviewText), curr
     
+    def shardBatch(nodeCount: int, result: list['EntryEnglishFilterer']) -> list[bytes]:
+        resultingBatches = [bytes() for _ in range(nodeCount)]
+        for entry in result:
+            shardResult = getShardingKey(entry._id, nodeCount)
+            resultingBatches[shardResult] = resultingBatches[shardResult] + entry.serializeForQuery4()
+
     def getReviewText(self) -> str:
         return self._reviewText
