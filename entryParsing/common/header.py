@@ -1,6 +1,4 @@
-from entryParsing.common.utils import boolToInt, intToBool
-FRAGMENT_LEN = 4
-EOF_FLAG_LEN = 1
+from .fieldParsing import BOOLEAN_LEN, COUNT_LEN, deserializeBoolean, deserializeCount, serializeBoolean, serializeCount
 
 class Header:
     def __init__(self, fragment: int, eof: bool):
@@ -8,24 +6,32 @@ class Header:
         self._eof = eof
 
     def serialize(self) -> bytes:
-        fragmentBytes = self._fragment.to_bytes(FRAGMENT_LEN, 'big')
-        eofBytes = boolToInt(self._eof).to_bytes(EOF_FLAG_LEN, 'big')
+        fragmentBytes = serializeCount(self._fragment)
+        eofBytes = serializeBoolean(self._eof)
         return fragmentBytes + eofBytes
 
     def __str__(self):
         return f"Header(fragmentNumber={self._fragment}, isEof]{self._eof})"
     
+    def getFragmentNumber(self) -> int:
+        return self._fragment
+    
+    def isEOF(self) -> bool:
+        return self._eof
+
+    @classmethod
+    def size(cls):
+        return COUNT_LEN + BOOLEAN_LEN
+
     @staticmethod
     def deserialize(data: bytes) -> tuple['Header', bytes]: 
         curr = 0
         try:
-            fragment = int.from_bytes(data[curr:curr+FRAGMENT_LEN], 'big')
-            curr+=FRAGMENT_LEN
-            eof = int.from_bytes(data[curr:curr+EOF_FLAG_LEN], 'big')
-            curr += EOF_FLAG_LEN
-            header = Header(fragment, intToBool(eof))
+            fragment, curr = deserializeCount(curr, data)
+            eof, curr = deserializeBoolean(curr, data)
+            header = Header(fragment, eof)
         except (IndexError, UnicodeDecodeError):
             raise Exception("There was an error parsing data in header")
         
-        return header, data[curr:len(data)]
+        return header, data[curr:]
    

@@ -1,22 +1,33 @@
 from abc import ABC, abstractmethod
+import os
+from entryParsing.common.header import Header
+from entryParsing.common.headerWithSender import HeaderWithSender
+from entryParsing.common.utils import maxDataBytes
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
+from internalCommunication.internalCommunication import InternalCommunication
+from packetTracker.packetTracker import PacketTracker
 
 TOP_AMOUNT = 5
 
 class SorterTopFinder(ABC):
-    def __init__(self, type: str, entrySorter: type, topAmount: int):
-        self._type = type
+    def __init__(self, id: int, nodeCount: int, type: str, entrySorter: type, topAmount: int):
+        self._internalComunnication = InternalCommunication(os.getenv(type), os.getenv('NODE_ID'))
         self._entrySorter = entrySorter
-        self._partialTop = None
+        self._partialTop = []
         self._topAmount = topAmount
+        self._id = id
+        self._packetTracker = PacketTracker(nodeCount, id)
 
     def execute(self, data: bytes):
-        # communication is not developed
-        print("work in progress")
+        self._internalComunnication.defineMessageHandler(self.handleMessage())
 
     @abstractmethod
     def getBatchTop(self, batch: list[EntrySorterTopFinder]) -> list[EntrySorterTopFinder]:
         pass
+
+    def reset(self):
+        self._partialTop = []
+        self._packetTracker.reset()
 
     def topHasCapacity(self, mergedList):
         return len(mergedList) < self._topAmount
@@ -32,10 +43,6 @@ class SorterTopFinder(ABC):
             return
         
         newBatchTop = self.getBatchTop(batch)
-        
-        if self._partialTop is None:
-            self.updatePartialTop(newBatchTop)
-            return
 
         i, j = 0, 0
         mergedList = []
@@ -55,4 +62,45 @@ class SorterTopFinder(ABC):
 
         self.updatePartialTop(mergedList)
             
-            
+    """returns serialized data"""
+    def serializeTop(self, maxDataBytes)-> list[bytes]: # recv max data bytes for testing purposes
+        fragment = 1
+        packets = []
+        currPacket = bytes()
+
+        for entry in self._partialTop:
+            entryBytes = entry.serialize()
+            if len(currPacket) + len(entryBytes) <= maxDataBytes:
+                currPacket += entryBytes
+            else:
+                headerBytes = HeaderWithSender(self._id, fragment, False).serialize()
+                fragment += 1
+                packets.append(headerBytes + currPacket)
+                currPacket = entryBytes
+
+        packets.append(HeaderWithSender(self._id, fragment, True).serialize() + currPacket)
+        return packets
+
+    @abstractmethod
+    def _sendToNextStep(self, data: bytes):
+        pass
+
+    def _handleSending(self):
+        if not self._packetTracker.isDone():
+            return
+        packets = self.serializeTop(maxDataBytes(HeaderWithSender))
+        for pack in packets:
+            self._sendToNextStep(pack)
+        self.reset()
+
+    def handleMessage(self, ch, method, properties, body):
+        header, batch = Header.deserialize(body)
+        if self._packetTracker.isDuplicate(header):
+            ch.basic_ack(delivery_tag = method.delivery_tag)
+            return
+        self._packetTracker.update(header)
+        entries = self._entrySorter.deserialize(batch)
+        self.mergeKeepTop(entries)
+        self._sendToNextStep()
+        ch.basic_ack(delivery_tag = method.delivery_tag)
+

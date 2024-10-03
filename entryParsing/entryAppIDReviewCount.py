@@ -1,9 +1,6 @@
 from entryParsing.common.utils import getShardingKey
 from .common.fieldParsing import deserializeVariableLenString, deserializeCount, serializeVariableLenString, serializeCount
 
-APP_ID_LEN = 1 
-COUNT_LEN = 4
-
 class EntryAppIDReviewCount:
     def __init__(self, appID: str, count: int):
         self._appID =  appID

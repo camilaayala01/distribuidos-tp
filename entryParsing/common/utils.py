@@ -1,3 +1,7 @@
+import math
+
+MAX_PACKET_SIZE = 4096
+
 def boolToInt(boolean: bool) -> int:
     match boolean:
         case True:
@@ -16,3 +20,9 @@ def intToBool(u8: int) -> bool:
 
 def getShardingKey(id, nodeCount) -> int:
     return hash(id) % nodeCount
+
+def maxDataBytes(headerType: type) -> int:
+    return MAX_PACKET_SIZE - headerType.size()
+
+def amountOfPacketsNeeded(headerType: type, byteCount: int) -> int:
+    return math.ceil(byteCount / maxDataBytes(headerType))

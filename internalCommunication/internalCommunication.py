@@ -24,7 +24,7 @@ class InternalCommunication:
 
     def declareExchange(self, exchangeName: str, routingKey: str) -> str:
         self._channel.exchange_declare(exchange=exchangeName, exchange_type='direct')
-        result = self._channel.queue_declare(queue='')
+        result = self._channel.queue_declare(queue='', auto_delete = True) # CHANGE IN PRODUCTION, JUST FOR TESTING
         queueName = result.method.queue
         self._channel.queue_bind(
                 exchange=exchangeName, queue=queueName, routing_key=routingKey)
@@ -36,8 +36,8 @@ class InternalCommunication:
             queueName = self.declareExchange(self._executerName, self._nodeID)
         else:
             queueName = self._executerName
-            self._channel.queue_declare(queue=self._executerName)
-        self._channel.basic_consume(queue=queueName, on_message_callback=callback, auto_ack = True)
+            self._channel.queue_declare(queue=self._executerName, durable=False)
+        self._channel.basic_consume(queue=queueName, on_message_callback=callback)
         try:
             self._channel.start_consuming() 
         # Don't recover connections closed by server

@@ -1,8 +1,6 @@
 from entryParsing.common.fieldParsing import deserializeCount, serializeCount
 from entryParsing.common.utils import boolToInt, intToBool
 
-COUNT_BYTES = 4
-
 class EntryOSCount:
     def __init__(self, windows: int, mac: int, linux: int):
         self._windows =  windows
