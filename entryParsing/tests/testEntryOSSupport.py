@@ -1,5 +1,5 @@
 import unittest
-from entryParsing.common.fieldParsing import BOOLEAN_BYTES
+from entryParsing.common.fieldParsing import BOOLEAN_LEN
 from entryParsing.entryOSSupport import EntryOSSupport
 
 class TestEntryOsSupport(unittest.TestCase):
@@ -8,7 +8,7 @@ class TestEntryOsSupport(unittest.TestCase):
         
     def testSerialize(self):
         serialized = self._entry.serialize()
-        expectedLen = 3 * BOOLEAN_BYTES
+        expectedLen = 3 * BOOLEAN_LEN
         self.assertEqual(len(serialized), expectedLen)
 
     def testSerializeAndDeserialize(self):
