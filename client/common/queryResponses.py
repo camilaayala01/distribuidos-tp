@@ -1,8 +1,6 @@
 class Query1Response:
-    def __init__(self, windowsCount: int, macCount: int, linuxCount: int):
-        self.windowsCount = windowsCount
-        self.macCount = macCount
-        self.linuxCount = linuxCount
+    def __init__(self, osCount: int):
+        self.OSCount = osCount
 class GamesNamesResponse:
     def __init__(self, results: list[str]):
         self.gamesNames = results

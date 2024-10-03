@@ -1,6 +1,5 @@
 import csv
 import datetime
-import time
 
 from client.common.queryResponses import GamesNamesResponse, Query1Response, Query2Response, Query3Response, Query4Response, query1Response, query2Response, query3Response, query4Response
 
@@ -61,7 +60,7 @@ def storeResultsQuery1(results: 'Query1Response') -> None:
     with open(filepath, 'a+') as file:
         writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
         for res in results: 
-            writer.writerow([res.windowsCount, res.macCount, res.linuxCount])
+            writer.writerow([res.OSCount])
             
 
 """
