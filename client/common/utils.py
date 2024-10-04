@@ -1,6 +1,7 @@
 import csv
 
 from client.common.queryResponses import GamesNamesResponse, Query1Response, Query2Response, Query3Response, Query4Response
+from entryParsing.common.gameEntry import Game
 
 """ Games storage location. """
 GAMES_STORAGE_FILEPATH = ""
@@ -9,16 +10,6 @@ GAMES_STORAGE_FILEPATH = ""
 REVIEWS_STORAGE_FILEPATH = ""
 
 QUERY_RESPONSES_PATH = ""
-
-        
-def strToBoolInt(string: str) -> int:
-    match string: 
-        case "True":
-            return 0
-        case "False":
-            return 1
-        case _:
-            raise(Exception("Boolean field could not be converted"))
 
 """
 Persist the information of each row returned by the query 1
@@ -49,8 +40,7 @@ def storeResultsQuery4(result: 'Query3Response') -> None:
     filepath = QUERY_RESPONSES_PATH + "/query3"
     storeResultsGameNames(result, filepath)
             
-             
-
+            
 """
 Persist the information of each row returned by the query 1
 Not thread-safe/process-safe.
@@ -66,9 +56,7 @@ def storeResultsGameNames(result: 'GamesNamesResponse' , filepath) -> None:
         for res in result.gamesNames: 
             writer.writerow([res])
       
-            
-
-
+        
 """
 Loads the information all the bets in the STORAGE_FILEPATH file.
 Not thread-safe/process-safe.

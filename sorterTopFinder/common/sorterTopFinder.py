@@ -18,7 +18,7 @@ class SorterTopFinder(ABC):
         self._id = id
         self._packetTracker = PacketTracker(nodeCount, id)
 
-    def execute(self, data: bytes):
+    def execute(self):
         self._internalComunnication.defineMessageHandler(self.handleMessage())
 
     @abstractmethod
@@ -101,6 +101,6 @@ class SorterTopFinder(ABC):
         self._packetTracker.update(header)
         entries = self._entrySorter.deserialize(batch)
         self.mergeKeepTop(entries)
-        self._sendToNextStep()
+        self._handleSending()
         ch.basic_ack(delivery_tag = method.delivery_tag)
 

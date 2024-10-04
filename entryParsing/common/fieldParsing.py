@@ -7,6 +7,8 @@ AVG_PLAYTIME_LEN = 4
 BOOLEAN_LEN = 1
 TOP_BYTES_LEN = 1
 SENDER_ID_LEN = 1
+QUERY_NUMBER_LEN = 1
+APP_ID_LEN = 1, NAME_LEN = 1, REV_LEN = 2
 
 def serializeVariableLenString(field: str):
     fieldBytes = field.encode()
@@ -52,3 +54,37 @@ def serializeTopCount(top: int):
 def deserializeTopCount(curr: int, data: bytes)-> Tuple[int, int]:
     top = int.from_bytes(data[curr:curr + TOP_BYTES_LEN], 'big')
     return top, curr + TOP_BYTES_LEN
+
+def serializeQueryNumber(queryNumber: int):
+    return queryNumber.to_bytes(QUERY_NUMBER_LEN,'big')
+
+def deserializeQueryNumber(curr: int, data: bytes)-> Tuple[int, int]:
+    top = int.from_bytes(data[curr:curr + QUERY_NUMBER_LEN], 'big')
+    return top, curr + QUERY_NUMBER_LEN
+
+def serializeNumber(number, size: int) -> bytes:
+    return number.to_bytes(size,'big')
+
+def deserializeNumber(data: bytes, curr: int, numberLen: int):
+    number = int.from_bytes(data[curr:curr+numberLen], 'big')
+    return number, curr + numberLen
+
+def serializeString(string: str, len) -> bytes:
+    stringBytes = string.encode()
+    stringLenBytes = len(stringBytes).to_bytes(len, 'big')
+    return stringLenBytes + stringBytes
+
+def deserializeString(curr: int, data: bytes, len)-> Tuple[str, int]:
+    stringLen = int.from_bytes(data[curr:curr+len], 'big')
+    curr+=len
+    string = data[curr:stringLen+curr].decode()
+    return string, curr + stringLen
+
+def strToBoolInt(string: str) -> int:
+    match string: 
+        case "True":
+            return 0
+        case "False":
+            return 1
+        case _:
+            raise(Exception("Boolean field could not be converted"))
