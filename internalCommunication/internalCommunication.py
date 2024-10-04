@@ -87,8 +87,16 @@ class InternalCommunication:
         self.basicSend(os.getenv('CONS_SORT_AVG_PT'), message)
 
 
-    
-    
+
+    # Query 3
+
+    def sendToNegativeReviewsGrouper(self, message: bytes):
+        self.basicSend(os.getenv('GROUP_NEG_REV'), message)
+
+    def sendToReviewsIndieGamesJoiner(self, shardingKey: str, message: bytes):
+        self.directSend(os.getenv('JOIN_INDIE_REV'), shardingKey, message)
+
+
 
     def sendToActionFilter(self, message: bytes):
         self.basicSend(os.getenv('FILT_ACT'), message)
@@ -103,8 +111,7 @@ class InternalCommunication:
     def sendToPositiveReviewsGrouper(self, message: bytes):
         self.basicSend(os.getenv('GROUP_POS_REV'), message)
 
-    def sendToNegativeReviewsGrouper(self, message: bytes):
-        self.basicSend(os.getenv('GROUP_NEG_REV'), message)
+    
 
     
         
@@ -116,8 +123,7 @@ class InternalCommunication:
     def sendToNegativeReviewsActionGamesJoiner(self, shardingKey: str, message: bytes):
         self.directSend(os.getenv('JOIN_ACT_NEG_REV'), shardingKey, message)
 
-    def sendToReviewsIndieGamesJoiner(self, shardingKey: str, message: bytes):
-        self.directSend(os.getenv('JOIN_INDIE_REV'), shardingKey, message)
+   
     
     def sendToReviewsIndieGamesConsolidator(self, message: bytes):
         self.basicSend(os.getenv('CONS_JOIN_INDIE_REV'), message)
