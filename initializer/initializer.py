@@ -17,7 +17,7 @@ class Initializer:
 
             entriesQuery1 = [entry.serializeForQuery1() for entry in gameEntries].sum()
 
-            self._internalCommunication.sendToOSCountsGrouper(serializedHeader + entriesQuery1)
+            self._internalCommunication.sendToOSCountsGrouper(header.serializeWithoutTable() + entriesQuery1)
             
             entriesQuery2And3 = [entry.serializeForQuery2And3() for entry in gameEntries].sum()
             self._internalCommunication.sendToIndieFilter(serializedHeader + entriesQuery2And3)
@@ -40,8 +40,6 @@ class Initializer:
  
             entriesQuery5 = [entry.serializeForQuery3And5() for entry in negativeReviewEntries].sum()
             self._internalCommunication.sendToNegativeReviewsGrouper(entriesQuery5)
-
-            return
         
         else:
             raise ValueError()
