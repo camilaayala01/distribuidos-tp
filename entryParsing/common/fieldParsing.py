@@ -1,5 +1,4 @@
 from typing import Tuple
-
 from .table import Table
 from .utils import boolToInt, intToBool
 

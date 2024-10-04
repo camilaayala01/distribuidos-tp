@@ -1,6 +1,7 @@
+from entryParsing.entry import EntryInterface
 from .common.fieldParsing import deserializeVariableLenString, serializeVariableLenString
 
-class EntryAppIDName:
+class EntryAppIDName(EntryInterface):
     def __init__(self, appID: str, name: str):
         self._appID = appID
         self._name = name
@@ -13,8 +14,8 @@ class EntryAppIDName:
     def __str__(self):
         return f"EntryAppIDName(appID={self._appID}, name={self._name})"
     
-    @staticmethod
-    def deserialize(data: bytes) -> list['EntryAppIDName']: 
+    @classmethod
+    def deserialize(cls, data: bytes) -> list['EntryAppIDName']: 
         curr = 0
         entries = []
 
