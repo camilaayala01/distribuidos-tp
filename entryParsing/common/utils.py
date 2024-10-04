@@ -17,6 +17,8 @@ def intToBool(u8: int) -> bool:
             return True
         case _:
             raise Exception("There was an error parsing int to bool")
+        
+
 
 def getShardingKey(id, nodeCount) -> int:
     return hash(id) % nodeCount

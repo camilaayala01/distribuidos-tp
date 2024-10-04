@@ -1,8 +1,6 @@
 import csv
-import datetime
 
-from client.common.queryResponses import GamesNamesResponse, Query1Response, Query2Response, Query3Response, Query4Response, query1Response, query2Response, query3Response, query4Response
-
+from client.common.queryResponses import GamesNamesResponse, Query1Response, Query2Response, Query3Response, Query4Response
 
 """ Games storage location. """
 GAMES_STORAGE_FILEPATH = ""
@@ -12,44 +10,15 @@ REVIEWS_STORAGE_FILEPATH = ""
 
 QUERY_RESPONSES_PATH = ""
 
-def strToBool(string: str) -> bool:
+        
+def strToBoolInt(string: str) -> int:
     match string: 
         case "True":
-            return True
+            return 0
         case "False":
-            return False
+            return 1
         case _:
             raise(Exception("Boolean field could not be converted"))
-""" An entry of the steam games dataset. """
-class Game:
-    def __init__(self, appID, name, releaseDate, estimatedOwners, peakCCU, reqAge, price, discCount, about, supLang, 
-                 audioLang, reviews, headerImg, website, supportUrl, supportEmail, windows, mac, linux, metaScore, metaUrl, 
-                 userScore, positive, negative, scoreRank, achievements, recs, notes, avgPlaytimeForever, avgPlaytimeTwoWeeks,
-                 medianPlaytimeForever, medianPlaytimeTwoWeeks, devs, pubs, categories, genres, tags, screens, movies):
-        """
-        releaseDate must be passed with format: 'Month Day, Year'.
-        windows, mac and linux must be passed with boolean format
-        The following must be passed with integer format: peakCCU, reqAge, discCount, metaScore, userScore, positive, negative, achievements, recs
-        avgPlaytimeForever, avgPlaytimeTwoWeeks, medianPlaytimeForever, medianPlaytimeTwoWeeks
-        price and scoreRank must be passed with float format
-        """
-        (self.appID, self.name, self.releaseDate, self.estimatedOwners, self.peakCCU, self.reqAge, self.price,
-         self.discCount, self.about, self.supLang, self.audioLang, self.reviews, 
-         self.headerImg, self.website, self.supportUrl, self.supportEmail, self.windows, self.mac, self.linux, self.metaScore, 
-         self.metaUrl,self.userScore, self.positive, self.negative, self.scoreRank, self.achievements, self.recs, self.notes, 
-         self.avgPlaytimeForever, self.avgPlaytimeTwoWeeks,self.medianPlaytimeForever, self.medianPlaytimeTwoWeeks, self.devs, 
-         self.pubs, self.categories, self.genres,
-         self.tags, self.screens, self.movies) = (appID, name, datetime.strptime(releaseDate, "%b %d, %Y").strftime("%d-%m-%Y"), 
-                                                  estimatedOwners, int(peakCCU), int(reqAge), float(price), int(discCount), 
-                                                  about, supLang, audioLang ,reviews, headerImg, website,
-                                                  supportUrl, supportEmail, strToBool(windows), strToBool(mac), strToBool(linux),
-                                                  int(metaScore), metaUrl, int(userScore), int(positive),
-                                                  int(negative), float(scoreRank), int(achievements), int(recs), notes, 
-                                                  int(avgPlaytimeForever), int(avgPlaytimeTwoWeeks),
-                                                  int(medianPlaytimeForever), int(medianPlaytimeTwoWeeks), devs, pubs, categories,
-                                                  genres, tags, screens, movies)
-
-
 
 """
 Persist the information of each row returned by the query 1
@@ -115,3 +84,4 @@ def loadGames() -> list[Game]:
                        row[25], row[26], row[27], row[28], row[29], row[30],
                        row[31], row[32], row[33], row[34], row[35], row[36],
                        row[37], row[38], row[39])
+
