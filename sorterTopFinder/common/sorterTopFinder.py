@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import os
 from entryParsing.common.header import Header
 from entryParsing.common.headerWithSender import HeaderWithSender
-from entryParsing.common.utils import maxDataBytes
+from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.packetTracker import PacketTracker
@@ -16,6 +16,7 @@ class SorterTopFinder(ABC):
         self._partialTop = []
         self._topAmount = topAmount
         self._id = id
+        # gonna have to add multiple trackers if senders are joiners
         self._packetTracker = PacketTracker(nodeCount, id)
 
     def execute(self):
@@ -61,25 +62,6 @@ class SorterTopFinder(ABC):
             mergedList.extend(newBatchTop[j:])
 
         self.updatePartialTop(mergedList)
-            
-    """returns serialized data"""
-    def serializeTop(self, maxDataBytes)-> list[bytes]: # recv max data bytes for testing purposes
-        fragment = 1
-        packets = []
-        currPacket = bytes()
-
-        for entry in self._partialTop:
-            entryBytes = entry.serialize()
-            if len(currPacket) + len(entryBytes) <= maxDataBytes:
-                currPacket += entryBytes
-            else:
-                headerBytes = HeaderWithSender(self._id, fragment, False).serialize()
-                fragment += 1
-                packets.append(headerBytes + currPacket)
-                currPacket = entryBytes
-
-        packets.append(HeaderWithSender(self._id, fragment, True).serialize() + currPacket)
-        return packets
 
     @abstractmethod
     def _sendToNextStep(self, data: bytes):
@@ -88,7 +70,7 @@ class SorterTopFinder(ABC):
     def _handleSending(self):
         if not self._packetTracker.isDone():
             return
-        packets = self.serializeTop(maxDataBytes(HeaderWithSender))
+        packets = serializeAndFragmentWithSender(maxDataBytes(), self._partialTop, self._id)
         for pack in packets:
             self._sendToNextStep(pack)
         self.reset()

@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
+from .entry import EntryInterface
 
-class EntrySorterTopFinder(ABC):
+class EntrySorterTopFinder(EntryInterface):
 
     def __init__(self, name: str):
         self._name = name

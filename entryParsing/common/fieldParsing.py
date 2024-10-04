@@ -1,4 +1,5 @@
 from typing import Tuple
+from .table import Table
 from .utils import boolToInt, intToBool
 
 STRING_LEN = 1
@@ -9,14 +10,36 @@ TOP_BYTES_LEN = 1
 SENDER_ID_LEN = 1
 QUERY_NUMBER_LEN = 1
 APP_ID_LEN = 1, NAME_LEN = 1, REV_LEN = 2
+TABLE_LEN = 1
+TEXT_LEN = 2
+
+# 0 for games, 1 for reviews
+def serializeTable(table: Table): 
+    return table.value.to_bytes(TABLE_LEN,'big')
+
+def deserializeTable(curr: int, data: bytes)-> Tuple[Table, int]:
+    tableNum = int.from_bytes(data[curr:curr+TABLE_LEN], 'big')
+    return Table(tableNum), curr + TABLE_LEN
 
 def serializeVariableLenString(field: str):
-    fieldBytes = field.encode()
-    fieldLenBytes = len(fieldBytes).to_bytes(STRING_LEN, 'big')
-    return fieldLenBytes + fieldBytes
+    return serializeVariableLen(field, STRING_LEN)
 
 def deserializeVariableLenString(curr: int, data: bytes)-> Tuple[str, int]:
-    fieldLen = int.from_bytes(data[curr:curr+STRING_LEN], 'big')
+    return deserializeVariableLen(curr, data, STRING_LEN)
+
+def serializeReviewText(field: str):
+    return serializeVariableLen(field, TEXT_LEN)
+
+def deserializeReviewText(curr: int, data: bytes)-> Tuple[str, int]:
+    return deserializeVariableLen(curr, data, TEXT_LEN)
+
+def serializeVariableLen(field: str, fieldLen: int):
+    fieldBytes = field.encode()
+    fieldLenBytes = len(fieldBytes).to_bytes(fieldLen, 'big')
+    return fieldLenBytes + fieldBytes
+
+def deserializeVariableLen(curr: int, data: bytes, fieldLen: int)-> Tuple[str, int]:
+    fieldLen = int.from_bytes(data[curr:curr+fieldLen], 'big')
     curr+=STRING_LEN
     appID = data[curr:fieldLen+curr].decode()
     return appID, curr + fieldLen
@@ -68,23 +91,3 @@ def serializeNumber(number, size: int) -> bytes:
 def deserializeNumber(data: bytes, curr: int, numberLen: int):
     number = int.from_bytes(data[curr:curr+numberLen], 'big')
     return number, curr + numberLen
-
-def serializeString(string: str, len) -> bytes:
-    stringBytes = string.encode()
-    stringLenBytes = len(stringBytes).to_bytes(len, 'big')
-    return stringLenBytes + stringBytes
-
-def deserializeString(curr: int, data: bytes, len)-> Tuple[str, int]:
-    stringLen = int.from_bytes(data[curr:curr+len], 'big')
-    curr+=len
-    string = data[curr:stringLen+curr].decode()
-    return string, curr + stringLen
-
-def strToBoolInt(string: str) -> int:
-    match string: 
-        case "True":
-            return 0
-        case "False":
-            return 1
-        case _:
-            raise(Exception("Boolean field could not be converted"))

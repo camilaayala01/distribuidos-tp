@@ -1,7 +1,8 @@
+from .entry import EntryInterface
 from .common.utils import boolToInt, intToBool
 from .common.fieldParsing import deserializeBoolean, serializeBoolean
 
-class EntryOSSupport:
+class EntryOSSupport(EntryInterface):
     def __init__(self, windows: bool, mac: bool, linux: bool):
         self._windows =  windows
         self._mac = mac
@@ -16,9 +17,8 @@ class EntryOSSupport:
     def __str__(self):
         return f"EntryOSSupport(windows={self._windows}, mac={self._mac}, linux={self._linux})"
     
-
-    @staticmethod
-    def deserialize(data: bytes): 
+    @classmethod
+    def deserialize(cls, data: bytes): 
         curr = 0
         entries = []
         while len(data) > curr:
