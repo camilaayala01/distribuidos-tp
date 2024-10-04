@@ -13,3 +13,20 @@ Si recibe un warning que dice `bash: ./run-test.sh: Permission denied`, probable
 chmod +x run-test.sh
 ```
 y luego volver a correr el script
+
+# Descargar datasets 
+```
+pip install --user kaggle
+mkdir ~/.kaggle
+cd ~/.kaggle
+touch kaggle.json
+echo "{"username":"camilaayala01","key":"1a21e47d2d693e4ab96853cad6149bd3"}" > kaggle.js
+kaggle datasets download -d fronkongames/steam-games-dataset
+kaggle datasets download -d andrewmvd/steam-reviews
+mkdir distribuidos
+mv ./steam-games-dataset.zip ./distribuidos && mv ./steam-reviews.zip ./distribuidos
+cd distribuidos
+unzip steam-games-dataset.zip && unzip steam-reviews.zip
+rm games.json && rm steam-games-dataset.zip && rm steam-reviews.zip
+
+```

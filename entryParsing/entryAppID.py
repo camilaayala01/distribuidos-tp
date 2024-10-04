@@ -1,12 +1,12 @@
 from entryParsing.entry import EntryInterface
-from .common.fieldParsing import deserializeVariableLenString, serializeVariableLenString
+from .common.fieldParsing import deserializeAppID, serializeAppID
 
 class EntryAppID(EntryInterface):
     def __init__(self, appID: str):
         self._appID =  appID
 
     def serialize(self) -> bytes:
-        return serializeVariableLenString(self._appID)
+        return serializeAppID(self._appID)
 
     def __str__(self):
         return f"EntryAppID(appID={self._appID})"
@@ -18,7 +18,7 @@ class EntryAppID(EntryInterface):
 
         while len(data) > curr:
             try:
-                appID, curr = deserializeVariableLenString(curr, data)
+                appID, curr = deserializeAppID(curr, data)
                 entries.append(EntryAppID(appID))
                 
             except (IndexError, UnicodeDecodeError):

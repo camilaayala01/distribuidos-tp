@@ -1,4 +1,4 @@
-from entryParsing.common.fieldParsing import deserializeReviewText, deserializeVariableLenString, serializeReviewText, serializeVariableLenString
+from entryParsing.common.fieldParsing import deserializeAppID, deserializeReviewText, serializeAppID, serializeReviewText
 from entryParsing.entry import EntryInterface
 
 class EntryAppIDReviewText(EntryInterface):
@@ -13,7 +13,7 @@ class EntryAppIDReviewText(EntryInterface):
         return self._reviewText
 
     def serialize(self) -> bytes:
-        appIDBytes = serializeVariableLenString(self._appID)
+        appIDBytes = serializeAppID(self._appID)
         reviewTextBytes = serializeReviewText(self._reviewText)
         return appIDBytes + reviewTextBytes
 
@@ -27,7 +27,7 @@ class EntryAppIDReviewText(EntryInterface):
 
         while len(data) > curr:
             try:
-                appID, curr = deserializeVariableLenString(curr, data)
+                appID, curr = deserializeAppID(curr, data)
                 reviewText, curr = deserializeReviewText(curr, data)
                 entries.append(EntryAppIDReviewText(appID, reviewText))
                 
