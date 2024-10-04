@@ -17,7 +17,7 @@ class ReviewEntry(EntryInterface):
         return (serializeAppID(self.appID) + serializeGameName(self.appName) +
                serializeReviewText(self.reviewText) + serializeNumber(self.reviewScore, SCORE_LEN) 
                + serializeNumber(self.reviewVotes, VOTE_LEN))
-    
+
     def isPositive(self) -> bool:
         return True if self.reviewScore == 1 else False
 
@@ -52,3 +52,4 @@ class ReviewEntry(EntryInterface):
         for entry in result:
             shardResult = getShardingKey(entry._id, nodeCount)
             resultingBatches[shardResult] = resultingBatches[shardResult] + entry.serializeForQuery4()
+

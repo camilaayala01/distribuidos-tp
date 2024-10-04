@@ -1,6 +1,6 @@
 from entryParsing.common.utils import getShardingKey
 from entryParsing.entry import EntryInterface
-from .common.fieldParsing import deserializeVariableLenString, deserializeCount, serializeVariableLenString, serializeCount
+from .common.fieldParsing import deserializeAppID, deserializeCount, serializeAppID, serializeCount
 
 class EntryAppIDReviewCount(EntryInterface):
     def __init__(self, appID: str, count: int):
@@ -14,7 +14,7 @@ class EntryAppIDReviewCount(EntryInterface):
         return self._count
     
     def serialize(self) -> bytes:
-        appIDBytes = serializeVariableLenString(self._appID)
+        appIDBytes = serializeAppID(self._appID)
         countBytes = serializeCount(self._count)
 
         return appIDBytes + countBytes
@@ -29,7 +29,7 @@ class EntryAppIDReviewCount(EntryInterface):
 
         while len(data) > curr:
             try:
-                appID, curr= deserializeVariableLenString(curr, data)
+                appID, curr= deserializeAppID(curr, data)
                 reviewCount, curr = deserializeCount(curr, data)
                 entries.append(EntryAppIDReviewCount(appID, reviewCount))
             except (IndexError, UnicodeDecodeError):

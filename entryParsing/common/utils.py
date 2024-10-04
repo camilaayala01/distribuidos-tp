@@ -19,6 +19,16 @@ def intToBool(u8: int) -> bool:
         case _:
             raise Exception("There was an error parsing int to bool")
 
+def strToBoolInt(string: str) -> int:
+    match string: 
+        case "True":
+            return 1
+        case "False":
+            return 0
+        case _:
+            raise(Exception("Boolean field could not be converted"))
+
+
 def getShardingKey(id, nodeCount) -> int:
     return hash(id) % nodeCount
 

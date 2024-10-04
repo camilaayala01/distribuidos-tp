@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Tuple
 from .entry import EntryInterface
 
 class EntrySorterTopFinder(EntryInterface):
@@ -13,7 +12,7 @@ class EntrySorterTopFinder(EntryInterface):
 
     @classmethod
     @abstractmethod
-    def deserializeEntry(cls, curr: int, data: bytes) -> Tuple['EntrySorterTopFinder', int]:
+    def deserializeEntry(cls, curr: int, data: bytes) -> tuple['EntrySorterTopFinder', int]:
         pass
     
     @classmethod

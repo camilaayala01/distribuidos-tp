@@ -1,6 +1,5 @@
-from typing import Tuple
 
-from entryParsing.common.fieldParsing import deserializeCount, deserializeVariableLenString, serializeCount, serializeVariableLenString
+from entryParsing.common.fieldParsing import deserializeCount, deserializeGameName, serializeCount, serializeGameName
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 
 class EntryNameReviewCount(EntrySorterTopFinder):
@@ -18,7 +17,7 @@ class EntryNameReviewCount(EntrySorterTopFinder):
         self._reviewCount += count
 
     def serialize(self) -> bytes:
-        nameBytes = serializeVariableLenString(self._name)
+        nameBytes = serializeGameName(self._name)
         reviewCountBytes = serializeCount(self._reviewCount)
 
         return nameBytes + reviewCountBytes  
@@ -27,8 +26,8 @@ class EntryNameReviewCount(EntrySorterTopFinder):
         return f"EntryNameReviewCount(name={self._name}, reviewCount={self._reviewCount})"
 
     @classmethod
-    def deserializeEntry(cls, curr: int, data: bytes) -> Tuple['EntryNameReviewCount', int]:
-        name, curr = deserializeVariableLenString(curr, data)
+    def deserializeEntry(cls, curr: int, data: bytes) -> tuple['EntryNameReviewCount', int]:
+        name, curr = deserializeGameName(curr, data)
         reviewCount, curr = deserializeCount(curr, data)
 
         return cls(name, reviewCount), curr

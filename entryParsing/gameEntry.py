@@ -64,7 +64,7 @@ class GameEntry(EntryInterface):
 
     def serializeForQuery4And5(self) -> bytes:
         return serializeAppID(self.appID) + serializeGameName(self.name) + serializeVariableLen(self.genres, GENRE_LEN)
-    
+
     @classmethod
     def deserialize(cls, data: bytes)-> list['GameEntry']:
         curr = 0

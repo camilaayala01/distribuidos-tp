@@ -1,4 +1,4 @@
-from .common.fieldParsing import deserializeCount, deserializeVariableLenString, serializeCount, serializeVariableLenString
+from .common.fieldParsing import deserializeAppID, deserializeCount, deserializeGameName, serializeAppID, serializeCount, serializeGameName, serializeVariableLenString
 from .entry import EntryInterface
 
 class EntryAppIDNameReviewCount(EntryInterface):
@@ -17,8 +17,8 @@ class EntryAppIDNameReviewCount(EntryInterface):
         return self._count
     
     def serialize(self) -> bytes:
-        appIDBytes = serializeVariableLenString(self._appID)
-        nameBytes = serializeVariableLenString(self._appID)
+        appIDBytes = serializeAppID(self._appID)
+        nameBytes = serializeGameName(self._appID)
         countBytes = serializeCount(self._count)
 
         return appIDBytes + nameBytes + countBytes
@@ -33,8 +33,8 @@ class EntryAppIDNameReviewCount(EntryInterface):
 
         while len(data) > curr:
             try:
-                appID, curr = deserializeVariableLenString(curr, data)
-                name, curr = deserializeVariableLenString(curr, data)
+                appID, curr = deserializeAppID(curr, data)
+                name, curr = deserializeGameName(curr, data)
                 reviewCount, curr = deserializeCount(curr, data)
                 entries.append(EntryAppIDNameReviewCount(appID, name, reviewCount))
             except (IndexError, UnicodeDecodeError):
