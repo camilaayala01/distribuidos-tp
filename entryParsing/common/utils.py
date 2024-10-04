@@ -5,16 +5,16 @@ MAX_PACKET_SIZE = 4096
 
 def boolToInt(boolean: bool) -> int:
     match boolean:
-        case True:
-            return 0
         case False:
+            return 0
+        case True:
             return 1
           
 def intToBool(u8: int) -> bool:
     match u8:
-        case 1:
-            return False
         case 0:
+            return False
+        case 1:
             return True
         case _:
             raise Exception("There was an error parsing int to bool")

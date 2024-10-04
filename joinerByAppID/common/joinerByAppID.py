@@ -1,5 +1,6 @@
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.headerWithTable import HeaderWithTable
+from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
@@ -44,12 +45,14 @@ class JoinerByAppIDNegativeReviews:
             # key: app id, value: EntryNameReviewCount initialized with 0 count
             self._joinedEntries[entry._appID] = EntryNameReviewCount(entry._name, 0)
 
-    def _sendToNextStep(self):
-        # has to send header with fragments and his own id, as
-        # well as body with name and reviewCount
-        # partition results into packets like in sorter
-        print("not implemented!")
-        self._internalComunnication.sendToNegativeReviewsSorter("message not created")
+    def _handleSending(self):
+        packets = serializeAndFragmentWithSender(maxDataBytes(), self._joinedEntries.values(), self._id)
+        for pack in packets:
+            self._sendToNextStep(pack)
+        self.reset()
+
+    def _sendToNextStep(self, msg: bytes):
+        self._internalComunnication.sendToNegativeReviewsSorter(msg)
 
     def handleMessage(self, ch, method, properties, body):
         header, batch = HeaderWithTable.deserialize(body)
@@ -68,6 +71,6 @@ class JoinerByAppIDNegativeReviews:
         
         if self.finishedReceiving():
             self.joinReviews(self._unjoinedReviews)
-            self._sendToNextStep(self)
+            self._handleSending()
 
         ch.basic_ack(delivery_tag = method.delivery_tag)

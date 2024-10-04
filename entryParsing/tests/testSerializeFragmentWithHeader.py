@@ -1,12 +1,12 @@
 import os
 import unittest
 from unittest.mock import MagicMock, patch
-from entryParsing.common.headerWithSender import HeaderWithSender
-from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
-from entryParsing.entryNameReviewCount import EntryNameReviewCount
+from ..common.headerWithSender import HeaderWithSender
+from ..common.utils import serializeAndFragmentWithSender
+from ..entryNameReviewCount import EntryNameReviewCount
 from sorterActionNegativeReviews.common.sorterActionNegativeReviews import SorterActionNegativeReviews
 
-class TestSorterTopFinder(unittest.TestCase):
+class TestSerializeFragmentWithHeader(unittest.TestCase):
     @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
     def setUp(self):
         self.entriesEqual = [
