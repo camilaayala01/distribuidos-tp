@@ -1,3 +1,5 @@
+
+
 juegos, campos compartidos:
 
 len(appid) -> 1 byte 
@@ -89,3 +91,5 @@ len Screenshots: 2
 Screenshots: 22691
 len Movies: 2
 Movies: 3687
+
+==> BIGEST POSSIBLE ENTRY LENGTH IS 168482 BYTES

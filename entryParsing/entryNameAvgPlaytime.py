@@ -1,5 +1,4 @@
-from typing import Tuple
-from entryParsing.common.fieldParsing import deserializePlaytime, deserializeVariableLenString, serializePlaytime, serializeVariableLenString
+from entryParsing.common.fieldParsing import deserializeGameName, deserializePlaytime, serializeGameName, serializePlaytime
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 
 class EntryNameAvgPlaytime(EntrySorterTopFinder):
@@ -8,7 +7,7 @@ class EntryNameAvgPlaytime(EntrySorterTopFinder):
         self._avgPlaytime = avgPlaytime
 
     def serialize(self) -> bytes:
-        nameBytes = serializeVariableLenString(self._name)
+        nameBytes = serializeGameName(self._name)
         avgPlaytimeBytes = serializePlaytime(self._avgPlaytime)
 
         return nameBytes + avgPlaytimeBytes   
@@ -17,8 +16,8 @@ class EntryNameAvgPlaytime(EntrySorterTopFinder):
         return f"EntryNameAvgPlaytime(name={self._name}, avgPlaytime={self._avgPlaytime})"
     
     @classmethod
-    def deserializeEntry(cls, curr: int, data: bytes) -> Tuple['EntryNameAvgPlaytime', int]:
-        name, curr = deserializeVariableLenString(curr, data)
+    def deserializeEntry(cls, curr: int, data: bytes) -> tuple['EntryNameAvgPlaytime', int]:
+        name, curr = deserializeGameName(curr, data)
         avgPlaytime, curr = deserializePlaytime(curr, data)
 
         return cls(name, avgPlaytime), curr

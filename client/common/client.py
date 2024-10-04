@@ -1,22 +1,22 @@
 import zmq
 import time
 
+from client.common.messages import buildGameTableMessage, buildReviewTableMessage, sendTable
 
+QUERY_COUNT = 5
 port = "5556"
 context = zmq.Context()
 socket = context.socket(zmq.PAIR)
 socket.connect("tcp://server:%s" % port)
 
-for i in range(10):
-    socket.send(str.encode("client message to server: {}".format(i)))
+sendTable(socket, buildGameTableMessage)
+sendTable(socket, buildReviewTableMessage)
 
-print("Stopping Client with ZMQ.PAIR socket")
-socket.send(b"END")
-end = False
+queriesFullyAnswered = 0
 while end != True:
     msg = socket.recv() 
     print(msg)
-
+    
     # Streams in ZMQ are received as bytes. 
     # Cast the msg to string and decode it to be able to do the comparison
     if msg.decode() == "END":

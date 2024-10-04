@@ -1,15 +1,13 @@
-from typing import Tuple
 from .table import Table
 from .utils import boolToInt, intToBool
 
-STRING_LEN = 1
-COUNT_LEN = 4
-AVG_PLAYTIME_LEN = 4
+COUNT_LEN = 3
+AVG_PLAYTIME_LEN = 3
 BOOLEAN_LEN = 1
 TOP_BYTES_LEN = 1
 SENDER_ID_LEN = 1
 QUERY_NUMBER_LEN = 1
-APP_ID_LEN = 1, NAME_LEN = 1, REV_LEN = 2
+APP_ID_LEN = 1, NAME_LEN = 1
 TABLE_LEN = 1
 TEXT_LEN = 2
 
@@ -17,20 +15,26 @@ TEXT_LEN = 2
 def serializeTable(table: Table): 
     return table.value.to_bytes(TABLE_LEN,'big')
 
-def deserializeTable(curr: int, data: bytes)-> Tuple[Table, int]:
+def deserializeTable(curr: int, data: bytes)-> tuple[Table, int]:
     tableNum = int.from_bytes(data[curr:curr+TABLE_LEN], 'big')
     return Table(tableNum), curr + TABLE_LEN
 
-def serializeVariableLenString(field: str):
-    return serializeVariableLen(field, STRING_LEN)
+def serializeGameName(field:str):
+    return serializeVariableLen(field, NAME_LEN)
 
-def deserializeVariableLenString(curr: int, data: bytes)-> Tuple[str, int]:
-    return deserializeVariableLen(curr, data, STRING_LEN)
+def deserializeGameName(curr: int, data: bytes)-> tuple[str, int]:
+    return deserializeVariableLen(curr, data, NAME_LEN)
+
+def serializeAppID(field:str):
+    return serializeVariableLen(field, APP_ID_LEN)
+
+def deserializeAppID(curr: int, data: bytes)-> tuple[str, int]:
+    return deserializeVariableLen(curr, data, APP_ID_LEN)
 
 def serializeReviewText(field: str):
     return serializeVariableLen(field, TEXT_LEN)
 
-def deserializeReviewText(curr: int, data: bytes)-> Tuple[str, int]:
+def deserializeReviewText(curr: int, data: bytes)-> tuple[str, int]:
     return deserializeVariableLen(curr, data, TEXT_LEN)
 
 def serializeVariableLen(field: str, fieldLen: int):
@@ -38,50 +42,50 @@ def serializeVariableLen(field: str, fieldLen: int):
     fieldLenBytes = len(fieldBytes).to_bytes(fieldLen, 'big')
     return fieldLenBytes + fieldBytes
 
-def deserializeVariableLen(curr: int, data: bytes, fieldLen: int)-> Tuple[str, int]:
+def deserializeVariableLen(curr: int, data: bytes, fieldLen: int)-> tuple[str, int]:
     fieldLen = int.from_bytes(data[curr:curr+fieldLen], 'big')
-    curr+=STRING_LEN
+    curr+=fieldLen
     appID = data[curr:fieldLen+curr].decode()
     return appID, curr + fieldLen
 
 def serializeCount(count: int):
     return count.to_bytes(COUNT_LEN,'big')
 
-def deserializeCount(curr: int, data: bytes)-> Tuple[int, int]:
+def deserializeCount(curr: int, data: bytes)-> tuple[int, int]:
     count = int.from_bytes(data[curr:curr+COUNT_LEN], 'big')
     return count, curr + COUNT_LEN
 
 def serializeSenderID(senderID: int):
     return senderID.to_bytes(SENDER_ID_LEN,'big')
 
-def deserializeSenderID(curr: int, data: bytes) -> Tuple[int, int]:
+def deserializeSenderID(curr: int, data: bytes) -> tuple[int, int]:
     senderID = int.from_bytes(data[curr:curr+SENDER_ID_LEN], 'big')
     return senderID, curr + SENDER_ID_LEN
 
 def serializeBoolean(os: bool):
     return boolToInt(os).to_bytes(BOOLEAN_LEN,'big')
 
-def deserializeBoolean(curr: int, data: bytes)-> Tuple[bool, int]:
+def deserializeBoolean(curr: int, data: bytes)-> tuple[bool, int]:
     return intToBool(int.from_bytes(data[curr:curr+BOOLEAN_LEN], 'big')), curr + BOOLEAN_LEN
 
-def serializePlaytime(avgPlaytime: int)-> Tuple[int, int]:
+def serializePlaytime(avgPlaytime: int)-> tuple[int, int]:
     return avgPlaytime.to_bytes(AVG_PLAYTIME_LEN,'big')
 
-def deserializePlaytime(curr: int, data: bytes)-> Tuple[int, int]:
+def deserializePlaytime(curr: int, data: bytes)-> tuple[int, int]:
     avgPlaytime = int.from_bytes(data[curr:curr + AVG_PLAYTIME_LEN], 'big')
     return avgPlaytime, curr + AVG_PLAYTIME_LEN
 
 def serializeTopCount(top: int):
     return top.to_bytes(TOP_BYTES_LEN,'big')
 
-def deserializeTopCount(curr: int, data: bytes)-> Tuple[int, int]:
+def deserializeTopCount(curr: int, data: bytes)-> tuple[int, int]:
     top = int.from_bytes(data[curr:curr + TOP_BYTES_LEN], 'big')
     return top, curr + TOP_BYTES_LEN
 
 def serializeQueryNumber(queryNumber: int):
     return queryNumber.to_bytes(QUERY_NUMBER_LEN,'big')
 
-def deserializeQueryNumber(curr: int, data: bytes)-> Tuple[int, int]:
+def deserializeQueryNumber(curr: int, data: bytes)-> tuple[int, int]:
     top = int.from_bytes(data[curr:curr + QUERY_NUMBER_LEN], 'big')
     return top, curr + QUERY_NUMBER_LEN
 
