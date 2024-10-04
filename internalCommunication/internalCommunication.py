@@ -1,8 +1,10 @@
 import pika
 import signal
 import os
+
 PREFETCH_COUNT = 1 # break round robin
-DELIVERY_MODE = 1 # make message transient, es lo mismo por ahora
+DELIVERY_MODE = 1 # make message transient, doesn't matter yet
+
 class InternalCommunication:
     def __init__(self, name: str, nodeID: str = None):
         self._executerName = name
@@ -22,7 +24,7 @@ class InternalCommunication:
 
     def declareExchange(self, exchangeName: str, routingKey: str) -> str:
         self._channel.exchange_declare(exchange=exchangeName, exchange_type='direct')
-        result = self._channel.queue_declare(queue='', durable=True)
+        result = self._channel.queue_declare(queue='', auto_delete = True) # CHANGE IN PRODUCTION, JUST FOR TESTING
         queueName = result.method.queue
         self._channel.queue_bind(
                 exchange=exchangeName, queue=queueName, routing_key=routingKey)
@@ -34,7 +36,7 @@ class InternalCommunication:
             queueName = self.declareExchange(self._executerName, self._nodeID)
         else:
             queueName = self._executerName
-            self._channel.queue_declare(queue=self._executerName)
+            self._channel.queue_declare(queue=self._executerName, durable=False)
         self._channel.basic_consume(queue=queueName, on_message_callback=callback)
         try:
             self._channel.start_consuming() 

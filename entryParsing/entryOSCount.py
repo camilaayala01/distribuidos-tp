@@ -1,13 +1,21 @@
 from entryParsing.common.fieldParsing import deserializeCount, serializeCount
 from entryParsing.common.utils import boolToInt, intToBool
+from entryParsing.entry import EntryInterface
 
-COUNT_BYTES = 4
-
-class EntryOSCount:
+class EntryOSCount(EntryInterface):
     def __init__(self, windows: int, mac: int, linux: int):
         self._windows =  windows
         self._mac = mac
         self._linux = linux
+
+    def getWindowsCount(self):
+        return self._windows
+    
+    def getMacCount(self):
+        return self._mac
+    
+    def getLinuxCount(self):
+        return self._linux
 
     def serialize(self) -> bytes: 
         windowsBytes = serializeCount(self._windows)
@@ -18,8 +26,8 @@ class EntryOSCount:
     def __str__(self):
         return f"EntryOSCount(windows={self._windows}, mac={self._mac}, linux={self._linux})"
 
-    @staticmethod
-    def deserialize(data: bytes):      
+    @classmethod
+    def deserialize(cls, data: bytes):      
         curr = 0
         try:
             windows, curr = deserializeCount(curr, data)
