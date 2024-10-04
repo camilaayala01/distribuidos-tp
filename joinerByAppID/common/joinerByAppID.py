@@ -10,11 +10,11 @@ from packetTracker.defaultTracker import DefaultTracker
 
 """For query 5"""
 class JoinerByAppID(ABC):
-    def __init__(self, type: str, id: str, nodeCount: int):
+    def __init__(self, type: str, id: str):
         self._internalComunnication = InternalCommunication(type, id)
         self._id = int(id)
-        self._gamesTracker = DefaultTracker(nodeCount, self._id)
-        self._reviewsTracker = DefaultTracker(nodeCount, self._id)
+        self._gamesTracker = DefaultTracker()
+        self._reviewsTracker = DefaultTracker()
         self._unjoinedReviews = []
 
     @abstractmethod
@@ -64,6 +64,11 @@ class JoinerByAppID(ABC):
         for pack in packets:
             self._sendToNextStep(pack)
         self.reset()
+
+    def reset(self):
+        self._gamesTracker.reset()
+        self._reviewsTracker.reset()
+        self._unjoinedReviews = []
 
     @abstractmethod
     def _sendToNextStep(self, msg: bytes):

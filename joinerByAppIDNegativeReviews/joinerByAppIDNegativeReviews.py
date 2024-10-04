@@ -6,14 +6,13 @@ from joinerByAppID.common.joinerByAppID import JoinerByAppID
 
 
 class JoinerByAppIDNegativeReviews(JoinerByAppID):
-    def __init__(self, type: str, id: str, nodeCount: int):
+    def __init__(self, type: str, id: str):
         #actually should get from env file
-        super().__init__(type, id, nodeCount)
+        super().__init__(type, id)
         
         self._id = int(id)
         # dict of entry name, review count
         self._joinedEntries = {}
-        # get from envfile both nodecount and id
 
     def joinReviews(self, reviews: list[EntryAppIDReviewCount]):
         for review in reviews:
@@ -35,11 +34,9 @@ class JoinerByAppIDNegativeReviews(JoinerByAppID):
     def entriesToSend(self)-> list[EntryNameReviewCount]:
         return self._joinedEntries.values()
 
-    def _handleSending(self):
-        packets = serializeAndFragmentWithSender(maxDataBytes(), self._joinedEntries.values(), self._id)
-        for pack in packets:
-            self._sendToNextStep(pack)
-        self.reset()
+    def reset(self):
+        super().reset()
+        self._joinedEntries = {}
 
     def _sendToNextStep(self, msg: bytes):
         self._internalComunnication.sendToNegativeReviewsSorter(msg)

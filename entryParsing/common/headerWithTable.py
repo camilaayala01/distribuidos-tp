@@ -14,7 +14,7 @@ class HeaderWithTable(Header):
         return Table.REVIEWS == self._table
 
     def serialize(self) -> bytes:
-        return serializeTable(self._sender) + super().serialize()
+        return serializeTable(self._table) + super().serialize()
     
     @classmethod
     def size(cls):

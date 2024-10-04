@@ -6,8 +6,8 @@ from entryParsing.entryAppIDReviewText import EntryAppIDReviewText
 from joinerByAppID.common.joinerByAppID import JoinerByAppID
 
 class JoinerByAppIDNegativeReviews(JoinerByAppID):
-    def __init__(self, type: str, id: str, nodeCount: int):
-        super().__init__(type, id, nodeCount)
+    def __init__(self, type: str, id: str):
+        super().__init__(type, id)
 
         self._joinedEntries = []
         # key: appid, value: name
@@ -27,6 +27,11 @@ class JoinerByAppIDNegativeReviews(JoinerByAppID):
     @classmethod
     def reviewsEntryReceivedType(cls):
         return EntryAppIDReviewText
+    
+    def reset(self):
+        super().reset()
+        self._joinedEntries = []
+        self._gamesReceived = {}
 
     def storeGamesEntry(self, entry: EntryAppIDName):
         self._gamesReceived[entry._appID] = entry._name
@@ -44,23 +49,3 @@ class JoinerByAppIDNegativeReviews(JoinerByAppID):
     def _sendToNextStep(self, msg: bytes):
         self._internalComunnication.sendToNegativeReviewsSorter(msg)
 
-    def handleMessage(self, ch, method, properties, body):
-        header, batch = HeaderWithTable.deserialize(body)
-
-        if header.isGamesTable():
-            if self._gamesTracker.isDuplicate(header):
-                ch.basic_ack(delivery_tag = method.delivery_tag)
-                return
-            self.handleGamesMessage(header, batch)
-
-        if header.isReviewsTable():
-            if self._reviewsTracker.isDuplicate(header):
-                ch.basic_ack(delivery_tag = method.delivery_tag)
-                return
-            self.handleReviewsMessage(header, batch)
-        
-        if self.finishedReceiving():
-            self.joinReviews(self._unjoinedReviews)
-            self._handleSending()
-
-        ch.basic_ack(delivery_tag = method.delivery_tag)

@@ -30,7 +30,7 @@ class JoinerOSCount:
             return
         osCount = EntryOSCount.deserialize(data)
         self._sum(osCount)
-        self._sendToNextStep()
+        self._handleSending()
         ch.basic_ack(delivery_tag = method.delivery_tag)
         
     def _sendToNextStep(self, data: bytes):

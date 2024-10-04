@@ -8,6 +8,12 @@ class EntryNameReviewCount(EntrySorterTopFinder):
         super().__init__(name)
         self._reviewCount = reviewCount
 
+    def getName(self):
+        return self._name
+    
+    def getCount(self):
+        return self._reviewCount
+    
     def addToCount(self, count: int):
         self._reviewCount += count
 
