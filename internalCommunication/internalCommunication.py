@@ -90,51 +90,89 @@ class InternalCommunication:
 
     # Query 3
 
+    # indie filter comes here
+    def sendToPositiveReviewsGrouper(self, message: bytes):
+        self.basicSend(os.getenv('GROUP_POS_REV'))
+
+    def sendToPositiveReviewsIndieGamesJoiner(self, shardingKey: str, message: bytes):
+        self.directSend(os.getenv('JOIN_INDIE_REV'), shardingKey, message)
+
+    def sendToPositiveReviewsIndieGamesConsolidator(self, message: bytes):
+        self.basicSend(os.getenv('CONS_JOIN_INDIE_REV'), message)
+
+    def sendToPositiveReviewsSorter(self, shardingKey: str, message: bytes):
+        self.directSend(os.getenv('SORT_INDIE_POS_REV'), shardingKey, message)
+
+    def sendToPositiveReviewsSorterConsolidator(self, message: bytes):
+         self.basicSend(os.getenv('CONS_SORT_INDIE_POS_REV'), message)
+
+
+    # Query 4
+    
+    def sendToActionFilter(self, message: bytes):
+        self.basicSend(os.getenv('FILT_ACT'), message)
+
+    def sendToPositiveReviewsActionGamesJoiner(self, shardingKey: str, message: bytes):
+        self.directSend(os.getenv('JOIN_ACT_POS_REV'), shardingKey, message)
+
+    def sentToEnglishFilter(self, message: bytes):
+        self.basicSend(os.getenv('FILT_ENG'), message)
+
+    def sendToEnglishPositiveReviewsGrouper(self, message: bytes):
+        self.basicSend(os.getenv('GROUP_EN_POS_REV'))
+
+    def sendToEnglishPositiveReviewsCountConsolidator(self, message: bytes):
+        self.basicSend(os.getenv('CONS_GROUP_EN_POS_REV'))
+    
+    # Query 5
+
+    # action filter comes here
+
     def sendToNegativeReviewsGrouper(self, message: bytes):
         self.basicSend(os.getenv('GROUP_NEG_REV'), message)
 
-    def sendToReviewsIndieGamesJoiner(self, shardingKey: str, message: bytes):
-        self.directSend(os.getenv('JOIN_INDIE_REV'), shardingKey, message)
+    def sendToActionNegativeReviewsJoiner(self,  shardingKey: str, message: bytes):
+        self.directSend(os.getenv('JOIN_ACT_NEG_REV'), shardingKey, message)
+    
+    def sendToNegativeReviewsSorter(self, message: bytes): # just the one, must build 90 percentile
+        self.basicSend(os.getenv('SORT_ACT_REV'), message)
+
+    
+    #end
+
+   
 
 
 
-    def sendToActionFilter(self, message: bytes):
-        self.basicSend(os.getenv('FILT_ACT'), message)
+   
     
     
 
     
     
-    def sentToEnglishFilter(self, message: bytes):
-        self.basicSend(os.getenv('FILT_ENG'), message)
+   
         
+    
+
+    
     def sendToPositiveReviewsGrouper(self, message: bytes):
         self.basicSend(os.getenv('GROUP_POS_REV'), message)
-
-    
-
     
         
     
  
-    def sendToPositiveReviewsActionGamesJoiner(self, shardingKey: str, message: bytes):
-        self.directSend(os.getenv('JOIN_ACT_POS_REV'), shardingKey, message)
+    
 
     def sendToNegativeReviewsActionGamesJoiner(self, shardingKey: str, message: bytes):
         self.directSend(os.getenv('JOIN_ACT_NEG_REV'), shardingKey, message)
 
    
     
-    def sendToReviewsIndieGamesConsolidator(self, message: bytes):
-        self.basicSend(os.getenv('CONS_JOIN_INDIE_REV'), message)
+    
     
     
 
-    def sendToPositiveReviewsSorter(self, shardingKey: str, message: bytes):
-        self.directSend(os.getenv('SORT_INDIE_POS_REV'), shardingKey, message)
-
-    def sendToPositiveReviewsSorterConsolidator(self, message: bytes):
-         self.basicSend(os.getenv('CONS_SORT_INIDIE_POS_REV'), message)
+    
 
     def sendToNegativeReviewsSorter(self, message: bytes): #el de percentil noventa
         self.basicSend(os.getenv('SORT_ACT_NEG_REV'), message)
