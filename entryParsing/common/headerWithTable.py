@@ -16,6 +16,9 @@ class HeaderWithTable(Header):
     def serialize(self) -> bytes:
         return serializeTable(self._table) + super().serialize()
     
+    def serializeWithoutTable(self) -> bytes:
+        return super().serialize()
+    
     @classmethod
     def size(cls):
         return super().size() + TABLE_LEN

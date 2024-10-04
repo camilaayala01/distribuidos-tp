@@ -1,6 +1,6 @@
 # amount of bytes dedicated to stating the length of the name
 from typing import Tuple
-from datetime import datetime
+from entryParsing.common.utils import getShardingKey
 ID_LEN = 1
 NAME_LEN = 1
 REVIEW_TEXT_LEN = 2
