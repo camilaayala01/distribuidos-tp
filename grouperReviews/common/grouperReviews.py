@@ -32,6 +32,7 @@ class GrouperReviews(ABC):
     @abstractmethod
     def sendToNextStep(self, id, msg):
         pass
+    
     def handleMessage(self, ch, method, properties, body):
         header, data = Header.deserialize(body)
         entries = EntryAppID.deserialize(data)

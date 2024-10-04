@@ -1,6 +1,7 @@
 from entryParsing.common.header import Header
+from packetTracker.tracker import TrackerInterface
 
-class PacketTracker:
+class PacketTracker(TrackerInterface):
     def __init__(self, nodesInCluster: int, module: int):
         self._nodesInCluster = nodesInCluster
         self._module = module

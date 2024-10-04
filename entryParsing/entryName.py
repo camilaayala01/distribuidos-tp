@@ -1,0 +1,36 @@
+from entryParsing.entry import EntryInterface
+from .common.fieldParsing import deserializeVariableLenString, serializeVariableLenString
+
+class EntryName(EntryInterface):
+    def __init__(self, name: str):
+        self._name =  name
+
+    @staticmethod
+    def serialize(self) -> bytes:
+        return serializeVariableLenString(self._name)
+
+    @staticmethod
+    def serializeAll(names: list['EntryName']) -> bytes:
+        entryBytes = bytearray()
+        for name in names:
+            entryBytes.append(name.deserialize())
+        return entryBytes
+
+    def __str__(self):
+        return f"EntryName(name={self._name})"
+    
+    @classmethod
+    def deserialize(cls, data: bytes): 
+        curr = 0
+        entries = []
+
+        while len(data) > curr:
+            try:
+                name, curr = deserializeVariableLenString(curr, data)
+                entries.append(EntryName(name))
+                
+            except (IndexError, UnicodeDecodeError):
+                raise Exception("There was an error parsing data")
+
+        return entries
+    
