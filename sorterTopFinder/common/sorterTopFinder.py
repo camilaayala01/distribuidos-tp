@@ -63,25 +63,6 @@ class SorterTopFinder(ABC):
 
         self.updatePartialTop(mergedList)
 
-    """returns serialized data"""
-    def serializeTop(self, maxDataBytes)-> list[bytes]: # recv max data bytes for testing purposes
-        fragment = 1
-        packets = []
-        currPacket = bytes()
-
-        for entry in self._partialTop:
-            entryBytes = entry.serialize()
-            if len(currPacket) + len(entryBytes) <= maxDataBytes:
-                currPacket += entryBytes
-            else:
-                headerBytes = HeaderWithSender(self._id, fragment, False).serialize()
-                fragment += 1
-                packets.append(headerBytes + currPacket)
-                currPacket = entryBytes
-
-        packets.append(HeaderWithSender(self._id, fragment, True).serialize() + currPacket)
-        return packets
-
     @abstractmethod
     def _sendToNextStep(self, data: bytes):
         pass
