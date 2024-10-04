@@ -1,3 +1,4 @@
+from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount

@@ -1,5 +1,4 @@
 import math
-
 from entryParsing.entry import EntryInterface
 
 MAX_PACKET_SIZE = 4096
@@ -29,20 +28,22 @@ def maxDataBytes(headerType: type) -> int:
 def amountOfPacketsNeeded(headerType: type, byteCount: int) -> int:
     return math.ceil(byteCount / maxDataBytes(headerType))
 
-def serializeAndFragment(self, headerType: type, maxDataBytes: int, data: EntryInterface)-> list[bytes]: # recv max data bytes for testing purposes
-        fragment = 1
-        packets = []
-        currPacket = bytes()
+"""returns serialized data"""
+def serializeAndFragmentWithSender(maxDataBytes: int, data: list[EntryInterface], id: int)-> list[bytes]: # recv max data bytes for testing purposes
+    from .headerWithSender import HeaderWithSender
+    fragment = 1
+    packets = []
+    currPacket = bytes()
 
-        for entry in self._partialTop:
-            entryBytes = entry.serialize()
-            if len(currPacket) + len(entryBytes) <= maxDataBytes:
-                currPacket += entryBytes
-            else:
-                headerBytes = headerType(self._id, fragment, False).serialize()
-                fragment += 1
-                packets.append(headerBytes + currPacket)
-                currPacket = entryBytes
+    for entry in data:
+        entryBytes = entry.serialize()
+        if len(currPacket) + len(entryBytes) <= maxDataBytes:
+            currPacket += entryBytes
+        else:
+            headerBytes = HeaderWithSender(id, fragment, False).serialize()
+            fragment += 1
+            packets.append(headerBytes + currPacket)
+            currPacket = entryBytes
 
-        packets.append(headerType(self._id, fragment, True).serialize() + currPacket)
-        return packets
+    packets.append(HeaderWithSender(id, fragment, True).serialize() + currPacket)
+    return packets
