@@ -3,7 +3,7 @@ from entryParsing.common.header import Header
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
 
-class FiltererGenre(ABC):
+class Filterer(ABC):
     def __init__(self, entryType: type, headerType: type, type: str, nodeID: str):
         self._entryType = entryType
         self._headerType = headerType

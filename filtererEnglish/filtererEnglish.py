@@ -1,12 +1,12 @@
 from entryParsing.entryAppIDName import EntryAppIDName
 from langid import classify
-from filtererGenre.filtererGenre import FiltererGenre
+from filterer.filtererGenre import Filterer
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
 import os
 
-class FiltererEnglish(FiltererGenre):
+class FiltererEnglish(Filterer):
     def __init__(self):
         super().__init__(EntryAppIDNameReviewText, HeaderWithSender, os.getenv('FILT_ENG'), os.getenv('NODE_ID'))
 

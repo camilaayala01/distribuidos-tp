@@ -1,12 +1,10 @@
-from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.entryNameDateAvgPlaytime import EntryNameDateAvgPlaytime
-from filtererGenre.filtererGenre import FiltererGenre
-from internalCommunication.internalCommunication import InternalCommunication
+from filterer.filtererGenre import Filterer
 from entryParsing.common.header import Header
 from entryParsing.common.utils import getShardingKey
 import os
 
-class FiltererDate(FiltererGenre):
+class FiltererDate(Filterer):
     def __init__(self):
         super().__init__(EntryNameDateAvgPlaytime, Header, os.getenv('FILT_DEC'), os.getenv('NODE_ID'))
 

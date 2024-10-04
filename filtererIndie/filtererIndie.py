@@ -2,11 +2,11 @@ from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDNameGenresReleaseDateAvgPlaytime import EntryAppIDNameGenresReleaseDateAvgPlaytime
 from entryParsing.entryNameReleaseDateAvgPlaytime import EntryNameReleaseDateAvgPlaytime
-from filtererGenre.filtererGenre import FiltererGenre
+from filterer.filtererGenre import Filterer
 from entryParsing.common.header import Header
 import os
 
-class FiltererIndie(FiltererGenre):
+class FiltererIndie(Filterer):
     def __init__(self):
         super().__init__(EntryAppIDNameGenresReleaseDateAvgPlaytime, HeaderWithTable, os.getenv('FILT_INDIE'), os.getenv('NODE_ID'))
 

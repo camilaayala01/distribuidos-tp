@@ -1,10 +1,10 @@
 from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.entryAppIDNameGenres import EntryAppIDNameGenres
-from filtererGenre.filtererGenre import FiltererGenre
+from filterer.filtererGenre import Filterer
 from internalCommunication.internalCommunication import InternalCommunication
 import os
 
-class FiltererAction(FiltererGenre):
+class FiltererAction(Filterer):
     def __init__(self):
         super().__init__(EntryAppIDNameGenres, HeaderWithTable, os.getenv('FILT_ACT'), os.getenv('NODE_ID'))
 
