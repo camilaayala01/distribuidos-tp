@@ -41,3 +41,12 @@ else
     echo -e "${RED}Joiner Os tests failed :( ${NO_COLOR}"
 fi
 
+echo -e "${BLUE}Running tests for Filterers ${NO_COLOR}"
+python3 -m unittest discover -s ./filterer/tests -p "test*.py" -t .
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Filterers tests passed successfully!${NO_COLOR}"
+else
+    echo -e "${RED}Filterers tests failed :( ${NO_COLOR}"
+fi
+
+

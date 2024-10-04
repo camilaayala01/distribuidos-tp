@@ -1,4 +1,5 @@
 import unittest
+from entryParsing.common.fieldParsing import COUNT_LEN, NAME_LEN
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
 
@@ -12,7 +13,7 @@ class TestEntrySorterTopFinder(unittest.TestCase):
 
     def testSerializeAndDeserializeReviewCount(self):
         serialized = self.entry1.serialize()
-        expectedLen = 1 + len(self.entry1._name.encode()) + 4
+        expectedLen = NAME_LEN + len(self.entry1._name.encode()) + COUNT_LEN
         deserialized = EntryNameReviewCount.deserialize(serialized)
         self.assertEqual(len(serialized), expectedLen)
         self.assertEqual(deserialized[0]._name, self.entry1._name)
@@ -20,7 +21,7 @@ class TestEntrySorterTopFinder(unittest.TestCase):
 
     def testSerializeAndDeserializeAvgPlaytime(self):
         serialized = self.entry4.serialize()
-        expectedLen = 1 + len(self.entry4._name.encode()) + 4
+        expectedLen = NAME_LEN + len(self.entry4._name.encode()) + COUNT_LEN
         deserialized = EntryNameAvgPlaytime.deserialize(serialized)
         self.assertEqual(len(serialized), expectedLen)
         self.assertEqual(deserialized[0]._name, self.entry4._name)

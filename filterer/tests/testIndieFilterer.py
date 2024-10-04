@@ -1,29 +1,31 @@
 import unittest
 from datetime import datetime
+from unittest.mock import MagicMock, patch
 
-from ..indieFilterer.indieFilterer import IndieFilterer
-from ..indieFilterer.indieFilterer import EntryIndieFilterer
+from entryParsing.entryAppIDNameGenresReleaseDateAvgPlaytime import EntryAppIDNameGenresReleaseDateAvgPlaytime
+from filtererIndie.filtererIndie import FiltererIndie
 
 class TestEnglishFilterer(unittest.TestCase):
+    @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
     def setUp(self):
         self.allIndie = [
-            EntryIndieFilterer("12345", "Fallout", "Indie,Shooter", datetime.strptime("2015-01-01", "%Y-%m-%d"), 12),
-            EntryIndieFilterer("12346", "Mirrors Edge", "Indie", datetime.strptime("2015-01-01", "%Y-%m-%d"), 12),
-            EntryIndieFilterer("12347", "Final Fantasy XV", "Indie", datetime.strptime("2015-01-01", "%Y-%m-%d"), 12),
+            EntryAppIDNameGenresReleaseDateAvgPlaytime("12345", "Fallout", "Indie,Shooter", "2015-01-01", 12),
+            EntryAppIDNameGenresReleaseDateAvgPlaytime("12346", "Mirrors Edge", "Indie", "2015-01-01", 12),
+            EntryAppIDNameGenresReleaseDateAvgPlaytime("12347", "Final Fantasy XV", "Indie", "2015-01-01", 12),
         ]
 
         self.noneIndie = [
-            EntryIndieFilterer("123", "Doki Doki Literature Club", "Visual novel", datetime.strptime("2015-01-01", "%Y-%m-%d"), 12),
-            EntryIndieFilterer("124", "Danganronpa", "Visual novel", datetime.strptime("2015-01-01", "%Y-%m-%d"), 12),
+            EntryAppIDNameGenresReleaseDateAvgPlaytime("123", "Doki Doki Literature Club", "Visual novel", "2015-01-01", 12),
+            EntryAppIDNameGenresReleaseDateAvgPlaytime("124", "Danganronpa", "Visual novel", "2015-01-01", 12),
         ]
 
         self.oneIndie = [
-            EntryIndieFilterer("12345", "Fallout", "Indie,Shooter", datetime.strptime("2015-01-01", "%Y-%m-%d"), 12),
-            EntryIndieFilterer("123", "Doki Doki Literature Club", "Visual novel", datetime.strptime("2015-01-01", "%Y-%m-%d"), 12),
-            EntryIndieFilterer("124", "Danganronpa", "Visual novel", datetime.strptime("2015-01-01", "%Y-%m-%d"), 12),
+            EntryAppIDNameGenresReleaseDateAvgPlaytime("12345", "Fallout", "Indie,Shooter", "2015-01-01", 12),
+            EntryAppIDNameGenresReleaseDateAvgPlaytime("123", "Doki Doki Literature Club", "Visual novel", "2015-01-01", 12),
+            EntryAppIDNameGenresReleaseDateAvgPlaytime("124", "Danganronpa", "Visual novel", "2015-01-01", 12),
         ]
         
-        self.filterer = IndieFilterer()
+        self.filterer = FiltererIndie()
 
     def testAllIndie(self):
         result = self.filterer.filterBatch(self.allIndie)

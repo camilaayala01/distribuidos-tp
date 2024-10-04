@@ -14,7 +14,7 @@ class GrouperOSCounts:
         entries = EntryOSSupport.deserialize(data)
         result = self._applyStep(entries)
         msg = header.serialize() + result.serialize()
-        self._internalComunnication.sendToOSCountsJoiner(getShardingKey(header._fragment, os.getenv('JOIN_OS_COUNT')), msg)
+        self._internalComunnication.sendToOSCountsJoiner(msg)
         ch.basic_ack(delivery_tag = method.delivery_tag)
 
     def _applyStep(self, entries: list['EntryOSSupport']) -> EntryOSCount:

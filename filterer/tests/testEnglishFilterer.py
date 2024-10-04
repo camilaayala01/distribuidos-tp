@@ -1,29 +1,30 @@
 import unittest
-from datetime import datetime
+from unittest.mock import MagicMock, patch
 
-from ..englishFilterer.englishFilterer import EntryEnglishFilterer
-from ..englishFilterer.englishFilterer import EnglishFilterer
+from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
+from filtererEnglish.filtererEnglish import FiltererEnglish
 
 class TestEnglishFilterer(unittest.TestCase):
+    @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
     def setUp(self):
         self.allEnglish = [
-            EntryEnglishFilterer("12345", "Fallout", "This game is really good"),
-            EntryEnglishFilterer("12346", "Mirrors Edge", "This game ruined my life"),
-            EntryEnglishFilterer("12347", "Final Fantasy XV", "Unfollow me now this is the only thing I'll talk about"),
+            EntryAppIDNameReviewText("12345", "Fallout", "This game is really good"),
+            EntryAppIDNameReviewText("12346", "Mirrors Edge", "This game ruined my life"),
+            EntryAppIDNameReviewText("12347", "Final Fantasy XV", "Unfollow me now this is the only thing I'll talk about"),
         ]
 
         self.noneEnglish = [
-            EntryEnglishFilterer("123", "Doki Doki Literature Club", "Que buen juego loco"),
-            EntryEnglishFilterer("124", "Danganronpa", "Me gustan las monas chinas"),
+            EntryAppIDNameReviewText("123", "Doki Doki Literature Club", "Que buen juego loco"),
+            EntryAppIDNameReviewText("124", "Danganronpa", "Me gustan las monas chinas"),
         ]
 
         self.oneEnglish = [
-            EntryEnglishFilterer("12345", "Fallout", "This game is really good"),
-            EntryEnglishFilterer("123", "Doki Doki Literature Club", "Que buen juego loco"),
-            EntryEnglishFilterer("124", "Danganronpa", "Me gustan las monas chinas"),
+            EntryAppIDNameReviewText("12345", "Fallout", "This game is really good"),
+            EntryAppIDNameReviewText("123", "Doki Doki Literature Club", "Que buen juego loco"),
+            EntryAppIDNameReviewText("124", "Danganronpa", "Me gustan las monas chinas"),
         ]
         
-        self.filterer = EnglishFilterer('en')
+        self.filterer = FiltererEnglish()
 
     def testAllEnglish(self):
         result = self.filterer.filterBatch(self.allEnglish)

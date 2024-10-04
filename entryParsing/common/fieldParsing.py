@@ -7,9 +7,12 @@ BOOLEAN_LEN = 1
 TOP_BYTES_LEN = 1
 SENDER_ID_LEN = 1
 QUERY_NUMBER_LEN = 1
-APP_ID_LEN = 1, NAME_LEN = 1
+APP_ID_LEN = 1
+NAME_LEN = 1
 TABLE_LEN = 1
 TEXT_LEN = 2
+GENRE_LEN = 1
+RELEASE_DATE_LEN = 10
 
 # 0 for games, 1 for reviews
 def serializeTable(table: Table): 
@@ -25,7 +28,7 @@ def serializeGameName(field:str):
 def deserializeGameName(curr: int, data: bytes)-> tuple[str, int]:
     return deserializeVariableLen(curr, data, NAME_LEN)
 
-def serializeAppID(field:str):
+def serializeAppID(field: str):
     return serializeVariableLen(field, APP_ID_LEN)
 
 def deserializeAppID(curr: int, data: bytes)-> tuple[str, int]:
@@ -37,16 +40,28 @@ def serializeReviewText(field: str):
 def deserializeReviewText(curr: int, data: bytes)-> tuple[str, int]:
     return deserializeVariableLen(curr, data, TEXT_LEN)
 
+def serializeGenres(field: str):
+    return serializeVariableLen(field, GENRE_LEN)
+
+def deserializeGenres(curr: int, data: bytes)-> tuple[str, int]:
+    return deserializeVariableLen(curr, data, GENRE_LEN)
+
 def serializeVariableLen(field: str, fieldLen: int):
     fieldBytes = field.encode()
     fieldLenBytes = len(fieldBytes).to_bytes(fieldLen, 'big')
     return fieldLenBytes + fieldBytes
 
 def deserializeVariableLen(curr: int, data: bytes, fieldLen: int)-> tuple[str, int]:
-    fieldLen = int.from_bytes(data[curr:curr+fieldLen], 'big')
+    field = int.from_bytes(data[curr:curr+fieldLen], 'big')
     curr+=fieldLen
-    appID = data[curr:fieldLen+curr].decode()
-    return appID, curr + fieldLen
+    appID = data[curr:field+curr].decode()
+    return appID, curr + field
+
+def serializeReleaseDate(releaseDate: str):
+    return releaseDate.encode()
+
+def deserializeReleaseDate(curr: int, data: bytes) -> tuple[str]:
+    return data[curr:curr+RELEASE_DATE_LEN].decode(), curr+RELEASE_DATE_LEN
 
 def serializeCount(count: int):
     return count.to_bytes(COUNT_LEN,'big')
