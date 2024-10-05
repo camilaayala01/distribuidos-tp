@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 import os
 from entryParsing.common.header import Header
-from entryParsing.common.headerWithSender import HeaderWithSender
-from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.packetTracker import PacketTracker
@@ -10,14 +8,14 @@ from packetTracker.packetTracker import PacketTracker
 TOP_AMOUNT = 5
 
 class SorterTopFinder(ABC):
-    def __init__(self, id: int, nodeCount: int, type: str, entrySorter: type, topAmount: int):
+    def __init__(self, id: int, type: str, entrySorter: type, topAmount: int, tracker: PacketTracker):
         self._internalComunnication = InternalCommunication(os.getenv(type), os.getenv('NODE_ID'))
         self._entrySorter = entrySorter
         self._partialTop = []
         self._topAmount = topAmount
         self._id = id
         # gonna have to add multiple trackers if senders are joiners
-        self._packetTracker = PacketTracker(nodeCount, id)
+        self._packetTracker = tracker
 
     def execute(self):
         self._internalComunnication.defineMessageHandler(self.handleMessage())
@@ -67,10 +65,14 @@ class SorterTopFinder(ABC):
     def _sendToNextStep(self, data: bytes):
         pass
 
+    @abstractmethod
+    def _serializeAndFragment(self):
+        pass
+        
     def _handleSending(self):
         if not self._packetTracker.isDone():
             return
-        packets = serializeAndFragmentWithSender(maxDataBytes(), self._partialTop, self._id)
+        packets = self._serializeAndFragment()
         for pack in packets:
             self._sendToNextStep(pack)
         self.reset()

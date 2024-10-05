@@ -7,7 +7,8 @@ BOOLEAN_LEN = 1
 TOP_BYTES_LEN = 1
 SENDER_ID_LEN = 1
 QUERY_NUMBER_LEN = 1
-APP_ID_LEN = 1, NAME_LEN = 1
+APP_ID_LEN = 1
+NAME_LEN = 1
 TABLE_LEN = 1
 TEXT_LEN = 2
 
@@ -43,10 +44,10 @@ def serializeVariableLen(field: str, fieldLen: int):
     return fieldLenBytes + fieldBytes
 
 def deserializeVariableLen(curr: int, data: bytes, fieldLen: int)-> tuple[str, int]:
-    fieldLen = int.from_bytes(data[curr:curr+fieldLen], 'big')
+    appIDLen = int.from_bytes(data[curr:curr+fieldLen], 'big')
     curr+=fieldLen
-    appID = data[curr:fieldLen+curr].decode()
-    return appID, curr + fieldLen
+    appID = data[curr:appIDLen+curr].decode()
+    return appID, curr + appIDLen
 
 def serializeCount(count: int):
     return count.to_bytes(COUNT_LEN,'big')

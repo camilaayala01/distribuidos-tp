@@ -5,7 +5,10 @@ from entryParsing.entryOSCount import EntryOSCount
 from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.defaultTracker import DefaultTracker
 
-"""Just one entity that sums one clients sums"""
+"""
+Just one entity that sums one clients sums
+Corresponds to query 1
+"""
 class JoinerOSCount:
     def __init__(self):
         self._internalComunnication = InternalCommunication(os.getenv('JOIN_OS'))
@@ -39,7 +42,8 @@ class JoinerOSCount:
     def _handleSending(self):
         if not self._packetTracker.isDone():
             return
-        # only one node is in charge of calculating counts
+        # only one node is in charge of calculating counts, in only one packet 
+        # (never 3 numbers and a header will take up more than 4096 bytes)
         headerBytes = HeaderWithQueryNumber(fragment=1, eof=True, queryNumber=1).serialize()
         countsBytes = self._buildResult().serialize()
         self._sendToNextStep(headerBytes + countsBytes)

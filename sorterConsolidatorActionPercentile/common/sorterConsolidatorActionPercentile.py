@@ -1,15 +1,22 @@
 import os
+from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithQueryNumber
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
+from packetTracker.multiTracker import MultiTracker
 from sorterTopFinder.common.sorterTopFinder import SorterTopFinder
 
-# change to a call to env file or somewhere that stores this
-AMOUNT_OF_SORTERS = 2
-CORRESPONDING_MODULE = 0
-
-"""in charge on finding the 90th percentile of negative reviews"""
-class SorterActionNegativeReviews(SorterTopFinder):
+"""
+in charge on finding the 90th percentile of negative reviews
+it is only one node that needs to find and sort all entries
+For query 5
+"""
+class SorterConsolidatorActionPercentile(SorterTopFinder):
     def __init__(self):
-        super().__init__(CORRESPONDING_MODULE, AMOUNT_OF_SORTERS, os.getenv('SORT_ACT_REV'), EntryNameReviewCount, None)
+        priorNodeCount = os.getenv('JOIN_ACT_NEG_REV_COUNT')
+        nodeID = os.getenv('NODE_ID')
+        super().__init__(nodeID, os.getenv('SORT_CONS_PERCENTILE'), EntryNameReviewCount, None, MultiTracker(int(priorNodeCount)))
+
+    def _serializeAndFragment(self):
+        serializeAndFragmentWithQueryNumber(maxDataBytes(), self._partialTop, 5)
 
     def getBatchTop(self, batch: list[EntryNameReviewCount]) -> list[EntryNameReviewCount]:
         return self._entrySorter.sort(batch, False)
