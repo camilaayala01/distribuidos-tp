@@ -16,7 +16,6 @@ class Initializer:
         header, data = HeaderWithTable.deserialize(body)
         serializedHeader = header.serialize()
 
-        
         if header.isGamesTable():
             gameEntries = GameEntry.deserialize(data)
 
