@@ -7,7 +7,7 @@ from packetTracker.defaultTracker import DefaultTracker
 
 """
 Just one entity that sums one clients sums
-Corresponds to query 1
+Query 1
 """
 class JoinerOSCount:
     def __init__(self):

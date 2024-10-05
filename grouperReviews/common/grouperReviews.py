@@ -6,6 +6,9 @@ from entryParsing.common.header import Header
 from internalCommunication.internalCommunication import InternalCommunication
 
 class GrouperReviews(ABC):
+    def __init__(self, type: str, id: str): 
+        self._internalCommunication = InternalCommunication(type, id)
+
     def _applyStep(self, entries: list['EntryAppID'])-> list['EntryAppIDReviewCount']:
         return self._buildResult(self._count(entries))
     

@@ -12,9 +12,9 @@ For query 5
 """
 class SorterConsolidatorActionPercentile(SorterTopFinder):
     def __init__(self):
-        priorNodeCount = os.getenv('JOIN_ACT_NEG_REV_COUNT')
+        priorNodeCount = os.getenv('JOIN_PERC_NEG_REV_COUNT')
         nodeID = os.getenv('NODE_ID')
-        super().__init__(id=nodeID, type=os.getenv('SORT_CONS_PERCENTILE'), headerType=HeaderWithSender, 
+        super().__init__(id=nodeID, type=os.getenv('CONS_SORT_PERC_NEG_REV'), headerType=HeaderWithSender, 
                          entryType=EntryNameReviewCount, topAmount=None, tracker=MultiTracker(int(priorNodeCount)))
 
     def _serializeAndFragment(self):
@@ -33,5 +33,4 @@ class SorterConsolidatorActionPercentile(SorterTopFinder):
         self._partialTop = newOrderedList
 
     def _sendToNextStep(self, data: bytes):
-        print("sorter joiner for this node is not yet implemented")
-        # self._internalComunnication.sendToPositiveReviewsActionGamesJoiner(str(i), msg)
+        self._internalComunnication.sendToDispatcher(data)

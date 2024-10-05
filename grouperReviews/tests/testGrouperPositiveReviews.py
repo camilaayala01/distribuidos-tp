@@ -1,9 +1,13 @@
+import os
 import unittest
+from unittest.mock import MagicMock, patch
 
 from entryParsing.entryAppID import EntryAppID
-from grouperReviews.common.grouperReviews import GrouperReviews
+from grouperActionEnglish.common.grouperActionEnglish import GrouperActionEnglishNegativeReviews
+
 
 class TestGrouperPositiveReviews(unittest.TestCase):
+    @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
     def setUp(self):
         self._entries = [
             EntryAppID('1'),
@@ -17,10 +21,12 @@ class TestGrouperPositiveReviews(unittest.TestCase):
             EntryAppID('2'),
             EntryAppID('1'),
         ]
-        self._grouper = GrouperReviews("test")
+        os.environ['NODE_ID'] = '1'
+        os.environ['GROUP_ENG_NEG_REV'] = 'grouper'
+        self._grouper = GrouperActionEnglishNegativeReviews()
 
     def testCountEntries(self):
-        result = self._grouper.count(self._entries)
+        result = self._grouper._count(self._entries)
         self.assertEqual(result[self._entries[0]._appID], 4)
         self.assertEqual(result[self._entries[1]._appID], 3)
         self.assertEqual(result[self._entries[2]._appID], 2)

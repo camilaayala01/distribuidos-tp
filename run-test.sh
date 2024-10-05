@@ -5,48 +5,24 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NO_COLOR='\033[0m'
 
-# execute entry parsing tests
-echo -e "${BLUE}Running tests for entry parsing modules${NO_COLOR}"
-python3 -m unittest discover -s ./entryParsing/tests -p "test*.py" -t .
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Entry parsing tests passed successfully!${NO_COLOR}"
-else
-    echo -e "${RED}Entry parsing tests failed :( ${NO_COLOR}"
-fi
+run_tests() {
+    local test_name=$1
+    local test_path=$2
 
-# execute packet tracker tests
-echo -e "${BLUE}Running tests for Packet Tracker${NO_COLOR}"
-python3 -m unittest discover -s ./packetTracker/tests -p "test*.py" -t .
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Packet Tracker tests passed successfully!${NO_COLOR}"
-else
-    echo -e "${RED}Packet Tracker tests failed :( ${NO_COLOR}"
-fi
+    echo -e "${BLUE}Running tests for ${test_name}${NO_COLOR}"
+    python3 -m unittest discover -s "${test_path}" -p "test*.py" -t .
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}${test_name} tests passed successfully!${NO_COLOR}"
+    else
+        echo -e "${RED}${test_name} tests failed :( ${NO_COLOR}"
+    fi
+}
 
-# execute sorter tests
-echo -e "${BLUE}Running tests for sorters${NO_COLOR}"
-python3 -m unittest discover -s ./sorterTopFinder/tests -p "test*.py" -t .
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Sorter tests passed successfully!${NO_COLOR}"
-else
-    echo -e "${RED}Sorter tests failed :( ${NO_COLOR}"
-fi
-
-# execute joiner os tests
-echo -e "${BLUE}Running tests for Joiner that counts OS support${NO_COLOR}"
-python3 -m unittest discover -s ./joinerOSCount/tests -p "test*.py" -t .
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Joiner OS tests passed successfully!${NO_COLOR}"
-else
-    echo -e "${RED}Joiner Os tests failed :( ${NO_COLOR}"
-fi
-
-echo -e "${BLUE}Running tests for Filterers ${NO_COLOR}"
-python3 -m unittest discover -s ./filterer/tests -p "test*.py" -t .
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Filterers tests passed successfully!${NO_COLOR}"
-else
-    echo -e "${RED}Filterers tests failed :( ${NO_COLOR}"
-fi
+run_tests "Entry Parsing" "./entryParsing/tests"
+run_tests "Packet Tracker" "./packetTracker/tests"
+run_tests "Grouper Reviews" "./grouperReviews/tests"
+run_tests "Sorters" "./sorterTopFinder/tests"
+run_tests "Joiner OS Support" "./joinerOSCount/tests"
+run_tests "Filterers" "./filterer/tests"
 
 

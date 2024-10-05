@@ -14,7 +14,7 @@ class FiltererEnglish(Filterer):
         msg = header.serialize()
         for entry in filteredEntries:
             msg += EntryAppIDName(entry._appID, entry._name)
-        self._internalCommunication.sendToPositiveReviewsGrouper(filteredEntries)
+        self._internalCommunication.sendToEnglishNegativeReviewsGrouper(filteredEntries)
 
     @classmethod
     def condition(cls, entry: EntryAppIDNameReviewText)-> bool:

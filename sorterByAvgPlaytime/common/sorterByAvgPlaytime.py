@@ -28,5 +28,4 @@ class SorterByAvgPlaytime(SorterTopFinder):
         serializeAndFragmentWithSender(maxDataBytes(), self._partialTop, self._id)
     
     def _sendToNextStep(self, data: bytes):
-        print("sorter joiner for this node is not yet implemented")
-        # self._internalComunnication.sendToSorterConsolidatorAvgPlaytime(data)
+        self._internalComunnication.sendToAvgPlaytimeSorterConsolidator(data)

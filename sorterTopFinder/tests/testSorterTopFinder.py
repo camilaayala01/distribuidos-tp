@@ -33,9 +33,9 @@ class TestSorterTopFinder(unittest.TestCase):
             EntryNameReviewCount("Game I", 250),
         ]
         os.environ['NODE_ID'] = '1'
-        os.environ['SORT_CONS_PERCENTILE'] = 'sorterAction'
+        os.environ['CONS_SORT_PERC_NEG_REV'] = 'sorterAction'
         os.environ['SORT_INDIE_POS_REV'] = 'sorterIndie'
-        os.environ['JOIN_ACT_NEG_REV_COUNT'] = '2'
+        os.environ['JOIN_PERC_NEG_REV_COUNT'] = '2'
 
         self.sorterIndieFew = SorterIndiePositiveReviews(SMALL_TEST_TOP_AMOUNT)
         self.sorterAction = SorterConsolidatorActionPercentile()

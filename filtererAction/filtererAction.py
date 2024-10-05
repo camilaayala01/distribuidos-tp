@@ -10,15 +10,15 @@ class FiltererAction(Filterer):
 
     def _sendToNext(self, header: HeaderWithTable, filteredEntries: list[EntryAppIDNameGenres]):
         header = header.serialize()
-        nodeCount = int(os.getenv('JOIN_ACT_POS_REV_COUNT'))
+        nodeCount = int(os.getenv('JOIN_ENG_NEG_REV_COUNT'))
         shardedResults = EntryAppIDNameGenres.shardBatch(nodeCount, filteredEntries)
         for i in range(nodeCount):
-            self._internalCommunication.sendToPositiveReviewsActionGamesJoiner(str(i), header + shardedResults[i])
+            self._internalCommunication.sendToActionNegativeReviewsEnglishJoiner(str(i), header + shardedResults[i])
         
-        nodeCount = int(os.getenv('JOIN_ACT_NEG_REV_COUNT'))
+        nodeCount = int(os.getenv('JOIN_PERC_NEG_REV_COUNT'))
         shardedResults = EntryAppIDNameGenres.shardBatch(nodeCount, filteredEntries)
         for i in range(nodeCount):
-            self._internalCommunication.sendToNegativeReviewsActionGamesJoiner(str(i), header + shardedResults[i])
+            self._internalCommunication.sendToActionNegativeReviewsJoiner(str(i), header + shardedResults[i])
 
     @classmethod
     def condition(cls, entry: EntryAppIDNameGenres) -> bool:

@@ -15,9 +15,8 @@ class TestSerializeFragmentWithHeader(unittest.TestCase):
             EntryNameReviewCount("Game B", 120),
             EntryNameReviewCount("Game C", 1100),
         ]
-        
-        os.environ['SORT_CONS_PERCENTILE'] = 'sorterPercentile'
-        os.environ['JOIN_ACT_NEG_REV_COUNT'] = '2'
+        os.environ['CONS_SORT_PERC_NEG_REV'] = 'sorterAction'
+        os.environ['JOIN_PERC_NEG_REV_COUNT'] = '2'
         self.sorterAction = SorterConsolidatorActionPercentile()   
 
     def testSerializeDataWithSmallMaxDataBytes(self):

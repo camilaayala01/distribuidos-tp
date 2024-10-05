@@ -26,4 +26,4 @@ class SorterIndiePositiveReviews(SorterTopFinder):
         serializeAndFragmentWithSender(maxDataBytes(), self._partialTop, self._id)
         
     def _sendToNextStep(self, data: bytes):
-        self._internalComunnication.sendToConsolidatorIndieTopSorter(data)
+        self._internalComunnication.sendToPositiveReviewsSorterConsolidator(data)

@@ -14,7 +14,7 @@ class SorterConsolidatorIndieTop(SorterTopFinder):
     def __init__(self, topAmount): # for testing purposes
         priorNodeCount = os.getenv('SORT_INDIE_POS_REV_COUNT')
         nodeID = os.getenv('NODE_ID')
-        super().__init__(id=nodeID, type=os.getenv('SORT_CONS_INDIE_TOP'), headerType=HeaderWithSender, 
+        super().__init__(id=nodeID, type=os.getenv('CONS_SORT_INDIE_POS_REV'), headerType=HeaderWithSender, 
                          entryType=EntryNameReviewCount, topAmount=topAmount, tracker=MultiTracker(priorNodeCount))
         
     def getBatchTop(self, batch: list[EntryNameReviewCount]) -> list[EntryNameReviewCount]:
@@ -25,4 +25,4 @@ class SorterConsolidatorIndieTop(SorterTopFinder):
         serializeAndFragmentWithQueryNumber(maxDataBytes(), self._partialTop, 3)
         
     def _sendToNextStep(self, data: bytes):
-        self._internalComunnication.sendToResponseDispatcher(data)
+        self._internalComunnication.sendToDispatcher(data)
