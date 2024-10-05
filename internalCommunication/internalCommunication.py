@@ -44,9 +44,6 @@ class InternalCommunication:
         except pika.exceptions.ConnectionClosedByBroker:
             pass
     
-    def readFromQueue(self) :
-        # basic.get return type is a three-tuple; (None, None, None) if the queue was empty; otherwise (method, properties, body); NOTE: body may be None
-        return self._channel.basic.get(self._executerName)[2]
 
     def stop(self):
         self._connection.close()
@@ -61,75 +58,134 @@ class InternalCommunication:
                 delivery_mode= DELIVERY_MODE, 
             ))
         
-    
-    def fanoutSend(self, exchangeName: str, message: bytes):
-        self._channel.exchange_declare(exchange=exchangeName, exchange_type='fanout')
-        self._channel.basic_publish(exchange=exchangeName, routing_key='', body=message)
-
 
     def directSend(self, exchangeName: str, routingKey: str, message: bytes):
         self._channel.exchange_declare(exchange=exchangeName, exchange_type='direct')
         self._channel.basic_publish(exchange=exchangeName, routing_key=routingKey, body=message)
 
+    # Query 1
 
-    def sendToActionFilter(self, message: bytes):
-        self.basicSend(os.getenv('FILT_ACT'), message)
-    
+    def sendToOSCountsGrouper(self, message: bytes):
+        self.basicSend(os.getenv('GROUP_OS'), message)
+
+    def sendToOSCountsJoiner(self, message: bytes): #UNO SOLO
+        self.basicSend(os.getenv('JOIN_OS'), message)
+
+
+    # Query 2
+
     def sendToIndieFilter(self, message: bytes):
         self.basicSend(os.getenv('FILT_INDIE'), message)
 
     def sendToDecadeFilter(self, message: bytes):
         self.basicSend(os.getenv('FILT_DEC'), message)
+
+    def sendToAvgPlaytimeSorter(self, shardingKey: str, message: bytes):
+        self.directSend(os.getenv('SORT_AVG_PT'), shardingKey, message)
+
+    def sendToAvgPlaytimeSorterConsolidator(self, message: bytes):
+        self.basicSend(os.getenv('CONS_SORT_AVG_PT'), message)
+
+
+
+    # Query 3
+
+    # indie filter comes here
+    def sendToPositiveReviewsGrouper(self, message: bytes):
+        self.basicSend(os.getenv('GROUP_POS_REV'))
+
+    def sendToPositiveReviewsIndieGamesJoiner(self, shardingKey: str, message: bytes):
+        self.directSend(os.getenv('JOIN_INDIE_REV'), shardingKey, message)
+
+    def sendToPositiveReviewsIndieGamesConsolidator(self, message: bytes):
+        self.basicSend(os.getenv('CONS_JOIN_INDIE_REV'), message)
+
+    def sendToPositiveReviewsSorter(self, shardingKey: str, message: bytes):
+        self.directSend(os.getenv('SORT_INDIE_POS_REV'), shardingKey, message)
+
+    def sendToPositiveReviewsSorterConsolidator(self, message: bytes):
+         self.basicSend(os.getenv('CONS_SORT_INDIE_POS_REV'), message)
+
+
+    # Query 4
     
+    def sendToActionFilter(self, message: bytes):
+        self.basicSend(os.getenv('FILT_ACT'), message)
+
+    def sendToPositiveReviewsActionGamesJoiner(self, shardingKey: str, message: bytes):
+        self.directSend(os.getenv('JOIN_ACT_POS_REV'), shardingKey, message)
+
     def sentToEnglishFilter(self, message: bytes):
         self.basicSend(os.getenv('FILT_ENG'), message)
-        
-    def sendToPositiveReviewsGrouper(self, message: bytes):
-        self.basicSend(os.getenv('GROUP_POS_REV'), message)
+
+    def sendToEnglishPositiveReviewsGrouper(self, message: bytes):
+        self.basicSend(os.getenv('GROUP_EN_POS_REV'))
+
+    def sendToEnglishPositiveReviewsCountConsolidator(self, message: bytes):
+        self.basicSend(os.getenv('CONS_GROUP_EN_POS_REV'))
+    
+    # Query 5
+
+    # action filter comes here
 
     def sendToNegativeReviewsGrouper(self, message: bytes):
         self.basicSend(os.getenv('GROUP_NEG_REV'), message)
 
-    def sendToOSCountsGrouper(self, message: bytes):
-        self.basicSend(os.getenv('GROUP_OS'), message)
-        
-    def sendToOSCountsJoiner(self, shardingKey: str, message: bytes):
-        self.directSend(os.getenv('JOIN_OS'), shardingKey, message)
-    def sendOSCountsJoinEOF(self, message: bytes):
-        self.fanoutSend(os.getenv('JOIN_OS'), message)
+    def sendToActionNegativeReviewsJoiner(self,  shardingKey: str, message: bytes):
+        self.directSend(os.getenv('JOIN_ACT_NEG_REV'), shardingKey, message)
     
-    def sendToPositiveReviewsActionGamesJoiner(self, shardingKey: str, message: bytes):
-        self.directSend(os.getenv('JOIN_ACT_POS_REV'), shardingKey, message)
-    def sendPositiveReviewsActionGamesJoinEOF(self, message: bytes):
-        self.fanoutSend(os.getenv('JOIN_ACT_POS_REV'), message)
+    def sendToNegativeReviewsSorter(self, message: bytes): # just the one, must build 90 percentile
+        self.basicSend(os.getenv('SORT_ACT_REV'), message)
+
+    
+    #end
+
+   
+
+
+
+   
+    
+    
+
+    
+    
+   
+        
+    
+
+    
+    def sendToPositiveReviewsGrouper(self, message: bytes):
+        self.basicSend(os.getenv('GROUP_POS_REV'), message)
+    
+        
+    
+ 
+    
 
     def sendToNegativeReviewsActionGamesJoiner(self, shardingKey: str, message: bytes):
         self.directSend(os.getenv('JOIN_ACT_NEG_REV'), shardingKey, message)
-    def sendNegativeReviewsActionGamesJoinEOF(self, message: bytes):
-        self.fanoutSend(os.getenv('JOIN_ACT_NEG_REV'), message)
 
-
-    def sendToReviewsIndieGamesJoiner(self, shardingKey: str, message: bytes):
-        self.directSend(os.getenv('JOIN_INDIE_REV'), shardingKey, message)
-    def sendReviewsIndieGamesJoinEOF(self, message: bytes):
-        self.fanoutSend(os.getenv('JOIN_INDIE_REV'), message)
-
+   
     
-    def sendToAvgPlaytimeSorter(self, shardingKey: str, message: bytes):
-        self.directSend(os.getenv('SORT_AVG_PT'), shardingKey, message)
-    def sendAvgPlaytimeSortEOF(self, message: bytes):
-        self.fanoutSend(os.getenv('SORT_AVG_PT'), message)
-
     
-    def sendToPositiveReviewsSorter(self, shardingKey: str, message: bytes):
-        self.directSend(os.getenv('SORT_INDIE_POS_REV'), shardingKey, message)
-    def sendPositiveReviewsSortEOF(self, message: bytes):
-        self.fanoutSend(os.getenv('SORT_INDIE_POS_REV'), message)
+    
     
 
-    def sendToNegativeReviewsSorter(self, shardingKey: str, message: bytes):
-        self.directSend(os.getenv('SORT_ACT_REV'), shardingKey, message) 
-    def sendNegativeReviewsSortEOF(self, message: bytes):
-        self.fanoutSend(os.getenv('SORT_ACT_REV'), message)
+    
+
+    def sendToNegativeReviewsSorter(self, message: bytes): #el de percentil noventa
+        self.basicSend(os.getenv('SORT_ACT_NEG_REV'), message)
+
+    def sendToEnglishReviewsJoinerConsolidator(self, message: bytes):
+        self.basicSend(os.getenv('CONS_POS_REV_EN_JOINER'), message) 
+
+    def sendToDispatcher(self, message: bytes):
+        self.basicSend(os.getenv('RESP_DISP'), message)
+
+    
+
+    
+ 
     
     

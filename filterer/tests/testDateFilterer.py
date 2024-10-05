@@ -1,29 +1,31 @@
 import unittest
 from datetime import datetime
+from unittest.mock import MagicMock, patch
 
-from ..dateFilterer.dateFilterer import DateFilterer
-from ..dateFilterer.dateFilterer import EntryDateFilterer
+from entryParsing.entryNameDateAvgPlaytime import EntryNameDateAvgPlaytime
+from filtererDate.filtererDate import FiltererDate
 
 class TestDateFilterer(unittest.TestCase):
+    @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
     def setUp(self):
         self.allDecade = [
-            EntryDateFilterer("Fallout", datetime.strptime("2015-01-01", "%Y-%m-%d"), 123456),
-            EntryDateFilterer("Mirrors Edge", datetime.strptime("2019-12-31", "%Y-%m-%d"), 123),
-            EntryDateFilterer("Final Fantasy XV", datetime.strptime("2010-01-01", "%Y-%m-%d"), 123412156),
+            EntryNameDateAvgPlaytime("Fallout", "2015-01-01", 123456),
+            EntryNameDateAvgPlaytime("Mirrors Edge", "2019-12-31", 123),
+            EntryNameDateAvgPlaytime("Final Fantasy XV", "2010-01-01", 123412156),
         ]
 
         self.noneDecade = [
-            EntryDateFilterer("Doki Doki Literature Club", datetime.strptime("2001-02-02", "%Y-%m-%d"), 1),
-            EntryDateFilterer("Danganronpa", datetime.strptime("2020-01-01", "%Y-%m-%d"), 1),
+            EntryNameDateAvgPlaytime("Doki Doki Literature Club","2001-02-02", 1),
+            EntryNameDateAvgPlaytime("Danganronpa", "2020-01-01", 1),
         ]
 
         self.oneDecade = [
-            EntryDateFilterer("Final Fantasy XV", datetime.strptime("2010-01-01", "%Y-%m-%d"), 123412156),
-            EntryDateFilterer("Doki Doki Literature Club", datetime.strptime("2001-02-02", "%Y-%m-%d"), 1),
-            EntryDateFilterer("Danganronpa", datetime.strptime("2020-01-01", "%Y-%m-%d"), 1),
+            EntryNameDateAvgPlaytime("Final Fantasy XV", "2010-01-01", 123412156),
+            EntryNameDateAvgPlaytime("Doki Doki Literature Club", "2001-02-02", 1),
+            EntryNameDateAvgPlaytime("Danganronpa", "2020-01-01", 1),
         ]
         
-        self.filterer = DateFilterer(datetime.strptime("2010-01-01", "%Y-%m-%d"), datetime.strptime("2019-12-31", "%Y-%m-%d"))
+        self.filterer = FiltererDate()
 
     def testAllDecade(self):
         result = self.filterer.filterBatch(self.allDecade)
