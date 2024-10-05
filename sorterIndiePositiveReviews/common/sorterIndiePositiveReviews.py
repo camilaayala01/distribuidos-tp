@@ -15,7 +15,7 @@ class SorterIndiePositiveReviews(Sorter):
     def __init__(self, topAmount): # for testing purposes
         nodeCount = os.getenv('SORT_INDIE_POS_REV_COUNT')
         nodeID = os.getenv('NODE_ID')
-        super().__init__(type=os.getenv('SORT_INDIE_POS_REV'), headerType=Header, 
+        super().__init__(id=nodeID, type=os.getenv('SORT_INDIE_POS_REV'), headerType=Header, 
                     entryType=EntryNameReviewCount, topAmount=topAmount, tracker=PacketTracker(nodeCount, nodeID))
         self._id = int(nodeID)
         

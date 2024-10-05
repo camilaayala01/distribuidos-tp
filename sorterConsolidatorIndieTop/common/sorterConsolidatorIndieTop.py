@@ -13,7 +13,7 @@ For query 3
 class SorterConsolidatorIndieTop(Sorter):
     def __init__(self, topAmount): # for testing purposes
         priorNodeCount = os.getenv('SORT_INDIE_POS_REV_COUNT')
-        super().__init__(type=os.getenv('CONS_SORT_INDIE_POS_REV'), headerType=HeaderWithSender, 
+        super().__init__(id=os.getenv('NODE_ID'), type=os.getenv('CONS_SORT_INDIE_POS_REV'), headerType=HeaderWithSender, 
                          entryType=EntryNameReviewCount, topAmount=topAmount, tracker=MultiTracker(priorNodeCount))
         
     def getBatchTop(self, batch: list[EntryNameReviewCount]) -> list[EntryNameReviewCount]:

@@ -15,7 +15,7 @@ For query 5
 class SorterConsolidatorActionPercentile(Sorter):
     def __init__(self):
         priorNodeCount = os.getenv('JOIN_PERC_NEG_REV_COUNT')
-        super().__init__(type=os.getenv('CONS_SORT_PERC_NEG_REV'), headerType=HeaderWithSender, 
+        super().__init__(id=os.getenv('NODE_ID'), type=os.getenv('CONS_SORT_PERC_NEG_REV'), headerType=HeaderWithSender, 
                          entryType=EntryNameReviewCount, topAmount=None, tracker=MultiTracker(int(priorNodeCount)))
 
     def _filterByPercentile(self):
