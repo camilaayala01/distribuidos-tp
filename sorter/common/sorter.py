@@ -5,7 +5,7 @@ from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.packetTracker import PacketTracker
 
-class SorterTopFinder(ABC):
+class Sorter(ABC):
     def __init__(self, id: int, type: str, headerType: type, entryType: type, topAmount: int, tracker: PacketTracker):
         self._internalComunnication = InternalCommunication(os.getenv(type), os.getenv('NODE_ID'))
         self._entryType = entryType

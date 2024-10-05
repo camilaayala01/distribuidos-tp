@@ -12,7 +12,7 @@ SMALL_TEST_TOP_AMOUNT = 3
 BIG_TEST_TOP_AMOUNT = 20
 
 # sorter by average playtime is not included, since it acts the same way as sorter by positive reviews
-class TestSorterTopFinder(unittest.TestCase):
+class TestSorterGeneral(unittest.TestCase):
     @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
     def setUp(self):
         self.entriesEqual = [
