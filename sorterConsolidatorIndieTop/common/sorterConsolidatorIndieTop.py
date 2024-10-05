@@ -3,18 +3,17 @@ from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithQueryNumber
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from packetTracker.multiTracker import MultiTracker
-from sorterTopFinder.common.sorterTopFinder import SorterTopFinder
+from sorter.common.sorter import Sorter
 
 """
 in charge on finding the top 5 of all prior nodes and finding the 
 global top 5
 For query 3
 """
-class SorterConsolidatorIndieTop(SorterTopFinder):
+class SorterConsolidatorIndieTop(Sorter):
     def __init__(self, topAmount): # for testing purposes
         priorNodeCount = os.getenv('SORT_INDIE_POS_REV_COUNT')
-        nodeID = os.getenv('NODE_ID')
-        super().__init__(id=nodeID, type=os.getenv('CONS_SORT_INDIE_POS_REV'), headerType=HeaderWithSender, 
+        super().__init__(id=os.getenv('NODE_ID'), type=os.getenv('CONS_SORT_INDIE_POS_REV'), headerType=HeaderWithSender, 
                          entryType=EntryNameReviewCount, topAmount=topAmount, tracker=MultiTracker(priorNodeCount))
         
     def getBatchTop(self, batch: list[EntryNameReviewCount]) -> list[EntryNameReviewCount]:

@@ -4,19 +4,20 @@ from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from packetTracker.packetTracker import PacketTracker
-from sorterTopFinder.common.sorterTopFinder import SorterTopFinder
+from sorter.common.sorter import Sorter
 
 """
 in charge on finding the top 5 local indie games with most positive reviews
 it receives packages with fragment number % amount of nodes = node id
 For query 3
 """
-class SorterIndiePositiveReviews(SorterTopFinder):
+class SorterIndiePositiveReviews(Sorter):
     def __init__(self, topAmount): # for testing purposes
         nodeCount = os.getenv('SORT_INDIE_POS_REV_COUNT')
         nodeID = os.getenv('NODE_ID')
         super().__init__(id=nodeID, type=os.getenv('SORT_INDIE_POS_REV'), headerType=Header, 
                     entryType=EntryNameReviewCount, topAmount=topAmount, tracker=PacketTracker(nodeCount, nodeID))
+        self._id = int(nodeID)
         
     def getBatchTop(self, batch: list[EntryNameReviewCount]) -> list[EntryNameReviewCount]:
         sortedBatch = self._entryType.sort(batch, True)

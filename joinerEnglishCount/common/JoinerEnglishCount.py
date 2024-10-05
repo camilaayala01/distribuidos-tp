@@ -15,6 +15,7 @@ Entities that join all partial counts and streams results to clients
 More than one entity
 Query 4
 """
+
 class JoinerNegativeReviewsEnglishCount:
     def __init__(self, id: str):
         id = os.getenv('NODE_ID')
