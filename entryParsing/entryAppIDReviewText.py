@@ -1,5 +1,6 @@
 from entryParsing.common.fieldParsing import deserializeAppID, deserializeReviewText, serializeAppID, serializeReviewText
 from entryParsing.entry import EntryInterface
+from entryParsing.common.utils import getShardingKey
 
 class EntryAppIDReviewText(EntryInterface):
     def __init__(self, appID: str, reviewText: str):

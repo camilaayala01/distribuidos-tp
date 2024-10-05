@@ -55,15 +55,6 @@ class GameEntry(EntryInterface):
                 serializeVariableLen(self.devs, TEAM_LEN) +  serializeVariableLen(self.pubs, TEAM_LEN) + serializeVariableLen(self.categories, GENRE_LEN) +  
                 serializeVariableLen(self.genres, GENRE_LEN) + serializeVariableLen(self.tags, GENRE_LEN) + serializeVariableLen(self.screens, MEDIA_LEN) + serializeVariableLen(self.movies, MEDIA_LEN)
                 )
-    
-    def serializeForQuery1(self) -> bytes:
-        return serializeNumber(self.windows, BOOLEAN_LEN) + serializeNumber(self.mac, BOOLEAN_LEN) + serializeNumber(self.linux, BOOLEAN_LEN)
-    
-    def serializeForQuery2And3(self) -> bytes:
-        return serializeAppID(self.appID) + serializeGameName(self.name) + serializeVariableLen(self.genres, GENRE_LEN) + serializeVariableLen(self.releaseDate, DATE_LEN) + serializePlaytime(self.avgPlaytimeForever)
-
-    def serializeForQuery4And5(self) -> bytes:
-        return serializeAppID(self.appID) + serializeGameName(self.name) + serializeVariableLen(self.genres, GENRE_LEN)
 
     @classmethod
     def deserialize(cls, data: bytes)-> list['GameEntry']:
