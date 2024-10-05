@@ -7,7 +7,7 @@ class MultiTracker(TrackerInterface):
         self._trackers = [DefaultTracker() for _ in range(priorNodeCount)]
 
     def getProcessingTracker(self, header: HeaderWithSender):
-        return self._trackers[header.getSenderID() - 1]
+        return self._trackers[header.getSenderID()]
     
     def isDuplicate(self, header: HeaderWithSender):
         return self.getProcessingTracker(header).isDuplicate(header)

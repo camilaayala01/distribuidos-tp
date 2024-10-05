@@ -22,25 +22,37 @@ class JoinerConsolidator(ABC):
             msg = header + allData[i]
             self.sendToNextStep(str(id), msg)
 
+    def reset(self):
+        self._tracker.reset()
+        self._currFragment = 1
+
     """
     this function avoids resharding, when the prior count and next count are the same, 
     as well as the sharding attribute. in our use case, this second is necessarily true
     
     """
     def sendToSorterWithSameID(self, header: HeaderWithSender, data: bytes):
-        if header.isEOF():
-            resultingBatches = [bytes() for _ in range(self._nextNodeCount)]
-            resultingBatches[HeaderWithSender.getSenderID()] = data
-            self.sendToAll(True, resultingBatches)
-        else:        
-            self.sendToNextStep(self, Header(False, self._currFragment).serialize() + data)
+        priorID=header.getSenderID() 
+        headerSerialized=Header(fragment=self._currFragment, eof=header.isEOF()).serialize()
+        for i in range(self._nextNodeCount):
+            if i == HeaderWithSender.getSenderID():
+                self.sendToNextStep(str(priorID), headerSerialized + data)
+            else:
+                # send empty header so they can keep track of the fragment number
+                self.sendToNextStep(str(priorID), headerSerialized)
+
         self._currFragment += 1
 
     def handleMessage(self, ch, method, properties, body):
         header, data = HeaderWithSender.deserialize(body)
-        # handle update and discard duplicates
 
+        if self._tracker.isDuplicate(header):
+            ch.basic_ack(delivery_tag = method.delivery_tag)
+            return
+        
+        self._tracker.update(header)
         if self._priorNodeCount == self._nextNodeCount:
             self.sendToSorterWithSameID(header, data)
+
         # handle different sharding quantity
         ch.basic_ack(delivery_tag = method.delivery_tag)
