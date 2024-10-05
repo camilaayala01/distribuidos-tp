@@ -20,7 +20,13 @@ class SorterConsolidatorActionPercentile(Sorter):
                          entryType=EntryNameReviewCount, topAmount=None, tracker=MultiTracker(int(priorNodeCount)))
 
     def _filterByPercentile(self):
+        if not self._partialTop:
+            return
+
         index = math.ceil(PERCENTILE / 100 * len(self._partialTop))
+        if index >= len(self._partialTop):
+            index = len(self._partialTop) - 1
+
         while index > 0 and self._partialTop[index] == self._partialTop[index-1]:
             index -= 1
         

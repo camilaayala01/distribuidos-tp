@@ -6,13 +6,13 @@ from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.packetTracker import PacketTracker
 
 class Sorter(ABC):
-    def __init__(self, id: int, type: str, headerType: type, entryType: type, topAmount: int, tracker: PacketTracker):
-        self._internalComunnication = InternalCommunication(os.getenv(type), os.getenv('NODE_ID'))
+    def __init__(self, id: str, type: str, headerType: type, entryType: type, topAmount: int, tracker: PacketTracker):
+        self._internalComunnication = InternalCommunication(type, id)
         self._entryType = entryType
         self._headerType = headerType
         self._partialTop = []
         self._topAmount = topAmount
-        self._id = id
+        self._id = int(id)
         self._packetTracker = tracker
 
     def execute(self):

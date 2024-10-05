@@ -15,7 +15,9 @@ class TestSerializeFragmentWithHeader(unittest.TestCase):
             EntryNameReviewCount("Game B", 120),
             EntryNameReviewCount("Game C", 1100),
         ]
+        os.environ['NODE_ID'] = '1'
         os.environ['CONS_SORT_PERC_NEG_REV'] = 'sorterAction'
+        os.environ['SORT_INDIE_POS_REV'] = 'sorterIndie'
         os.environ['JOIN_PERC_NEG_REV_COUNT'] = '2'
         self.sorterAction = SorterConsolidatorActionPercentile()   
 
