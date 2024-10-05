@@ -8,7 +8,7 @@ from sorter.common.sorter import Sorter
 """
 in charge on finding the top 5 local indie games with most positive reviews
 it receives packages with fragment number % amount of nodes = node id
-For query 2
+Query 2
 """
 class SorterAvgPlaytime(Sorter):
     def __init__(self, topAmount: int): # for testing purposes
