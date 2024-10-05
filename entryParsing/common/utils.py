@@ -30,7 +30,7 @@ def strToBoolInt(string: str) -> int:
 
 
 def getShardingKey(id, nodeCount) -> int:
-    return hash(id) % nodeCount
+    return id % nodeCount
 
 def maxDataBytes(headerType: type) -> int:
     return MAX_PACKET_SIZE - headerType.size()

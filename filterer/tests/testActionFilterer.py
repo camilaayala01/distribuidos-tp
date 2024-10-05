@@ -1,28 +1,30 @@
 import unittest
+from unittest.mock import MagicMock, patch
 
-from ..actionFilterer.actionFilterer import ActionFilterer
-from ..actionFilterer.entryActionFilterer import EntryActionFilterer
+from entryParsing.entryAppIDNameGenres import EntryAppIDNameGenres
+from filtererAction.filtererAction import FiltererAction
 
 class TestActionFilterer(unittest.TestCase):
+    @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
     def setUp(self):
         self.allAction = [
-            EntryActionFilterer("12345", "Fallout", "Action"),
-            EntryActionFilterer("12346", "Mirrors Edge", "Action,Suspense"),
-            EntryActionFilterer("12347", "Final Fantasy XV", "Action,Fantasy"),
+            EntryAppIDNameGenres("12345", "Fallout", "Action"),
+            EntryAppIDNameGenres("12346", "Mirrors Edge", "Action,Suspense"),
+            EntryAppIDNameGenres("12347", "Final Fantasy XV", "Action,Fantasy"),
         ]
 
         self.noneAction = [
-            EntryActionFilterer("123", "Doki Doki Literature Club", "Horror,Love"),
-            EntryActionFilterer("124", "Danganronpa", "Visual novel"),
+            EntryAppIDNameGenres("123", "Doki Doki Literature Club", "Horror,Love"),
+            EntryAppIDNameGenres("124", "Danganronpa", "Visual novel"),
         ]
 
         self.oneAction = [
-            EntryActionFilterer("123", "Doki Doki Literature Club", "Horror,Love"),
-            EntryActionFilterer("12346", "Mirrors Edge", "Action,Suspense"),
-            EntryActionFilterer("124", "Danganronpa", "Visual novel"),
+            EntryAppIDNameGenres("123", "Doki Doki Literature Club", "Horror,Love"),
+            EntryAppIDNameGenres("12346", "Mirrors Edge", "Action,Suspense"),
+            EntryAppIDNameGenres("124", "Danganronpa", "Visual novel"),
         ]
         
-        self.filterer = ActionFilterer()
+        self.filterer = FiltererAction()
 
     def testAllAction(self):
         result = self.filterer.filterBatch(self.allAction)

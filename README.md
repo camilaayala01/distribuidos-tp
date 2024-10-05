@@ -30,3 +30,40 @@ unzip steam-games-dataset.zip && unzip steam-reviews.zip
 rm games.json && rm steam-games-dataset.zip && rm steam-reviews.zip
 
 ```
+
+## Query 1 
+windows: u8, mac: u8, linux: u8
+    GrouperOSCounts
+windowsParcialCount: u32, macParcialCount: u32, linuxParcialCount: u32
+    JoinerOSCount (solo uno)
+windowsCount: u32, macCount: u32, linux: u32
+
+## Query 2
+appID: str, name: str, genres: str, releaseDate: str, avgPlaytime: u32
+    FiltererIndie
+name: str, releaseDate: str, avgPlaytime: u32
+    FiltererDate
+name: str, avgPlaytime: u32
+    SorterByAvgPlaytime (dispatching por fragment number) si es un end of file se lo manda a todos
+10 o menos (name: str) por cada  sorter
+    SorterJoinerByAvgPlaytime
+10 o menos(name: str)
+
+## Query 3
+Tabla reviews:                               Tabla games:
+    appid de tabla reviews                          appID: str, name: str, genres: str, releaseDate: str, avgPlaytime: u32
+        GrouperIndiePositiveReviews                          FiltererIndie     
+    appid: str, parcial count: u32          name: str, releaseDate: str, avgPlaytime: u32
+                                JoinerPositiveReviews
+
+
+
+
+
+
+
+
+
+
+
+

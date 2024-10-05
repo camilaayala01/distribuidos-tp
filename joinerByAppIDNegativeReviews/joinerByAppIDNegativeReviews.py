@@ -4,7 +4,6 @@ from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from joinerByAppID.common.joinerByAppID import JoinerByAppID
 
-
 class JoinerByAppIDNegativeReviews(JoinerByAppID):
     def __init__(self, type: str, id: str):
         #actually should get from env file
