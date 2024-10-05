@@ -13,11 +13,12 @@ in charge on finding the top 5 local indie games with most positive reviews
 it receives packages with fragment number % amount of nodes = node id
 For query 2
 """
-class SorterByAvgPlaytime(Sorter):
+class SorterAvgPlaytime(Sorter):
     def __init__(self, topAmount: int = TOP_AMOUNT): # for testing purposes
         nodeCount = os.getenv('SORT_AVG_PT_COUNT')
         nodeID = os.getenv('NODE_ID')
-        super().__init__(id=nodeID, type=os.getenv('SORT_AVG_PT'), headerType=Header, entryType=EntryNameAvgPlaytime, 
+        self._id = int(nodeID)
+        super().__init__(type=os.getenv('SORT_AVG_PT'), headerType=Header, entryType=EntryNameAvgPlaytime, 
                          topAmount=topAmount, tracker=PacketTracker(nodeCount, nodeID))
 
     def getBatchTop(self, batch: list[EntryNameAvgPlaytime]) -> list[EntryNameAvgPlaytime]:
