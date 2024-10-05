@@ -1,23 +1,19 @@
 from abc import ABC, abstractmethod
 import os
 from entryParsing.common.header import Header
-from entryParsing.common.headerWithSender import HeaderWithSender
-from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.packetTracker import PacketTracker
 
-TOP_AMOUNT = 5
-
 class SorterTopFinder(ABC):
-    def __init__(self, id: int, nodeCount: int, type: str, entrySorter: type, topAmount: int):
+    def __init__(self, id: int, type: str, headerType: type, entryType: type, topAmount: int, tracker: PacketTracker):
         self._internalComunnication = InternalCommunication(os.getenv(type), os.getenv('NODE_ID'))
-        self._entrySorter = entrySorter
+        self._entryType = entryType
+        self._headerType = headerType
         self._partialTop = []
         self._topAmount = topAmount
         self._id = id
-        # gonna have to add multiple trackers if senders are joiners
-        self._packetTracker = PacketTracker(nodeCount, id)
+        self._packetTracker = tracker
 
     def execute(self):
         self._internalComunnication.defineMessageHandler(self.handleMessage())
@@ -67,21 +63,25 @@ class SorterTopFinder(ABC):
     def _sendToNextStep(self, data: bytes):
         pass
 
+    @abstractmethod
+    def _serializeAndFragment(self):
+        pass
+        
     def _handleSending(self):
         if not self._packetTracker.isDone():
             return
-        packets = serializeAndFragmentWithSender(maxDataBytes(), self._partialTop, self._id)
+        packets = self._serializeAndFragment()
         for pack in packets:
             self._sendToNextStep(pack)
         self.reset()
 
     def handleMessage(self, ch, method, properties, body):
-        header, batch = Header.deserialize(body)
+        header, batch = self._headerType.deserialize(body)
         if self._packetTracker.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
         self._packetTracker.update(header)
-        entries = self._entrySorter.deserialize(batch)
+        entries = self._entryType.deserialize(batch)
         self.mergeKeepTop(entries)
         self._handleSending()
         ch.basic_ack(delivery_tag = method.delivery_tag)

@@ -1,13 +1,13 @@
-from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
+import os
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from joinerByAppID.common.joinerByAppID import JoinerByAppID
 
-class JoinerByAppIDNegativeReviews(JoinerByAppID):
-    def __init__(self, type: str, id: str):
-        #actually should get from env file
-        super().__init__(type, id)
+class JoinerActionNegativeReviewsPercentile(JoinerByAppID):
+    def __init__(self):
+        id = os.getenv('NODE_ID')
+        super().__init__(type=os.getenv('JOIN_PERC_NEG_REV'), id=id)
         
         self._id = int(id)
         # dict of entry name, review count
@@ -38,4 +38,4 @@ class JoinerByAppIDNegativeReviews(JoinerByAppID):
         self._joinedEntries = {}
 
     def _sendToNextStep(self, msg: bytes):
-        self._internalComunnication.sendToNegativeReviewsSorter(msg)
+        self._internalComunnication.sendToActionPercentileSorterConsolidator(msg)

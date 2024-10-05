@@ -15,12 +15,11 @@ Entities that join all partial counts and streams results to clients
 More than one entity
 Query 4
 """
-class JoinerAppIDCount:
+class JoinerNegativeReviewsEnglishCount:
     def __init__(self, id: str):
-        # its var is not in env file
-        self._internalComunnication = InternalCommunication(os.getenv('JOIN_OS'))
-        # id should come from env as well
-        self._id = id
+        id = os.getenv('NODE_ID')
+        self._internalComunnication = InternalCommunication(name=os.getenv('JOIN_ENG_COUNT_MORE_REV'), nodeID=id)
+        self._id = int(id)
         self._packetTracker = DefaultTracker()
         self._counts = {}
         self._sent = set()
@@ -47,7 +46,7 @@ class JoinerAppIDCount:
             if priorEntry.getCount() + entry.getCount() >= REQUIRED_REVIEWS:
                 ready.append(priorEntry.getName())
                 self._sent.add(entry.getAppID())
-                del self._counts[entry.getAppID()]
+                self._counts.pop(entry.getAppID(), None)
             else:
                 self._counts[entry.getAppID()] = priorEntry.addToCount(entry.getCount())
 

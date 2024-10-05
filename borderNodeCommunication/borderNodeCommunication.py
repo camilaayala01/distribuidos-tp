@@ -1,8 +1,9 @@
 import pika
 import signal
 import os
+from internalCommunication.internalCommunication import InternalCommunication
 import zmq
-from ..internalCommunication.internalComunication import InternalCommunication
+
 PREFETCH_COUNT = 1 # break round robin
 DELIVERY_MODE = 1 # make message transient, es lo mismo por ahora
 
@@ -13,7 +14,7 @@ class BorderNodeCommunication:
         self._clientSocket = zmq.Context().socket(zmq.PAIR)
         self._clientSocket.bind("tcp://*:%s" % "5556")
         self._internalCommunication = InternalCommunication(os.getenv('RESP_DISP'), os.getenv('NODE_ID'))
-        self._internalComunnication.defineMessageHandler(self.sendClient)
+        self._internalCommunication.defineMessageHandler(self.sendClient)
 
     def startConnection(self) -> pika.BlockingConnection:
         signal.signal(signal.SIGTERM, self.stop)

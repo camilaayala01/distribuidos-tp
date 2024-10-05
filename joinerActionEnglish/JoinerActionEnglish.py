@@ -1,3 +1,4 @@
+import os
 from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
 from entryParsing.entryAppIDName import EntryAppIDName
@@ -5,9 +6,14 @@ from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
 from entryParsing.entryAppIDReviewText import EntryAppIDReviewText
 from joinerByAppID.common.joinerByAppID import JoinerByAppID
 
-class JoinerByAppIDNegativeReviews(JoinerByAppID):
-    def __init__(self, type: str, id: str):
-        super().__init__(type, id)
+"""
+Entities that join all entries maintaining all negative reviews with its text
+More than one entity
+Query 5
+"""
+class JoinerActionNegativeReviewsEnglish(JoinerByAppID):
+    def __init__(self):
+        super().__init__(type=os.getenv('JOIN_ENG_NEG_REV'), id=os.getenv('NODE_ID'))
 
         self._joinedEntries = []
         # key: appid, value: name
@@ -47,5 +53,5 @@ class JoinerByAppIDNegativeReviews(JoinerByAppID):
         return self._joinedEntries
     
     def _sendToNextStep(self, msg: bytes):
-        self._internalComunnication.sendToNegativeReviewsSorter(msg)
+        self._internalComunnication.sendToEnglishFilter(msg)
 

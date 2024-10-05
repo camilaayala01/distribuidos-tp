@@ -1,10 +1,11 @@
 import os
 import unittest
 from unittest.mock import MagicMock, patch
+
+from sorterConsolidatorActionPercentile.common.sorterConsolidatorActionPercentile import SorterConsolidatorActionPercentile
 from ..common.headerWithSender import HeaderWithSender
 from ..common.utils import serializeAndFragmentWithSender
 from ..entryNameReviewCount import EntryNameReviewCount
-from sorterActionNegativeReviews.common.sorterActionNegativeReviews import SorterActionNegativeReviews
 
 class TestSerializeFragmentWithHeader(unittest.TestCase):
     @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
@@ -14,9 +15,9 @@ class TestSerializeFragmentWithHeader(unittest.TestCase):
             EntryNameReviewCount("Game B", 120),
             EntryNameReviewCount("Game C", 1100),
         ]
-        
-        os.environ['SORT_ACT_REV'] = 'sorterAction'
-        self.sorterAction = SorterActionNegativeReviews()   
+        os.environ['CONS_SORT_PERC_NEG_REV'] = 'sorterAction'
+        os.environ['JOIN_PERC_NEG_REV_COUNT'] = '2'
+        self.sorterAction = SorterConsolidatorActionPercentile()   
 
     def testSerializeDataWithSmallMaxDataBytes(self):
         self.sorterAction._partialTop = self.entriesEqual

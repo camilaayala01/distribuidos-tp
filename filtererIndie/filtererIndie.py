@@ -19,12 +19,12 @@ class FiltererIndie(Filterer):
             forQuery2 += EntryNameReleaseDateAvgPlaytime(entry._name, entry._releaseDate, entry._avgPlaytimeForever).serialize()
             listQuery3 += [EntryAppIDName(entry._id, entry._name)]
 
-        listQuery3 = EntryAppIDName.shardBatch(listQuery3, os.getenv('JOIN_INDIE_REV_COUNT'))
+        listQuery3 = EntryAppIDName.shardBatch(listQuery3, os.getenv('JOIN_INDIE_POS_REV_COUNT'))
 
         self._internalCommunication.sendToDecadeFilter(forQuery2)
 
-        for i in range(os.getenv('JOIN_INDIE_REV_COUNT')):
-            self._internalCommunication.sendToReviewsIndieGamesJoiner(str(i), forQuery3 + listQuery3[i])
+        for i in range(os.getenv('JOIN_INDIE_POS_REV_COUNT')):
+            self._internalCommunication.sendToIndiePositiveReviewsJoiner(str(i), forQuery3 + listQuery3[i])
 
     @classmethod
     def condition(cls, entry: EntryAppIDNameGenresReleaseDateAvgPlaytime)-> bool:

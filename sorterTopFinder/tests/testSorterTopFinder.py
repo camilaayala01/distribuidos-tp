@@ -4,8 +4,8 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from entryParsing.common.headerWithSender import HeaderWithSender
+from sorterConsolidatorActionPercentile.common.sorterConsolidatorActionPercentile import SorterConsolidatorActionPercentile
 from sorterIndiePositiveReviews.common.sorterIndiePositiveReviews import SorterIndiePositiveReviews
-from sorterActionNegativeReviews.common.sorterActionNegativeReviews import SorterActionNegativeReviews
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 
 SMALL_TEST_TOP_AMOUNT = 3
@@ -32,12 +32,13 @@ class TestSorterTopFinder(unittest.TestCase):
             EntryNameReviewCount("Game H", 300),
             EntryNameReviewCount("Game I", 250),
         ]
-        
-        os.environ['SORT_ACT_REV'] = 'sorterAction'
+        os.environ['NODE_ID'] = '1'
+        os.environ['CONS_SORT_PERC_NEG_REV'] = 'sorterAction'
         os.environ['SORT_INDIE_POS_REV'] = 'sorterIndie'
+        os.environ['JOIN_PERC_NEG_REV_COUNT'] = '2'
 
         self.sorterIndieFew = SorterIndiePositiveReviews(SMALL_TEST_TOP_AMOUNT)
-        self.sorterAction = SorterActionNegativeReviews()
+        self.sorterAction = SorterConsolidatorActionPercentile()
         self.sorterBig = SorterIndiePositiveReviews(BIG_TEST_TOP_AMOUNT)
 
     def generateEntries(self):
