@@ -6,7 +6,7 @@ from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.defaultTracker import DefaultTracker
 
 """
-Just one entity that sums one clients sums
+Just one entity that sums one client's data set support
 Query 1
 """
 class JoinerOSCount:

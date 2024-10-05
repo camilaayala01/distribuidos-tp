@@ -5,16 +5,13 @@ from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
 from packetTracker.packetTracker import PacketTracker
 from sorter.common.sorter import Sorter
 
-# should get from env file
-TOP_AMOUNT = 10
-
 """
 in charge on finding the top 5 local indie games with most positive reviews
 it receives packages with fragment number % amount of nodes = node id
 For query 2
 """
 class SorterAvgPlaytime(Sorter):
-    def __init__(self, topAmount: int = TOP_AMOUNT): # for testing purposes
+    def __init__(self, topAmount: int): # for testing purposes
         nodeCount = os.getenv('SORT_AVG_PT_COUNT')
         nodeID = os.getenv('NODE_ID')
         self._id = int(nodeID)

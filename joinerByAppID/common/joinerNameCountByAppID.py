@@ -1,13 +1,13 @@
+from abc import abstractmethod
 import os
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from joinerByAppID.common.joinerByAppID import JoinerByAppID
 
-class JoinerActionNegativeReviewsPercentile(JoinerByAppID):
-    def __init__(self):
-        id = os.getenv('NODE_ID')
-        super().__init__(type=os.getenv('JOIN_PERC_NEG_REV'), id=id)
+class JoinerNameCountByAppID(JoinerByAppID):
+    def __init__(self, id: str, type: str):
+        super().__init__(type=type, id=id)
         
         self._id = int(id)
         # dict of entry name, review count
@@ -25,7 +25,7 @@ class JoinerActionNegativeReviewsPercentile(JoinerByAppID):
     
     @classmethod
     def reviewsEntryReceivedType(cls):
-        return EntryNameReviewCount
+        return EntryAppIDReviewCount
     
     def storeGamesEntry(self, entry: EntryAppIDName):
         self._joinedEntries[entry._appID] = EntryNameReviewCount(entry._name, 0)
@@ -37,5 +37,6 @@ class JoinerActionNegativeReviewsPercentile(JoinerByAppID):
         super().reset()
         self._joinedEntries = {}
 
+    @abstractmethod
     def _sendToNextStep(self, msg: bytes):
-        self._internalComunnication.sendToActionPercentileSorterConsolidator(msg)
+        pass
