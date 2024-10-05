@@ -5,16 +5,14 @@ from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.packetTracker import PacketTracker
 
-TOP_AMOUNT = 5
-
 class SorterTopFinder(ABC):
-    def __init__(self, id: int, type: str, entrySorter: type, topAmount: int, tracker: PacketTracker):
+    def __init__(self, id: int, type: str, headerType: type, entryType: type, topAmount: int, tracker: PacketTracker):
         self._internalComunnication = InternalCommunication(os.getenv(type), os.getenv('NODE_ID'))
-        self._entrySorter = entrySorter
+        self._entryType = entryType
+        self._headerType = headerType
         self._partialTop = []
         self._topAmount = topAmount
         self._id = id
-        # gonna have to add multiple trackers if senders are joiners
         self._packetTracker = tracker
 
     def execute(self):
@@ -78,12 +76,12 @@ class SorterTopFinder(ABC):
         self.reset()
 
     def handleMessage(self, ch, method, properties, body):
-        header, batch = Header.deserialize(body)
+        header, batch = self._headerType.deserialize(body)
         if self._packetTracker.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
         self._packetTracker.update(header)
-        entries = self._entrySorter.deserialize(batch)
+        entries = self._entryType.deserialize(batch)
         self.mergeKeepTop(entries)
         self._handleSending()
         ch.basic_ack(delivery_tag = method.delivery_tag)

@@ -1,5 +1,8 @@
+from .common.sorterConsolidatorActionPercentile import SorterConsolidatorActionPercentile
+
 def main():
-    print("nothing done yet!")
+    sorter = SorterConsolidatorActionPercentile()
+    sorter.execute()
 
 if __name__ == "__main__":
     main()

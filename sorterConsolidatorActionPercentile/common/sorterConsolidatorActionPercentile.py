@@ -1,4 +1,5 @@
 import os
+from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithQueryNumber
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from packetTracker.multiTracker import MultiTracker
@@ -13,13 +14,14 @@ class SorterConsolidatorActionPercentile(SorterTopFinder):
     def __init__(self):
         priorNodeCount = os.getenv('JOIN_ACT_NEG_REV_COUNT')
         nodeID = os.getenv('NODE_ID')
-        super().__init__(nodeID, os.getenv('SORT_CONS_PERCENTILE'), EntryNameReviewCount, None, MultiTracker(int(priorNodeCount)))
+        super().__init__(id=nodeID, type=os.getenv('SORT_CONS_PERCENTILE'), headerType=HeaderWithSender, 
+                         entryType=EntryNameReviewCount, topAmount=None, tracker=MultiTracker(int(priorNodeCount)))
 
     def _serializeAndFragment(self):
         serializeAndFragmentWithQueryNumber(maxDataBytes(), self._partialTop, 5)
 
     def getBatchTop(self, batch: list[EntryNameReviewCount]) -> list[EntryNameReviewCount]:
-        return self._entrySorter.sort(batch, False)
+        return self._entryType.sort(batch, False)
     
     def mustElementGoFirst(self, first: EntryNameReviewCount, other: EntryNameReviewCount):
         return not first.isGreaterThan(other)

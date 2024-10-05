@@ -1,5 +1,8 @@
+from .common.sorterByAvgPlaytime import SorterByAvgPlaytime
+
 def main():
-    print("nothing done yet!")
+    sorter = SorterByAvgPlaytime()
+    sorter.execute()
 
 if __name__ == "__main__":
     main()
