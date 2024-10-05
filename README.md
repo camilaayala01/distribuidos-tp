@@ -50,8 +50,13 @@ name: str, avgPlaytime: u32
 10 o menos(name: str)
 
 ## Query 3
-appId
-    GrouperNegativeReviews
+Tabla reviews:                               Tabla games:
+    appid de tabla reviews                          appID: str, name: str, genres: str, releaseDate: str, avgPlaytime: u32
+        GrouperIndiePositiveReviews                          FiltererIndie     
+    appid: str, parcial count: u32          name: str, releaseDate: str, avgPlaytime: u32
+                                JoinerPositiveReviews
+
+
 
 
 

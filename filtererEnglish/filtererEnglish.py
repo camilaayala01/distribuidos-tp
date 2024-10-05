@@ -1,6 +1,6 @@
 from entryParsing.entryAppIDName import EntryAppIDName
 from langid import classify
-from filterer.filtererGenre import Filterer
+from filterer.filterer import Filterer
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText

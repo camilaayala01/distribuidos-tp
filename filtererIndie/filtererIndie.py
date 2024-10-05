@@ -2,7 +2,7 @@ from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDNameGenresReleaseDateAvgPlaytime import EntryAppIDNameGenresReleaseDateAvgPlaytime
 from entryParsing.entryNameReleaseDateAvgPlaytime import EntryNameReleaseDateAvgPlaytime
-from filterer.filtererGenre import Filterer
+from filterer.filterer import Filterer
 from entryParsing.common.header import Header
 import os
 

@@ -1,6 +1,6 @@
 from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.entryAppIDNameGenres import EntryAppIDNameGenres
-from filterer.filtererGenre import Filterer
+from filterer.filterer import Filterer
 from internalCommunication.internalCommunication import InternalCommunication
 import os
 
