@@ -96,8 +96,12 @@ Movies: 3687
 BIGGEST ENTRY IN GAME TABLE IS 259397
 BIGGEST ENTRY IN REVIEW TABLE IS 16875
 TODO:
-look for biggest entry, csv library crashed because a field was larger than 131072
-check eof is set when file ends
-create smaller datasets
+look for biggest entry - DONE
+check eof is set when file ends- DONE
+create smaller  - NOT 
 define responses types and how to write them in files
-check game table reading (number of columns)
+check game table reading (number of columns) - DONE
+
+check performance and consider header overhead in initializer
+cleanse dataset of big entries
+find out send packet 

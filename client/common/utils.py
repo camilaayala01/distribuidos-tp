@@ -60,7 +60,6 @@ Not thread-safe/process-safe.
 """
 import sys
 
-# Aumenta el límite de tamaño del campo
 csv.field_size_limit(sys.maxsize)
 
 def loadGames() -> list[GameEntry]:
@@ -79,7 +78,7 @@ def loadGames() -> list[GameEntry]:
                                 row[37], row[38], row[39])
     
             except StopIteration:
-                raise(StopIteration("Ended"))
+                return None
             except Exception as e:
                 print(f"Error on line {line_number}: {e}")
                 return
@@ -98,7 +97,7 @@ def loadReviews() -> list[ReviewEntry]:
             try:
                 yield ReviewEntry(row[0], row[1], row[2], row[3], row[4])
             except StopIteration:
-                raise(StopIteration("Ended"))
+                return None
             except Exception as e:
                 print(e)
                 return
