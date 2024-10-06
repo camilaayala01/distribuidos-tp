@@ -45,7 +45,7 @@ class JoinerNegativeReviewsEnglishCount:
 
             priorEntry = self._counts.get(id, EntryNameReviewCount(entry.getName(), 0))
             if priorEntry.getCount() + entry.getCount() >= REQUIRED_REVIEWS:
-                ready.append(priorEntry.getName())
+                ready.append(EntryName(priorEntry.getName()))
                 self._sent.add(entry.getAppID())
                 self._counts.pop(entry.getAppID(), None)
             else:
@@ -61,21 +61,16 @@ class JoinerNegativeReviewsEnglishCount:
             return
         entries = EntryAppIDNameReviewCount.deserialize(data)
         ready = self._handleEntries(entries)
-        self._handleSending()
+        self._handleSending(ready)
         ch.basic_ack(delivery_tag = method.delivery_tag)
         
     def _sendToNextStep(self, data: bytes):
         self._internalComunnication.sendToDispatcher(data)
 
     def _handleSending(self, ready: list[EntryName]):
-        if self._packetTracker.isDone():
-            headerBytes = HeaderWithQueryNumber(self._fragnum, True, 4).deserialize()
-            self._sendToNextStep(headerBytes)
-            self.reset()
-            return
-        
-        # sender id is missing and should be here, or else add another joiner joiner
-        headerBytes = HeaderWithQueryNumber(self._fragnum, False, 4).deserialize()
-        namesBytes = EntryName.serializeAll(ready)
+        namesBytes = EntryName.serializeAll(ready)        
+        headerBytes = HeaderWithQueryNumber(self._fragnum, self._packetTracker.isDone(), 4).serialize()
         self._sendToNextStep(headerBytes + namesBytes)
-        
+
+        if self._packetTracker.isDone():
+            self.reset()
