@@ -16,12 +16,14 @@ class JoinerOSCount:
         self._windows = 0
         self._mac = 0
         self._linux = 0
+        self._total = 0
 
     def reset(self):
         self._packetTracker.reset()
         self._windows = 0
         self._mac = 0
         self._linux = 0
+        self._total = 0
 
     def execute(self):
         self._internalComunnication.defineMessageHandler(self.handleMessage())
@@ -53,6 +55,7 @@ class JoinerOSCount:
         self._windows += entry.getWindowsCount()
         self._mac += entry.getMacCount()
         self._linux += entry.getLinuxCount()
+        self._total += entry.getTotalCount()
         
     def _buildResult(self) -> EntryOSCount:
-        return EntryOSCount(self._windows, self._mac, self._linux)
+        return EntryOSCount(self._windows, self._mac, self._linux, self._total)

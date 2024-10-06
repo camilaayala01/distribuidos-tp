@@ -37,7 +37,7 @@ class TestHeader(unittest.TestCase):
 
     def testSerializeAndDeserializeWithExtraData(self):
         serializedHeader = self._entryLast.serialize()
-        serializedEntryOsCount = EntryOSCount(10, 600000, 500).serialize()
+        serializedEntryOsCount = EntryOSCount(10, 600000, 500, 600200).serialize()
         data = serializedHeader + serializedEntryOsCount
         deserializedHeader, rest = Header.deserialize(data)
         deserializedOsCount = EntryOSCount.deserialize(rest)
@@ -46,3 +46,4 @@ class TestHeader(unittest.TestCase):
         self.assertEqual(deserializedOsCount._windows, 10)
         self.assertEqual(deserializedOsCount._mac, 600000)
         self.assertEqual(deserializedOsCount._linux, 500)
+        self.assertEqual(deserializedOsCount._total, 600200)
