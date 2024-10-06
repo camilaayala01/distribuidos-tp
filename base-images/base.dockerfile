@@ -34,7 +34,7 @@ RUN git clone https://github.com/protocolbuffers/protobuf.git && \
     cp bazel-bin/protoc /usr/local/bin
 
 # Instala Protobuf3
-RUN wget --no-check-certificate https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protoc-3.20.0-linux-x86_64.zip && \
+RUN wget --no-check-certificate https://github.com/protocolbuffers/protobuf/releases/download/v28.2/protoc-28.2-linux-aarch_64.zip && \
     unzip protoc-3.20.0-linux-x86_64.zip && \
     mkdir -p /opt/protoc-3.20.0 && \
     mv bin include /opt/protoc-3.20.0 && \
