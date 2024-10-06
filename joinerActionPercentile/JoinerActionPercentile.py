@@ -1,4 +1,5 @@
 import os
+from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
 from joinerByAppID.common.joinerNameCountByAppID import JoinerNameCountByAppID
 
 """
@@ -13,3 +14,9 @@ class JoinerActionNegativeReviewsPercentile(JoinerNameCountByAppID):
 
     def _sendToNextStep(self, msg: bytes):
         self._internalComunnication.sendToActionPercentileSorterConsolidator(msg)
+
+    def entriesToSend(self)-> list[EntryAppIDNameReviewCount]:
+        entries = []
+        for id, entry in self._joinedEntries.items():
+            entries.append(EntryAppIDNameReviewCount(id, entry.getName(), entry.getCount()))
+        return entries

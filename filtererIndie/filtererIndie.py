@@ -28,4 +28,4 @@ class FiltererIndie(Filterer):
 
     @classmethod
     def condition(cls, entry: EntryAppIDNameGenresReleaseDateAvgPlaytime)-> bool:
-        return "Indie" in entry.getGenres()
+        return "indie" in entry.getGenres().lower()
