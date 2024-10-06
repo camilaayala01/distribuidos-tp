@@ -38,6 +38,7 @@ def tryToFloat(string)-> float:
         return float(string)
     except Exception:
         return 0
+    
 def parseDate(string)-> datetime.datetime:
     try:
         return datetime.datetime.strptime(string,"%b %d, %Y").strftime("%d-%m-%Y")

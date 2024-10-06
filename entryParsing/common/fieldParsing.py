@@ -1,5 +1,6 @@
 from .table import Table
 from .utils import boolToInt, intToBool
+import struct
 
 COUNT_LEN = 3
 AVG_PLAYTIME_LEN = 3
@@ -110,3 +111,9 @@ def serializeNumber(number, size: int) -> bytes:
 def deserializeNumber(data: bytes, curr: int, numberLen: int):
     number = int.from_bytes(data[curr:curr+numberLen], 'big')
     return number, curr + numberLen
+
+def serializeSignedInt(number: int):
+    return struct.pack('b', number)
+
+def deserializeSignedInt(data: bytes, curr: int) -> int:
+    return struct.unpack('b', data)[0], curr + 1

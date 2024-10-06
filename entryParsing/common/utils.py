@@ -1,4 +1,5 @@
 import math
+from entryParsing.common.table import Table
 from entryParsing.entry import EntryInterface
 
 MAX_PACKET_SIZE = 4096
@@ -81,3 +82,22 @@ def serializeAndFragmentWithQueryNumber(maxDataBytes: int, data: list[EntryInter
     # will have to yield once we have memory restrictions
     packets.append(HeaderWithQueryNumber(fragment, True, queryNumber).serialize() + currPacket)
     return packets
+
+# same as fragmenting with sender, but couldnt modularize
+def serializeAndFragmentWithTable(maxDataBytes: int, queryNumber: int, generator)-> list[bytes]:
+    from .headerWithTable import HeaderWithTable
+    fragment = 1
+    currPacket = bytes()
+
+    while entry := next(generator) is not None:
+        entryBytes = entry.serialize()
+        if len(currPacket) + len(entryBytes) <= maxDataBytes:
+            currPacket += entryBytes
+        else:
+            headerBytes = HeaderWithTable(Table.GAMES, fragment, False).serialize()
+            fragment += 1
+            currPacket = entryBytes
+            # send packet
+
+    packet = HeaderWithTable(fragment, True, queryNumber).serialize() + currPacket
+    # send packet

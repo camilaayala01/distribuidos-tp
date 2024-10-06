@@ -1,4 +1,4 @@
-from entryParsing.common.fieldParsing import deserializeAppID, deserializeGameName, deserializeNumber, deserializeReviewText, serializeAppID, serializeGameName, serializeNumber, serializeReviewText
+from entryParsing.common import fieldParsing
 from entryParsing.entry import EntryInterface
 from entryParsing.common.utils import getShardingKey
 
@@ -11,27 +11,24 @@ class ReviewEntry(EntryInterface):
             self.appName = appName # max len 83
             self.reviewText = reviewText # max len 8873
             self.reviewScore = int(reviewScore)
-            if self.reviewScore < 0:
-                self.reviewScore = 0
             self.reviewVotes = int(reviewVotes) # 0 o 1
-        
 
     def __str__(self):
         return f"EntryReview(appID={self.appID}, name={self.appName})"
     
     def serialize(self) -> bytes:
-        return (serializeAppID(self.appID) + serializeGameName(self.appName) +
-               serializeReviewText(self.reviewText) + serializeNumber(self.reviewScore, SCORE_LEN) 
-               + serializeNumber(self.reviewVotes, VOTE_LEN))
+        return (fieldParsing.serializeAppID(self.appID) + fieldParsing.serializeGameName(self.appName) +
+               fieldParsing.serializeReviewText(self.reviewText) + fieldParsing.serializeSignedInt(self.reviewScore)
+               + fieldParsing.serializeNumber(self.reviewVotes, VOTE_LEN))
 
     def isPositive(self) -> bool:
-        return True if self.reviewScore == 1 else False #cami: hago que negativo sea cero porque serializar numeros negativos implica hacer el complemento a 2
+        return True if self.reviewScore == 1 else False 
 
     def serializeForQuery3And5(self) -> bytes:
-        return serializeAppID(self.appID)
+        return fieldParsing.serializeAppID(self.appID)
     
     def serializeForQuery4(self) -> bytes:
-        return serializeAppID(self.appID) + serializeReviewText(self.reviewText)
+        return fieldParsing.serializeAppID(self.appID) + fieldParsing.serializeReviewText(self.reviewText)
 
     @classmethod
     def deserialize(cls, data: bytes) -> list['ReviewEntry']: 
@@ -40,11 +37,11 @@ class ReviewEntry(EntryInterface):
 
         while len(data) > curr:
             try:
-                appID, curr = deserializeAppID(curr, data)
-                appName, curr = deserializeGameName(curr, data)
-                reviewText, curr = deserializeReviewText(curr, data)
-                reviewScore, curr = deserializeNumber(curr,data, SCORE_LEN)
-                reviewVotes, curr = deserializeNumber(curr,data, VOTE_LEN)
+                appID, curr = fieldParsing.deserializeAppID(curr, data)
+                appName, curr = fieldParsing.deserializeGameName(curr, data)
+                reviewText, curr = fieldParsing.deserializeReviewText(curr, data)
+                reviewScore, curr = fieldParsing.deserializeSignedInt(curr, data)
+                reviewVotes, curr = fieldParsing.deserializeNumber(curr,data, VOTE_LEN) 
 
                 entries.append(ReviewEntry(appID, appName,reviewText, reviewScore, reviewVotes))
                 

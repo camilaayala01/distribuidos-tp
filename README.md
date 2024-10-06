@@ -30,11 +30,12 @@ unzip steam-games-dataset.zip && unzip steam-reviews.zip
 rm games.json && rm steam-games-dataset.zip && rm steam-reviews.zip
 
 ```
+# Reducir datasets
+```
+head -n 100 games.csv > games-reducido.csv
+head -n 10000 dataset.csv > reviews-reducido.csv
+```
 
-
-# Lineas que borrar:
-## Games: 
-- 
 
 
 
