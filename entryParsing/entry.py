@@ -9,3 +9,5 @@ class EntryInterface(ABC):
     @abstractmethod
     def deserialize(cls, data: bytes): 
         pass
+
+
