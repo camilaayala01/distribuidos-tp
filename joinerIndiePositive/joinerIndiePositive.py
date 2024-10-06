@@ -1,4 +1,5 @@
 import os
+from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from joinerByAppID.common.joinerNameCountByAppID import JoinerNameCountByAppID
 
 """
@@ -13,3 +14,6 @@ class JoinerIndiePositiveReviews(JoinerNameCountByAppID):
 
     def _sendToNextStep(self, msg: bytes):
         self._internalComunnication.sendToIndiePositiveReviewsConsolidator(msg)
+
+    def entriesToSend(self)-> list[EntryNameReviewCount]:
+        return self._joinedEntries.values()

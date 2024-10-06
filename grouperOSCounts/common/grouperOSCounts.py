@@ -19,19 +19,20 @@ class GrouperOSCounts:
     def _applyStep(self, entries: list['EntryOSSupport']) -> EntryOSCount:
         return self._buildResult(self._count(entries))
     
-    def _count(self, entries: list['EntryOSSupport']) -> list[int, int, int]:
-        windowsCount, macCount, linuxCount = 0, 0, 0 
+    def _count(self, entries: list['EntryOSSupport']) -> list[int, int, int, int]:
+        windowsCount, macCount, linuxCount, total = 0, 0, 0, 0 
         for entry in entries:
+            total += 1
             if entry._windows:
                 windowsCount += 1
             if entry._mac:
                 macCount +=1
             if entry._linux:
                 linuxCount +=1
-            return [windowsCount, macCount, linuxCount]
+            return [windowsCount, macCount, linuxCount, total]
         
     def _buildResult(self, counts: list[int]) -> EntryOSCount:
-        return EntryOSCount(counts[0], counts[1], counts[2])
+        return EntryOSCount(counts[0], counts[1], counts[2], counts[3])
     
     def execute(self):
         self._internalComunnication.defineMessageHandler(self.handleMessage)
