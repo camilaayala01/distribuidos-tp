@@ -1,7 +1,7 @@
+from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from .common.fieldParsing import deserializeAppID, deserializeCount, deserializeGameName, serializeAppID, serializeCount, serializeGameName
-from .entry import EntryInterface
 
-class EntryAppIDNameReviewCount(EntryInterface):
+class EntryAppIDNameReviewCount(EntrySorterTopFinder):
     def __init__(self, appID: str, name: str, count: int):
         self._appID =  appID
         self._name = name
@@ -15,7 +15,13 @@ class EntryAppIDNameReviewCount(EntryInterface):
     
     def getCount(self):
         return self._count
+          
+    def addToCount(self, count: int):
+        self._count += count
     
+    def getSortingAtribute(self) -> int:
+        return self._count
+
     def serialize(self) -> bytes:
         appIDBytes = serializeAppID(self._appID)
         nameBytes = serializeGameName(self._appID)
@@ -27,17 +33,9 @@ class EntryAppIDNameReviewCount(EntryInterface):
         return f"EntryAppIDNameReviewCount(appID={self._appID}, name={self._name}, count={self._count})"
 
     @classmethod
-    def deserialize(cls, data: bytes): 
-        curr = 0
-        entries = []
+    def deserializeEntry(cls, curr: int, data: bytes) -> tuple['EntryAppIDNameReviewCount', int]:
+        appID, curr = deserializeAppID(curr, data)
+        name, curr = deserializeGameName(curr, data)
+        reviewCount, curr = deserializeCount(curr, data)
 
-        while len(data) > curr:
-            try:
-                appID, curr = deserializeAppID(curr, data)
-                name, curr = deserializeGameName(curr, data)
-                reviewCount, curr = deserializeCount(curr, data)
-                entries.append(EntryAppIDNameReviewCount(appID, name, reviewCount))
-            except (IndexError, UnicodeDecodeError):
-                raise Exception("There was an error parsing data")
-
-        return entries
+        return cls(appID, name, reviewCount), curr

@@ -7,10 +7,10 @@ class TestJoinerOSCount(unittest.TestCase):
     @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
     def setUp(self):
         self._entries = [
-            EntryOSCount(1, 2, 3),
-            EntryOSCount(1, 2, 3),
-            EntryOSCount(1, 2, 3),
-            EntryOSCount(1, 2, 3),
+            EntryOSCount(1, 2, 3, 5),
+            EntryOSCount(1, 2, 3, 5),
+            EntryOSCount(1, 2, 3, 5),
+            EntryOSCount(1, 2, 3, 5),
         ]
         self._joiner = JoinerOSCount()
 
@@ -21,6 +21,7 @@ class TestJoinerOSCount(unittest.TestCase):
         self.assertEqual(result._windows, 4)
         self.assertEqual(result._mac, 8)
         self.assertEqual(result._linux, 12)
+        self.assertEqual(result._total, 20)
 
 if __name__ == '__main__':
     unittest.main()

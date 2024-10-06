@@ -22,4 +22,4 @@ class FiltererAction(Filterer):
 
     @classmethod
     def condition(cls, entry: EntryAppIDNameGenres) -> bool:
-        return "Action" in entry.getGenres()
+        return "action" in entry.getGenres().lower()

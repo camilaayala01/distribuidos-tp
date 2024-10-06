@@ -1,5 +1,6 @@
 from abc import abstractmethod
 import os
+from entryParsing.entry import EntryInterface
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
@@ -30,8 +31,9 @@ class JoinerNameCountByAppID(JoinerByAppID):
     def storeGamesEntry(self, entry: EntryAppIDName):
         self._joinedEntries[entry._appID] = EntryNameReviewCount(entry._name, 0)
 
-    def entriesToSend(self)-> list[EntryNameReviewCount]:
-        return self._joinedEntries.values()
+    @abstractmethod
+    def entriesToSend(self)-> list[EntryInterface]:
+        pass
 
     def reset(self):
         super().reset()
