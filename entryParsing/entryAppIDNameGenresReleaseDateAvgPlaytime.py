@@ -1,6 +1,5 @@
 # amount of bytes dedicated to stating the length of the name
 from typing import Tuple
-from datetime import datetime
 from entryParsing.common import fieldParsing
 from entryParsing.entry import EntryInterface
 ID_LEN = 1

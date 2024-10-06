@@ -1,9 +1,6 @@
 import os
-from entryParsing.common.header import Header
-from entryParsing.entryAppID import EntryAppID
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from grouperReviews.common.grouperReviews import GrouperReviews
-from internalCommunication.internalCommunication import InternalCommunication
 
 class GrouperIndiePositiveReviews(GrouperReviews):
     def __init__(self): 
