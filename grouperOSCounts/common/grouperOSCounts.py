@@ -2,7 +2,6 @@ import os
 from entryParsing.entryOSCount import EntryOSCount
 from entryParsing.entryOSSupport import EntryOSSupport
 from entryParsing.common.header import Header
-from entryParsing.common.utils import getShardingKey
 from internalCommunication.internalCommunication import InternalCommunication
 
 class GrouperOSCounts:

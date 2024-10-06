@@ -1,0 +1,11 @@
+services:
+  border-node:
+    build:
+      context: ./borderNode
+      dockerfile: border-node.dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication

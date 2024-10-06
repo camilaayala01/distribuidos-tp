@@ -3,6 +3,7 @@ import signal
 import os
 from internalCommunication.internalCommunication import InternalCommunication
 import zmq
+from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 
 PREFETCH_COUNT = 1 # break round robin
 DELIVERY_MODE = 1 # make message transient, es lo mismo por ahora
@@ -68,8 +69,8 @@ class BorderNodeCommunication:
         return self._clientSocket.recv()
     
     def sendClient(self, ch, method, properties, body):
-        return self._clientSocket.send(body)
+        self._clientSocket.send(body)
 
     def sendInitializer(self, message: bytes):
-        self.fanoutSend(os.getenv('INIT'), message)
+        self.basicSend(os.getenv('INIT'), message)
  
