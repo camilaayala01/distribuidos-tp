@@ -3,7 +3,7 @@ import signal
 import os
 from internalCommunication.internalCommunication import InternalCommunication
 import zmq
-from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
+#from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 
 PREFETCH_COUNT = 1 # break round robin
 DELIVERY_MODE = 1 # make message transient, es lo mismo por ahora
