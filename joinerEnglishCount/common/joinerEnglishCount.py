@@ -46,10 +46,10 @@ class JoinerNegativeReviewsEnglishCount:
             priorEntry = self._counts.get(id, EntryNameReviewCount(entry.getName(), 0))
             if priorEntry.getCount() + entry.getCount() >= REQUIRED_REVIEWS:
                 ready.append(EntryName(priorEntry.getName()))
-                self._sent.add(entry.getAppID())
-                self._counts.pop(entry.getAppID(), None)
+                self._sent.add(id)
+                self._counts.pop(id, None)
             else:
-                self._counts[entry.getAppID()] = priorEntry.addToCount(entry.getCount())
+                self._counts[id] = priorEntry.addToCount(entry.getCount())
 
         return ready
 
