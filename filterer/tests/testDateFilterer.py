@@ -3,7 +3,7 @@ from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 from entryParsing.entryNameDateAvgPlaytime import EntryNameDateAvgPlaytime
-from filtererDate.filtererDate import FiltererDate
+from filtererDate.common.filtererDate import FiltererDate
 
 class TestDateFilterer(unittest.TestCase):
     @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))

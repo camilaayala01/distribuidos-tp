@@ -16,6 +16,9 @@ class JoinerByAppID(ABC):
         self._reviewsTracker = DefaultTracker()
         self._unjoinedReviews = []
 
+    def execute(self):
+        self._internalComunnication.defineMessageHandler(self.handleMessage())
+
     @abstractmethod
     def joinReviews(self, reviews: list[EntryInterface]):
         pass

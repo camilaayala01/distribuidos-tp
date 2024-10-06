@@ -1,4 +1,4 @@
-from .filtererIndie import FiltererIndie
+from .common.filtererIndie import FiltererIndie
 
 def main():
     filterer = FiltererIndie()

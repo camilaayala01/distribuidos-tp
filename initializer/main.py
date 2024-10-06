@@ -1,8 +1,8 @@
-from .initializer import Initializer
+from .common.initializer import Initializer
 
 def main():
-    grouper = Initializer()
-    grouper.execute()
+    initializer = Initializer()
+    initializer.execute()
 
 if __name__ == "__main__":
     main()

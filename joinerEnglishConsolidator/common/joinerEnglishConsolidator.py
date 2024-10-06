@@ -1,9 +1,8 @@
 import os
-from entryParsing.common.header import Header
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.utils import getShardingKey
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
-from joinerConsolidator.joinerConsolidator import JoinerConsolidator
+from joiner.common.joinerConsolidator import JoinerConsolidator
 
 class JoinerEnglishConsolidator(JoinerConsolidator):
     def __init__(self): 

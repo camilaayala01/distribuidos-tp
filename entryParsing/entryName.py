@@ -8,7 +8,7 @@ class EntryName(EntryInterface):
     @staticmethod
     def serialize(self) -> bytes:
         return serializeGameName(self._name)
-
+    
     @staticmethod
     def serializeAll(names: list['EntryName']) -> bytes:
         entryBytes = bytearray()
@@ -18,6 +18,13 @@ class EntryName(EntryInterface):
 
     def __str__(self):
         return f"EntryName(name={self._name})"
+    
+    @classmethod
+    def header(cls):
+        return "name\n"
+    
+    def csv(self):
+        return f'{self._name}\n'
     
     @classmethod
     def deserialize(cls, data: bytes): 

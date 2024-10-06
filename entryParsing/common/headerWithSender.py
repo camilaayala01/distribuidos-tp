@@ -1,4 +1,5 @@
-from .fieldParsing import SENDER_ID_LEN, deserializeBoolean, deserializeCount, deserializeSenderID, serializeSenderID
+from .fieldParsing import deserializeBoolean, deserializeCount, deserializeSenderID, serializeSenderID
+from entryParsing.common.fieldLen import SENDER_ID_LEN
 from .header import Header
 
 class HeaderWithSender(Header):

@@ -1,6 +1,6 @@
 import unittest
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
-from entryParsing.common.fieldParsing import APP_ID_LEN, COUNT_LEN
+from entryParsing.common.fieldLen import APP_ID_LEN, COUNT_LEN
 
 class TestEntryAppID(unittest.TestCase):
     def setUp(self):

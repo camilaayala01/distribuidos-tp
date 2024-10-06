@@ -1,5 +1,4 @@
 import unittest
-from entryParsing.common.fieldParsing import BOOLEAN_LEN, COUNT_LEN
 from entryParsing.common.header import Header
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entryOSCount import EntryOSCount

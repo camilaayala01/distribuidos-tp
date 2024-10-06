@@ -1,5 +1,6 @@
 from entryParsing.common.table import Table
-from .fieldParsing import TABLE_LEN, deserializeBoolean, deserializeCount, deserializeTable, serializeTable
+from entryParsing.common.fieldLen import TABLE_LEN, BOOLEAN_LEN
+from .fieldParsing import deserializeBoolean, deserializeCount, deserializeTable, serializeTable
 from .header import Header
 
 class HeaderWithTable(Header):

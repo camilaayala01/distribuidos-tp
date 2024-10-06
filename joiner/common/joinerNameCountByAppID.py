@@ -4,7 +4,7 @@ from entryParsing.entry import EntryInterface
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
-from joinerByAppID.common.joinerByAppID import JoinerByAppID
+from joiner.common.joinerByAppID import JoinerByAppID
 
 class JoinerNameCountByAppID(JoinerByAppID):
     def __init__(self, id: str, type: str):

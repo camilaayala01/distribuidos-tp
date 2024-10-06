@@ -4,7 +4,7 @@ from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSend
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
 from entryParsing.entryAppIDReviewText import EntryAppIDReviewText
-from joinerByAppID.common.joinerByAppID import JoinerByAppID
+from joiner.common.joinerByAppID import JoinerByAppID
 
 """
 Entities that join all entries maintaining all negative reviews with its text

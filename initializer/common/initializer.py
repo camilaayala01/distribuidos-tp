@@ -1,11 +1,11 @@
-from ..internalCommunication.internalCommunication import InternalCommunication
-from ..entryParsing.common.headerWithTable import HeaderWithTable
-from ..entryParsing.gameEntry import GameEntry
-from ..entryParsing.reviewEntry import ReviewEntry
-from ..entryParsing.entryOSSupport import EntryOSSupport
-from ..entryParsing.entryAppIDNameGenresReleaseDateAvgPlaytime import EntryAppIDNameGenresReleaseDateAvgPlaytime
-from ..entryParsing.entryAppIDNameGenres import EntryAppIDNameGenres
-from ..entryParsing.entryAppID import EntryAppID
+from entryParsing import ReducedGameEntry
+from internalCommunication.internalCommunication import InternalCommunication
+from entryParsing.common.headerWithTable import HeaderWithTable
+from entryParsing.reviewEntry import ReviewEntry
+from entryParsing.entryOSSupport import EntryOSSupport
+from entryParsing.entryAppIDNameGenresReleaseDateAvgPlaytime import EntryAppIDNameGenresReleaseDateAvgPlaytime
+from entryParsing.entryAppIDNameGenres import EntryAppIDNameGenres
+from entryParsing.entryAppID import EntryAppID
 import os
 
 class Initializer:
@@ -17,7 +17,7 @@ class Initializer:
         serializedHeader = header.serialize()
 
         if header.isGamesTable():
-            gameEntries = GameEntry.deserialize(data)
+            gameEntries = ReducedGameEntry.deserialize(data)
 
             entriesQuery1 = [EntryOSSupport(entry.windows, entry.mac, entry.linux).serialize() for entry in gameEntries].sum()
 
@@ -34,18 +34,22 @@ class Initializer:
             positiveReviewEntries = [entry for entry in reviewEntries if entry.isPositive()]
             negativeReviewEntries = [entry for entry in reviewEntries if not entry.isPositive()]
 
+            #Query 3
             entriesQuery3 = [EntryAppID(entry.appID).serialize() for entry in positiveReviewEntries].sum()
-            self._internalCommunication.sendToPositiveReviewsGrouper(entriesQuery3)
+            self._internalCommunication.sendToIndiePositiveReviewsGrouper(entriesQuery3)
 
-            nodeCount = int(os.getenv('JOIN_ACT_POS_REV_COUNT'))
-            shardedResults = ReviewEntry.shardBatch(nodeCount, positiveReviewEntries)
+            #Query 4
+            nodeCount = int(os.getenv('JOIN_ENG_NEG_REV_COUNT'))
+            shardedResults = ReviewEntry.shardBatch(nodeCount, negativeReviewEntries)
 
             for i in range(nodeCount):
-                self._internalCommunication.sendToPositiveReviewsActionGamesJoiner(str(i), serializedHeader + shardedResults[i])
+                self._internalCommunication.sendToActionNegativeReviewsEnglishJoiner(str(i), serializedHeader + shardedResults[i])
  
+            # Query 5
             entriesQuery5 = [EntryAppID(entry.appID).serialize() for entry in negativeReviewEntries].sum()
-            self._internalCommunication.sendToNegativeReviewsGrouper(entriesQuery5)
-        
+            self._internalCommunication.sendToActionAllNegativeReviewsGrouper(entriesQuery5)
+
+            ch.basic_ack(delivery_tag = method.delivery_tag)
         else:
             raise ValueError()
 

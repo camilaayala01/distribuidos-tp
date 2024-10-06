@@ -12,55 +12,37 @@ REVIEWS_STORAGE_FILEPATH = "./datasets/dataset.csv"
 
 QUERY_RESPONSES_PATH = "./responses"
 
-"""
-Only called once. Not a CSV
-"""
+
 def storeResultsQuery1(response: str) -> None:
     filepath = QUERY_RESPONSES_PATH + "/query1.txt"
-    with open(filepath, 'a+') as file:
-        file.write(response)
-    
-        
-"""
-Persist the information of each response for query 2 from a batch 
-Not thread-safe/process-safe.
-"""
-def storeResultsQuery2(result: 'Query2Response') -> None:
+    storeResultsQuery(response, filepath)
+
+def storeResultsQuery2(response: str) -> None:
     filepath = QUERY_RESPONSES_PATH + "/query2.csv"
+    storeResultsQuery(response, filepath)
     
-
-
-"""
-Persist the information of each response for query 3 from a batch 
-Not thread-safe/process-safe.
-"""
-def storeResultsQuery4(result: 'Query3Response') -> None:
+def storeResultsQuery3(response: str) -> None:
     filepath = QUERY_RESPONSES_PATH + "/query3.csv"
-    
-            
-            
-"""
-Persist the information of each response for query 4 from a batch 
-Not thread-safe/process-safe.
-"""
-def storeResultsQuery4(result: 'Query4Response') -> None:
+    storeResultsQuery(response, filepath)
+                
+def storeResultsQuery4(response: str) -> None:
     filepath = QUERY_RESPONSES_PATH + "/query4.csv"
+    storeResultsQuery(response, filepath)
+
+def storeResultsQuery5(response: str) -> None:
+    filepath = QUERY_RESPONSES_PATH + "/query5.csv"
+    storeResultsQuery(response, filepath)
+                
+def storeResultsQuery(result: str, filepath: str) -> None:
     with open(filepath, 'a+') as file:
-        writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
-        for res in result.gamesNames: 
-            writer.writerow([res])
-           
-        
+        file.write(result)
     
-      
-        
+       
 """
 Loads the information all the bets in the STORAGE_FILEPATH file.
 Not thread-safe/process-safe.
 """
-import sys
 
-csv.field_size_limit(sys.maxsize)
 
 def loadGames() -> list[GameEntry]:
     with open(GAMES_STORAGE_FILEPATH, 'r') as file:
@@ -80,8 +62,7 @@ def loadGames() -> list[GameEntry]:
             except StopIteration:
                 return None
             except Exception as e:
-                print(f"Error on line {line_number}: {e}")
-                return
+                pass
 
             
 
@@ -99,6 +80,5 @@ def loadReviews() -> list[ReviewEntry]:
             except StopIteration:
                 return None
             except Exception as e:
-                print(e)
-                return
+                pass
 

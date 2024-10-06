@@ -84,20 +84,20 @@ def serializeAndFragmentWithQueryNumber(maxDataBytes: int, data: list[EntryInter
     return packets
 
 # same as fragmenting with sender, but couldnt modularize
-def serializeAndFragmentWithTable(maxDataBytes: int, queryNumber: int, generator)-> list[bytes]:
+def serializeAndFragmentWithTable(socket, maxDataBytes: int, generatorFunction, table: Table):
     from .headerWithTable import HeaderWithTable
     fragment = 1
     currPacket = bytes()
-
+    generator = generatorFunction()
     while entry := next(generator) is not None:
         entryBytes = entry.serialize()
         if len(currPacket) + len(entryBytes) <= maxDataBytes:
             currPacket += entryBytes
         else:
-            headerBytes = HeaderWithTable(Table.GAMES, fragment, False).serialize()
+            headerBytes = HeaderWithTable(table, fragment, False).serialize()
             fragment += 1
+            socket.send(headerBytes + currPacket)
             currPacket = entryBytes
-            # send packet
 
-    packet = HeaderWithTable(fragment, True, queryNumber).serialize() + currPacket
-    # send packet
+    packet = HeaderWithTable(table, fragment, True).serialize() + currPacket
+    socket.send(packet)

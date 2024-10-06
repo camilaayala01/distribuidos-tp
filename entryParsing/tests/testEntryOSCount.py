@@ -1,5 +1,5 @@
 import unittest
-from entryParsing.common.fieldParsing import COUNT_LEN
+from entryParsing.common.fieldLen import COUNT_LEN
 from entryParsing.entryOSCount import EntryOSCount
 
 class TestEntryOSCount(unittest.TestCase):

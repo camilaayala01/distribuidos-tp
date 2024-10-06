@@ -1,6 +1,6 @@
 import os
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
-from joinerByAppID.common.joinerNameCountByAppID import JoinerNameCountByAppID
+from joiner.common.joinerNameCountByAppID import JoinerNameCountByAppID
 
 """
 Entities that join all entries maintaining total counts for all

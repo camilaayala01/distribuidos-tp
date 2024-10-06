@@ -15,6 +15,13 @@ class EntryNameAvgPlaytime(EntrySorterTopFinder):
     def __str__(self):
         return f"EntryNameAvgPlaytime(name={self._name}, avgPlaytime={self._avgPlaytime})"
     
+    def csv(self):
+        return f"{self._name}, {self._avgPlaytime}\n"
+
+    @classmethod
+    def header(self):
+        return f"name, avgPlaytime\n"
+    
     @classmethod
     def deserializeEntry(cls, curr: int, data: bytes) -> tuple['EntryNameAvgPlaytime', int]:
         name, curr = deserializeGameName(curr, data)

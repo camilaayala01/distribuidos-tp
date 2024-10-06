@@ -1,4 +1,4 @@
-from .filtererEnglish import FiltererEnglish
+from .common.filtererEnglish import FiltererEnglish
 
 def main():
     filterer = FiltererEnglish()

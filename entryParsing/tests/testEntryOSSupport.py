@@ -1,5 +1,5 @@
 import unittest
-from entryParsing.common.fieldParsing import BOOLEAN_LEN
+from entryParsing.common.fieldLen import BOOLEAN_LEN
 from entryParsing.entryOSSupport import EntryOSSupport
 
 class TestEntryOsSupport(unittest.TestCase):

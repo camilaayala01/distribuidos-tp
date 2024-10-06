@@ -25,15 +25,12 @@ class ReviewEntry(EntryInterface):
     def isPositive(self) -> bool:
         return True if self.reviewScore == 1 else False 
 
-<<<<<<< HEAD
     def serializeForQuery3And5(self) -> bytes:
         return fieldParsing.serializeAppID(self.appID)
     
     def serializeForQuery4(self) -> bytes:
         return fieldParsing.serializeAppID(self.appID) + fieldParsing.serializeReviewText(self.reviewText)
 
-=======
->>>>>>> c52796b3bfbc812bea24a0eb95b2976bef15f73e
     @classmethod
     def deserialize(cls, data: bytes) -> list['ReviewEntry']: 
         curr = 0

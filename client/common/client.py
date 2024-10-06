@@ -1,16 +1,20 @@
 import zmq
 import time
 
-from common.messages import buildGameTableMessage, buildReviewTableMessage, processResponse, sendTable
+from client.common.messages import processResponse
+from client.common.utils import loadGames, loadReviews
+from entryParsing.common.table import Table
+from entryParsing.common.utils import serializeAndFragmentWithTable
 
 QUERY_COUNT = 5
+MAX_DATA_BYTES = 8000
 port = "5556"
 context = zmq.Context()
 socket = context.socket(zmq.PAIR)
 socket.connect("tcp://server:%s" % port)
 
-sendTable(socket, buildGameTableMessage)
-sendTable(socket, buildReviewTableMessage)
+serializeAndFragmentWithTable(socket, MAX_DATA_BYTES, loadGames, Table.GAMES)
+serializeAndFragmentWithTable(socket, MAX_DATA_BYTES, loadReviews, Table.REVIEWS)
 
 queriesFullyAnswered = 0
 while queriesFullyAnswered < QUERY_COUNT:
@@ -18,4 +22,5 @@ while queriesFullyAnswered < QUERY_COUNT:
     isQueryResolved = processResponse(msg)
     if isQueryResolved:
         queriesFullyAnswered += 1
+
     

@@ -16,6 +16,13 @@ class EntryAppIDName(EntryInterface):
         return f"EntryAppIDName(appID={self._appID}, name={self._name})"
     
     @classmethod
+    def header(cls):
+        return "appID, name\n"
+    
+    def csv(self):
+        return f'{self._appID}, {self._name}\n'
+    
+    @classmethod
     def deserialize(cls, data: bytes) -> list['EntryAppIDName']: 
         curr = 0
         entries = []

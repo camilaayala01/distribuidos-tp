@@ -1,5 +1,5 @@
 import unittest
-from entryParsing.common.fieldParsing import COUNT_LEN, NAME_LEN
+from entryParsing.common.fieldLen import COUNT_LEN, NAME_LEN
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
 
