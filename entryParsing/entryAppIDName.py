@@ -35,4 +35,5 @@ class EntryAppIDName(EntryInterface):
         resultingBatches = [bytes() for _ in range(nodeCount)]
         for entry in result:
             shardResult = getShardingKey(entry._id, nodeCount)
-            resultingBatches[shardResult] = resultingBatches[shardResult] + EntryAppIDName(entry._id, entry._name).deserialize()
+            resultingBatches[shardResult] = resultingBatches[shardResult] + EntryAppIDName(entry._id, entry._name).serialize()
+    

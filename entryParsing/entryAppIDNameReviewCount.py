@@ -1,4 +1,4 @@
-from .common.fieldParsing import deserializeAppID, deserializeCount, deserializeGameName, serializeAppID, serializeCount, serializeGameName, serializeVariableLenString
+from .common.fieldParsing import deserializeAppID, deserializeCount, deserializeGameName, serializeAppID, serializeCount, serializeGameName
 from .entry import EntryInterface
 
 class EntryAppIDNameReviewCount(EntryInterface):

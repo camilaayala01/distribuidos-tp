@@ -1,6 +1,7 @@
 from entryParsing.common import fieldParsing
 from entryParsing.entry import EntryInterface
 from entryParsing.common.utils import getShardingKey
+from ..entryParsing.entryAppIDReviewText import EntryAppIDReviewText
 
 SCORE_LEN = 3 
 VOTE_LEN = 1
@@ -24,12 +25,15 @@ class ReviewEntry(EntryInterface):
     def isPositive(self) -> bool:
         return True if self.reviewScore == 1 else False 
 
+<<<<<<< HEAD
     def serializeForQuery3And5(self) -> bytes:
         return fieldParsing.serializeAppID(self.appID)
     
     def serializeForQuery4(self) -> bytes:
         return fieldParsing.serializeAppID(self.appID) + fieldParsing.serializeReviewText(self.reviewText)
 
+=======
+>>>>>>> c52796b3bfbc812bea24a0eb95b2976bef15f73e
     @classmethod
     def deserialize(cls, data: bytes) -> list['ReviewEntry']: 
         curr = 0
@@ -53,6 +57,6 @@ class ReviewEntry(EntryInterface):
     def shardBatch(nodeCount: int, result: list['ReviewEntry']) -> list[bytes]:
         resultingBatches = [bytes() for _ in range(nodeCount)]
         for entry in result:
-            shardResult = getShardingKey(entry._id, nodeCount)
-            resultingBatches[shardResult] = resultingBatches[shardResult] + entry.serializeForQuery4()
+            shardResult = getShardingKey(entry.appID, nodeCount)
+            resultingBatches[shardResult] = resultingBatches[shardResult] + EntryAppIDReviewText(entry.appID, entry.reviewText).serialize()
 
