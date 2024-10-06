@@ -2,24 +2,30 @@ from entryParsing.common.fieldParsing import deserializeAppID, deserializeGameNa
 from entryParsing.entry import EntryInterface
 from entryParsing.common.utils import getShardingKey
 
-SCORE_LEN = 2
+SCORE_LEN = 3 
 VOTE_LEN = 1
 
 class ReviewEntry(EntryInterface):
     def __init__(self, appID, appName, reviewText, reviewScore, reviewVotes):
-        self.appID = appID # max len 6
-        self.appName: appName # max len 83
-        self.reviewText: reviewText # max len 8873
-        self.reviewScore = int(reviewScore) # -1 o 1
-        self.reviewVotes = int(reviewVotes) # 0 o 1
+            self.appID = appID # max len 6
+            self.appName = appName # max len 83
+            self.reviewText = reviewText # max len 8873
+            self.reviewScore = int(reviewScore)
+            if self.reviewScore < 0:
+                self.reviewScore = 0
+            self.reviewVotes = int(reviewVotes) # 0 o 1
+        
 
+    def __str__(self):
+        return f"EntryReview(appID={self.appID}, name={self.appName})"
+    
     def serialize(self) -> bytes:
         return (serializeAppID(self.appID) + serializeGameName(self.appName) +
                serializeReviewText(self.reviewText) + serializeNumber(self.reviewScore, SCORE_LEN) 
                + serializeNumber(self.reviewVotes, VOTE_LEN))
 
     def isPositive(self) -> bool:
-        return True if self.reviewScore == 1 else False
+        return True if self.reviewScore == 1 else False #cami: hago que negativo sea cero porque serializar numeros negativos implica hacer el complemento a 2
 
     def serializeForQuery3And5(self) -> bytes:
         return serializeAppID(self.appID)
@@ -42,7 +48,7 @@ class ReviewEntry(EntryInterface):
 
                 entries.append(ReviewEntry(appID, appName,reviewText, reviewScore, reviewVotes))
                 
-            except (IndexError, UnicodeDecodeError):
+            except (IndexError, UnicodeDecodeError, ValueError):
                 raise Exception("There was an error parsing data")
 
         return entries

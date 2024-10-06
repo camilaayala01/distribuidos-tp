@@ -25,7 +25,10 @@ def strToBoolInt(string: str) -> int:
             return 1
         case "False":
             return 0
+        case "":
+            return 0
         case _:
+            print(string)
             raise(Exception("Boolean field could not be converted"))
 
 

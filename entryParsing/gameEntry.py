@@ -4,13 +4,46 @@ from entryParsing.common.fieldParsing import BOOLEAN_LEN, deserializeAppID, dese
 from entryParsing.common.utils import strToBoolInt
 from entryParsing.entry import EntryInterface
 
-PEAK_CCU_BYTES = 3, REQ_AGE_BYTES = 1, DISC_COUNT_BYTES = 1 
-META_SCORE_BYTES = 1 , USER_SCORE_BYTES = 1 
-PRICE_BYTES = 4, POSITIVE_BYTES = 3, NEGATIVE_BYTES = 3
-ACHIVEMENT_BYTES = 2, SCORE_RANK_BYTES = 4, RECS_BYTES = 3
-MEDIAN_BYTES = 2 
-DATE_LEN = 1, EST_OWN_LEN = 1, ABOUT_LEN = 3
-LANG_LEN = 2, URL_LEN = 2, NOTES_LEN = 2, TEAM_LEN = 2, MEDIA_LEN = 2,GENRE_LEN = 2
+PEAK_CCU_BYTES = 3
+REQ_AGE_BYTES = 1
+DISC_COUNT_BYTES = 1 
+META_SCORE_BYTES = 1 
+USER_SCORE_BYTES = 1 
+PRICE_BYTES = 3 # tuve que cambiarlo no entraba sino
+POSITIVE_BYTES = 3
+NEGATIVE_BYTES = 3
+ACHIVEMENT_BYTES = 2
+SCORE_RANK_BYTES = 2
+RECS_BYTES = 3
+MEDIAN_BYTES = 3 # tuve que cambiarlo, no entraba sino
+DATE_LEN = 1
+EST_OWN_LEN = 1
+ABOUT_LEN = 3
+LANG_LEN = 2
+URL_LEN = 2
+NOTES_LEN = 2
+TEAM_LEN = 2
+MEDIA_LEN = 2
+GENRE_LEN = 2
+
+    
+def floatToInt(number) -> int:
+    return int(number * 100)
+
+def floatFromInt(number)-> float:
+    return float(number / 100)
+        
+def tryToFloat(string)-> float:
+    try: 
+        return float(string)
+    except Exception:
+        return 0
+def parseDate(string)-> datetime.datetime:
+    try:
+        return datetime.datetime.strptime(string,"%b %d, %Y").strftime("%d-%m-%Y")
+    except Exception:
+        return datetime.datetime.strptime("1 " + string, "%d %b %Y").strftime("%d-%m-%Y")
+            
 
 class GameEntry(EntryInterface):
     def __init__(self, appID, name, releaseDate, estimatedOwners, peakCCU, reqAge, price, discCount, about, supLang, 
@@ -24,32 +57,34 @@ class GameEntry(EntryInterface):
         avgPlaytimeForever, avgPlaytimeTwoWeeks, medianPlaytimeForever, medianPlaytimeTwoWeeks
         price and scoreRank must be passed with float format
         """
+        
         (self.appID, self.name, self.releaseDate, self.estimatedOwners, self.peakCCU, self.reqAge, self.price,
-         self.discCount, self.about, self.supLang, self.audioLang, self.reviews, 
-         self.headerImg, self.website, self.supportUrl, self.supportEmail, self.windows, self.mac, self.linux, self.metaScore, 
-         self.metaUrl,self.userScore, self.positive, self.negative, self.scoreRank, self.achievements, self.recs, self.notes, 
-         self.avgPlaytimeForever, self.avgPlaytimeTwoWeeks,self.medianPlaytimeForever, self.medianPlaytimeTwoWeeks, self.devs, 
-         self.pubs, self.categories, self.genres,
-         self.tags, self.screens, self.movies) = (appID, name, datetime.strptime(releaseDate, "%b %d, %Y").strftime("%d-%m-%Y"), 
-                                                  estimatedOwners, int(peakCCU), int(reqAge), float(price), int(discCount), 
-                                                  about, supLang, audioLang ,reviews, headerImg, website,
-                                                  supportUrl, supportEmail, strToBoolInt(windows), strToBoolInt(mac), strToBoolInt(linux),
-                                                  int(metaScore), metaUrl, int(userScore), int(positive),
-                                                  int(negative), float(scoreRank), int(achievements), int(recs), notes, 
-                                                  int(avgPlaytimeForever), int(avgPlaytimeTwoWeeks),
-                                                  int(medianPlaytimeForever), int(medianPlaytimeTwoWeeks), devs, pubs, categories,
-                                                  genres, tags, screens, movies)
+            self.discCount, self.about, self.supLang, self.audioLang, self.reviews, 
+            self.headerImg, self.website, self.supportUrl, self.supportEmail, self.windows, self.mac, self.linux, self.metaScore, 
+            self.metaUrl,self.userScore, self.positive, self.negative, self.scoreRank, self.achievements, self.recs, self.notes, 
+            self.avgPlaytimeForever, self.avgPlaytimeTwoWeeks,self.medianPlaytimeForever, self.medianPlaytimeTwoWeeks, self.devs, 
+            self.pubs, self.categories, self.genres,
+            self.tags, self.screens, self.movies) = (appID, name, parseDate(releaseDate), 
+                                                    estimatedOwners, int(peakCCU), int(reqAge), tryToFloat(price), int(discCount), 
+                                                    about, supLang, audioLang ,reviews, headerImg, website,
+                                                    supportUrl, supportEmail, strToBoolInt(windows), strToBoolInt(mac), strToBoolInt(linux),
+                                                    int(metaScore), metaUrl, int(userScore), int(positive),
+                                                    int(negative), tryToFloat(scoreRank), int(achievements), int(recs), notes, 
+                                                    int(avgPlaytimeForever), int(avgPlaytimeTwoWeeks),
+                                                    int(medianPlaytimeForever), int(medianPlaytimeTwoWeeks), devs, pubs, categories,
+                                                    genres, tags, screens, movies)
+       
         
     def serialize(self) -> bytes:
         return (serializeAppID(self.appID) + serializeGameName(self.name) + serializeVariableLen(self.releaseDate, DATE_LEN) + 
                 serializeVariableLen(self.estimatedOwners, EST_OWN_LEN) + serializeNumber(self.peakCCU, PEAK_CCU_BYTES) + 
-                serializeNumber(self.reqAge, REQ_AGE_BYTES) + serializeNumber(self.price, PRICE_BYTES) + serializeNumber(self.discCount,DISC_COUNT_BYTES) + 
+                serializeNumber(self.reqAge, REQ_AGE_BYTES) + serializeNumber(floatToInt(self.price), PRICE_BYTES) + serializeNumber(self.discCount,DISC_COUNT_BYTES) + 
                 serializeVariableLen(self.about, ABOUT_LEN) + serializeVariableLen(self.supLang, LANG_LEN) + serializeVariableLen(self.audioLang, LANG_LEN) + 
                 serializeReviewText(self.reviews) + serializeVariableLen(self.headerImg, MEDIA_LEN) +  serializeVariableLen(self.website, URL_LEN) + 
                 serializeVariableLen(self.supportUrl, URL_LEN) + serializeVariableLen(self.supportEmail, URL_LEN) + serializeNumber(self.windows, BOOLEAN_LEN) + 
                 serializeNumber(self.mac, BOOLEAN_LEN) + serializeNumber(self.linux, BOOLEAN_LEN) + serializeNumber(self.metaScore, META_SCORE_BYTES) +  
                 serializeVariableLen(self.metaUrl, URL_LEN) + serializeNumber(self.userScore,USER_SCORE_BYTES) + serializeNumber(self.positive, POSITIVE_BYTES) + 
-                serializeNumber(self.negative,NEGATIVE_BYTES) + serializeNumber(self.scoreRank,SCORE_RANK_BYTES) + serializeNumber(self.achievements,ACHIVEMENT_BYTES)+ 
+                serializeNumber(self.negative,NEGATIVE_BYTES) + serializeNumber(floatToInt(self.scoreRank),SCORE_RANK_BYTES) + serializeNumber(self.achievements,ACHIVEMENT_BYTES)+ 
                 serializeNumber(self.recs,RECS_BYTES) + serializeVariableLen(self.notes, NOTES_LEN) + serializePlaytime(self.avgPlaytimeForever) + 
                 serializePlaytime(self.avgPlaytimeTwoWeeks) + serializeNumber(self.medianPlaytimeForever,MEDIAN_BYTES) + serializeNumber(self.medianPlaytimeTwoWeeks, MEDIAN_BYTES) + 
                 serializeVariableLen(self.devs, TEAM_LEN) +  serializeVariableLen(self.pubs, TEAM_LEN) + serializeVariableLen(self.categories, GENRE_LEN) +  
@@ -78,7 +113,7 @@ class GameEntry(EntryInterface):
                 estimatedOwners, curr = deserializeVariableLen(data,curr, EST_OWN_LEN)
                 peakCCU, curr = deserializeNumber(data,curr, PEAK_CCU_BYTES)
                 reqAge, curr = deserializeNumber(data,curr, REQ_AGE_BYTES)
-                price, curr = deserializeNumber(data,curr, PRICE_BYTES)
+                price, curr = floatFromInt(deserializeNumber(data,curr, PRICE_BYTES))
                 discCount, curr = deserializeNumber(data,curr, DISC_COUNT_BYTES)
                 about, curr = deserializeVariableLen(data,curr, ABOUT_LEN)
                 supLang, curr = deserializeVariableLen(data,curr, LANG_LEN)
