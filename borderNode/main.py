@@ -1,7 +1,11 @@
-import os
 import time
 from threading import Thread
+<<<<<<< HEAD
 from borderNodeCommunication.borderNodeCommunication import BorderNodeCommunication
+=======
+from borderNodeCommunication import BorderNodeCommunication
+from internalCommunication import InternalCommunication
+>>>>>>> 9091c93b0e8d6bd323bd7b8bab0494e42aaf8561
 
 def listenForClient(communication):
     end = False

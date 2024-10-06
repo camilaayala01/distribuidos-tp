@@ -8,7 +8,6 @@ from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.defaultTracker import DefaultTracker
 
-"""For query 5"""
 class JoinerByAppID(ABC):
     def __init__(self, type: str, id: str):
         self._internalComunnication = InternalCommunication(type, id)

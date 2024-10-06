@@ -54,8 +54,8 @@ def serializeVariableLen(field: str, fieldLen: int):
 def deserializeVariableLen(curr: int, data: bytes, fieldLen: int)-> tuple[str, int]:
     field = int.from_bytes(data[curr:curr+fieldLen], 'big')
     curr+=fieldLen
-    appID = data[curr:field+curr].decode()
-    return appID, curr + field
+    string = data[curr:field+curr].decode()
+    return string, curr + field
 
 def serializeReleaseDate(releaseDate: str):
     return releaseDate.encode()
