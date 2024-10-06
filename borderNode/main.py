@@ -1,7 +1,6 @@
 import time
 from threading import Thread
-from borderNodeCommunication import BorderNodeCommunication
-from internalCommunication import InternalCommunication
+from common.borderCommunication import BorderNodeCommunication
 
 def listenForClient(communication):
     end = False
@@ -15,5 +14,9 @@ def listenForClient(communication):
         time.sleep(1)
 
 def main():
+    print("corriendo")
     communication = BorderNodeCommunication()
     Thread(target=listenForClient, args=[communication]).run()
+
+if __name__ == "__main__":
+    main()
