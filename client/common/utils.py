@@ -5,10 +5,10 @@ from entryParsing.gameEntry import GameEntry
 from entryParsing.reviewEntry import ReviewEntry
 
 """ Games storage location. """
-GAMES_STORAGE_FILEPATH = "./datasets/games.csv"
+GAMES_STORAGE_FILEPATH = "./datasets/games-reducido.csv"
 
 """ Reviews storage location. """
-REVIEWS_STORAGE_FILEPATH = "./datasets/dataset.csv"
+REVIEWS_STORAGE_FILEPATH = "./datasets/reviews-acotados.csv"
 
 QUERY_RESPONSES_PATH = "./responses"
 

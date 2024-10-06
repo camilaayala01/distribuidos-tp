@@ -36,6 +36,7 @@ class JoinerOSCount:
         osCount = EntryOSCount.deserialize(data)
         self._sum(osCount)
         self._handleSending()
+        print(f"joiner os received packet. new total {self._total}")
         ch.basic_ack(delivery_tag = method.delivery_tag)
         
     def _sendToNextStep(self, data: bytes):

@@ -9,6 +9,7 @@ class GrouperOSCounts:
         self._internalComunnication = InternalCommunication(os.getenv('GROUP_OS'), os.getenv('NODE_ID'))
 
     def handleMessage(self, ch, method, properties, body):
+        print("grouper received batch")
         header, data = Header.deserialize(body)
         entries = EntryOSSupport.deserialize(data)
         result = self._applyStep(entries)
