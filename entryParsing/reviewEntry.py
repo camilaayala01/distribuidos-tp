@@ -50,4 +50,5 @@ class ReviewEntry(EntryInterface):
         for entry in result:
             shardResult = getShardingKey(entry.appID, nodeCount)
             resultingBatches[shardResult] = resultingBatches[shardResult] + EntryAppIDReviewText(entry.appID, entry.reviewText).serialize()
+        return resultingBatches
 
