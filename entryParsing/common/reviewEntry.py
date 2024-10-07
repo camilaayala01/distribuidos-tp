@@ -15,6 +15,7 @@ class ReviewEntry:
         return (serializeAppID(self.appID) + serializeGameName(self.appName) +
                serializeReviewText(self.reviewText) + serializeNumber(self.reviewScore, SCORE_LEN) 
             + serializeNumber(self.reviewVotes, VOTE_LEN))
+    
     def deserialize(cls, data: bytes) -> list['ReviewEntry']: 
         curr = 0
         entries = []

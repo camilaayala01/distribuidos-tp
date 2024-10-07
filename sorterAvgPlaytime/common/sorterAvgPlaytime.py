@@ -16,7 +16,7 @@ class SorterAvgPlaytime(Sorter):
         nodeID = os.getenv('NODE_ID')
         self._id = int(nodeID)
         super().__init__(id=nodeID, type=os.getenv('SORT_AVG_PT'), headerType=Header, entryType=EntryNameAvgPlaytime, 
-                         topAmount=topAmount, tracker=PacketTracker(nodeCount, nodeID))
+                         topAmount=topAmount, tracker=PacketTracker(int(nodeCount), int(nodeID)))
 
     def getBatchTop(self, batch: list[EntryNameAvgPlaytime]) -> list[EntryNameAvgPlaytime]:
         sortedBatch = self._entryType.sort(batch)

@@ -12,9 +12,9 @@ class FiltererDate(Filterer):
         serializedHeader = header.serialize()
 
         for entry in filteredEntries:
-            serializedHeader += EntryNameDateAvgPlaytime(entry._name, entry._avgPlaytimeForever)
+            serializedHeader += entry.serialize()
 
-        shardingKey = getShardingKey(header.getFragmentNumber(), os.getenv('SORT_AVG_PT_COUNT'))
+        shardingKey = getShardingKey(header.getFragmentNumber(), int(os.getenv('SORT_AVG_PT_COUNT')))
         if header.isEOF():
             for i in range(os.getenv('SORT_AVG_PT_COUNT')):
                 if shardingKey == i:

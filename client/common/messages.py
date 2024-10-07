@@ -10,9 +10,9 @@ from entryParsing.entryOSCount import EntryOSCount
 def receiveQuery1Answer(data):
     response = EntryOSCount.deserialize(data)
     storeResultsQuery1("Total de juegos: " + str(response._total) + 
-    "Total de juegos soportados en Windows: " + str(response._windows) + 
-    "Total de juegos soportados en Linux: " + str(response._linux) +
-    "Total de juegos soportados en Mac: " + str(response._mac))
+    "\nTotal de juegos soportados en Windows: " + str(response._windows) + 
+    "\nTotal de juegos soportados en Linux: " + str(response._linux) +
+    "\nTotal de juegos soportados en Mac: " + str(response._mac))
     
 
 def receiveCSVAnswer(data, includeHeader: bool, entryType, storageFunction):

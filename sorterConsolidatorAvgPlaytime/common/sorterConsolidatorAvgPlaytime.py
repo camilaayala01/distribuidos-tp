@@ -12,7 +12,7 @@ For query 2
 """
 class SorterConsolidatorAvgPlaytime(Sorter):
     def __init__(self, topAmount: int): # for testing purposes
-        priorNodeCount = os.getenv('SORT_AVG_PT_COUNT')
+        priorNodeCount = int(os.getenv('SORT_AVG_PT_COUNT'))
         super().__init__(id=os.getenv('NODE_ID'), type=os.getenv('CONS_SORT_AVG_PT'), headerType=HeaderWithSender, entryType=EntryNameAvgPlaytime, 
                          topAmount=topAmount, tracker=MultiTracker(priorNodeCount))
 

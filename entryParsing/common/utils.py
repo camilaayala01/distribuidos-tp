@@ -34,6 +34,7 @@ def strToBoolInt(string: str) -> int:
 
 
 def getShardingKey(id, nodeCount) -> int:
+    print(f"id: {id}, nodeCount: {nodeCount}")
     return id % nodeCount
 
 def maxDataBytes(headerType: type) -> int:

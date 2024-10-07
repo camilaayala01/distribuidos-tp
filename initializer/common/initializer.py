@@ -39,6 +39,7 @@ class Initializer:
             ch.basic_ack(delivery_tag = method.delivery_tag)
             
         elif header.isReviewsTable():
+
             reviewEntries = ReviewEntry.deserialize(data)
             positiveReviewEntries, negativeReviewEntries = self.separatePositiveAndNegative(reviewEntries)
 
@@ -48,8 +49,9 @@ class Initializer:
 
             #Query 4
             nodeCount = int(os.getenv('JOIN_ENG_NEG_REV_COUNT'))
-            shardedResults = ReviewEntry.shardBatch(nodeCount, negativeReviewEntries)
 
+            shardedResults = ReviewEntry.shardBatch(nodeCount, negativeReviewEntries)
+            print("hay resultados shardeados")
             for i in range(nodeCount):
                 self._internalCommunication.sendToActionNegativeReviewsEnglishJoiner(str(i), serializedHeader + shardedResults[i])
  

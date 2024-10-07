@@ -1,4 +1,4 @@
-from .common.sorterConsolidatorAvgPlaytime import SorterConsolidatorAvgPlaytime
+from common.sorterConsolidatorAvgPlaytime import SorterConsolidatorAvgPlaytime
 
 # should get from env file
 TOP_AMOUNT = 10
