@@ -68,6 +68,7 @@ class Sorter(ABC):
         
     def _handleSending(self):
         if not self._packetTracker.isDone():
+            print("not done gordi")
             return
         packets = self._serializeAndFragment()
         for pack in packets:
@@ -80,6 +81,7 @@ class Sorter(ABC):
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
         self._packetTracker.update(header)
+        print(batch)
         entries = self._entryType.deserialize(batch)
         self.mergeKeepTop(entries)
         self._handleSending()

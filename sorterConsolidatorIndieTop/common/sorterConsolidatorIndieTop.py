@@ -21,7 +21,7 @@ class SorterConsolidatorIndieTop(Sorter):
         return sortedBatch[:self._topAmount]
     
     def _serializeAndFragment(self):
-        serializeAndFragmentWithQueryNumber(maxDataBytes(), self._partialTop, 3)
+        return serializeAndFragmentWithQueryNumber(maxDataBytes(self._headerType), self._partialTop, 3)
         
     def _sendToNextStep(self, data: bytes):
         self._internalCommunication.sendToDispatcher(data)

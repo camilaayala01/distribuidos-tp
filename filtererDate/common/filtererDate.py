@@ -1,4 +1,5 @@
 from entryParsing.entryNameDateAvgPlaytime import EntryNameDateAvgPlaytime
+from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
 from filterer.filterer import Filterer
 from entryParsing.common.header import Header
 from entryParsing.common.utils import getShardingKey
@@ -12,11 +13,11 @@ class FiltererDate(Filterer):
         serializedHeader = header.serialize()
 
         for entry in filteredEntries:
-            serializedHeader += entry.serialize()
+            serializedHeader += EntryNameAvgPlaytime(entry._name, entry._avgPlaytimeForever).serialize()
 
         shardingKey = getShardingKey(header.getFragmentNumber(), int(os.getenv('SORT_AVG_PT_COUNT')))
         if header.isEOF():
-            for i in range(os.getenv('SORT_AVG_PT_COUNT')):
+            for i in range(int(os.getenv('SORT_AVG_PT_COUNT'))):
                 if shardingKey == i:
                     self._internalCommunication.sendToAvgPlaytimeSorter(str(i), serializedHeader)
                     continue

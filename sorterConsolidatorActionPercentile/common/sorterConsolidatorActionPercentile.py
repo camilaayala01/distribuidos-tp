@@ -42,7 +42,7 @@ class SorterConsolidatorActionPercentile(Sorter):
     def _serializeAndFragment(self):
         self._filterByPercentile()
         entriesWithRemoved = self._removeCount(self._partialTop)
-        serializeAndFragmentWithQueryNumber(maxDataBytes(), entriesWithRemoved, 5)
+        return serializeAndFragmentWithQueryNumber(maxDataBytes(self._headerType), entriesWithRemoved, 5)
 
     def getBatchTop(self, batch: list[EntryAppIDNameReviewCount]) -> list[EntryAppIDNameReviewCount]:
         return self._entryType.sort(batch, False)

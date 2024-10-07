@@ -14,7 +14,6 @@ def receiveQuery1Answer(data):
     "\nTotal de juegos soportados en Linux: " + str(response._linux) +
     "\nTotal de juegos soportados en Mac: " + str(response._mac))
     
-
 def receiveCSVAnswer(data, includeHeader: bool, entryType, storageFunction):
     responses = entryType.deserialize(data)
     csvData = ""

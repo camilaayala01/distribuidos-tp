@@ -21,7 +21,7 @@ class SorterConsolidatorAvgPlaytime(Sorter):
         return sortedBatch[:self._topAmount]
     
     def _serializeAndFragment(self):
-        serializeAndFragmentWithQueryNumber(maxDataBytes(), self._partialTop, 2)
+        return serializeAndFragmentWithQueryNumber(maxDataBytes(self._headerType), self._partialTop, 2)
     
     def _sendToNextStep(self, data: bytes):
-        self._internalCommunication.sendToAvgPlaytimeSorterConsolidator(data)
+        self._internalCommunication.sendToDispatcher(data)

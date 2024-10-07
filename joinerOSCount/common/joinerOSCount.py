@@ -40,7 +40,6 @@ class JoinerOSCount:
         ch.basic_ack(delivery_tag = method.delivery_tag)
         
     def _sendToNextStep(self, data: bytes):
-        print("holi mando algo")
         self._internalCommunication.sendToDispatcher(data)
 
     def _handleSending(self):
