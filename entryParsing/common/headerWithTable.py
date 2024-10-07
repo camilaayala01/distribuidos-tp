@@ -1,7 +1,7 @@
 from entryParsing.common.table import Table
-from entryParsing.common.fieldLen import TABLE_LEN, BOOLEAN_LEN
-from .fieldParsing import deserializeBoolean, deserializeCount, deserializeTable, serializeTable
-from .header import Header
+from entryParsing.common.fieldLen import TABLE_LEN
+from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, deserializeTable, serializeTable
+from entryParsing.common.header import Header
 
 class HeaderWithTable(Header):
     def __init__(self, table: Table, fragment: int, eof: bool):

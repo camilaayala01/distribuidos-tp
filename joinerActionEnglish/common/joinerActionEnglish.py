@@ -53,5 +53,5 @@ class JoinerActionNegativeReviewsEnglish(JoinerByAppID):
         return self._joinedEntries
     
     def _sendToNextStep(self, msg: bytes):
-        self._internalComunnication.sendToEnglishFilter(msg)
+        self._internalCommunication.sendToEnglishFilter(msg)
 

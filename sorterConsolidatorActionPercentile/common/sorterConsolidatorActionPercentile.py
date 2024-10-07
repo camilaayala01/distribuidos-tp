@@ -57,4 +57,4 @@ class SorterConsolidatorActionPercentile(Sorter):
         self._partialTop = newOrderedList
 
     def _sendToNextStep(self, data: bytes):
-        self._internalComunnication.sendToDispatcher(data)
+        self._internalCommunication.sendToDispatcher(data)

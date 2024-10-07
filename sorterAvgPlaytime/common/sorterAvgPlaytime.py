@@ -26,4 +26,4 @@ class SorterAvgPlaytime(Sorter):
         serializeAndFragmentWithSender(maxDataBytes(), self._partialTop, self._id)
     
     def _sendToNextStep(self, data: bytes):
-        self._internalComunnication.sendToAvgPlaytimeSorterConsolidator(data)
+        self._internalCommunication.sendToAvgPlaytimeSorterConsolidator(data)

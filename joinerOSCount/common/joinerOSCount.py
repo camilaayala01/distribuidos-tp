@@ -11,7 +11,7 @@ Query 1
 """
 class JoinerOSCount:
     def __init__(self):
-        self._internalComunnication = InternalCommunication(os.getenv('JOIN_OS'))
+        self._internalCommunication = InternalCommunication(os.getenv('JOIN_OS'))
         self._packetTracker = DefaultTracker()
         self._windows = 0
         self._mac = 0
@@ -26,21 +26,22 @@ class JoinerOSCount:
         self._total = 0
 
     def execute(self):
-        self._internalComunnication.defineMessageHandler(self.handleMessage())
+        self._internalCommunication.defineMessageHandler(self.handleMessage)
 
     def handleMessage(self, ch, method, properties, body):
         header, data = Header.deserialize(body)
         if self._packetTracker.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
+        self._packetTracker.update(header)
         osCount = EntryOSCount.deserialize(data)
         self._sum(osCount)
         self._handleSending()
-        print(f"joiner os received packet. new total {self._total}")
         ch.basic_ack(delivery_tag = method.delivery_tag)
         
     def _sendToNextStep(self, data: bytes):
-        self._internalComunnication.sendToDispatcher(data)
+        print("holi mando algo")
+        self._internalCommunication.sendToDispatcher(data)
 
     def _handleSending(self):
         if not self._packetTracker.isDone():

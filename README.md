@@ -20,14 +20,18 @@ pip install --user kaggle
 mkdir ~/.kaggle
 cd ~/.kaggle
 touch kaggle.json
-echo "{"username":"camilaayala01","key":"1a21e47d2d693e4ab96853cad6149bd3"}" > kaggle.js
+echo "{"username":"camilaayala01","key":"1a21e47d2d693e4ab96853cad6149bd3"}" > kaggle.json
 kaggle datasets download -d fronkongames/steam-games-dataset
 kaggle datasets download -d andrewmvd/steam-reviews
 mkdir distribuidos
-mv ./steam-games-dataset.zip ./distribuidos && mv ./steam-reviews.zip ./distribuidos
+mv ./steam-games-dataset.zip ./distribuidos 
+mv ./steam-reviews.zip ./distribuidos
 cd distribuidos
-unzip steam-games-dataset.zip && unzip steam-reviews.zip
-rm games.json && rm steam-games-dataset.zip && rm steam-reviews.zip
+unzip steam-games-dataset.zip 
+unzip steam-reviews.zip
+rm games.json 
+rm steam-games-dataset.zip 
+rm steam-reviews.zip
 
 ```
 # Reducir datasets

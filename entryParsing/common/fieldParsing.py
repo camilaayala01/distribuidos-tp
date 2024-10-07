@@ -1,8 +1,7 @@
-from .table import Table
-from .utils import boolToInt, intToBool
 import struct
+from entryParsing.common.table import Table
+from entryParsing.common.utils import boolToInt, intToBool
 from entryParsing.common import fieldLen
-
 
 # 0 for games, 1 for reviews
 def serializeTable(table: Table): 
@@ -10,6 +9,7 @@ def serializeTable(table: Table):
 
 def deserializeTable(curr: int, data: bytes)-> tuple[Table, int]:
     tableNum = int.from_bytes(data[curr:curr+fieldLen.TABLE_LEN], 'big')
+    print("table num is: ", tableNum)
     return Table(tableNum), curr + fieldLen.TABLE_LEN
 
 def serializeGameName(field:str):
@@ -74,7 +74,7 @@ def deserializeSenderID(curr: int, data: bytes) -> tuple[int, int]:
     senderID = int.from_bytes(data[curr:curr+fieldLen.SENDER_ID_LEN], 'big')
     return senderID, curr + fieldLen.SENDER_ID_LEN
 
-def serializeBoolean(os: bool):
+def serializeBoolean(os: bool) -> bytes:
     return boolToInt(os).to_bytes(fieldLen.BOOLEAN_LEN,'big')
 
 def deserializeBoolean(curr: int, data: bytes)-> tuple[bool, int]:
@@ -107,12 +107,12 @@ def deserializeQueryNumber(curr: int, data: bytes)-> tuple[int, int]:
 def serializeNumber(number, size: int) -> bytes:
     return number.to_bytes(size,'big')
 
-def deserializeNumber(data: bytes, curr: int, numberLen: int):
+def deserializeNumber(curr: int, data: bytes, numberLen: int):
     number = int.from_bytes(data[curr:curr+numberLen], 'big')
     return number, curr + numberLen
 
 def serializeSignedInt(number: int):
     return struct.pack('b', number)
 
-def deserializeSignedInt(data: bytes, curr: int) -> int:
-    return struct.unpack('b', data)[0], curr + 1
+def deserializeSignedInt(curr: int, data: bytes) -> int:
+    return struct.unpack('b', data[curr:curr+1])[0], curr + 1

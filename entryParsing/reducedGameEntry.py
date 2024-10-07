@@ -16,12 +16,12 @@ class ReducedGameEntry:
     def deserialize(cls, data: bytes)-> list['ReducedGameEntry']:
         curr = 0
         entries = []
-        # avgPlaytimeForever genres
+        
         while len(data) > curr:
             try:
-                appID, curr = fieldParsing.deserializeAppID(data, curr)
-                name, curr = fieldParsing.deserializeGameName(data, curr)
-                releaseDate, curr = fieldParsing.deserializeVariableLen(data,curr, fieldLen.DATE_LEN)
+                appID, curr = fieldParsing.deserializeAppID(curr, data)
+                name, curr = fieldParsing.deserializeGameName(curr, data)
+                releaseDate, curr = fieldParsing.deserializeVariableLen(curr, data, fieldLen.DATE_LEN)
                 
                 # skip unused variable len fields
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.EST_OWN_LEN)
@@ -52,7 +52,7 @@ class ReducedGameEntry:
                 curr = nextCurr
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.NOTES_LEN)
     
-                avgPlaytimeForever, curr = fieldParsing.deserializePlaytime(data,curr)
+                avgPlaytimeForever, curr = fieldParsing.deserializePlaytime(curr, data)
 
                 curr = fieldParsing.skipPlaytime(curr)
                 curr += fieldLen.MEDIAN_BYTES * 2
@@ -60,7 +60,7 @@ class ReducedGameEntry:
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.TEAM_LEN)
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.GENRE_LEN)
 
-                genres, curr = fieldParsing.deserializeVariableLen(data,curr, fieldLen.GENRE_LEN)
+                genres, curr = fieldParsing.deserializeVariableLen(curr, data, fieldLen.GENRE_LEN)
 
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.GENRE_LEN)
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.MEDIA_LEN)

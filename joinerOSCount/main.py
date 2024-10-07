@@ -1,4 +1,4 @@
-from .common.joinerOSCount import JoinerOSCount
+from common.joinerOSCount import JoinerOSCount
 
 def main():
     joiner = JoinerOSCount()

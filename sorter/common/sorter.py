@@ -7,7 +7,7 @@ from packetTracker.packetTracker import PacketTracker
 
 class Sorter(ABC):
     def __init__(self, id: str, type: str, headerType: type, entryType: type, topAmount: int, tracker: PacketTracker):
-        self._internalComunnication = InternalCommunication(type, id)
+        self._internalCommunication = InternalCommunication(type, id)
         self._entryType = entryType
         self._headerType = headerType
         self._partialTop = []
@@ -15,7 +15,7 @@ class Sorter(ABC):
         self._packetTracker = tracker
 
     def execute(self):
-        self._internalComunnication.defineMessageHandler(self.handleMessage())
+        self._internalCommunication.defineMessageHandler(self.handleMessage)
 
     @abstractmethod
     def getBatchTop(self, batch: list[EntrySorterTopFinder]) -> list[EntrySorterTopFinder]:

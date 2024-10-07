@@ -15,7 +15,7 @@ class JoinerConsolidator(ABC):
         self._currFragment = 1
 
     def execute(self):
-        self._internalComunnication.defineMessageHandler(self.handleMessage())
+        self._internalCommunication.defineMessageHandler(self.handleMessage)
         
     def reset(self):
         self._tracker.reset()

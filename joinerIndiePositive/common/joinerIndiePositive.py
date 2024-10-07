@@ -13,7 +13,7 @@ class JoinerIndiePositiveReviews(JoinerNameCountByAppID):
         super().__init__(type=os.getenv('JOIN_INDIE_POS_REV'), id=os.getenv('NODE_ID'))
 
     def _sendToNextStep(self, msg: bytes):
-        self._internalComunnication.sendToIndiePositiveReviewsConsolidator(msg)
+        self._internalCommunication.sendToIndiePositiveReviewsConsolidator(msg)
 
     def entriesToSend(self)-> list[EntryNameReviewCount]:
         return self._joinedEntries.values()

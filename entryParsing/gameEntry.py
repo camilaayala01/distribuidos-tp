@@ -59,8 +59,8 @@ class GameEntry():
                 serializeNumber(self.reqAge, fieldLen.REQ_AGE_BYTES) + serializeNumber(floatToInt(self.price), fieldLen.PRICE_BYTES) + serializeNumber(self.discCount, fieldLen.DISC_COUNT_BYTES) + 
                 serializeVariableLen(self.about, fieldLen.ABOUT_LEN) + serializeVariableLen(self.supLang, fieldLen.LANG_LEN) + serializeVariableLen(self.audioLang, fieldLen.LANG_LEN) + 
                 serializeReviewText(self.reviews) + serializeVariableLen(self.headerImg, fieldLen.MEDIA_LEN) +  serializeVariableLen(self.website, fieldLen.URL_LEN) + 
-                serializeVariableLen(self.supportUrl, fieldLen.URL_LEN) + serializeVariableLen(self.supportEmail, fieldLen.URL_LEN) + serializeBoolean(self.windows) + 
-                serializeBoolean(self.mac) + serializeBoolean(self.linux) + serializeNumber(self.metaScore, fieldLen.META_SCORE_BYTES) +  
+                serializeVariableLen(self.supportUrl, fieldLen.URL_LEN) + serializeVariableLen(self.supportEmail, fieldLen.URL_LEN) + serializeNumber(self.windows, fieldLen.BOOLEAN_LEN) + 
+                serializeNumber(self.mac, fieldLen.BOOLEAN_LEN) + serializeNumber(self.linux, fieldLen.BOOLEAN_LEN) + serializeNumber(self.metaScore, fieldLen.META_SCORE_BYTES) +  
                 serializeVariableLen(self.metaUrl, fieldLen.URL_LEN) + serializeNumber(self.userScore, fieldLen.USER_SCORE_BYTES) + serializeNumber(self.positive, fieldLen.POSITIVE_BYTES) + 
                 serializeNumber(self.negative, fieldLen.NEGATIVE_BYTES) + serializeNumber(floatToInt(self.scoreRank), fieldLen.SCORE_RANK_BYTES) + serializeNumber(self.achievements, fieldLen.ACHIVEMENT_BYTES)+ 
                 serializeNumber(self.recs, fieldLen.RECS_BYTES) + serializeVariableLen(self.notes, fieldLen.NOTES_LEN) + serializePlaytime(self.avgPlaytimeForever) + 

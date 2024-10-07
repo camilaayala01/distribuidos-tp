@@ -6,7 +6,8 @@ from internalCommunication.internalCommunication import InternalCommunication
 
 class GrouperOSCounts:
     def __init__(self): 
-        self._internalComunnication = InternalCommunication(os.getenv('GROUP_OS'), os.getenv('NODE_ID'))
+        print(os.getenv('GROUP_OS'))
+        self._internalCommunication = InternalCommunication(os.getenv('GROUP_OS'), os.getenv('NODE_ID'))
 
     def handleMessage(self, ch, method, properties, body):
         print("grouper received batch")
@@ -14,7 +15,7 @@ class GrouperOSCounts:
         entries = EntryOSSupport.deserialize(data)
         result = self._applyStep(entries)
         msg = header.serialize() + result.serialize()
-        self._internalComunnication.sendToOSCountsJoiner(msg)
+        self._internalCommunication.sendToOSCountsJoiner(msg)
         ch.basic_ack(delivery_tag = method.delivery_tag)
 
     def _applyStep(self, entries: list['EntryOSSupport']) -> EntryOSCount:
@@ -36,7 +37,7 @@ class GrouperOSCounts:
         return EntryOSCount(counts[0], counts[1], counts[2], counts[3])
     
     def execute(self):
-        self._internalComunnication.defineMessageHandler(self.handleMessage)
+        self._internalCommunication.defineMessageHandler(self.handleMessage)
     
         
 

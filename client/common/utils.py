@@ -1,6 +1,5 @@
 import csv
 
-from entryParsing.entryOSCount import EntryOSCount
 from entryParsing.gameEntry import GameEntry
 from entryParsing.reviewEntry import ReviewEntry
 
@@ -8,13 +7,14 @@ from entryParsing.reviewEntry import ReviewEntry
 GAMES_STORAGE_FILEPATH = "./datasets/games-reducido.csv"
 
 """ Reviews storage location. """
-REVIEWS_STORAGE_FILEPATH = "./datasets/reviews-acotados.csv"
+REVIEWS_STORAGE_FILEPATH = "./datasets/reviews-reducido.csv"
 
 QUERY_RESPONSES_PATH = "./responses"
 
 
 def storeResultsQuery1(response: str) -> None:
     filepath = QUERY_RESPONSES_PATH + "/query1.txt"
+    print(response)
     storeResultsQuery(response, filepath)
 
 def storeResultsQuery2(response: str) -> None:
@@ -50,7 +50,6 @@ def loadGames() -> list[GameEntry]:
         next(reader)  # Skip header
         for line_number, row in enumerate(reader, start=2):
             try:
-                #if line_number not in [94, 147, 538, 1247, 1466, 1593, 1930, 1992, 2074, 2466]:
                 yield GameEntry(row[0], row[1], row[2], row[3], row[4], row[5],
                                 row[6], row[7], row[9], row[10], row[11], row[12],
                                 row[13], row[14], row[15], row[16], row[17], row[18],
@@ -59,11 +58,8 @@ def loadGames() -> list[GameEntry]:
                                 row[31], row[32], row[33], row[34], row[35], row[36],
                                 row[37], row[38], row[39])
     
-            except StopIteration:
-                return None
             except Exception as e:
                 pass
-
             
 
 """
@@ -78,6 +74,7 @@ def loadReviews() -> list[ReviewEntry]:
             try:
                 yield ReviewEntry(row[0], row[1], row[2], row[3], row[4])
             except StopIteration:
+                print("leaving")
                 return None
             except Exception as e:
                 pass

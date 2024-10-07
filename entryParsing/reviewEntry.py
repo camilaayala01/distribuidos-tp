@@ -1,7 +1,7 @@
 from entryParsing.common import fieldParsing
 from entryParsing.entry import EntryInterface
 from entryParsing.common.utils import getShardingKey
-from ..entryParsing.entryAppIDReviewText import EntryAppIDReviewText
+from entryParsing.entryAppIDReviewText import EntryAppIDReviewText
 
 SCORE_LEN = 3 
 VOTE_LEN = 1
@@ -25,12 +25,6 @@ class ReviewEntry(EntryInterface):
     def isPositive(self) -> bool:
         return True if self.reviewScore == 1 else False 
 
-    def serializeForQuery3And5(self) -> bytes:
-        return fieldParsing.serializeAppID(self.appID)
-    
-    def serializeForQuery4(self) -> bytes:
-        return fieldParsing.serializeAppID(self.appID) + fieldParsing.serializeReviewText(self.reviewText)
-
     @classmethod
     def deserialize(cls, data: bytes) -> list['ReviewEntry']: 
         curr = 0
@@ -42,7 +36,7 @@ class ReviewEntry(EntryInterface):
                 appName, curr = fieldParsing.deserializeGameName(curr, data)
                 reviewText, curr = fieldParsing.deserializeReviewText(curr, data)
                 reviewScore, curr = fieldParsing.deserializeSignedInt(curr, data)
-                reviewVotes, curr = fieldParsing.deserializeNumber(curr,data, VOTE_LEN) 
+                reviewVotes, curr = fieldParsing.deserializeNumber(curr, data, VOTE_LEN) 
 
                 entries.append(ReviewEntry(appID, appName,reviewText, reviewScore, reviewVotes))
                 

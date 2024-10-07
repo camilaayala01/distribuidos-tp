@@ -1,4 +1,4 @@
-from .common.initializer import Initializer
+from common.initializer import Initializer
 
 def main():
     initializer = Initializer()

@@ -8,8 +8,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
+      - ~/.kaggle/distribuidos:/datasets
     networks: 
       - sa_net
 
@@ -47,7 +47,6 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-      - NODE_ID=0
     env_file:
       - .env
     volumes:
@@ -62,12 +61,12 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-      - NODE_ID=0
     env_file:
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
+      - ./packetTracker:/packetTracker
     networks: 
       - sa_net
 

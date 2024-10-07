@@ -1,5 +1,5 @@
 from entryParsing.common.fieldLen import BOOLEAN_LEN, COUNT_LEN
-from .fieldParsing import deserializeBoolean, deserializeCount, serializeBoolean, serializeCount
+from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, serializeBoolean, serializeCount
 
 class Header:
     def __init__(self, fragment: int, eof: bool):

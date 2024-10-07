@@ -24,4 +24,4 @@ class SorterConsolidatorIndieTop(Sorter):
         serializeAndFragmentWithQueryNumber(maxDataBytes(), self._partialTop, 3)
         
     def _sendToNextStep(self, data: bytes):
-        self._internalComunnication.sendToDispatcher(data)
+        self._internalCommunication.sendToDispatcher(data)
