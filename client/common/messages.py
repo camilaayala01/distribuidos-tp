@@ -1,39 +1,53 @@
-from client.common.utils import loadGames, loadReviews
-from entryParsing.common.headerWithTable import HeaderWithTable
-from entryParsing.common.table import Table
+from common.utils import storeResultsQuery1, storeResultsQuery2, storeResultsQuery3, storeResultsQuery4, storeResultsQuery5
+from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
+from entryParsing.entryAppIDName import EntryAppIDName
+from entryParsing.entryName import EntryName
+from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
+from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from entryParsing.entryOSCount import EntryOSCount
-GAME_BATCH_SIZE = 5
-REVIEW_BATCH_SIZE = 100
 
-def buildGameTableMessage(fragment: int):
-    return buildMessage(fragment, loadGames, GAME_BATCH_SIZE, Table.GAMES)
-
-def buildReviewTableMessage(fragment: int):
-    return buildMessage(fragment, loadReviews, REVIEW_BATCH_SIZE, Table.REVIEWS)
-
-def buildMessage(fragment: int, generator, batchSize: int, table: Table):
-    eof = False
-    payload: bytes = bytes()
-    for i in range( batchSize):
-        try:
-            entry = next(generator)
-            payload += entry.serialize()
-        except StopIteration:
-            eof = True
-            break
-
-    header = HeaderWithTable(table, fragment, eof)
-    return header + payload, eof
-
-
-def sendTable(socket, msgBuilder):
-    eofTable = False
-    fragment = 1
-    while not eofTable:
-        msg, eofTable = msgBuilder(fragment)
-        fragment += 1
-        socket.send(msg)
 
 def receiveQuery1Answer(data):
     response = EntryOSCount.deserialize(data)
+    storeResultsQuery1("Total de juegos: " + str(response._total) + 
+    "Total de juegos soportados en Windows: " + str(response._windows) + 
+    "Total de juegos soportados en Linux: " + str(response._linux) +
+    "Total de juegos soportados en Mac: " + str(response._mac))
     
+
+def receiveCSVAnswer(data, includeHeader: bool, entryType, storageFunction):
+    responses = entryType.deserialize(data)
+    csvData = ""
+    if includeHeader:
+        csvData += entryType.header()
+    for response in responses:
+        csvData += response.csv()
+    storageFunction(responses)
+
+def receiveQuery2Answer(data, includeHeader: bool):
+    receiveCSVAnswer(data, includeHeader, entryType=EntryNameAvgPlaytime, storageFunction=storeResultsQuery2)
+
+def receiveQuery3Answer(data, includeHeader: bool):
+    receiveCSVAnswer(data, includeHeader, entryType=EntryNameReviewCount, storageFunction=storeResultsQuery3)
+
+def receiveQuery4Answer(data, includeHeader: bool):
+    receiveCSVAnswer(data, includeHeader, entryType=EntryName, storageFunction=storeResultsQuery4)
+    
+def receiveQuery4Answer(data, includeHeader: bool):
+    receiveCSVAnswer(data, includeHeader, entryType=EntryName, storageFunction=storeResultsQuery4)
+
+def receiveQuery5Answer(data, includeHeader: bool):
+    receiveCSVAnswer(data, includeHeader, entryType=EntryAppIDName, storageFunction=storeResultsQuery5)
+
+def processResponse(data: bytes) -> bool:
+    header, data = HeaderWithQueryNumber.deserialize(data)
+    match header._queryNumber:
+        case 1: receiveQuery1Answer(data)
+        case 2: receiveQuery2Answer(data, header.getFragmentNumber() == 1)
+        case 3: receiveQuery3Answer(data, header.getFragmentNumber() == 1)
+        case 4: receiveQuery4Answer(data, header.getFragmentNumber() == 1)
+        case 5: receiveQuery5Answer(data, header.getFragmentNumber() == 1)
+        case default:
+            raise(Exception("invalid query num"))
+        
+    return header._eof

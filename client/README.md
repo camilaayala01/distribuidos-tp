@@ -43,7 +43,7 @@ len Estimated owners: 1
 Estimated owners: 21
 Peak CCU: 3
 Required age: 1
-Price: 4
+Price: 3
 DiscountDLC count: 1
 len About the game: 3
 About the game: 131699
@@ -68,15 +68,15 @@ Metacritic url: 142
 User score: 1
 Positive: 3
 Negative: 3
-Score rank: 4
+Score rank: 2
 Achievements: 2
 Recommendations: 3
 len Notes: 2
 Notes: 2028
 Average playtime forever: 3
 Average playtime two weeks: 3
-Median playtime forever: 2
-Median playtime two weeks: 2
+Median playtime forever: 3
+Median playtime two weeks: 3
 len Developers: 2
 Developers: 584
 len Publishers: 2
@@ -92,4 +92,16 @@ Screenshots: 22691
 len Movies: 2
 Movies: 3687
 
-==> BIGEST POSSIBLE ENTRY LENGTH IS 168482 BYTES
+
+BIGGEST ENTRY IN GAME TABLE IS 259397
+BIGGEST ENTRY IN REVIEW TABLE IS 16875
+TODO:
+look for biggest entry - DONE
+check eof is set when file ends- DONE
+create smaller  - NOT 
+define responses types and how to write them in files
+check game table reading (number of columns) - DONE
+
+check performance and consider header overhead in initializer
+cleanse dataset of big entries
+find out send packet 

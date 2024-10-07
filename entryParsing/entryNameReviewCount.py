@@ -21,6 +21,13 @@ class EntryNameReviewCount(EntrySorterTopFinder):
         reviewCountBytes = serializeCount(self._reviewCount)
 
         return nameBytes + reviewCountBytes  
+    
+    @classmethod
+    def header(cls):
+        return("name, reviewCount\n")
+    
+    def csv(self):
+        return(f'{self._name}, {self._reviewCount}\n')
 
     def __str__(self):
         return f"EntryNameReviewCount(name={self._name}, reviewCount={self._reviewCount})"

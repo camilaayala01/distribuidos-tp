@@ -1,4 +1,4 @@
-from grouperOSCounts.common.grouperOSCounts import GrouperOSCounts
+from common.grouperOSCounts import GrouperOSCounts
 
 def main():
     grouper = GrouperOSCounts()

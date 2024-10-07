@@ -1,7 +1,7 @@
 import os
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
-from joinerConsolidator.joinerConsolidator import JoinerConsolidator
+from joiner.common.joinerConsolidator import JoinerConsolidator
 
 class JoinerIndiePositiveConsolidator(JoinerConsolidator):
     

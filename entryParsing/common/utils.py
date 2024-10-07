@@ -1,7 +1,8 @@
 import math
+from entryParsing.common.table import Table
 from entryParsing.entry import EntryInterface
-
-MAX_PACKET_SIZE = 4096
+import time
+MAX_PACKET_SIZE = 8192
 
 def boolToInt(boolean: bool) -> int:
     match boolean:
@@ -25,7 +26,10 @@ def strToBoolInt(string: str) -> int:
             return 1
         case "False":
             return 0
+        case "":
+            return 0
         case _:
+            print(string)
             raise(Exception("Boolean field could not be converted"))
 
 
@@ -40,7 +44,7 @@ def amountOfPacketsNeeded(headerType: type, byteCount: int) -> int:
 
 """returns serialized data"""
 def serializeAndFragmentWithSender(maxDataBytes: int, data: list[EntryInterface], id: int)-> list[bytes]: # recv max data bytes for testing purposes
-    from .headerWithSender import HeaderWithSender
+    from entryParsing.common.headerWithSender import HeaderWithSender
     fragment = 1
     packets = []
     currPacket = bytes()
@@ -60,7 +64,7 @@ def serializeAndFragmentWithSender(maxDataBytes: int, data: list[EntryInterface]
 
 # same as fragmenting with sender, but couldnt modularize
 def serializeAndFragmentWithQueryNumber(maxDataBytes: int, data: list[EntryInterface], queryNumber: int)-> list[bytes]:
-    from .headerWithQueryNumber import HeaderWithQueryNumber
+    from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
     fragment = 1
     packets = []
     currPacket = bytes()
@@ -78,3 +82,28 @@ def serializeAndFragmentWithQueryNumber(maxDataBytes: int, data: list[EntryInter
     # will have to yield once we have memory restrictions
     packets.append(HeaderWithQueryNumber(fragment, True, queryNumber).serialize() + currPacket)
     return packets
+
+# same as fragmenting with sender, but couldnt modularize
+def serializeAndFragmentWithTable(socket, maxDataBytes: int, generatorFunction, table: Table):
+    from entryParsing.common.headerWithTable import HeaderWithTable
+    fragment = 1
+    currPacket = bytes()
+    generator = generatorFunction()
+    
+    try:
+        while True:
+            entry = next(generator)
+            entryBytes = entry.serialize()
+            if len(currPacket) + len(entryBytes) <= maxDataBytes:
+                currPacket += entryBytes
+            else:
+                headerBytes = HeaderWithTable(table, fragment, False).serialize()
+                fragment += 1
+                socket.send(headerBytes + currPacket)
+                time.sleep(0.1)
+                currPacket = entryBytes
+    except StopIteration:
+        print("sending eof")
+        print(f' last fragment number is {fragment}')
+        packet = HeaderWithTable(table, fragment, True).serialize() + currPacket
+        socket.send(packet)

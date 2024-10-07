@@ -17,8 +17,8 @@ class Filterer(ABC):
         header, data = self._headerType.deserialize(body)
         entries = self._entryType.deserialize(data)
         filteredEntries = self.filterBatch(entries)
-
         self._sendToNext(header, filteredEntries)
+        ch.basic_ack(delivery_tag = method.delivery_tag)
 
     @classmethod
     @abstractmethod

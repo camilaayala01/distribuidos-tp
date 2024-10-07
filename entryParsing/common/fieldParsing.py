@@ -1,55 +1,52 @@
-from .table import Table
-from .utils import boolToInt, intToBool
-
-COUNT_LEN = 3
-AVG_PLAYTIME_LEN = 3
-BOOLEAN_LEN = 1
-TOP_BYTES_LEN = 1
-SENDER_ID_LEN = 1
-QUERY_NUMBER_LEN = 1
-APP_ID_LEN = 1
-NAME_LEN = 1
-TABLE_LEN = 1
-TEXT_LEN = 2
-GENRE_LEN = 1
-RELEASE_DATE_LEN = 10
+import struct
+from entryParsing.common.table import Table
+from entryParsing.common.utils import boolToInt, intToBool
+from entryParsing.common import fieldLen
 
 # 0 for games, 1 for reviews
 def serializeTable(table: Table): 
-    return table.value.to_bytes(TABLE_LEN,'big')
+    return table.value.to_bytes(fieldLen.TABLE_LEN,'big')
 
 def deserializeTable(curr: int, data: bytes)-> tuple[Table, int]:
-    tableNum = int.from_bytes(data[curr:curr+TABLE_LEN], 'big')
-    return Table(tableNum), curr + TABLE_LEN
+    tableNum = int.from_bytes(data[curr:curr+fieldLen.TABLE_LEN], 'big')
+    print("table num is: ", tableNum)
+    return Table(tableNum), curr + fieldLen.TABLE_LEN
 
 def serializeGameName(field:str):
-    return serializeVariableLen(field, NAME_LEN)
+    return serializeVariableLen(field, fieldLen.NAME_LEN)
 
 def deserializeGameName(curr: int, data: bytes)-> tuple[str, int]:
-    return deserializeVariableLen(curr, data, NAME_LEN)
+    return deserializeVariableLen(curr, data, fieldLen.NAME_LEN)
 
 def serializeAppID(field: str):
-    return serializeVariableLen(field, APP_ID_LEN)
+    return serializeVariableLen(field, fieldLen.APP_ID_LEN)
 
 def deserializeAppID(curr: int, data: bytes)-> tuple[str, int]:
-    return deserializeVariableLen(curr, data, APP_ID_LEN)
+    return deserializeVariableLen(curr, data, fieldLen.APP_ID_LEN)
 
 def serializeReviewText(field: str):
-    return serializeVariableLen(field, TEXT_LEN)
+    return serializeVariableLen(field, fieldLen.TEXT_LEN)
+
+def skipReviewText(curr: int, data: bytes)-> int:
+    return skipVariableLen(curr, data, fieldLen.TEXT_LEN)
 
 def deserializeReviewText(curr: int, data: bytes)-> tuple[str, int]:
-    return deserializeVariableLen(curr, data, TEXT_LEN)
+    return deserializeVariableLen(curr, data, fieldLen.TEXT_LEN)
 
 def serializeGenres(field: str):
-    return serializeVariableLen(field, GENRE_LEN)
+    return serializeVariableLen(field, fieldLen.GENRE_LEN)
 
 def deserializeGenres(curr: int, data: bytes)-> tuple[str, int]:
-    return deserializeVariableLen(curr, data, GENRE_LEN)
+    return deserializeVariableLen(curr, data, fieldLen.GENRE_LEN)
 
 def serializeVariableLen(field: str, fieldLen: int):
     fieldBytes = field.encode()
     fieldLenBytes = len(fieldBytes).to_bytes(fieldLen, 'big')
     return fieldLenBytes + fieldBytes
+
+def skipVariableLen(curr: int, data: bytes, fieldLen: int)-> int:
+    field = int.from_bytes(data[curr:curr+fieldLen], 'big')
+    return curr + field + fieldLen
 
 def deserializeVariableLen(curr: int, data: bytes, fieldLen: int)-> tuple[str, int]:
     field = int.from_bytes(data[curr:curr+fieldLen], 'big')
@@ -61,52 +58,61 @@ def serializeReleaseDate(releaseDate: str):
     return releaseDate.encode()
 
 def deserializeReleaseDate(curr: int, data: bytes) -> tuple[str]:
-    return data[curr:curr+RELEASE_DATE_LEN].decode(), curr+RELEASE_DATE_LEN
+    return data[curr:curr+fieldLen.RELEASE_DATE_LEN].decode(), curr+fieldLen.RELEASE_DATE_LEN
 
 def serializeCount(count: int):
-    return count.to_bytes(COUNT_LEN,'big')
+    return count.to_bytes(fieldLen.COUNT_LEN,'big')
 
 def deserializeCount(curr: int, data: bytes)-> tuple[int, int]:
-    count = int.from_bytes(data[curr:curr+COUNT_LEN], 'big')
-    return count, curr + COUNT_LEN
+    count = int.from_bytes(data[curr:curr+fieldLen.COUNT_LEN], 'big')
+    return count, curr + fieldLen.COUNT_LEN
 
 def serializeSenderID(senderID: int):
-    return senderID.to_bytes(SENDER_ID_LEN,'big')
+    return senderID.to_bytes(fieldLen.SENDER_ID_LEN,'big')
 
 def deserializeSenderID(curr: int, data: bytes) -> tuple[int, int]:
-    senderID = int.from_bytes(data[curr:curr+SENDER_ID_LEN], 'big')
-    return senderID, curr + SENDER_ID_LEN
+    senderID = int.from_bytes(data[curr:curr+fieldLen.SENDER_ID_LEN], 'big')
+    return senderID, curr + fieldLen.SENDER_ID_LEN
 
-def serializeBoolean(os: bool):
-    return boolToInt(os).to_bytes(BOOLEAN_LEN,'big')
+def serializeBoolean(os: bool) -> bytes:
+    return boolToInt(os).to_bytes(fieldLen.BOOLEAN_LEN,'big')
 
 def deserializeBoolean(curr: int, data: bytes)-> tuple[bool, int]:
-    return intToBool(int.from_bytes(data[curr:curr+BOOLEAN_LEN], 'big')), curr + BOOLEAN_LEN
+    return intToBool(int.from_bytes(data[curr:curr+fieldLen.BOOLEAN_LEN], 'big')), curr + fieldLen.BOOLEAN_LEN
 
 def serializePlaytime(avgPlaytime: int)-> tuple[int, int]:
-    return avgPlaytime.to_bytes(AVG_PLAYTIME_LEN,'big')
+    return avgPlaytime.to_bytes(fieldLen.AVG_PLAYTIME_LEN,'big')
+
+def skipPlaytime(curr: int)-> int:
+    return curr + fieldLen.AVG_PLAYTIME_LEN
 
 def deserializePlaytime(curr: int, data: bytes)-> tuple[int, int]:
-    avgPlaytime = int.from_bytes(data[curr:curr + AVG_PLAYTIME_LEN], 'big')
-    return avgPlaytime, curr + AVG_PLAYTIME_LEN
+    avgPlaytime = int.from_bytes(data[curr:curr + fieldLen.AVG_PLAYTIME_LEN], 'big')
+    return avgPlaytime, curr + fieldLen.AVG_PLAYTIME_LEN
 
 def serializeTopCount(top: int):
-    return top.to_bytes(TOP_BYTES_LEN,'big')
+    return top.to_bytes(fieldLen.TOP_BYTES_LEN,'big')
 
 def deserializeTopCount(curr: int, data: bytes)-> tuple[int, int]:
-    top = int.from_bytes(data[curr:curr + TOP_BYTES_LEN], 'big')
-    return top, curr + TOP_BYTES_LEN
+    top = int.from_bytes(data[curr:curr + fieldLen.TOP_BYTES_LEN], 'big')
+    return top, curr + fieldLen.TOP_BYTES_LEN
 
 def serializeQueryNumber(queryNumber: int):
-    return queryNumber.to_bytes(QUERY_NUMBER_LEN,'big')
+    return queryNumber.to_bytes(fieldLen.QUERY_NUMBER_LEN,'big')
 
 def deserializeQueryNumber(curr: int, data: bytes)-> tuple[int, int]:
-    top = int.from_bytes(data[curr:curr + QUERY_NUMBER_LEN], 'big')
-    return top, curr + QUERY_NUMBER_LEN
+    top = int.from_bytes(data[curr:curr + fieldLen.QUERY_NUMBER_LEN], 'big')
+    return top, curr + fieldLen.QUERY_NUMBER_LEN
 
 def serializeNumber(number, size: int) -> bytes:
     return number.to_bytes(size,'big')
 
-def deserializeNumber(data: bytes, curr: int, numberLen: int):
+def deserializeNumber(curr: int, data: bytes, numberLen: int):
     number = int.from_bytes(data[curr:curr+numberLen], 'big')
     return number, curr + numberLen
+
+def serializeSignedInt(number: int):
+    return struct.pack('b', number)
+
+def deserializeSignedInt(curr: int, data: bytes) -> int:
+    return struct.unpack('b', data[curr:curr+1])[0], curr + 1

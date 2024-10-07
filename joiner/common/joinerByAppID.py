@@ -10,11 +10,14 @@ from packetTracker.defaultTracker import DefaultTracker
 
 class JoinerByAppID(ABC):
     def __init__(self, type: str, id: str):
-        self._internalComunnication = InternalCommunication(type, id)
+        self._internalCommunication = InternalCommunication(type, id)
         self._id = int(id)
         self._gamesTracker = DefaultTracker()
         self._reviewsTracker = DefaultTracker()
         self._unjoinedReviews = []
+
+    def execute(self):
+        self._internalCommunication.defineMessageHandler(self.handleMessage)
 
     @abstractmethod
     def joinReviews(self, reviews: list[EntryInterface]):

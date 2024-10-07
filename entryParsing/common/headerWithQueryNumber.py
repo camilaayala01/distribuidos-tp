@@ -1,6 +1,6 @@
-from .header import Header
-from .fieldParsing import QUERY_NUMBER_LEN, deserializeBoolean, deserializeCount, deserializeQueryNumber, serializeQueryNumber
-
+from entryParsing.common.header import Header
+from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, deserializeQueryNumber, serializeQueryNumber
+from entryParsing.common.fieldLen import QUERY_NUMBER_LEN
 
 class HeaderWithQueryNumber(Header):
     def __init__(self, fragment: int, eof: bool, queryNumber: int):

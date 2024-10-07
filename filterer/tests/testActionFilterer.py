@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from entryParsing.entryAppIDNameGenres import EntryAppIDNameGenres
-from filtererAction.filtererAction import FiltererAction
+from filtererAction.common.filtererAction import FiltererAction
 
 class TestActionFilterer(unittest.TestCase):
     @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))

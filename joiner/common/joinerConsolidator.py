@@ -6,7 +6,6 @@ from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.multiTracker import MultiTracker
 
 class JoinerConsolidator(ABC):
-    
     def __init__(self, type: str, nextNodeCount: int, priorNodeCount: int, entriesType: EntryInterface): 
         self._internalCommunication = InternalCommunication(type, None)
         self._entriesType = entriesType
@@ -15,6 +14,9 @@ class JoinerConsolidator(ABC):
         self._priorNodeCount = priorNodeCount
         self._currFragment = 1
 
+    def execute(self):
+        self._internalCommunication.defineMessageHandler(self.handleMessage)
+        
     def reset(self):
         self._tracker.reset()
         self._currFragment = 1
@@ -41,3 +43,4 @@ class JoinerConsolidator(ABC):
             self.reset()
         
         ch.basic_ack(delivery_tag = method.delivery_tag)
+

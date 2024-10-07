@@ -1,0 +1,78 @@
+services:  
+  client:
+    build:
+      context: ./client
+      dockerfile: ../zmqUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./entryParsing:/entryParsing
+      - ~/.kaggle/distribuidos:/datasets
+    networks: 
+      - sa_net
+
+  border-node:
+    build:
+      context: ./borderNode
+      dockerfile: ../zmqUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+    networks: 
+      - sa_net
+
+  initializer:
+    build:
+      context: ./initializer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+    networks: 
+      - sa_net
+
+  grouper-os-counts:
+    build:
+      context: ./grouperOSCounts
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+    networks: 
+      - sa_net
+
+  joiner-os-counts:
+    build:
+      context: ./joinerOSCount
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./packetTracker:/packetTracker
+    networks: 
+      - sa_net
+
+networks:
+  sa_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.125.0/24

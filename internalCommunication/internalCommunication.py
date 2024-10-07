@@ -36,14 +36,12 @@ class InternalCommunication:
             queueName = self.declareExchange(self._executerName, self._nodeID)
         else:
             queueName = self._executerName
+            print(queueName)
             self._channel.queue_declare(queue=self._executerName, durable=False)
         self._channel.basic_consume(queue=queueName, on_message_callback=callback)
-        try:
-            self._channel.start_consuming() 
-        # Don't recover connections closed by server
-        except pika.exceptions.ConnectionClosedByBroker:
-            pass
-    
+        print("por empezar a consumir")
+        self._channel.start_consuming() 
+        print("empecé a consumir yeah")
 
     def stop(self):
         self._connection.close()
@@ -66,6 +64,7 @@ class InternalCommunication:
     # Query 1
 
     def sendToOSCountsGrouper(self, message: bytes):
+        print(os.getenv('GROUP_OS'))
         self.basicSend(os.getenv('GROUP_OS'), message)
 
     def sendToOSCountsJoiner(self, message: bytes): #UNO SOLO
@@ -147,3 +146,6 @@ class InternalCommunication:
 
     def sendToDispatcher(self, message: bytes):
         self.basicSend(os.getenv('RESP_DISP'), message)
+
+    def sendToInitializer(self, message: bytes):
+        self.basicSend(os.getenv('INIT'), message)

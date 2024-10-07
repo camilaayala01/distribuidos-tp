@@ -1,11 +1,11 @@
 services:
   client:
     build:
-      context: ./client
+      context: .
       dockerfile: client.dockerfile
     environment:
       - PYTHONUNBUFFERED=1
     volumes:
-      - ./entryParsing:/entryParsing
+      - ../entryParsing:/entryParsing
       - ~/.kaggle/distribuidos:/datasets
     

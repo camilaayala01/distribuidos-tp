@@ -1,6 +1,6 @@
 import os
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
-from joinerByAppID.common.joinerNameCountByAppID import JoinerNameCountByAppID
+from joiner.common.joinerNameCountByAppID import JoinerNameCountByAppID
 
 """
 Entities that join all entries maintaining total counts for all
@@ -13,7 +13,7 @@ class JoinerActionNegativeReviewsPercentile(JoinerNameCountByAppID):
         super().__init__(type=os.getenv('JOIN_PERC_NEG_REV'), id=os.getenv('NODE_ID'))
 
     def _sendToNextStep(self, msg: bytes):
-        self._internalComunnication.sendToActionPercentileSorterConsolidator(msg)
+        self._internalCommunication.sendToActionPercentileSorterConsolidator(msg)
 
     def entriesToSend(self)-> list[EntryAppIDNameReviewCount]:
         entries = []

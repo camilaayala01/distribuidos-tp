@@ -19,7 +19,7 @@ Query 4
 class JoinerNegativeReviewsEnglishCount:
     def __init__(self, id: str):
         id = os.getenv('NODE_ID')
-        self._internalComunnication = InternalCommunication(name=os.getenv('JOIN_ENG_COUNT_MORE_REV'), nodeID=id)
+        self._internalCommunication = InternalCommunication(name=os.getenv('JOIN_ENG_COUNT_MORE_REV'), nodeID=id)
         self._id = int(id)
         self._packetTracker = DefaultTracker()
         self._counts = {}
@@ -33,7 +33,7 @@ class JoinerNegativeReviewsEnglishCount:
         self._fragnum = 1
 
     def execute(self):
-        self._internalComunnication.defineMessageHandler(self.handleMessage())
+        self._internalCommunication.defineMessageHandler(self.handleMessage)
 
     def _handleEntries(self, entries: list[EntryAppIDNameReviewCount])-> list[str]:
         ready = []
@@ -65,7 +65,7 @@ class JoinerNegativeReviewsEnglishCount:
         ch.basic_ack(delivery_tag = method.delivery_tag)
         
     def _sendToNextStep(self, data: bytes):
-        self._internalComunnication.sendToDispatcher(data)
+        self._internalCommunication.sendToDispatcher(data)
 
     def _handleSending(self, ready: list[EntryName]):
         namesBytes = EntryName.serializeAll(ready)        
