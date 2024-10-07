@@ -56,9 +56,9 @@ services:
     networks: 
       - sa_net
 
-  filterer-date:
+  grouper-indie:
     build:
-      context: ./filtererDate
+      context: ./grouperIndiePositiveReviews
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
@@ -67,13 +67,14 @@ services:
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
-      - ./filterer:/filterer
+      - ./grouperReviews:/grouperReviews
     networks: 
       - sa_net
 
-  sorter-avg-playtime-1:
+
+  joiner-indie-positive-1:
     build:
-      context: ./sorterAvgPlaytime
+      context: ./joinerIndiePositive
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
@@ -84,18 +85,51 @@ services:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./sorter:/sorter
+      - ./joiner:/joiner
     networks: 
       - sa_net
 
-  sorter-avg-playtime-2:
+  joiner-indie-positive-2:
     build:
-      context: ./sorterAvgPlaytime
+      context: ./joinerIndiePositive
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
       - NODE_ID=1
-      - TOP_AMOUN
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./packetTracker:/packetTracker
+      - ./joiner:/joiner
+    networks: 
+      - sa_net
+
+  joiner-indie-consolidator:
+    build:
+      context: ./joinerIndieConsolidator
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./packetTracker:/packetTracker
+      - ./joiner:/joiner
+    networks:
+      - sa_net
+    
+  sorter-indie-positive-reviews-1:
+    build:
+      context: ./sorterIndiePositiveReviews
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+      - NODE_ID=0
+      - TOP_AMOUNT=5
     env_file:
       - .env
     volumes:
@@ -106,12 +140,14 @@ services:
     networks: 
       - sa_net
 
-  sorter-consolidator-avg-playtime:
+  sorter-indie-positive-reviews-2:
     build:
-      context: ./sorterConsolidatorAvgPlaytime
+      context: ./sorterIndiePositiveReviews
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - NODE_ID=1
+      - TOP_AMOUNT=5
     env_file:
       - .env
     volumes:
@@ -121,6 +157,24 @@ services:
       - ./sorter:/sorter
     networks: 
       - sa_net
+
+  sorter-consolidator-indie-top:
+    build:
+      context: ./sorterConsolidatorIndieTop
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+      - TOP_AMOUNT=5
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./packetTracker:/packetTracker
+      - ./sorter:/sorter
+    networks: 
+      - sa_net
+      
 
 networks:
   sa_net:

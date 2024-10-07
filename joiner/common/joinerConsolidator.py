@@ -3,10 +3,12 @@ from entryParsing.common.header import Header
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
+from entryParsing.common.utils import initializeLog
 from packetTracker.multiTracker import MultiTracker
 
 class JoinerConsolidator(ABC):
     def __init__(self, type: str, nextNodeCount: int, priorNodeCount: int, entriesType: EntryInterface): 
+        initializeLog()
         self._internalCommunication = InternalCommunication(type, None)
         self._entriesType = entriesType
         self._tracker = MultiTracker(priorNodeCount)
@@ -22,7 +24,7 @@ class JoinerConsolidator(ABC):
         self._currFragment = 1
 
     def getHeaderSerialized(self):
-        return Header(fragment=self._currFragment, eof=self._tracker.isDone())
+        return Header(fragment=self._currFragment, eof=self._tracker.isDone()).serialize()
 
     @abstractmethod
     def handleSending(self, header: HeaderWithSender, data: bytes):

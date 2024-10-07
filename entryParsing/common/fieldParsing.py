@@ -1,4 +1,5 @@
 import struct
+import logging
 from entryParsing.common.table import Table
 from entryParsing.common.utils import boolToInt, intToBool
 from entryParsing.common import fieldLen
@@ -9,8 +10,8 @@ def serializeTable(table: Table):
 
 def deserializeTable(curr: int, data: bytes)-> tuple[Table, int]:
     tableNum = int.from_bytes(data[curr:curr+fieldLen.TABLE_LEN], 'big')
-    print("table num is: ", tableNum)
-    return Table(tableNum), curr + fieldLen.TABLE_LEN
+    table = Table(tableNum)
+    return table, curr + fieldLen.TABLE_LEN
 
 def serializeGameName(field:str):
     return serializeVariableLen(field, fieldLen.NAME_LEN)

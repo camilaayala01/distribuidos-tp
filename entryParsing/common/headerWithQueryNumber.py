@@ -10,6 +10,12 @@ class HeaderWithQueryNumber(Header):
     def serialize(self) -> bytes:
         return  super().serialize() + serializeQueryNumber(self._queryNumber)
     
+    def getQueryNumber(self):
+        return self._queryNumber
+
+    def __str__(self):
+        return f"fragment: {self._fragment} | eof: {self._eof} | query number: {self._queryNumber}"
+    
     @classmethod
     def size(cls):
         return super().size() + QUERY_NUMBER_LEN

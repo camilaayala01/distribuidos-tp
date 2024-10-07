@@ -1,5 +1,6 @@
 import math
 import os
+import logging
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithQueryNumber
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
@@ -58,3 +59,4 @@ class SorterConsolidatorActionPercentile(Sorter):
 
     def _sendToNextStep(self, data: bytes):
         self._internalCommunication.sendToDispatcher(data)
+        logging.info(f'action: send final results to dispatcher | result: success')

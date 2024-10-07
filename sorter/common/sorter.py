@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
-import os
-from entryParsing.common.header import Header
+import logging
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.packetTracker import PacketTracker
+from entryParsing.common.utils import initializeLog
 
 class Sorter(ABC):
     def __init__(self, id: str, type: str, headerType: type, entryType: type, topAmount: int, tracker: PacketTracker):
+        initializeLog()
         self._internalCommunication = InternalCommunication(type, id)
         self._entryType = entryType
         self._headerType = headerType
@@ -24,6 +25,7 @@ class Sorter(ABC):
     def reset(self):
         self._partialTop = []
         self._packetTracker.reset()
+        logging.info(f'action: reseting stored data for next client | result: success')
 
     def topHasCapacity(self, mergedList):
         return len(mergedList) < self._topAmount
@@ -68,8 +70,8 @@ class Sorter(ABC):
         
     def _handleSending(self):
         if not self._packetTracker.isDone():
-            print("not done gordi")
             return
+        logging.info(f'action: received all required batches | result: success')
         packets = self._serializeAndFragment()
         for pack in packets:
             self._sendToNextStep(pack)
@@ -77,11 +79,11 @@ class Sorter(ABC):
 
     def handleMessage(self, ch, method, properties, body):
         header, batch = self._headerType.deserialize(body)
+        logging.info(f'action: receive batch | {header} | result: success')
         if self._packetTracker.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
         self._packetTracker.update(header)
-        print(batch)
         entries = self._entryType.deserialize(batch)
         self.mergeKeepTop(entries)
         self._handleSending()

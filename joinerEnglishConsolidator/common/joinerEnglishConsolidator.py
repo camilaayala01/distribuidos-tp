@@ -7,7 +7,7 @@ from joiner.common.joinerConsolidator import JoinerConsolidator
 class JoinerEnglishConsolidator(JoinerConsolidator):
     def __init__(self): 
         super().__init__(type=os.getenv('CONS_JOIN_ENG_NEG_REV'), nextNodeCount=1, 
-                        priorNodeCount=os.getenv('JOIN_ENG_COUNT_MORE_REV_COUNT'), entriesType=EntryAppIDNameReviewCount)
+                        priorNodeCount=int(os.getenv('JOIN_ENG_COUNT_MORE_REV_COUNT')), entriesType=EntryAppIDNameReviewCount)
 
     def sendToNextStep(self, id: str, data: bytes):
         self._internalCommunication.sendToEnglishNegativeReviewsCounter(id, data)

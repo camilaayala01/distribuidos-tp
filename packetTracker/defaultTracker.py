@@ -1,4 +1,4 @@
-from .packetTracker import PacketTracker
+from packetTracker.packetTracker import PacketTracker
 
 """A packet tracker that requires all packets to be received"""
 class DefaultTracker(PacketTracker):

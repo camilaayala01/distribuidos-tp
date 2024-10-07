@@ -28,11 +28,9 @@ class EntryNameDateAvgPlaytime():
         entries = []
         while len(data) > curr:
             try:
-                print(data[curr:])
                 entry, curr = EntryNameDateAvgPlaytime.deserializeEntry(curr, data)
                 entries.append(entry)
             except:
-                print(data)
                 raise Exception("Can't deserialize entry")
         return entries
 

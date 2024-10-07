@@ -1,10 +1,8 @@
-from .common.sorterConsolidatorIndieTop import SorterConsolidatorIndieTop
-
-# should get from env
-TOP_AMOUNT = 5
+import os
+from common.sorterConsolidatorIndieTop import SorterConsolidatorIndieTop
 
 def main():
-    sorter = SorterConsolidatorIndieTop(TOP_AMOUNT)
+    sorter = SorterConsolidatorIndieTop(int(os.getenv('TOP_AMOUNT')))
     sorter.execute()
 
 if __name__ == "__main__":

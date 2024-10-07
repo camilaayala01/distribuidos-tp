@@ -1,4 +1,4 @@
-from grouperActionPercentile.common.grouperActionPercentile import GrouperActionPercentileNegativeReviews
+from common.grouperActionPercentile import GrouperActionPercentileNegativeReviews
 
 def main():
     grouper = GrouperActionPercentileNegativeReviews()

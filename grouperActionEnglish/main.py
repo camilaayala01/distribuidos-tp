@@ -1,4 +1,4 @@
-from grouperActionEnglish.common.grouperActionEnglish import GrouperActionEnglishNegativeReviews
+from common.grouperActionEnglish import GrouperActionEnglishNegativeReviews
 
 def main():
     grouper = GrouperActionEnglishNegativeReviews()

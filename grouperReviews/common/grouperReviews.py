@@ -1,12 +1,15 @@
 from entryParsing.entryAppID import EntryAppID
 from abc import ABC, abstractmethod
-import os
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from entryParsing.common.header import Header
 from internalCommunication.internalCommunication import InternalCommunication
+from entryParsing.common.utils import initializeLog
+import logging
 
 class GrouperReviews(ABC):
-    def __init__(self, type: str, id: str): 
+    def __init__(self, headerType: type, type: str, id: str): 
+        initializeLog()
+        self._headerType = headerType
         self._internalCommunication = InternalCommunication(type, id)
 
     def _applyStep(self, entries: list['EntryAppID'])-> list['EntryAppIDReviewCount']:
@@ -35,7 +38,8 @@ class GrouperReviews(ABC):
         pass
     
     def handleMessage(self, ch, method, properties, body):
-        header, data = Header.deserialize(body)
+        header, data = self._headerType.deserialize(body)
+        logging.info(f'action: received reviews batch | {header} | result: success')
         entries = EntryAppID.deserialize(data)
         result = self._applyStep(entries)
         self.sendToNextStep(header, result)

@@ -7,9 +7,8 @@ from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from joiner.common.joinerByAppID import JoinerByAppID
 
 class JoinerNameCountByAppID(JoinerByAppID):
-    def __init__(self, id: str, type: str):
-        super().__init__(type=type, id=id)
-        
+    def __init__(self, id: str, type: str, headerType: type):
+        super().__init__(type=type, id=id, headerType=headerType)
         self._id = int(id)
         # dict of entry name, review count
         self._joinedEntries = {}
@@ -20,12 +19,10 @@ class JoinerNameCountByAppID(JoinerByAppID):
             if id in self._joinedEntries:
                 self._joinedEntries[id] = self._joinedEntries[id].addToCount(review.getCount())
         
-    @classmethod
-    def gamesEntryReceivedType(cls):
+    def gamesEntryReceivedType(self):
         return EntryAppIDName
     
-    @classmethod
-    def reviewsEntryReceivedType(cls):
+    def reviewsEntryReceivedType(self):
         return EntryAppIDReviewCount
     
     def storeGamesEntry(self, entry: EntryAppIDName):

@@ -1,2 +1,2 @@
 #!/bin/bash
-docker compose -f docker-compose-query-2.yaml up --build 
+docker compose -f docker-compose-queries.yaml up --build 

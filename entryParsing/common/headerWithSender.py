@@ -14,6 +14,9 @@ class HeaderWithSender(Header):
     def size(cls):
         return SENDER_ID_LEN + super().size()
 
+    def __str__(self):
+        return f"fragment: {self._fragment} | eof: {self._eof} | sender: {self._sender}"
+    
     def getSenderID(self) -> int:
         return self._sender
     

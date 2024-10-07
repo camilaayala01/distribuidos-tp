@@ -12,7 +12,7 @@ class Header:
         return fragmentBytes + eofBytes
 
     def __str__(self):
-        return f"Header(fragmentNumber={self._fragment}, isEof]{self._eof})"
+        return f"fragment: {self._fragment} | eof: {self._eof}"
     
     def getFragmentNumber(self) -> int:
         return self._fragment

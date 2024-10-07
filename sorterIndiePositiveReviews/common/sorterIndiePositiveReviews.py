@@ -1,6 +1,6 @@
 import os
+import logging
 from entryParsing.common.header import Header
-from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from packetTracker.packetTracker import PacketTracker
@@ -28,3 +28,4 @@ class SorterIndiePositiveReviews(Sorter):
         
     def _sendToNextStep(self, data: bytes):
         self._internalCommunication.sendToPositiveReviewsSorterConsolidator(data)
+        logging.info(f'action: send final results to consolidator | result: success')

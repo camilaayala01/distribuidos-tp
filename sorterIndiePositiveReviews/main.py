@@ -1,10 +1,8 @@
-from .common.sorterIndiePositiveReviews import SorterIndiePositiveReviews
-
-# should get from env
-TOP_AMOUNT = 5
+import os
+from common.sorterIndiePositiveReviews import SorterIndiePositiveReviews
 
 def main():
-    sorter = SorterIndiePositiveReviews(TOP_AMOUNT)
+    sorter = SorterIndiePositiveReviews(int(os.getenv('TOP_AMOUNT')))
     sorter.execute()
 
 if __name__ == "__main__":

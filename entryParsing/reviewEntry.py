@@ -48,7 +48,7 @@ class ReviewEntry(EntryInterface):
     def shardBatch(nodeCount: int, result: list['ReviewEntry']) -> list[bytes]:
         resultingBatches = [bytes() for _ in range(nodeCount)]
         for entry in result:
-            shardResult = getShardingKey(int(entry.appID), nodeCount)
+            shardResult = getShardingKey(entry.appID, nodeCount)
             resultingBatches[shardResult] = resultingBatches[shardResult] + EntryAppIDReviewText(entry.appID, entry.reviewText).serialize()
         return resultingBatches
 

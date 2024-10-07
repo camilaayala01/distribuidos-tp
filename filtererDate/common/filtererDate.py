@@ -4,6 +4,7 @@ from filterer.filterer import Filterer
 from entryParsing.common.header import Header
 from entryParsing.common.utils import getShardingKey
 import os
+import logging
 
 class FiltererDate(Filterer):
     def __init__(self):
@@ -24,6 +25,8 @@ class FiltererDate(Filterer):
                 self._internalCommunication.sendToAvgPlaytimeSorter(str(i), header.serialize())
         else:
             self._internalCommunication.sendToAvgPlaytimeSorter(str(shardingKey), serializedHeader)
+
+        logging.info(f'action: sending batch to average playtime sorter | result: success')
     
     @classmethod
     def condition(cls, entry: EntryNameDateAvgPlaytime):

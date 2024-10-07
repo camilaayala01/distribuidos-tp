@@ -5,42 +5,41 @@ from entryParsing.entryName import EntryName
 from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from entryParsing.entryOSCount import EntryOSCount
-
+import logging
 
 def receiveQuery1Answer(data):
     response = EntryOSCount.deserialize(data)
-    storeResultsQuery1("Total de juegos: " + str(response._total) + 
-    "\nTotal de juegos soportados en Windows: " + str(response._windows) + 
-    "\nTotal de juegos soportados en Linux: " + str(response._linux) +
-    "\nTotal de juegos soportados en Mac: " + str(response._mac))
+    logging.info(f'action: store query 1 data | data received: {response}')
+    storeResultsQuery1(str(response))
     
-def receiveCSVAnswer(data, includeHeader: bool, entryType, storageFunction):
+def receiveCSVAnswer(data, includeHeader: bool, entryType, storageFunction, queryNum):
     responses = entryType.deserialize(data)
     csvData = ""
+    loggingData = ""
     if includeHeader:
         csvData += entryType.header()
     for response in responses:
         csvData += response.csv()
-    storageFunction(responses)
+        loggingData += str(response)
+    logging.info(f'action: store query {queryNum} data | data received: {loggingData}')
+    storageFunction(csvData)
 
 def receiveQuery2Answer(data, includeHeader: bool):
-    receiveCSVAnswer(data, includeHeader, entryType=EntryNameAvgPlaytime, storageFunction=storeResultsQuery2)
+    receiveCSVAnswer(data, includeHeader, entryType=EntryNameAvgPlaytime, storageFunction=storeResultsQuery2, queryNum=2)
 
 def receiveQuery3Answer(data, includeHeader: bool):
-    receiveCSVAnswer(data, includeHeader, entryType=EntryNameReviewCount, storageFunction=storeResultsQuery3)
+    receiveCSVAnswer(data, includeHeader, entryType=EntryNameReviewCount, storageFunction=storeResultsQuery3, queryNum=3)
 
 def receiveQuery4Answer(data, includeHeader: bool):
-    receiveCSVAnswer(data, includeHeader, entryType=EntryName, storageFunction=storeResultsQuery4)
+    receiveCSVAnswer(data, includeHeader, entryType=EntryName, storageFunction=storeResultsQuery4, queryNum = 4)
     
-def receiveQuery4Answer(data, includeHeader: bool):
-    receiveCSVAnswer(data, includeHeader, entryType=EntryName, storageFunction=storeResultsQuery4)
-
 def receiveQuery5Answer(data, includeHeader: bool):
-    receiveCSVAnswer(data, includeHeader, entryType=EntryAppIDName, storageFunction=storeResultsQuery5)
+    receiveCSVAnswer(data, includeHeader, entryType=EntryAppIDName, storageFunction=storeResultsQuery5, queryNum=5)
 
 def processResponse(data: bytes) -> bool:
     header, data = HeaderWithQueryNumber.deserialize(data)
-    match header._queryNumber:
+    logging.info(f'action: receive response for query {header.getQueryNumber()} | {header} | result: success ')
+    match header.getQueryNumber():
         case 1: receiveQuery1Answer(data)
         case 2: receiveQuery2Answer(data, header.getFragmentNumber() == 1)
         case 3: receiveQuery3Answer(data, header.getFragmentNumber() == 1)
@@ -49,4 +48,4 @@ def processResponse(data: bytes) -> bool:
         case default:
             raise(Exception("invalid query num"))
         
-    return header._eof
+    return header.isEOF()

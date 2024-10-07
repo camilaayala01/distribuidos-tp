@@ -1,4 +1,4 @@
-from .common.sorterConsolidatorActionPercentile import SorterConsolidatorActionPercentile
+from common.sorterConsolidatorActionPercentile import SorterConsolidatorActionPercentile
 
 def main():
     sorter = SorterConsolidatorActionPercentile()

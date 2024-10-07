@@ -1,5 +1,4 @@
 import csv
-
 from entryParsing.gameEntry import GameEntry
 from entryParsing.reviewEntry import ReviewEntry
 
@@ -11,10 +10,8 @@ REVIEWS_STORAGE_FILEPATH = "./datasets/reviews-reducido.csv"
 
 QUERY_RESPONSES_PATH = "."
 
-
 def storeResultsQuery1(response: str) -> None:
     filepath = QUERY_RESPONSES_PATH + "/query1.txt"
-    print(response)
     storeResultsQuery(response, filepath)
 
 def storeResultsQuery2(response: str) -> None:
@@ -37,13 +34,6 @@ def storeResultsQuery(result: str, filepath: str) -> None:
     with open(filepath, 'a+') as file:
         file.write(result)
     
-       
-"""
-Loads the information all the bets in the STORAGE_FILEPATH file.
-Not thread-safe/process-safe.
-"""
-
-
 def loadGames() -> list[GameEntry]:
     with open(GAMES_STORAGE_FILEPATH, 'r') as file:
         reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
@@ -61,11 +51,6 @@ def loadGames() -> list[GameEntry]:
             except Exception as e:
                 pass
             
-
-"""
-Loads the information all the bets in the STORAGE_FILEPATH file.
-Not thread-safe/process-safe.
-"""
 def loadReviews() -> list[ReviewEntry]:
     with open(REVIEWS_STORAGE_FILEPATH, 'r') as file:
         reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
@@ -74,7 +59,6 @@ def loadReviews() -> list[ReviewEntry]:
             try:
                 yield ReviewEntry(row[0], row[1], row[2], row[3], row[4])
             except StopIteration:
-                print("leaving")
                 return None
             except Exception as e:
                 pass

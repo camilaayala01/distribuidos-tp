@@ -1,4 +1,5 @@
 import os
+import logging
 from entryParsing.common.header import Header
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
 from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
@@ -12,11 +13,12 @@ Query 2
 """
 class SorterAvgPlaytime(Sorter):
     def __init__(self, topAmount: int): # for testing purposes
-        nodeCount = os.getenv('SORT_AVG_PT_COUNT')
+        logging.info(f'action: initialize sorter avg playtime | result: success')
+        nodeCount = int(os.getenv('SORT_AVG_PT_COUNT'))
         nodeID = os.getenv('NODE_ID')
         self._id = int(nodeID)
         super().__init__(id=nodeID, type=os.getenv('SORT_AVG_PT'), headerType=Header, entryType=EntryNameAvgPlaytime, 
-                         topAmount=topAmount, tracker=PacketTracker(int(nodeCount), int(nodeID)))
+                         topAmount=topAmount, tracker=PacketTracker(nodeCount, int(nodeID)))
 
     def getBatchTop(self, batch: list[EntryNameAvgPlaytime]) -> list[EntryNameAvgPlaytime]:
         sortedBatch = self._entryType.sort(batch)
@@ -27,3 +29,4 @@ class SorterAvgPlaytime(Sorter):
     
     def _sendToNextStep(self, data: bytes):
         self._internalCommunication.sendToAvgPlaytimeSorterConsolidator(data)
+        logging.info(f'action: send ordered local top to consolidator | result: success')
