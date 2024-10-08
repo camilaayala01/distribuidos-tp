@@ -15,7 +15,6 @@ class InternalCommunication:
         logging.info(f'action: initialized an entity | result: success | msg: binded to queue {name}')
 
     def startConnection(self) -> pika.BlockingConnection:
-        signal.signal(signal.SIGTERM, self.stop)
         return pika.BlockingConnection(
         pika.ConnectionParameters(host=os.getenv('HOST')))
 

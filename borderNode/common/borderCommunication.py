@@ -1,4 +1,5 @@
 import os
+import signal
 from internalCommunication.internalCommunication import InternalCommunication
 import zmq
 import logging
@@ -21,6 +22,10 @@ class BorderNodeCommunication:
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.sendClient)
 
+    def stop(self):
+        self._internalCommunication.stop()
+        self._accepterCommunication.stop()
+        
     def receiveFromClient(self):
         msg = self._clientSocket.recv()
         logging.info(f'action: receiving batch from client | result: success')
