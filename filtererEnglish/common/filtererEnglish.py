@@ -1,5 +1,6 @@
 from entryParsing.entryAppIDName import EntryAppIDName
 from langid import classify
+import logging
 from filterer.filterer import Filterer
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.headerWithSender import HeaderWithSender
@@ -15,6 +16,8 @@ class FiltererEnglish(Filterer):
         for entry in filteredEntries:
             msg += EntryAppIDName(entry._appID, entry._name)
         self._internalCommunication.sendToEnglishNegativeReviewsGrouper(filteredEntries)
+
+        logging.info(f'action: sending batch to english negative reviews grouper | result: success')
 
     @classmethod
     def condition(cls, entry: EntryAppIDNameReviewText)-> bool:

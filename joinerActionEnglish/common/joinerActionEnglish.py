@@ -13,7 +13,7 @@ Query 5
 """
 class JoinerActionNegativeReviewsEnglish(JoinerByAppID):
     def __init__(self):
-        super().__init__(type=os.getenv('JOIN_ENG_NEG_REV'), id=os.getenv('NODE_ID'), header=HeaderWithSender)
+        super().__init__(type=os.getenv('JOIN_ENG_NEG_REV'), id=os.getenv('NODE_ID'), headerType=HeaderWithSender)
         self._joinedEntries = []
         # key: appid, value: name
         self._gamesReceived = {}
@@ -41,7 +41,8 @@ class JoinerActionNegativeReviewsEnglish(JoinerByAppID):
 
     def _handleSending(self):
         # could be optimized by sending every once in a while
-        packets = serializeAndFragmentWithSender(maxDataBytes(self._headerType), self._joinedEntries.values(), self._id)
+        # was self._joinedEntries.values()
+        packets = serializeAndFragmentWithSender(maxDataBytes(self._headerType), self._joinedEntries, self._id)
         for pack in packets:
             self._sendToNextStep(pack)
         self.reset()

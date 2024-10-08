@@ -1,0 +1,163 @@
+services:  
+  client:
+    build:
+      context: ./client
+      dockerfile: ../zmqUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./entryParsing:/entryParsing
+      - ~/.kaggle/distribuidos:/datasets
+    networks: 
+      - sa_net
+
+  border-node:
+    build:
+      context: ./borderNode
+      dockerfile: ../zmqUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+    networks: 
+      - sa_net
+
+  initializer:
+    build:
+      context: ./initializer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+    networks: 
+      - sa_net
+
+  filterer-action:
+    build:
+      context: ./filtererAction
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./filterer:/filterer
+    networks: 
+      - sa_net
+
+  joiner-action-english-1:
+    build:
+      context: ./joinerActionEnglish
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+      - NODE_ID=0
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./packetTracker:/packetTracker
+      - ./joiner:/joiner
+    networks: 
+      - sa_net
+
+  joiner-action-english-2:
+    build:
+      context: ./joinerActionEnglish
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+      - NODE_ID=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./packetTracker:/packetTracker
+      - ./joiner:/joiner
+    networks: 
+      - sa_net
+
+  filterer-english:
+    build:
+      context: ./filtererEnglish
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./filterer:/filterer
+    networks: 
+      - sa_net
+
+  grouper-action-english:
+    build:
+      context: ./grouperActionEnglish
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./grouperReviews:/grouperReviews
+    networks: 
+      - sa_net
+
+  joiner-english-consolidator:
+    build:
+      context: ./joinerEnglishConsolidator
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./packetTracker:/packetTracker
+      - ./joiner:/joiner
+    networks:
+      - sa_net
+    
+  joiner-stream-consolidator:
+    build:
+      context: ./joinerStreamConsolidator
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./packetTracker:/packetTracker
+      - ./joiner:/joiner
+    networks:
+      - sa_net
+
+
+      
+
+networks:
+  sa_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.125.0/24

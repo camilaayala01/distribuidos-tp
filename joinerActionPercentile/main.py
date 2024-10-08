@@ -1,4 +1,4 @@
-from .common.joinerActionPercentile import JoinerActionPercentile
+from common.joinerActionPercentile import JoinerActionPercentile
 
 def main():
     joiner = JoinerActionPercentile()

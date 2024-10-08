@@ -1,7 +1,7 @@
-from .common.joinerActionEnglish import JoinerActionEnglish
+from common.joinerActionEnglish import JoinerActionNegativeReviewsEnglish
 
 def main():
-    joiner = JoinerActionEnglish()
+    joiner = JoinerActionNegativeReviewsEnglish()
     joiner.execute()
 
 if __name__ == "__main__":

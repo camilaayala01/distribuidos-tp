@@ -26,7 +26,6 @@ class EntryAppIDName(EntryInterface):
     def deserialize(cls, data: bytes) -> list['EntryAppIDName']: 
         curr = 0
         entries = []
-
         while len(data) > curr:
             try:
                 appID, curr = deserializeAppID(curr, data)
