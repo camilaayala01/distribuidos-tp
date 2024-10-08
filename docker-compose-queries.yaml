@@ -12,6 +12,8 @@ services:
       - ~/.kaggle/distribuidos:/datasets
     networks: 
       - sa_net
+    depends_on:
+      - border-node
 
   border-node:
     build:
@@ -26,6 +28,22 @@ services:
       - ./entryParsing:/entryParsing
     networks: 
       - sa_net
+    depends_on:
+      - initializer
+      - filterer-indie
+      - filterer-date
+      - sorter-avg-playtime-1
+      - sorter-avg-playtime-2
+      - sorter-consolidator-avg-playtime
+      - grouper-indie
+      - joiner-indie-positive-1
+      - joiner-indie-positive-2
+      - joiner-indie-consolidator
+      - sorter-indie-positive-reviews-1
+      - sorter-indie-positive-reviews-2
+      - sorter-consolidator-indie-top
+      - grouper-os-counts
+      - joiner-os-counts
 
   initializer:
     build:
