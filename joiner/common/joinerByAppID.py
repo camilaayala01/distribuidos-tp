@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import logging
+from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender, initializeLog
 from entryParsing.entry import EntryInterface
@@ -7,14 +8,13 @@ from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.defaultTracker import DefaultTracker
 
 class JoinerByAppID(ABC):
-    def __init__(self, type: str, id: str, headerType: type):
+    def __init__(self, type: str, id: str):
         initializeLog()
         self._internalCommunication = InternalCommunication(type, id)
         self._id = int(id)
         self._gamesTracker = DefaultTracker()
         self._reviewsTracker = DefaultTracker()
         self._unjoinedReviews = []
-        self._headerType = headerType
 
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
@@ -60,7 +60,7 @@ class JoinerByAppID(ABC):
         pass
 
     def _handleSending(self):
-        packets = serializeAndFragmentWithSender(maxDataBytes(self._headerType), self.entriesToSend(), self._id)
+        packets = serializeAndFragmentWithSender(maxDataBytes(HeaderWithSender), self.entriesToSend(), self._id)
         for pack in packets:
             self._sendToNextStep(pack)
         self.reset()

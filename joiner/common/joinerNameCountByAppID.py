@@ -1,5 +1,4 @@
 from abc import abstractmethod
-import os
 from entryParsing.entry import EntryInterface
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
@@ -7,8 +6,8 @@ from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from joiner.common.joinerByAppID import JoinerByAppID
 
 class JoinerNameCountByAppID(JoinerByAppID):
-    def __init__(self, id: str, type: str, headerType: type):
-        super().__init__(type=type, id=id, headerType=headerType)
+    def __init__(self, id: str, type: str):
+        super().__init__(type=type, id=id)
         self._id = int(id)
         # dict of entry name, review count
         self._joinedEntries = {}

@@ -1,5 +1,4 @@
 import os
-from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
@@ -13,7 +12,7 @@ Query 5
 """
 class JoinerActionNegativeReviewsEnglish(JoinerByAppID):
     def __init__(self):
-        super().__init__(type=os.getenv('JOIN_ENG_NEG_REV'), id=os.getenv('NODE_ID'), headerType=HeaderWithSender)
+        super().__init__(type=os.getenv('JOIN_ENG_NEG_REV'), id=os.getenv('NODE_ID'))
         self._joinedEntries = []
         # key: appid, value: name
         self._gamesReceived = {}
