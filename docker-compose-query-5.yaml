@@ -31,12 +31,10 @@ services:
     depends_on:
       - initializer
       - filterer-action
-      - joiner-action-english-1
-      - joiner-action-english-2
-      - filterer-english
-      - grouper-action-english
-      - joiner-english-consolidator
-      - joiner-stream-consolidator
+      - grouper-action-percentile
+      - joiner-action-percentile-1
+      - joiner-action-percentile-2
+      - sorter-consolidator-action-percentile
 
   initializer:
     build:
@@ -67,58 +65,9 @@ services:
     networks: 
       - sa_net
 
-  joiner-action-english-1:
+  grouper-action-percentile:
     build:
-      context: ./joinerActionEnglish
-      dockerfile: ../rabbitUser.Dockerfile
-    environment:
-      - PYTHONUNBUFFERED=1
-      - NODE_ID=0
-    env_file:
-      - .env
-    volumes:
-      - ./internalCommunication:/internalCommunication
-      - ./entryParsing:/entryParsing
-      - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
-    networks: 
-      - sa_net
-
-  joiner-action-english-2:
-    build:
-      context: ./joinerActionEnglish
-      dockerfile: ../rabbitUser.Dockerfile
-    environment:
-      - PYTHONUNBUFFERED=1
-      - NODE_ID=1
-    env_file:
-      - .env
-    volumes:
-      - ./internalCommunication:/internalCommunication
-      - ./entryParsing:/entryParsing
-      - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
-    networks: 
-      - sa_net
-
-  filterer-english:
-    build:
-      context: ./filtererEnglish
-      dockerfile: ../rabbitUser.Dockerfile
-    environment:
-      - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
-    volumes:
-      - ./internalCommunication:/internalCommunication
-      - ./entryParsing:/entryParsing
-      - ./filterer:/filterer
-    networks: 
-      - sa_net
-
-  grouper-action-english:
-    build:
-      context: ./grouperActionEnglish
+      context: ./grouperActionPercentile
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
@@ -131,25 +80,9 @@ services:
     networks: 
       - sa_net
 
-  joiner-english-consolidator:
+  joiner-action-percentile-1:
     build:
-      context: ./joinerEnglishConsolidator
-      dockerfile: ../rabbitUser.Dockerfile
-    environment:
-      - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
-    volumes:
-      - ./internalCommunication:/internalCommunication
-      - ./entryParsing:/entryParsing
-      - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
-    networks:
-      - sa_net
-    
-  joiner-english-count-1:
-    build:
-      context: ./joinerEnglishCount
+      context: ./joinerActionPercentile
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
@@ -161,12 +94,12 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./joiner:/joiner
-    networks:
+    networks: 
       - sa_net
 
-  joiner-english-count-2:
+  joiner-action-percentile-2:
     build:
-      context: ./joinerEnglishCount
+      context: ./joinerActionPercentile
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
@@ -178,12 +111,12 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./joiner:/joiner
-    networks:
+    networks: 
       - sa_net
 
-  joiner-stream-consolidator:
+  sorter-consolidator-action-percentile:
     build:
-      context: ./joinerStreamConsolidator
+      context: ./sorterConsolidatorActionPercentile
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
@@ -193,8 +126,8 @@ services:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
-    networks:
+      - ./sorter:/sorter
+    networks: 
       - sa_net
 
 networks:

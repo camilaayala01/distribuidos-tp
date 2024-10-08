@@ -16,7 +16,7 @@ class BorderNodeCommunication:
         self._clientSocket = socket
         # dispatcher
         self._internalCommunication = InternalCommunication(os.getenv('RESP_DISP'), os.getenv('NODE_ID'))
-        self._accepterCommunication = InternalCommunication("Accepter")
+        self._accepterCommunication = InternalCommunication()
 
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.sendClient)

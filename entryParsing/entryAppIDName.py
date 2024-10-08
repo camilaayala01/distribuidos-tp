@@ -13,8 +13,8 @@ class EntryAppIDName(EntryInterface):
         return appIDBytes + nameBytes
 
     def __str__(self):
-        return f"EntryAppIDName(appID={self._appID}, name={self._name})"
-    
+        return f'{self._appID}, {self._name};\n'
+
     @classmethod
     def header(cls):
         return "appID, name\n"

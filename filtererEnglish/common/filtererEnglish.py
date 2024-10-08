@@ -14,8 +14,8 @@ class FiltererEnglish(Filterer):
     def _sendToNext(self, header: HeaderWithSender, filteredEntries: list[EntryAppIDNameReviewText]):
         msg = header.serialize()
         for entry in filteredEntries:
-            msg += EntryAppIDName(entry._appID, entry._name)
-        self._internalCommunication.sendToEnglishNegativeReviewsGrouper(filteredEntries)
+            msg += EntryAppIDName(entry._appID, entry._name).serialize()
+        self._internalCommunication.sendToEnglishNegativeReviewsGrouper(msg)
 
         logging.info(f'action: sending batch to english negative reviews grouper | result: success')
 

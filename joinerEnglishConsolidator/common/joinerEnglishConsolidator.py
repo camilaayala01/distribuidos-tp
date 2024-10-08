@@ -3,11 +3,12 @@ from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.utils import getShardingKey
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
 from joiner.common.joinerConsolidator import JoinerConsolidator
+import logging
 
 class JoinerEnglishConsolidator(JoinerConsolidator):
     def __init__(self): 
-        super().__init__(type=os.getenv('CONS_JOIN_ENG_NEG_REV'), nextNodeCount=1, 
-                        priorNodeCount=int(os.getenv('JOIN_ENG_COUNT_MORE_REV_COUNT')), entriesType=EntryAppIDNameReviewCount)
+        super().__init__(type=os.getenv('CONS_JOIN_ENG_NEG_REV'), nextNodeCount=int(os.getenv('JOIN_ENG_COUNT_MORE_REV_COUNT')), 
+                        priorNodeCount=int(os.getenv('JOIN_ENG_NEG_REV_COUNT')), entriesType=EntryAppIDNameReviewCount)
 
     def sendToNextStep(self, id: str, data: bytes):
         self._internalCommunication.sendToEnglishNegativeReviewsCounter(id, data)
@@ -22,16 +23,17 @@ class JoinerEnglishConsolidator(JoinerConsolidator):
         headerSerialized=self.getHeaderSerialized()
         for i in range(self._nextNodeCount):
             if i == priorID:
-                self.sendToNextStep(i, headerSerialized + data)
+                self.sendToNextStep(str(i), headerSerialized + data)
             else:
                 # send empty payload so they can keep track of the fragment number
-                self.sendToNextStep(i, headerSerialized)
+                self.sendToNextStep(str(i), headerSerialized)
+            logging.info(f'action: send batch to joiner counter with id {i} | {header} | result: success')
 
     """
     reshards and distributes
     
     """
-    def sendToNextResharding(self, data: bytes):
+    def sendToNextResharding(self, header: HeaderWithSender, data: bytes):
         entries = self._entriesType.deserialize(data)
         resultingBatches = [bytes() for _ in range(self._nextNodeCount)]
         for entry in entries:
@@ -39,11 +41,13 @@ class JoinerEnglishConsolidator(JoinerConsolidator):
             resultingBatches[shardResult] += entry.serialize()
 
         headerSerialized = self.getHeaderSerialized()
-        for i in range(resultingBatches):
-            self.sendToNextStep(i, headerSerialized + resultingBatches[i])
+        for i in range(len(resultingBatches)):
+            self.sendToNextStep(str(i), headerSerialized + resultingBatches[i])
+            logging.info(f'action: send batch to joiner counter with id {i} | header: {header} | result: success')
 
     def handleSending(self, header: HeaderWithSender, data: bytes):
         if self._priorNodeCount == self._nextNodeCount:
             self.sendToNextWithSameID(header, data)
         else:
-            self.sendToNextResharding(data)
+            self.sendToNextResharding(header, data)
+        

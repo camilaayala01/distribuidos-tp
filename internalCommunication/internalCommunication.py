@@ -7,7 +7,7 @@ PREFETCH_COUNT = 1 # break round robin
 DELIVERY_MODE = 1 # make message transient, doesn't matter yet
 
 class InternalCommunication:
-    def __init__(self, name: str, nodeID: str = None):
+    def __init__(self, name: str = None, nodeID: str = None):
         self._executerName = name
         self._connection = self.startConnection()
         self._channel = self.createChannel()
@@ -124,6 +124,9 @@ class InternalCommunication:
 
     def sendToEnglishNegativeReviewsCounter(self, shardingKey: str, message: bytes):
         self.directSend(os.getenv('JOIN_ENG_COUNT_MORE_REV'), shardingKey, message)
+
+    def sendToStreamJoinerConsolidator(self, message: bytes):
+        self.basicSend(os.getenv('CONS_JOIN_STREAM'), message)
 
         
     # Query 5

@@ -7,7 +7,6 @@ class GrouperActionEnglishNegativeReviews(GrouperReviews):
         super().__init__(HeaderWithSender, os.getenv('GROUP_ENG_NEG_REV'), os.getenv('NODE_ID'))
     
     def sendToNextStep(self, header, result):
-        print(result)
         serializedHeader = header.serialize()
         for entry in result:
             serializedHeader += entry.serialize()

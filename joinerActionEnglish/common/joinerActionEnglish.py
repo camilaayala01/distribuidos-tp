@@ -1,5 +1,6 @@
 import os
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
+from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
 from entryParsing.entryAppIDReviewText import EntryAppIDReviewText
@@ -41,7 +42,7 @@ class JoinerActionNegativeReviewsEnglish(JoinerByAppID):
     def _handleSending(self):
         # could be optimized by sending every once in a while
         # was self._joinedEntries.values()
-        packets = serializeAndFragmentWithSender(maxDataBytes(self._headerType), self._joinedEntries, self._id)
+        packets = serializeAndFragmentWithSender(maxDataBytes(HeaderWithSender), self._joinedEntries, self._id)
         for pack in packets:
             self._sendToNextStep(pack)
         self.reset()

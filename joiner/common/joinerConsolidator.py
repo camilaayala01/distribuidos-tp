@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import logging
 from entryParsing.common.header import Header
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entry import EntryInterface
@@ -32,14 +33,16 @@ class JoinerConsolidator(ABC):
 
     def handleMessage(self, ch, method, properties, body):
         header, data = HeaderWithSender.deserialize(body)
-
+        logging.info(f'action: received batch | {header} | result: success')
         if self._tracker.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
-        
         self._tracker.update(header)
-        self.handleSending(header, data)
-        self._currFragment += 1
+
+        if self._tracker.isDone() or not (self._tracker.isDone() or len(data) == 0):
+            # send only if received batch or if there is nothing more to send
+            self.handleSending(header, data)
+            self._currFragment += 1
         
         if self._tracker.isDone():
             self.reset()

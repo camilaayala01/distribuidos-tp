@@ -1,7 +1,6 @@
 import os
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from joiner.common.joinerNameCountByAppID import JoinerNameCountByAppID
-from entryParsing.common.headerWithSender import HeaderWithSender
 import logging
 
 """

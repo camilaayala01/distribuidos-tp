@@ -2,7 +2,7 @@ import math
 import logging
 from entryParsing.common.table import Table
 from entryParsing.entry import EntryInterface
-import time
+from time import sleep
 MAX_PACKET_SIZE = 8192
 
 def initializeLog():
@@ -114,6 +114,7 @@ def serializeAndFragmentWithTable(socket, maxDataBytes: int, generatorFunction, 
             else:
                 headerBytes = HeaderWithTable(table, fragment, False).serialize()
                 fragment += 1
+                sleep(0.01)
                 socket.send(headerBytes + currPacket)
                 currPacket = entryBytes
     except StopIteration:

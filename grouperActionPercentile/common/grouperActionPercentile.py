@@ -1,4 +1,5 @@
 import os
+import logging
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from grouperReviews.common.grouperReviews import GrouperReviews
 from entryParsing.common.headerWithTable import HeaderWithTable
@@ -13,4 +14,5 @@ class GrouperActionPercentileNegativeReviews(GrouperReviews):
         serializedHeader = header.serialize()
         for i in range(self._nextNodeCount):
             msg = serializedHeader + shardedResults[i]
-            self._internalCommunication.sendToActionNegativeReviewsJoiner(str(id), msg)
+            self._internalCommunication.sendToActionNegativeReviewsJoiner(str(i), msg)
+            logging.info(f"action: sending to joiner action percentile with id {i} | result: success")

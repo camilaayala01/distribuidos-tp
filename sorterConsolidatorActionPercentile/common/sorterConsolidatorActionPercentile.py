@@ -37,6 +37,7 @@ class SorterConsolidatorActionPercentile(Sorter):
     def _removeCount(self, entries: list[EntryAppIDNameReviewCount]):
         newEntries = []
         for entry in entries:
+            print(entry)
             newEntries.append(EntryAppIDName(entry.getAppID(), entry.getName()))
         return newEntries
 
