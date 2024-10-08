@@ -1,12 +1,10 @@
 from threading import Thread
-from time import sleep
 from common.borderCommunication import BorderNodeCommunication
 
 def listenForClient(communication):
     while True:
         msg = communication.receiveFromClient()
         communication.sendInitializer(msg)
-        sleep(0.1)
 
 def main():
     communication = BorderNodeCommunication()
