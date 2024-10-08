@@ -1,4 +1,4 @@
-from .common.joinerEnglishCount import JoinerNegativeReviewsEnglishCount
+from common.joinerEnglishCount import JoinerNegativeReviewsEnglishCount
 
 def main():
     joiner = JoinerNegativeReviewsEnglishCount()

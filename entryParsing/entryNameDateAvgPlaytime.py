@@ -23,6 +23,7 @@ class EntryNameDateAvgPlaytime():
     
     @classmethod
     def deserialize(cls, data: bytes): 
+        
         curr = 0
         entries = []
         while len(data) > curr:
@@ -31,6 +32,7 @@ class EntryNameDateAvgPlaytime():
                 entries.append(entry)
             except:
                 raise Exception("Can't deserialize entry")
+        return entries
 
 
     def getDate(self) -> str:

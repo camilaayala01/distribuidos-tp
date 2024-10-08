@@ -1,12 +1,13 @@
 import os
+import logging
 from entryParsing.common.header import Header
-from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
+from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
 from entryParsing.entryName import EntryName
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
-from entryParsing.entryOSCount import EntryOSCount
 from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.defaultTracker import DefaultTracker
+from entryParsing.common.utils import initializeLog
 
 REQUIRED_REVIEWS=5000
 
@@ -17,7 +18,8 @@ Query 4
 """
 
 class JoinerNegativeReviewsEnglishCount:
-    def __init__(self, id: str):
+    def __init__(self):
+        initializeLog()
         id = os.getenv('NODE_ID')
         self._internalCommunication = InternalCommunication(name=os.getenv('JOIN_ENG_COUNT_MORE_REV'), nodeID=id)
         self._id = int(id)
@@ -56,21 +58,32 @@ class JoinerNegativeReviewsEnglishCount:
     # should have a fragment number to stream results to client
     def handleMessage(self, ch, method, properties, body):
         header, data = Header.deserialize(body)
+        logging.info(f'action: received batch | {header} | result: success')
         if self._packetTracker.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
+        self._packetTracker.update(header)
         entries = EntryAppIDNameReviewCount.deserialize(data)
         ready = self._handleEntries(entries)
         self._handleSending(ready)
         ch.basic_ack(delivery_tag = method.delivery_tag)
         
     def _sendToNextStep(self, data: bytes):
-        self._internalCommunication.sendToDispatcher(data)
+        self._internalCommunication.sendToStreamJoinerConsolidator(data)
 
     def _handleSending(self, ready: list[EntryName]):
+        header = HeaderWithSender(self._id, self._fragnum, self._packetTracker.isDone())
+        if self._packetTracker.isDone() and len(ready) == 0:
+            self._sendToNextStep(header.serialize())
+            logging.info(f'action: sending to consolidator empty batch | {header} | result: success')
+            self.reset()
+
+        if len(ready) == 0:
+            return
+        
+        logging.info(f'action: sending to consolidator batch | {header} | result: success')
         namesBytes = EntryName.serializeAll(ready)        
-        headerBytes = HeaderWithQueryNumber(self._fragnum, self._packetTracker.isDone(), 4).serialize()
-        self._sendToNextStep(headerBytes + namesBytes)
+        self._sendToNextStep(header.serialize() + namesBytes)
 
         if self._packetTracker.isDone():
             self.reset()

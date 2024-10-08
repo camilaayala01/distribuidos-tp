@@ -1,4 +1,4 @@
-from .common.joinerEnglishConsolidator import JoinerEnglishConsolidator
+from common.joinerEnglishConsolidator import JoinerEnglishConsolidator
 
 def main():
     joiner = JoinerEnglishConsolidator()

@@ -1,15 +1,15 @@
 from abc import ABC, abstractmethod
+import logging
 from entryParsing.common.headerWithTable import HeaderWithTable
-from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
+from entryParsing.common.headerWithSender import HeaderWithSender
+from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender, initializeLog
 from entryParsing.entry import EntryInterface
-from entryParsing.entryAppIDName import EntryAppIDName
-from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
-from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.defaultTracker import DefaultTracker
 
 class JoinerByAppID(ABC):
     def __init__(self, type: str, id: str):
+        initializeLog()
         self._internalCommunication = InternalCommunication(type, id)
         self._id = int(id)
         self._gamesTracker = DefaultTracker()
@@ -23,14 +23,12 @@ class JoinerByAppID(ABC):
     def joinReviews(self, reviews: list[EntryInterface]):
         pass
 
-    @classmethod
     @abstractmethod
-    def gamesEntryReceivedType(cls) -> EntryInterface:
+    def gamesEntryReceivedType(self) -> EntryInterface:
         pass
 
-    @classmethod
     @abstractmethod
-    def reviewsEntryReceivedType(cls) -> EntryInterface:
+    def reviewsEntryReceivedType(self) -> EntryInterface:
         pass
 
     @abstractmethod
@@ -42,7 +40,7 @@ class JoinerByAppID(ABC):
     
     def handleReviewsMessage(self, header: HeaderWithTable, data: bytes):
         self._reviewsTracker.update(header)
-        reviews = JoinerByAppID.gamesEntryReceivedType().deserialize(data)
+        reviews = self.reviewsEntryReceivedType().deserialize(data)
 
         if not self._gamesTracker.isDone():
             self._unjoinedReviews.extend(reviews)
@@ -52,7 +50,7 @@ class JoinerByAppID(ABC):
 
     def handleGamesMessage(self, header: HeaderWithTable, data: bytes):
         self._gamesTracker.update(header)
-        entries = JoinerByAppID.gamesEntryReceivedType().deserialize(data)
+        entries = self.gamesEntryReceivedType().deserialize(data)
         for entry in entries:
             # key: app id, value: EntryNameReviewCount initialized with 0 count
             self.storeGamesEntry(entry)
@@ -62,7 +60,7 @@ class JoinerByAppID(ABC):
         pass
 
     def _handleSending(self):
-        packets = serializeAndFragmentWithSender(maxDataBytes(), self.entriesToSend(), self._id)
+        packets = serializeAndFragmentWithSender(maxDataBytes(HeaderWithSender), self.entriesToSend(), self._id)
         for pack in packets:
             self._sendToNextStep(pack)
         self.reset()
@@ -78,7 +76,7 @@ class JoinerByAppID(ABC):
 
     def handleMessage(self, ch, method, properties, body):
         header, batch = HeaderWithTable.deserialize(body)
-
+        logging.info(f'action: received batch from table {header.getTable()} | {header} | result: success')
         if header.isGamesTable():
             if self._gamesTracker.isDuplicate(header):
                 ch.basic_ack(delivery_tag = method.delivery_tag)
@@ -92,6 +90,7 @@ class JoinerByAppID(ABC):
             self.handleReviewsMessage(header, batch)
         
         if self.finishedReceiving():
+            logging.info(f'action: finished receiving data | result: success')
             self.joinReviews(self._unjoinedReviews)
             self._handleSending()
 

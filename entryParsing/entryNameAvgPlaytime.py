@@ -13,7 +13,7 @@ class EntryNameAvgPlaytime(EntrySorterTopFinder):
         return nameBytes + avgPlaytimeBytes   
 
     def __str__(self):
-        return f"EntryNameAvgPlaytime(name={self._name}, avgPlaytime={self._avgPlaytime})"
+        return f"{self._name},{self._avgPlaytime};"
     
     def csv(self):
         return f"{self._name}, {self._avgPlaytime}\n"

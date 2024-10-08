@@ -8,6 +8,9 @@ class HeaderWithTable(Header):
         self._table = table
         super().__init__(fragment, eof)
 
+    def getTable(self):
+        return self._table
+
     def isGamesTable(self) -> bool:
         return Table.GAMES == self._table
     
@@ -23,7 +26,10 @@ class HeaderWithTable(Header):
     @classmethod
     def size(cls):
         return super().size() + TABLE_LEN
-
+    
+    def __str__(self):
+        return f"fragment: {self._fragment} | eof: {self._eof} | table: {self._table}"
+    
     @staticmethod
     def deserialize(data: bytes) -> tuple['HeaderWithTable', bytes]:
         curr = 0

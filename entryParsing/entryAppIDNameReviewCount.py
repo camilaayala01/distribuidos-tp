@@ -24,7 +24,7 @@ class EntryAppIDNameReviewCount(EntrySorterTopFinder):
 
     def serialize(self) -> bytes:
         appIDBytes = serializeAppID(self._appID)
-        nameBytes = serializeGameName(self._appID)
+        nameBytes = serializeGameName(self._name)
         countBytes = serializeCount(self._count)
 
         return appIDBytes + nameBytes + countBytes

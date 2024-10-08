@@ -1,6 +1,7 @@
 import os
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from joiner.common.joinerNameCountByAppID import JoinerNameCountByAppID
+import logging
 
 """
 Entities that join all entries maintaining total counts for all
@@ -14,6 +15,8 @@ class JoinerIndiePositiveReviews(JoinerNameCountByAppID):
 
     def _sendToNextStep(self, msg: bytes):
         self._internalCommunication.sendToIndiePositiveReviewsConsolidator(msg)
+        logging.info("action: sending joined batch to consolidator | result: success")
 
     def entriesToSend(self)-> list[EntryNameReviewCount]:
         return self._joinedEntries.values()
+        

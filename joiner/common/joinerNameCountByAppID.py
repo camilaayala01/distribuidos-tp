@@ -1,5 +1,4 @@
 from abc import abstractmethod
-import os
 from entryParsing.entry import EntryInterface
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
@@ -9,7 +8,6 @@ from joiner.common.joinerByAppID import JoinerByAppID
 class JoinerNameCountByAppID(JoinerByAppID):
     def __init__(self, id: str, type: str):
         super().__init__(type=type, id=id)
-        
         self._id = int(id)
         # dict of entry name, review count
         self._joinedEntries = {}
@@ -20,12 +18,10 @@ class JoinerNameCountByAppID(JoinerByAppID):
             if id in self._joinedEntries:
                 self._joinedEntries[id] = self._joinedEntries[id].addToCount(review.getCount())
         
-    @classmethod
-    def gamesEntryReceivedType(cls):
+    def gamesEntryReceivedType(self):
         return EntryAppIDName
     
-    @classmethod
-    def reviewsEntryReceivedType(cls):
+    def reviewsEntryReceivedType(self):
         return EntryAppIDReviewCount
     
     def storeGamesEntry(self, entry: EntryAppIDName):

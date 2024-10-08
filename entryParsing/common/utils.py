@@ -1,8 +1,24 @@
 import math
+import logging
 from entryParsing.common.table import Table
 from entryParsing.entry import EntryInterface
-import time
+from time import sleep
 MAX_PACKET_SIZE = 8192
+
+def initializeLog():
+    """
+    Python custom logging initialization
+
+    Current timestamp is added to be able to identify in docker
+    compose logs the date when the log has arrived
+    """
+    logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        level=logging.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S',
+    )
+    logging.getLogger("pika").setLevel(logging.WARNING)
+
 
 def boolToInt(boolean: bool) -> int:
     match boolean:
@@ -29,12 +45,11 @@ def strToBoolInt(string: str) -> int:
         case "":
             return 0
         case _:
-            print(string)
             raise(Exception("Boolean field could not be converted"))
 
 
-def getShardingKey(id, nodeCount) -> int:
-    return id % nodeCount
+def getShardingKey(id: str, nodeCount: int) -> int:
+    return int(id) % nodeCount
 
 def maxDataBytes(headerType: type) -> int:
     return MAX_PACKET_SIZE - headerType.size()
@@ -89,7 +104,7 @@ def serializeAndFragmentWithTable(socket, maxDataBytes: int, generatorFunction, 
     fragment = 1
     currPacket = bytes()
     generator = generatorFunction()
-    
+    logging.info(f'action: start sending table {table} | result: success')
     try:
         while True:
             entry = next(generator)
@@ -99,11 +114,10 @@ def serializeAndFragmentWithTable(socket, maxDataBytes: int, generatorFunction, 
             else:
                 headerBytes = HeaderWithTable(table, fragment, False).serialize()
                 fragment += 1
+                sleep(0.01)
                 socket.send(headerBytes + currPacket)
-                time.sleep(0.1)
                 currPacket = entryBytes
     except StopIteration:
-        print("sending eof")
-        print(f' last fragment number is {fragment}')
         packet = HeaderWithTable(table, fragment, True).serialize() + currPacket
         socket.send(packet)
+        logging.info(f'action: send table {table} end of file | result: success')

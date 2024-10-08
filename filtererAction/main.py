@@ -1,4 +1,4 @@
-from filtererAction.common.filtererAction import FiltererAction
+from common.filtererAction import FiltererAction
 
 def main():
     filterer = FiltererAction()

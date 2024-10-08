@@ -1,5 +1,6 @@
 import math
 import os
+import logging
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithQueryNumber
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
@@ -36,13 +37,14 @@ class SorterConsolidatorActionPercentile(Sorter):
     def _removeCount(self, entries: list[EntryAppIDNameReviewCount]):
         newEntries = []
         for entry in entries:
+            print(entry)
             newEntries.append(EntryAppIDName(entry.getAppID(), entry.getName()))
         return newEntries
 
     def _serializeAndFragment(self):
         self._filterByPercentile()
         entriesWithRemoved = self._removeCount(self._partialTop)
-        serializeAndFragmentWithQueryNumber(maxDataBytes(), entriesWithRemoved, 5)
+        return serializeAndFragmentWithQueryNumber(maxDataBytes(self._headerType), entriesWithRemoved, 5)
 
     def getBatchTop(self, batch: list[EntryAppIDNameReviewCount]) -> list[EntryAppIDNameReviewCount]:
         return self._entryType.sort(batch, False)
@@ -58,3 +60,4 @@ class SorterConsolidatorActionPercentile(Sorter):
 
     def _sendToNextStep(self, data: bytes):
         self._internalCommunication.sendToDispatcher(data)
+        logging.info(f'action: send final results to dispatcher | result: success')

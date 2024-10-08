@@ -1,4 +1,4 @@
-from .common.joinerIndieConsolidator import JoinerIndiePositiveConsolidator
+from common.joinerIndieConsolidator import JoinerIndiePositiveConsolidator
 
 def main():
     joiner = JoinerIndiePositiveConsolidator()

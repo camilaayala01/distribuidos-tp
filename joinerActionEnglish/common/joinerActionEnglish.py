@@ -1,6 +1,6 @@
 import os
-from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
+from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
 from entryParsing.entryAppIDReviewText import EntryAppIDReviewText
@@ -14,7 +14,6 @@ Query 5
 class JoinerActionNegativeReviewsEnglish(JoinerByAppID):
     def __init__(self):
         super().__init__(type=os.getenv('JOIN_ENG_NEG_REV'), id=os.getenv('NODE_ID'))
-
         self._joinedEntries = []
         # key: appid, value: name
         self._gamesReceived = {}
@@ -26,12 +25,10 @@ class JoinerActionNegativeReviewsEnglish(JoinerByAppID):
             if name is not None:
                 self._joinedEntries.append(EntryAppIDNameReviewText(id, name, review.getReviewText()))
 
-    @classmethod
-    def gamesEntryReceivedType(cls):
+    def gamesEntryReceivedType(self):
         return EntryAppIDName
     
-    @classmethod
-    def reviewsEntryReceivedType(cls):
+    def reviewsEntryReceivedType(self):
         return EntryAppIDReviewText
     
     def reset(self):
@@ -44,7 +41,8 @@ class JoinerActionNegativeReviewsEnglish(JoinerByAppID):
 
     def _handleSending(self):
         # could be optimized by sending every once in a while
-        packets = serializeAndFragmentWithSender(maxDataBytes(), self._joinedEntries.values(), self._id)
+        # was self._joinedEntries.values()
+        packets = serializeAndFragmentWithSender(maxDataBytes(HeaderWithSender), self._joinedEntries, self._id)
         for pack in packets:
             self._sendToNextStep(pack)
         self.reset()

@@ -1,4 +1,4 @@
-from .common.joinerStreamConsolidator import JoinerStreamConsolidator
+from common.joinerStreamConsolidator import JoinerStreamConsolidator
 
 def main():
     joiner = JoinerStreamConsolidator()

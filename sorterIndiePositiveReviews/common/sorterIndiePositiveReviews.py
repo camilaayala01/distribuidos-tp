@@ -1,6 +1,6 @@
 import os
+import logging
 from entryParsing.common.header import Header
-from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from packetTracker.packetTracker import PacketTracker
@@ -16,7 +16,7 @@ class SorterIndiePositiveReviews(Sorter):
         nodeCount = os.getenv('SORT_INDIE_POS_REV_COUNT')
         nodeID = os.getenv('NODE_ID')
         super().__init__(id=nodeID, type=os.getenv('SORT_INDIE_POS_REV'), headerType=Header, 
-                    entryType=EntryNameReviewCount, topAmount=topAmount, tracker=PacketTracker(nodeCount, nodeID))
+                    entryType=EntryNameReviewCount, topAmount=topAmount, tracker=PacketTracker(int(nodeCount), int(nodeID)))
         self._id = int(nodeID)
         
     def getBatchTop(self, batch: list[EntryNameReviewCount]) -> list[EntryNameReviewCount]:
@@ -24,7 +24,8 @@ class SorterIndiePositiveReviews(Sorter):
         return sortedBatch[:self._topAmount]
     
     def _serializeAndFragment(self):
-        serializeAndFragmentWithSender(maxDataBytes(), self._partialTop, self._id)
+        return serializeAndFragmentWithSender(maxDataBytes(self._headerType), self._partialTop, self._id)
         
     def _sendToNextStep(self, data: bytes):
         self._internalCommunication.sendToPositiveReviewsSorterConsolidator(data)
+        logging.info(f'action: send final results to consolidator | result: success')

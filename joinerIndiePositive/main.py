@@ -1,4 +1,4 @@
-from .common.joinerIndiePositive import JoinerIndiePositiveReviews
+from common.joinerIndiePositive import JoinerIndiePositiveReviews
 
 def main():
     joiner = JoinerIndiePositiveReviews()

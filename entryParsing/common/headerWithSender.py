@@ -1,6 +1,6 @@
 from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, deserializeSenderID, serializeSenderID
 from entryParsing.common.fieldLen import SENDER_ID_LEN
-from header import Header
+from entryParsing.common.header import Header
 
 class HeaderWithSender(Header):
     def __init__(self,  senderID: int, fragment: int, eof: bool):
@@ -14,6 +14,9 @@ class HeaderWithSender(Header):
     def size(cls):
         return SENDER_ID_LEN + super().size()
 
+    def __str__(self):
+        return f"fragment: {self._fragment} | eof: {self._eof} | sender: {self._sender}"
+    
     def getSenderID(self) -> int:
         return self._sender
     

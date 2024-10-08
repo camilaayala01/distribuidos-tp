@@ -1,7 +1,7 @@
-from .common.joinerActionPercentile import JoinerActionPercentile
+from common.joinerActionPercentile import JoinerActionNegativeReviewsPercentile
 
 def main():
-    joiner = JoinerActionPercentile()
+    joiner = JoinerActionNegativeReviewsPercentile()
     joiner.execute()
 
 if __name__ == "__main__":
