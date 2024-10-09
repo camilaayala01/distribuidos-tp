@@ -51,13 +51,16 @@ class JoinerNegativeReviewsEnglishCount:
                 self._sent.add(id)
                 self._counts.pop(id, None)
             else:
-                self._counts[id] = priorEntry.addToCount(entry.getCount())
+                priorEntry.addToCount(entry.getCount())
+                self._counts[id] = priorEntry
 
         return ready
 
     # should have a fragment number to stream results to client
     def handleMessage(self, ch, method, properties, body):
+        print(body)
         header, data = Header.deserialize(body)
+        print(data)
         logging.info(f'action: received batch | {header} | result: success')
         if self._packetTracker.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)

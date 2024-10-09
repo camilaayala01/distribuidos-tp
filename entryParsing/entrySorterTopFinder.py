@@ -25,6 +25,7 @@ class EntrySorterTopFinder(EntryInterface):
                 entry, curr = cls.deserializeEntry(curr, data)
                 entries.append(entry)
             except (IndexError, UnicodeDecodeError):
+                print(data)
                 raise Exception("There was an error parsing data")
 
         return entries

@@ -13,7 +13,7 @@ class EntryName(EntryInterface):
     def serializeAll(names: list['EntryName']) -> bytes:
         entryBytes = bytes()
         for entry in names:
-            entryBytes+=entry.serialize()
+            entryBytes+=serializeGameName(entry._name)
         return entryBytes
 
     def __str__(self):
