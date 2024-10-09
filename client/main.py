@@ -5,22 +5,26 @@ from common.utils import loadGames, loadReviews
 from entryParsing.common.table import Table
 from entryParsing.common.utils import serializeAndFragmentWithTable
 from entryParsing.common.utils import initializeLog
+from common.client import Client
+import signal 
 
 QUERY_COUNT = 5
 MAX_DATA_BYTES = 8000
 port = "5556"    
 
 def main():
+    client = Client()
+    signal.signal(signal.SIGTERM, client.stop)
     initializeLog()
     context = zmq.Context()
     socket = context.socket(zmq.PAIR)
     socket.connect("tcp://border-node:%s" % port)
-    serializeAndFragmentWithTable(socket, MAX_DATA_BYTES, loadGames, Table.GAMES)
+    serializeAndFragmentWithTable(socket, MAX_DATA_BYTES, loadGames, Table.GAMES) # BOOL PARA PARAR DE LEER
     serializeAndFragmentWithTable(socket, MAX_DATA_BYTES, loadReviews, Table.REVIEWS)
 
     logging.info(f'action: wait for responses | result: success | msg: finalized data sending')
     queriesFullyAnswered = 0
-    while queriesFullyAnswered < QUERY_COUNT:
+    while queriesFullyAnswered < QUERY_COUNT: # and keep_reading:
         msg = socket.recv()
         isQueryResolved = processResponse(msg)
         if isQueryResolved:

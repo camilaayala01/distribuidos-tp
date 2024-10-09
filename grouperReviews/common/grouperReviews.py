@@ -24,6 +24,9 @@ class GrouperReviews(ABC):
                 appIDCount[entry._appID] = appIDCount[entry._appID] + 1
         return appIDCount
     
+    def stop(self, _signum, _frame):
+        self._internalCommunication.stop()
+
     def _buildResult(self, appIDCount: dict[str, int]) -> list['EntryAppIDReviewCount']:
         result = []
         for (key, value) in appIDCount.items():

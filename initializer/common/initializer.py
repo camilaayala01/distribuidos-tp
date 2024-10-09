@@ -26,6 +26,9 @@ class Initializer:
 
         return positiveReviewEntries, negativeReviewEntries
 
+    def stop(self, _signum, _frame):
+        self._internalCommunication.stop()
+
     def handleMessage(self, ch, method, properties, body):
         header, data = HeaderWithTable.deserialize(body)
         logging.info(f'action: received msg corresponding to table {header.getTable()} | {header}')

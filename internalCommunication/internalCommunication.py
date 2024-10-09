@@ -39,9 +39,14 @@ class InternalCommunication:
             queueName = self._executerName
             self._channel.queue_declare(queue=self._executerName, durable=False)
         self._channel.basic_consume(queue=queueName, on_message_callback=callback)
-        self._channel.start_consuming()
+        try:
+            self._channel.start_consuming()
+        except OSError:
+            logging.info(f'action: gracefully shutting down | result: success')
 
     def stop(self):
+        self._channel.stop_consuming()
+        self._channel.close()
         self._connection.close()
 
     def basicSend(self, queueName: str, message: bytes):
@@ -54,7 +59,6 @@ class InternalCommunication:
                 delivery_mode= DELIVERY_MODE, 
             ))
         
-
     def directSend(self, exchangeName: str, routingKey: str, message: bytes):
         self._channel.exchange_declare(exchange=exchangeName, exchange_type='direct')
         self._channel.basic_publish(exchange=exchangeName, routing_key=routingKey, body=message)

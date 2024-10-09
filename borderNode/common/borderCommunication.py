@@ -22,13 +22,17 @@ class BorderNodeCommunication:
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.sendClient)
 
-    def stop(self):
+    def stop(self, _signum, _):
         self._internalCommunication.stop()
         self._accepterCommunication.stop()
+        self._clientSocket.close()
         
     def receiveFromClient(self):
-        msg = self._clientSocket.recv()
-        logging.info(f'action: receiving batch from client | result: success')
+        try:
+            msg = self._clientSocket.recv()
+            logging.info(f'action: receiving batch from client | result: success')
+        except:
+            msg = ""
         return msg
     
     def sendClient(self, ch, method, properties, body):

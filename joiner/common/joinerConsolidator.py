@@ -18,14 +18,11 @@ class JoinerConsolidator(ABC):
         self._priorNodeCount = priorNodeCount
         self._currFragment = 1
     
-    def stop(self):
+    def stop(self, _signum, _frame):
         self._internalCommunication.stop()
 
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
-
-    def stop(self):
-        self._internalCommunication.stop()
         
     def reset(self):
         self._tracker.reset()

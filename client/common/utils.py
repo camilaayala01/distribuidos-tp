@@ -1,6 +1,8 @@
 import csv
+import sys
 from entryParsing.gameEntry import GameEntry
 from entryParsing.reviewEntry import ReviewEntry
+csv.field_size_limit(sys.maxsize)
 
 """ Games storage location. """
 GAMES_STORAGE_FILEPATH = "./datasets/games-reducido.csv"

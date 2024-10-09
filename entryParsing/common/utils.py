@@ -114,7 +114,7 @@ def serializeAndFragmentWithTable(socket, maxDataBytes: int, generatorFunction, 
             else:
                 headerBytes = HeaderWithTable(table, fragment, False).serialize()
                 fragment += 1
-                sleep(0.01)
+                #sleep(0.01)
                 socket.send(headerBytes + currPacket)
                 currPacket = entryBytes
     except StopIteration:

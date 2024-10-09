@@ -16,7 +16,7 @@ class JoinerByAppID(ABC):
         self._reviewsTracker = DefaultTracker()
         self._unjoinedReviews = []
 
-    def stop(self):
+    def stop(self, _signum, _frame):
         self._internalCommunication.stop()
         
     def execute(self):
