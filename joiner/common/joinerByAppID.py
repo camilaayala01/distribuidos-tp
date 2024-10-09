@@ -40,7 +40,7 @@ class JoinerByAppID(ABC):
 
     def finishedReceiving(self):
         return self._gamesTracker.isDone() and self._reviewsTracker.isDone()
-    
+
     def handleReviewsMessage(self, header: HeaderWithTable, data: bytes):
         self._reviewsTracker.update(header)
         reviews = self.reviewsEntryReceivedType().deserialize(data)
@@ -77,6 +77,12 @@ class JoinerByAppID(ABC):
     def _sendToNextStep(self, msg: bytes):
         pass
 
+    def doSend(self):
+        if self.finishedReceiving():
+            logging.info(f'action: finished receiving data | result: success')
+            self.joinReviews(self._unjoinedReviews)
+            self._handleSending()
+            
     def handleMessage(self, ch, method, properties, body):
         header, batch = HeaderWithTable.deserialize(body)
         logging.info(f'action: received batch from table {header.getTable()} | {header} | result: success')

@@ -96,3 +96,28 @@ def serializeAndFragmentWithQueryNumber(maxDataBytes: int, data: list[EntryInter
     # will have to yield once we have memory restrictions
     packets.append(HeaderWithQueryNumber(fragment, True, queryNumber).serialize() + currPacket)
     return packets
+
+# same as fragmenting with sender, but couldnt modularize
+def serializeAndFragmentWithTable(socket, maxDataBytes: int, generatorFunction, table: Table):
+    from entryParsing.common.headerWithTable import HeaderWithTable
+    fragment = 1
+    currPacket = bytes()
+    generator = generatorFunction()
+    logging.info(f'action: start sending table {table} | result: success')
+    try:
+        while True:
+            entry = next(generator)
+            entryBytes = entry.serialize()
+            if len(entryBytes) > maxDataBytes:
+                continue
+            elif len(currPacket) + len(entryBytes) <= maxDataBytes:
+                currPacket += entryBytes
+            else:
+                headerBytes = HeaderWithTable(table, fragment, False).serialize()
+                fragment += 1
+                socket.send(headerBytes + currPacket)
+                currPacket = entryBytes
+    except StopIteration:
+        packet = HeaderWithTable(table, fragment, True).serialize() + currPacket
+        socket.send(packet)
+        logging.info(f'action: send table {table} end of file | result: success')
