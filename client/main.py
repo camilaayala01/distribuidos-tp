@@ -16,7 +16,8 @@ def main():
     serializeAndFragmentWithTable(client, MAX_DATA_BYTES, loadGames, Table.GAMES)
     serializeAndFragmentWithTable(client, MAX_DATA_BYTES, loadReviews, Table.REVIEWS)
 
-    logging.info(f'action: wait for responses | result: success | msg: finalized data sending')
+    if client.isRunning():
+        logging.info(f'action: wait for responses | result: success | msg: finalized data sending')
     queriesFullyAnswered = 0
     while queriesFullyAnswered < QUERY_COUNT and client.isRunning():
         msg = client.receiveFromServer()

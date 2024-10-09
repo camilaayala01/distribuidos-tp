@@ -12,6 +12,9 @@ class GrouperActionEnglishNegativeReviews:
         initializeLog()
         self._internalCommunication = InternalCommunication(os.getenv('GROUP_ENG_NEG_REV'), os.getenv('NODE_ID'))
     
+    def stop(self, _signum, _frame):
+        self._internalCommunication.stop()
+
     def sendToNextStep(self, header, result):
         data = header.serialize()
         for entry in result:

@@ -57,6 +57,8 @@ def processResponse(data: bytes) -> bool:
 
 # same as fragmenting with sender, but couldnt modularize
 def serializeAndFragmentWithTable(client: Client, maxDataBytes: int, generatorFunction, table: Table):
+    if not client.isRunning():
+        return
     fragment = 1
     currPacket = bytes()
     generator = generatorFunction()
