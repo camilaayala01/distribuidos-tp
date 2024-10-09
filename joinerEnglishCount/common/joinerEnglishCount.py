@@ -58,9 +58,7 @@ class JoinerNegativeReviewsEnglishCount:
 
     # should have a fragment number to stream results to client
     def handleMessage(self, ch, method, properties, body):
-        print(body)
         header, data = Header.deserialize(body)
-        print(data)
         logging.info(f'action: received batch | {header} | result: success')
         if self._packetTracker.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)
@@ -80,6 +78,8 @@ class JoinerNegativeReviewsEnglishCount:
             self._sendToNextStep(header.serialize())
             logging.info(f'action: sending to consolidator empty batch | {header} | result: success')
             self.reset()
+            self._fragnum+=1
+            return
 
         if len(ready) == 0:
             return
@@ -87,6 +87,7 @@ class JoinerNegativeReviewsEnglishCount:
         logging.info(f'action: sending to consolidator batch | {header} | result: success')
         namesBytes = EntryName.serializeAll(ready)        
         self._sendToNextStep(header.serialize() + namesBytes)
+        self._fragnum += 1
 
         if self._packetTracker.isDone():
             self.reset()

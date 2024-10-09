@@ -39,8 +39,7 @@ class JoinerConsolidator(ABC):
             return
         self._tracker.update(header)
 
-        if self._tracker.isDone() or not (self._tracker.isDone() or len(data) == 0):
-            # send only if received batch or if there is nothing more to send
+        if self._tracker.isDone() or (not self._tracker.isDone() and not len(data) == 0):
             self.handleSending(header, data)
             self._currFragment += 1
         
