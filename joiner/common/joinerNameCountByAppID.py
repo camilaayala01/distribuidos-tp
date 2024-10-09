@@ -16,7 +16,7 @@ class JoinerNameCountByAppID(JoinerByAppID):
         for review in reviews:
             id = review.getAppID()
             if id in self._joinedEntries:
-                self._joinedEntries[id] = self._joinedEntries[id].addToCount(review.getCount())
+                self._joinedEntries[id].addToCount(review.getCount())
         
     def gamesEntryReceivedType(self):
         return EntryAppIDName
