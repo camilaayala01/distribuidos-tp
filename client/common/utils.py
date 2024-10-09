@@ -36,7 +36,7 @@ def storeResultsQuery(result: str, filepath: str) -> None:
     with open(filepath, 'a+') as file:
         file.write(result)
     
-def loadGames() -> list[GameEntry]:
+def loadGames() -> list[GameEntry]: # type: ignore
     with open(GAMES_STORAGE_FILEPATH, 'r') as file:
         reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
         next(reader)  # Skip header
@@ -53,7 +53,7 @@ def loadGames() -> list[GameEntry]:
             except Exception as e:
                 pass
             
-def loadReviews() -> list[ReviewEntry]:
+def loadReviews() -> list[ReviewEntry]: # type: ignore
     with open(REVIEWS_STORAGE_FILEPATH, 'r') as file:
         reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
         next(reader) #skip header
