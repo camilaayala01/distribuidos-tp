@@ -70,7 +70,7 @@ def serializeAndFragmentWithTable(client: Client, maxDataBytes: int, generatorFu
             else:
                 headerBytes = HeaderWithTable(table, fragment, False).serialize()
                 fragment += 1
-                sleep(1)
+                #sleep(1)
                 client.sendToServer(headerBytes + currPacket)
                 currPacket = entryBytes
     except StopIteration:
