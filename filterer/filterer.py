@@ -16,6 +16,9 @@ class Filterer(ABC):
     def _sendToNext(self, header: Header, filteredEntries: list[EntryInterface]):
         pass
 
+    def stop(self, _signum, _frame):
+        self._internalCommunication.stop()
+
     def handleMessage(self, ch, method, properties, body):
         header, data = self._headerType.deserialize(body)
         logging.info(f'action: received batch | result: success')

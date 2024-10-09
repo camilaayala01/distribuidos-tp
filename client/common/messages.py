@@ -6,6 +6,10 @@ from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from entryParsing.entryOSCount import EntryOSCount
 import logging
+from common.client import Client
+from time import sleep
+from entryParsing.common.table import Table
+from entryParsing.common.headerWithTable import HeaderWithTable
 
 def receiveQuery1Answer(data):
     response = EntryOSCount.deserialize(data)
@@ -49,3 +53,27 @@ def processResponse(data: bytes) -> bool:
             raise(Exception("invalid query num"))
         
     return header.isEOF()
+
+
+# same as fragmenting with sender, but couldnt modularize
+def serializeAndFragmentWithTable(client: Client, maxDataBytes: int, generatorFunction, table: Table):
+    fragment = 1
+    currPacket = bytes()
+    generator = generatorFunction()
+    logging.info(f'action: start sending table {table} | result: success')
+    try:
+        while client.isRunning():
+            entry = next(generator)
+            entryBytes = entry.serialize()
+            if len(currPacket) + len(entryBytes) <= maxDataBytes:
+                currPacket += entryBytes
+            else:
+                headerBytes = HeaderWithTable(table, fragment, False).serialize()
+                fragment += 1
+                #sleep(1)
+                client.sendToServer(headerBytes + currPacket)
+                currPacket = entryBytes
+    except StopIteration:
+        packet = HeaderWithTable(table, fragment, True).serialize() + currPacket
+        client.sendToServer(packet)
+        logging.info(f'action: send table {table} end of file | result: success')

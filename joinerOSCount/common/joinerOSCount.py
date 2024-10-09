@@ -25,7 +25,10 @@ class JoinerOSCount:
         self._mac = 0
         self._linux = 0
         self._total = 0
-
+        
+    def stop(self, _signum, _frame):
+        self._internalCommunication.stop()
+    
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 

@@ -11,6 +11,9 @@ class GrouperOSCounts:
         initializeLog()
         self._internalCommunication = InternalCommunication(os.getenv('GROUP_OS'), os.getenv('NODE_ID'))
 
+    def stop(self, _signum, _frame):
+        self._internalCommunication.stop()
+
     def handleMessage(self, ch, method, properties, body):
         logging.info(f'action: receiving batch from initializer | result: success')
         header, data = Header.deserialize(body)

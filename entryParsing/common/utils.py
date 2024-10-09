@@ -1,8 +1,7 @@
 import math
 import logging
-from entryParsing.common.table import Table
 from entryParsing.entry import EntryInterface
-from time import sleep
+
 MAX_PACKET_SIZE = 8192
 
 def initializeLog():

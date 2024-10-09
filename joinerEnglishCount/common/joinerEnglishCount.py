@@ -28,6 +28,9 @@ class JoinerNegativeReviewsEnglishCount:
         self._sent = set()
         self._fragnum = 1
 
+    def stop(self, _signum, _frame):
+        self._internalCommunication.stop()
+
     def reset(self):
         self._packetTracker.reset()
         self._counts = {}
