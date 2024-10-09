@@ -12,7 +12,8 @@ class InternalCommunication:
         self._connection = self.startConnection()
         self._channel = self.createChannel()
         self._nodeID = nodeID
-        logging.info(f'action: initialized an entity | result: success | msg: binded to queue {name}')
+        if name != None:
+            logging.info(f'action: initialized an entity | result: success | msg: binded to queue {name}')
 
     def startConnection(self) -> pika.BlockingConnection:
         return pika.BlockingConnection(
@@ -39,10 +40,10 @@ class InternalCommunication:
             queueName = self._executerName
             self._channel.queue_declare(queue=self._executerName, durable=False)
         self._channel.basic_consume(queue=queueName, on_message_callback=callback)
-        #try:
-        self._channel.start_consuming()
-        #except:
-        logging.info(f'action: gracefully shutting down | result: success')
+        try:
+            self._channel.start_consuming()
+        except:
+            logging.info(f'action: gracefully shutting down | result: success')
 
     def stop(self):
         self._channel.stop_consuming()

@@ -21,6 +21,8 @@ def main():
     queriesFullyAnswered = 0
     while queriesFullyAnswered < QUERY_COUNT and client.isRunning():
         msg = client.receiveFromServer()
+        if msg == None:
+            continue
         isQueryResolved = processResponse(msg)
         if isQueryResolved:
             queriesFullyAnswered += 1

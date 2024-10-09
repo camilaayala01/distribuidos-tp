@@ -147,8 +147,6 @@ class Initializer:
                 headerBytes = HeaderWithTable(header.getTable(), self._query_5_reviews_fragment, True).serialize()
                 self._internalCommunication.sendToActionAllNegativeReviewsGrouper(headerBytes + self._query_5_reviews)
 
-            self._internalCommunication.sendToActionAllNegativeReviewsGrouper(serializedHeader + entriesQuery5)
-
             ch.basic_ack(delivery_tag = method.delivery_tag)
             logging.info(f'action: sending Reviews table batch | result: success')
 
