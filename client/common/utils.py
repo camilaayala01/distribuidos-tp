@@ -10,7 +10,7 @@ GAMES_STORAGE_FILEPATH = "./datasets/games-reducido.csv"
 """ Reviews storage location. """
 REVIEWS_STORAGE_FILEPATH = "./datasets/reviews-reducido.csv"
 
-QUERY_RESPONSES_PATH = "."
+QUERY_RESPONSES_PATH = "/responses"
 
 def storeResultsQuery1(response: str) -> None:
     filepath = QUERY_RESPONSES_PATH + "/query1.txt"

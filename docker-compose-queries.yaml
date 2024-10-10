@@ -1,4 +1,4 @@
-services:  
+services:
   client:
     build:
       context: ./client
@@ -10,7 +10,8 @@ services:
     volumes:
       - ./entryParsing:/entryParsing
       - ~/.kaggle/distribuidos:/datasets
-    networks: 
+      - ./client/responses:/responses
+    networks:
       - sa_net
     depends_on:
       - border-node
@@ -26,7 +27,7 @@ services:
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
-    networks: 
+    networks:
       - sa_net
     depends_on:
       - initializer
@@ -69,7 +70,7 @@ services:
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
-    networks: 
+    networks:
       - sa_net
 
   filterer-indie:
@@ -84,7 +85,7 @@ services:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./filterer:/filterer
-    networks: 
+    networks:
       - sa_net
 
   filterer-date:
@@ -99,7 +100,7 @@ services:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./filterer:/filterer
-    networks: 
+    networks:
       - sa_net
 
   sorter-avg-playtime-1:
@@ -117,7 +118,7 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./sorter:/sorter
-    networks: 
+    networks:
       - sa_net
 
   sorter-avg-playtime-2:
@@ -135,7 +136,7 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./sorter:/sorter
-    networks: 
+    networks:
       - sa_net
 
   sorter-consolidator-avg-playtime:
@@ -152,7 +153,7 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./sorter:/sorter
-    networks: 
+    networks:
       - sa_net
 
   grouper-indie:
@@ -167,7 +168,7 @@ services:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./grouperReviews:/grouperReviews
-    networks: 
+    networks:
       - sa_net
 
   joiner-indie-positive-1:
@@ -184,7 +185,7 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./joiner:/joiner
-    networks: 
+    networks:
       - sa_net
 
   joiner-indie-positive-2:
@@ -201,7 +202,7 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./joiner:/joiner
-    networks: 
+    networks:
       - sa_net
 
   joiner-indie-consolidator:
@@ -219,7 +220,7 @@ services:
       - ./joiner:/joiner
     networks:
       - sa_net
-    
+
   sorter-indie-positive-reviews-1:
     build:
       context: ./sorterIndiePositiveReviews
@@ -235,7 +236,7 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./sorter:/sorter
-    networks: 
+    networks:
       - sa_net
 
   sorter-indie-positive-reviews-2:
@@ -253,7 +254,7 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./sorter:/sorter
-    networks: 
+    networks:
       - sa_net
 
   sorter-consolidator-indie-top:
@@ -270,7 +271,7 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./sorter:/sorter
-    networks: 
+    networks:
       - sa_net
 
   grouper-os-counts:
@@ -284,7 +285,7 @@ services:
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
-    networks: 
+    networks:
       - sa_net
 
   joiner-os-counts:
@@ -299,7 +300,7 @@ services:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-    networks: 
+    networks:
       - sa_net
 
   filterer-action:
@@ -314,7 +315,7 @@ services:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./filterer:/filterer
-    networks: 
+    networks:
       - sa_net
 
   joiner-action-english-1:
@@ -331,7 +332,7 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./joiner:/joiner
-    networks: 
+    networks:
       - sa_net
 
   joiner-action-english-2:
@@ -348,7 +349,7 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./joiner:/joiner
-    networks: 
+    networks:
       - sa_net
 
   filterer-english:
@@ -363,7 +364,7 @@ services:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./filterer:/filterer
-    networks: 
+    networks:
       - sa_net
 
   grouper-action-english:
@@ -378,7 +379,7 @@ services:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./grouperReviews:/grouperReviews
-    networks: 
+    networks:
       - sa_net
 
   joiner-english-consolidator:
@@ -396,7 +397,7 @@ services:
       - ./joiner:/joiner
     networks:
       - sa_net
-    
+
   joiner-english-count-1:
     build:
       context: ./joinerEnglishCount
@@ -459,7 +460,7 @@ services:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./grouperReviews:/grouperReviews
-    networks: 
+    networks:
       - sa_net
 
   joiner-action-percentile-1:
@@ -476,7 +477,7 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./joiner:/joiner
-    networks: 
+    networks:
       - sa_net
 
   joiner-action-percentile-2:
@@ -493,7 +494,7 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./joiner:/joiner
-    networks: 
+    networks:
       - sa_net
 
   sorter-consolidator-action-percentile:
@@ -509,7 +510,7 @@ services:
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
       - ./sorter:/sorter
-    networks: 
+    networks:
       - sa_net
 
 networks:
