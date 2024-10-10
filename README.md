@@ -67,7 +67,7 @@ En particular, está configurado para correrlo como
 ```
 pero pueden ubicar los archivos en donde deseen
 
-## Como interpretar los resultados de diff
+## Como interpretar los resultados de las querys 4 y 5
 Si se obtiene un mensaje como
 ```
 12c12
