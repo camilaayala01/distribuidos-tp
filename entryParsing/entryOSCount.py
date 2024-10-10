@@ -29,7 +29,7 @@ class EntryOSCount(EntryInterface):
         return windowsBytes + macBytes + linuxBytes + totalBytes
 
     def __str__(self):
-        return f"\nTotal de juegos: {str(self._total)}\nTotal de juegos soportados en Windows: {str(self._windows)}\nTotal de juegos soportados en Linux: {str(self._linux)}\nTotal de juegos soportados en Mac: {str(self._mac)}"
+        return f"Total de juegos: {str(self._total)}\nTotal de juegos soportados en Windows: {str(self._windows)}\nTotal de juegos soportados en Linux: {str(self._linux)}\nTotal de juegos soportados en Mac: {str(self._mac)}"
 
     @classmethod
     def deserialize(cls, data: bytes):      

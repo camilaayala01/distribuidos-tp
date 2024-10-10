@@ -27,7 +27,7 @@ class EntryNameReviewCount(EntrySorterTopFinder):
         return("Name,positive_score\n")
     
     def csv(self):
-        return(f'{self._name}, {self._reviewCount}\n')
+        return(f'{self._name},{self._reviewCount}\n')
 
     def __str__(self):
         return f"{self._name},{self._reviewCount};"

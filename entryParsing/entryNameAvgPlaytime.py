@@ -16,11 +16,11 @@ class EntryNameAvgPlaytime(EntrySorterTopFinder):
         return f"{self._name},{self._avgPlaytime};"
     
     def csv(self):
-        return f"{self._name}, {self._avgPlaytime}\n"
+        return f"{self._name},{self._avgPlaytime}\n"
 
     @classmethod
     def header(self):
-        return f"Name, Average Playtime Forever\n"
+        return f"Name,Average Playtime Forever\n"
     
     @classmethod
     def deserializeEntry(cls, curr: int, data: bytes) -> tuple['EntryNameAvgPlaytime', int]:

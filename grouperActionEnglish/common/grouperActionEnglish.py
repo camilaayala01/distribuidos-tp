@@ -7,6 +7,14 @@ from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
 from entryParsing.entryAppIDName import EntryAppIDName
 
+"""
+Entities that count the amount of reviews in a batch that belong to the same game
+grouping them by AppID
+They receive batches of negative reviews only and responds with App ID, Name of the Game and review count
+More than one entity
+Query 4
+"""
+
 class GrouperActionEnglishNegativeReviews:
     def __init__(self): 
         initializeLog()

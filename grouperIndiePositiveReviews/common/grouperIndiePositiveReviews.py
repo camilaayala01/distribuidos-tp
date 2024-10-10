@@ -4,6 +4,14 @@ from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from entryParsing.common.headerWithTable import HeaderWithTable
 from grouperReviews.common.grouperReviews import GrouperReviews
 
+"""
+Entities that count the amount of reviews in a batch that belong to the same game
+grouping them by AppID and sending the a response with AppID, ReviewCount
+They receive batches of positive reviews only
+More than one entity
+Query 3
+"""
+
 class GrouperIndiePositiveReviews(GrouperReviews):
     def __init__(self): 
         self._nextNodeCount = int(os.getenv('JOIN_INDIE_POS_REV_COUNT'))

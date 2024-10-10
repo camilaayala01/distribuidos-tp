@@ -13,14 +13,14 @@ class EntryAppIDName(EntryInterface):
         return appIDBytes + nameBytes
 
     def __str__(self):
-        return f'{self._appID}, {self._name};\n'
+        return f'{self._appID},{self._name};\n'
 
     @classmethod
     def header(cls):
         return "app_id,Name\n"
     
     def csv(self):
-        return f'{self._appID}, {self._name}\n'
+        return f'{self._appID},{self._name}\n'
     
     @classmethod
     def deserialize(cls, data: bytes) -> list['EntryAppIDName']: 

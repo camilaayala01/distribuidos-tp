@@ -6,6 +6,14 @@ from entryParsing.common.header import Header
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.utils import initializeLog
 
+"""
+Entities that count the amount of reviews in a batch that belong to the same game
+grouping them by AppID and sending the a response with AppID, ReviewCount
+They receive batches of positive reviews only
+More than one entity
+Query 3
+"""
+
 class GrouperOSCounts:
     def __init__(self): 
         initializeLog()
