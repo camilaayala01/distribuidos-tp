@@ -115,3 +115,24 @@ q3_obtenidas="${directorio_obtenidas}/query3.csv"
 
 echo_color "azul" "--Comparando Resultados Query 3--"
 comparar_archivos "$q3_esperadas" "$q3_obtenidas"
+
+# query 4
+
+q4_esperadas="${directorio_esperadas}/query4.csv"
+q4_obtenidas="${directorio_obtenidas}/query4.csv"
+
+echo_color "azul" "--Comparando Resultados Query 4--"
+
+sort "$q4_esperadas" > esperadas_ordenado.csv
+sort "$q4_obtenidas" > obtenidas_ordenado.csv
+
+diferencias=$(diff esperadas_ordenado.csv obtenidas_ordenado.csv)
+
+if [ -z "$diferencias" ]; then
+    echo_color "verde" "Ambos archivos son iguales."
+else
+    echo_color "rojo" "Los archivos de respuestas difieren: (izq esperado, derecha obtenido)"
+    echo_color "amarillo" "$diferencias"
+fi
+
+rm esperadas_ordenado.csv obtenidas_ordenado.csv
