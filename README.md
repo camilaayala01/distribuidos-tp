@@ -56,11 +56,16 @@ Cuando se desee que se frene la ejecución, se debe correr:
 * Para cortar rabbit: `./stop-rabbit.sh`
 * Para cortar los nodos y el cliente: `./stop.sh`
 
-
-
-
-
-
+# Correr script para testear el programa
+Para correr este script, se debe correr el comando 
+```
+./comparison.sh <directorio_esperadas> <directorio_obtenidas>
+```
+En particular, está configurado para correrlo como
+```
+./comparison.sh client/expectedResponses client/responses
+```
+pero pueden ubicar los archivos en donde deseen
 
 
 

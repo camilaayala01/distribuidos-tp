@@ -1,26 +1,32 @@
 #!/bin/bash
 
-# Archivos de texto de entrada
-archivo1="client/expectedResponses/query1.txt"
-archivo2="client/responses/query1.txt"
+if [ "$#" -ne 2 ]; then
+    echo "Uso: $0 <directorio_esperadas> <directorio_obtenidas>"
+    exit 1
+fi
 
-# Función para extraer números basados en la línea que corresponde
+directorio_esperadas="$1"
+directorio_obtenidas="$2"
+
+q1_esperadas="${directorio_esperadas}/query1.txt"
+q1_obtenidas="${directorio_obtenidas}/query1.txt"
+
 function extraer_numero {
     grep "$1" "$2" | awk '{print $NF}'
 }
 
 # Extraer los números de las líneas correspondientes
-total_juegos1=$(extraer_numero "Total de juegos: " "$archivo1")
-total_juegos2=$(extraer_numero "Total de juegos: " "$archivo2")
+total_juegos1=$(extraer_numero "Total de juegos: " "$q1_esperadas")
+total_juegos2=$(extraer_numero "Total de juegos: " "$q1_obtenidas")
 
-total_windows1=$(extraer_numero "Total de juegos soportados en Windows: " "$archivo1")
-total_windows2=$(extraer_numero "Total de juegos soportados en Windows: " "$archivo2")
+total_windows1=$(extraer_numero "Total de juegos soportados en Windows: " "$q1_esperadas")
+total_windows2=$(extraer_numero "Total de juegos soportados en Windows: " "$q1_obtenidas")
 
-total_linux1=$(extraer_numero "Total de juegos soportados en Linux: " "$archivo1")
-total_linux2=$(extraer_numero "Total de juegos soportados en Linux: " "$archivo2")
+total_linux1=$(extraer_numero "Total de juegos soportados en Linux: " "$q1_esperadas")
+total_linux2=$(extraer_numero "Total de juegos soportados en Linux: " "$q1_obtenidas")
 
-total_mac1=$(extraer_numero "Total de juegos soportados en Mac: " "$archivo1")
-total_mac2=$(extraer_numero "Total de juegos soportados en Mac: " "$archivo2")
+total_mac1=$(extraer_numero "Total de juegos soportados en Mac: " "$q1_esperadas")
+total_mac2=$(extraer_numero "Total de juegos soportados en Mac: " "$q1_obtenidas")
 
 # Función para imprimir en colores
 function echo_color {
