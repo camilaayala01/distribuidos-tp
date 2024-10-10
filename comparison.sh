@@ -136,3 +136,24 @@ else
 fi
 
 rm esperadas_ordenado.csv obtenidas_ordenado.csv
+
+# query 5
+
+q5_esperadas="${directorio_esperadas}/query5.csv"
+q5_obtenidas="${directorio_obtenidas}/query5.csv"
+
+echo_color "azul" "--Comparando Resultados Query 5--"
+
+sort "$q5_esperadas" > esperadas_ordenado.csv
+sort "$q5_obtenidas" > obtenidas_ordenado.csv
+
+diferencias=$(diff esperadas_ordenado.csv obtenidas_ordenado.csv)
+
+if [ -z "$diferencias" ]; then
+    echo_color "verde" "Ambos archivos son iguales."
+else
+    echo_color "rojo" "Los archivos de respuestas difieren: (izq esperado, derecha obtenido)"
+    echo_color "amarillo" "$diferencias"
+fi
+
+rm esperadas_ordenado.csv obtenidas_ordenado.csv
