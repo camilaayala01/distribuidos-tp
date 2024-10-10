@@ -12,7 +12,8 @@ class InternalCommunication:
         self._connection = self.startConnection()
         self._channel = self.createChannel()
         self._nodeID = nodeID
-        logging.info(f'action: initialized an entity | result: success | msg: binded to queue {name}')
+        if name != None:
+            logging.info(f'action: initialized an entity | result: success | msg: binded to queue {name}')
 
     def startConnection(self) -> pika.BlockingConnection:
         return pika.BlockingConnection(

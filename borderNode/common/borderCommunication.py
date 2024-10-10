@@ -15,6 +15,7 @@ class BorderNodeCommunication:
         socket = context.socket(zmq.PAIR)
         socket.bind("tcp://*:5556")
         self._clientSocket = socket
+        self._clientSocket.setsockopt(zmq.RCVTIMEO, 100)
         # dispatcher
         self._internalCommunication = InternalCommunication(os.getenv('RESP_DISP'), os.getenv('NODE_ID'))
         self._accepterCommunication = InternalCommunication()
@@ -36,7 +37,6 @@ class BorderNodeCommunication:
         return self._running
 
     def receiveFromClient(self):
-        self._clientSocket.setsockopt(zmq.RCVTIMEO, 100)
         try:
             msg = self._clientSocket.recv()
             logging.info(f'action: receiving batch from client | result: success')

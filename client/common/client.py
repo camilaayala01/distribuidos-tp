@@ -6,6 +6,7 @@ class Client:
         socket = context.socket(zmq.PAIR)
         socket.connect("tcp://border-node:%s" % "5556")
         self._socket = socket
+        self._socket.setsockopt(zmq.RCVTIMEO, 100)
         self._working = True
 
     def stop(self, _signum, _frame):
@@ -15,7 +16,10 @@ class Client:
         self._socket.close()
 
     def receiveFromServer(self):
-        return self._socket.recv()
+        try:
+            return self._socket.recv()
+        except zmq.error.Again:
+            return None
     
     def sendToServer(self, msg):
         self._socket.send(msg)
