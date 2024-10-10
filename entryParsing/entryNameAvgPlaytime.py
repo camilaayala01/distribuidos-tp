@@ -20,7 +20,7 @@ class EntryNameAvgPlaytime(EntrySorterTopFinder):
 
     @classmethod
     def header(self):
-        return f"Name,Average Playtime Forever\n"
+        return f"Name,Average playtime forever\n"
     
     @classmethod
     def deserializeEntry(cls, curr: int, data: bytes) -> tuple['EntryNameAvgPlaytime', int]:
