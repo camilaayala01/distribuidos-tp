@@ -8,27 +8,6 @@ fi
 directorio_esperadas="$1"
 directorio_obtenidas="$2"
 
-q1_esperadas="${directorio_esperadas}/query1.txt"
-q1_obtenidas="${directorio_obtenidas}/query1.txt"
-
-function extraer_numero {
-    grep "$1" "$2" | awk '{print $NF}'
-}
-
-# Extraer los números de las líneas correspondientes
-total_juegos1=$(extraer_numero "Total de juegos: " "$q1_esperadas")
-total_juegos2=$(extraer_numero "Total de juegos: " "$q1_obtenidas")
-
-total_windows1=$(extraer_numero "Total de juegos soportados en Windows: " "$q1_esperadas")
-total_windows2=$(extraer_numero "Total de juegos soportados en Windows: " "$q1_obtenidas")
-
-total_linux1=$(extraer_numero "Total de juegos soportados en Linux: " "$q1_esperadas")
-total_linux2=$(extraer_numero "Total de juegos soportados en Linux: " "$q1_obtenidas")
-
-total_mac1=$(extraer_numero "Total de juegos soportados en Mac: " "$q1_esperadas")
-total_mac2=$(extraer_numero "Total de juegos soportados en Mac: " "$q1_obtenidas")
-
-# Función para imprimir en colores
 function echo_color {
     color=$1
     texto=$2
@@ -51,7 +30,27 @@ function echo_color {
     esac
 }
 
-# Función para comparar y mostrar resultados
+# query 1
+
+q1_esperadas="${directorio_esperadas}/query1.txt"
+q1_obtenidas="${directorio_obtenidas}/query1.txt"
+
+function extraer_numero {
+    grep "$1" "$2" | awk '{print $NF}'
+}
+
+total_juegos1=$(extraer_numero "Total de juegos: " "$q1_esperadas")
+total_juegos2=$(extraer_numero "Total de juegos: " "$q1_obtenidas")
+
+total_windows1=$(extraer_numero "Total de juegos soportados en Windows: " "$q1_esperadas")
+total_windows2=$(extraer_numero "Total de juegos soportados en Windows: " "$q1_obtenidas")
+
+total_linux1=$(extraer_numero "Total de juegos soportados en Linux: " "$q1_esperadas")
+total_linux2=$(extraer_numero "Total de juegos soportados en Linux: " "$q1_obtenidas")
+
+total_mac1=$(extraer_numero "Total de juegos soportados en Mac: " "$q1_esperadas")
+total_mac2=$(extraer_numero "Total de juegos soportados en Mac: " "$q1_obtenidas")
+
 function comparar_total {
     local categoria=$1
     local valor1=$2
@@ -71,10 +70,48 @@ function comparar_total {
     fi
 }
 
-echo_color "azul" "--Comparando Query 1--"
+echo_color "azul" "--Comparando resultados Query 1--"
 
-# Comparaciones
 comparar_total "" "$total_juegos1" "$total_juegos2"
 comparar_total " soportados en Windows" "$total_windows1" "$total_windows2"
 comparar_total " soportados en Linux" "$total_linux1" "$total_linux2"
 comparar_total " soportados en Mac" "$total_mac1" "$total_mac2"
+echo
+
+# query 2
+
+comparar_archivos() {
+    archivo_esperado="$1"
+    archivo_obtenido="$2"
+
+    diferencias=0
+
+    while IFS= read -r expected || [ -n "$expected" ]; do
+        IFS= read -r gotten <&3 || [ -n "$gotten" ]
+
+        if [ "$expected" != "$gotten" ]; then
+            echo_color "rojo" "La línea difiere"
+            echo_color "amarillo" "+ Esperado: $expected"
+            echo_color "amarillo" "- Obtenido: $gotten"
+            diferencias=1
+        fi
+    done <"$archivo_esperado" 3<"$archivo_obtenido"
+
+    if [ "$diferencias" -eq 0 ]; then
+        echo_color "verde" "Ambos archivos son iguales.\n"
+    fi
+}
+
+q2_esperadas="${directorio_esperadas}/query2.csv"
+q2_obtenidas="${directorio_obtenidas}/query2.csv"
+
+echo_color "azul" "--Comparando Resultados Query 2--"
+comparar_archivos "$q2_esperadas" "$q2_obtenidas"
+
+# query 3
+
+q3_esperadas="${directorio_esperadas}/query3.csv"
+q3_obtenidas="${directorio_obtenidas}/query3.csv"
+
+echo_color "azul" "--Comparando Resultados Query 3--"
+comparar_archivos "$q3_esperadas" "$q3_obtenidas"

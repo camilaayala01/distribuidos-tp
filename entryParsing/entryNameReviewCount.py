@@ -24,7 +24,7 @@ class EntryNameReviewCount(EntrySorterTopFinder):
     
     @classmethod
     def header(cls):
-        return("name, reviewCount\n")
+        return("name,reviewCount\n")
     
     def csv(self):
         return(f'{self._name}, {self._reviewCount}\n')
