@@ -17,7 +17,7 @@ class EntryAppIDName(EntryInterface):
 
     @classmethod
     def header(cls):
-        return "appID, name\n"
+        return "app_id,Name\n"
     
     def csv(self):
         return f'{self._appID}, {self._name}\n'

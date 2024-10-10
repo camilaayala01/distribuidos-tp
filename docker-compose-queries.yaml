@@ -47,7 +47,9 @@ services:
       - joiner-os-counts
       - joiner-action-english-1
       - joiner-action-english-2
-      - filterer-english
+      - filterer-english-1
+      - filterer-english-2
+      - filterer-english-3
       - grouper-action-english
       - joiner-english-count-1
       - joiner-english-count-2
@@ -353,6 +355,51 @@ services:
       - sa_net
 
   filterer-english:
+    build:
+      context: ./filtererEnglish
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./filterer:/filterer
+    networks:
+      - sa_net
+
+  filterer-english-1:
+    build:
+      context: ./filtererEnglish
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./filterer:/filterer
+    networks:
+      - sa_net
+
+  filterer-english-2:
+    build:
+      context: ./filtererEnglish
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./filterer:/filterer
+    networks:
+      - sa_net
+
+  filterer-english-3:
     build:
       context: ./filtererEnglish
       dockerfile: ../rabbitUser.Dockerfile

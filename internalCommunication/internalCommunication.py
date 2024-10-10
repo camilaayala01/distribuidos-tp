@@ -42,7 +42,7 @@ class InternalCommunication:
         self._channel.basic_consume(queue=queueName, on_message_callback=callback)
         try:
             self._channel.start_consuming()
-        except:
+        except: # cambiar 
             logging.info(f'action: gracefully shutting down | result: success')
 
     def stop(self):

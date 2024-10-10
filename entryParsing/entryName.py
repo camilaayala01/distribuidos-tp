@@ -21,7 +21,7 @@ class EntryName(EntryInterface):
     
     @classmethod
     def header(cls):
-        return "name\n"
+        return "Name\n"
     
     def csv(self):
         return f'{self._name}\n'

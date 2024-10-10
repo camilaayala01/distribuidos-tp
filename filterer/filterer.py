@@ -21,7 +21,7 @@ class Filterer(ABC):
 
     def handleMessage(self, ch, method, properties, body):
         header, data = self._headerType.deserialize(body)
-        logging.info(f'action: received batch | result: success')
+        logging.info(f'action: received batch | {header} | result: success')
         entries = self._entryType.deserialize(data)
         filteredEntries = self.filterBatch(entries)
         logging.info(f'action: filtering batch | result: success')

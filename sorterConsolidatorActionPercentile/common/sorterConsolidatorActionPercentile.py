@@ -46,7 +46,8 @@ class SorterConsolidatorActionPercentile(Sorter):
         return serializeAndFragmentWithQueryNumber(maxDataBytes(self._headerType), entriesWithRemoved, 5)
 
     def getBatchTop(self, batch: list[EntryAppIDNameReviewCount]) -> list[EntryAppIDNameReviewCount]:
-        return self._entryType.sort(batch, False)
+        noCeros=[entry for entry in batch if entry.getCount() > 0]
+        return self._entryType.sort(noCeros, False)
     
     def mustElementGoFirst(self, first: EntryAppIDNameReviewCount, other: EntryAppIDNameReviewCount):
         return not first.isGreaterThan(other)

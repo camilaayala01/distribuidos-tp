@@ -2,7 +2,7 @@ from entryParsing.common import fieldParsing, fieldLen
 from entryParsing.gameEntry import *
 
 class ReducedGameEntry:
-    def __init__(self, appID, name, releaseDate, windows, linux, mac, avgPlaytime, genres):
+    def __init__(self, appID, name, releaseDate, windows, mac, linux, avgPlaytime, genres):
         self.appID = appID
         self.name = name
         self.releaseDate = releaseDate
