@@ -11,20 +11,21 @@ class FiltererDate(Filterer):
         super().__init__(EntryNameDateAvgPlaytime, Header, os.getenv('FILT_DEC'), os.getenv('NODE_ID'))
 
     def _sendToNext(self, header: Header, filteredEntries: list[EntryNameDateAvgPlaytime]):
-        serializedHeader = header.serialize()
+        serializedPacket = header.serialize()
 
         for entry in filteredEntries:
-            serializedHeader += EntryNameAvgPlaytime(entry._name, entry._avgPlaytimeForever).serialize()
+            serializedPacket += EntryNameAvgPlaytime(entry._name, entry._avgPlaytimeForever).serialize()
 
-        shardingKey = getShardingKey(header.getFragmentNumber(), int(os.getenv('SORT_AVG_PT_COUNT')))
+        correspondingNode = header.getFragmentNumber() % int(os.getenv('SORT_AVG_PT_COUNT'))
+
         if header.isEOF():
             for i in range(int(os.getenv('SORT_AVG_PT_COUNT'))):
-                if shardingKey == i:
-                    self._internalCommunication.sendToAvgPlaytimeSorter(str(i), serializedHeader)
+                if correspondingNode == i:
+                    self._internalCommunication.sendToAvgPlaytimeSorter(str(i), serializedPacket)
                     continue
                 self._internalCommunication.sendToAvgPlaytimeSorter(str(i), header.serialize())
         else:
-            self._internalCommunication.sendToAvgPlaytimeSorter(str(shardingKey), serializedHeader)
+            self._internalCommunication.sendToAvgPlaytimeSorter(str(correspondingNode), serializedPacket)
 
         logging.info(f'action: sending batch to average playtime sorter | result: success')
     
