@@ -2,7 +2,7 @@ from entryParsing.common.header import Header
 from entryParsing.common.utils import getShardingKey
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
-from nextNode import nextNode
+from sendingStrategy.common.nextNode import NextNode
 from sendingStrategy.sendingStrategy import SendingStrategy
 from enum import Enum
 
@@ -11,9 +11,12 @@ class ShardingAttribute(Enum):
     FRAGMENT_NUMBER = 1
 
 class DirectSend(SendingStrategy):
-    def __init__(self, nextNode: nextNode):
+    def __init__(self, nextNode: NextNode):
         self._nextNode = nextNode
 
+    def getNextNodeName(self):
+        return self._nextNode._nextNodeName
+    
     def send(self, middleware: InternalCommunication, header: Header, batch: list[EntryInterface]):
         self.shardAndSend(middleware, header, batch)
     

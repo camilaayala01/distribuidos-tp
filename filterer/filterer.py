@@ -1,41 +1,41 @@
 from abc import ABC, abstractmethod
+import os
 from entryParsing.common.header import Header
 from entryParsing.entry import EntryInterface
+from filterer.common.filtererTypes import FiltererType
 from internalCommunication.internalCommunication import InternalCommunication
 import logging
 from entryParsing.common.utils import initializeLog
+from sendingStrategy.common.utils import createStrategiesFromNextNodes
+from sendingStrategy.sendingStrategy import SendingStrategy
 
 class Filterer(ABC):
-    def __init__(self, entryType: type, headerType: type, type: str, nodeID: str):
+    def __init__(self, sendingStrategies: list[SendingStrategy]):
         initializeLog()
-        self._entryType = entryType
-        self._headerType = headerType
-        self._internalCommunication = InternalCommunication(type, nodeID)
+        self._filtererType = FiltererType(int(os.getenv('FILTERER_TYPE')))
+        self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'))
+        self._sendingStrategies = createStrategiesFromNextNodes()
 
-    @abstractmethod
-    def _sendToNext(self, header: Header, filteredEntries: list[EntryInterface]):
-        pass
+    def _sendToNext(self, header: Header, batch: list[EntryInterface]):
+        for strategy in self._sendingStrategies:
+            newBatch = [self._filtererType.getResultingEntry(entry, strategy.getNextNodeName()) for entry in batch]
+            newHeader = self._filtererType.getResultingHeader(header, strategy.getNextNodeName())
+            strategy.send(self._internalCommunication, newHeader, newBatch)
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
 
     def handleMessage(self, ch, method, properties, body):
-        header, data = self._headerType.deserialize(body)
+        header, data = self._filtererType.headerType().deserialize(body)
         logging.info(f'action: received batch | {header} | result: success')
-        entries = self._entryType.deserialize(data)
+        entries = self._filtererType.entryType().deserialize(data)
         filteredEntries = self.filterBatch(entries)
         logging.info(f'action: filtering batch | result: success')
         self._sendToNext(header, filteredEntries)
         ch.basic_ack(delivery_tag = method.delivery_tag)
-
-    @classmethod
-    @abstractmethod
-    def condition(cls, entry: EntryInterface) -> bool:
-        pass
     
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 
     def filterBatch(self, batch: list[EntryInterface]) -> list[EntryInterface]:
-        return [entry for entry in batch if self.__class__.condition(entry)]
-        # return [self._filterType.getResultingEntry(entry) for entry in batch if self.__class__.condition(entry)]
+        return [entry for entry in batch if self._filtererType.executeCondition(entry)]

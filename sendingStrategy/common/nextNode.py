@@ -1,11 +1,22 @@
-from sendingStrategy.directSend import ShardingAttribute
+from sendingStrategy.basicSend import BasicSend
+from sendingStrategy.directSend import DirectSend, ShardingAttribute
+from sendingStrategy.sendingStrategy import SendingStrategy
 
 class NextNode:
     def __init__(self, queueName: str, nextNodeCount: int = None, shardingAtribute: ShardingAttribute = None):
         self._queueName = queueName
         self._nextNodeCount = nextNodeCount
         self._shardingAttribute = shardingAtribute
-    
+
+    def getCorrespondingStrategy(self) -> SendingStrategy:
+        if self.hasCountAndShardingAttribute():
+            return DirectSend(self)
+        else:
+            return BasicSend(self)
+
+    def hasCountAndShardingAttribute(self):
+        return self._nextNodeCount is not None and self._shardingAttribute is not None
+
     @staticmethod
     def createFromList(attributes: list[str]):
         if len(attributes) == 1:
