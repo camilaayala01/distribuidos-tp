@@ -34,7 +34,5 @@ class TestEntrySorterTopFinder(unittest.TestCase):
         self.assertEqual(sortedEntries[1]._name, "Fallout")
         self.assertEqual(sortedEntries[2]._name, "Pepito y sus amigos")
 
-        
-    
 if __name__ == "__main__":
     unittest.main()

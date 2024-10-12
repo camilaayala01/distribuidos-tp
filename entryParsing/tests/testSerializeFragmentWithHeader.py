@@ -63,3 +63,6 @@ class TestSerializeFragmentWithHeader(unittest.TestCase):
 
         self.assertEqual(header._eof, True)
         self.assertEqual(header._fragment, 1)
+    
+if __name__ == "__main__":
+    unittest.main()

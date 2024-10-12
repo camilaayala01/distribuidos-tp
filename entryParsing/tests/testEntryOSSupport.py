@@ -17,7 +17,6 @@ class TestEntryOsSupport(unittest.TestCase):
         self.assertTrue(deserialized[0]._windows)
         self.assertFalse(deserialized[0]._mac)
         self.assertTrue(deserialized[0]._linux)
-
         
 if __name__ == "__main__":
     unittest.main()

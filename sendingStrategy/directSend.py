@@ -1,0 +1,54 @@
+from entryParsing.common.header import Header
+from entryParsing.common.utils import getShardingKey
+from entryParsing.entry import EntryInterface
+from internalCommunication.internalCommunication import InternalCommunication
+from sendingStrategy.sendingStrategy import SendingStrategy
+import os
+from enum import Enum
+
+class ShardingAttribute(Enum):
+    APP_ID = 0
+    FRAGMENT_NUMBER = 1
+
+class DirectSend(SendingStrategy):
+    def __init__(self):
+        self._queueName = os.getenv('NEXT_NODE_NAME')
+        self._nextNodeCount = int(os.getenv('NEXT_NODE_COUNT'))
+        self._shardingAttribute = ShardingAttribute(int(os.getenv('SHARDING_ATRIBUTE')))
+
+    def send(self, middleware: InternalCommunication, header: Header, batch: list[EntryInterface]):
+        self.shardAndSend(middleware, header, batch)
+    
+    def shardByFragmentNumber(self, middleware: InternalCommunication, header: Header, batch: list[EntryInterface]):
+        msg = header.serialize()
+        for entry in batch:
+            msg += entry.serialize()
+
+        shardingKey = header.getFragmentNumber() % self._nextNodeCount
+        
+        if header.isEOF():
+            # announce eof to all
+            for i in range(self._nextNodeCount):
+                if shardingKey == i:
+                    middleware.directSend(self._queueName, str(i), msg)
+                else:
+                    middleware.directSend(self._queueName, str(i), header.serialize())
+        else:
+            # only send to the corresponding node
+            middleware.directSend(self._queueName, str(shardingKey), msg)
+
+    def shardAndSendByAppID(self, middleware: InternalCommunication, header: Header, batch: list[EntryInterface]):
+        resultingBatches = [bytes() for _ in range(self._nextNodeCount)]
+        for entry in batch:
+            routingKey = getShardingKey(entry._appID, self._nextNodeCount)
+            resultingBatches[routingKey] += entry.serialize()
+
+        serializedHeader = header.serialize()
+        for i in range(self._nextNodeCount):
+            middleware.directSend(self._queueName, str(i), serializedHeader + resultingBatches[i])
+
+    def shardAndSend(self, middleware: InternalCommunication, header: Header, batch: list[EntryInterface]):
+        if self._shardingAttribute == ShardingAttribute.APP_ID:
+            self.shardAndSendByAppID(middleware, header, batch)
+        elif self._shardingAttribute == ShardingAttribute.FRAGMENT_NUMBER:
+            self.shardByFragmentNumber(middleware, header, batch)

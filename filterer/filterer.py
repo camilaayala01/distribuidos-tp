@@ -38,3 +38,4 @@ class Filterer(ABC):
 
     def filterBatch(self, batch: list[EntryInterface]) -> list[EntryInterface]:
         return [entry for entry in batch if self.__class__.condition(entry)]
+        # return [self._filterType.getResultingEntry(entry) for entry in batch if self.__class__.condition(entry)]
