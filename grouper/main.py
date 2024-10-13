@@ -1,8 +1,8 @@
-from common.grouperOSCounts import GrouperOSCounts
-import signal 
+from common.grouper import Grouper
+import signal
 
 def main():
-    grouper = GrouperOSCounts()
+    grouper = Grouper()
     signal.signal(signal.SIGTERM, grouper.stop)
     grouper.execute()
 

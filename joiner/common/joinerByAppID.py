@@ -6,7 +6,7 @@ from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSend
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.defaultTracker import DefaultTracker
-
+PRINT_FREQUENCY = 100
 class JoinerByAppID(ABC):
     def __init__(self, type: str, id: str):
         initializeLog()
@@ -85,7 +85,8 @@ class JoinerByAppID(ABC):
             
     def handleMessage(self, ch, method, properties, body):
         header, batch = HeaderWithTable.deserialize(body)
-        logging.info(f'action: received batch from table {header.getTable()} | {header} | result: success')
+        if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
+            logging.info(f'action: received batch from table {header.getTable()} | {header} | result: success')
         if header.isGamesTable():
             if self._gamesTracker.isDuplicate(header):
                 ch.basic_ack(delivery_tag = method.delivery_tag)

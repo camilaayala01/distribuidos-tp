@@ -7,7 +7,7 @@ from entryParsing.common.utils import initializeLog
 
 PREFETCH_COUNT = 1 # break round robin
 DELIVERY_MODE = 1 # make message transient, es lo mismo por ahora
-
+PRINT_FREQUENCY = 1000
 class BorderNodeCommunication:
     def __init__(self):
         initializeLog()
@@ -39,7 +39,6 @@ class BorderNodeCommunication:
     def receiveFromClient(self):
         try:
             msg = self._clientSocket.recv()
-            logging.info(f'action: receiving batch from client | result: success')
         except:
             msg = None
         return msg
@@ -53,5 +52,4 @@ class BorderNodeCommunication:
 
     def sendInitializer(self, message: bytes):
         self._accepterCommunication.sendToInitializer(message)
-        logging.info(f'action: sending batch to initializer | result: success')
  

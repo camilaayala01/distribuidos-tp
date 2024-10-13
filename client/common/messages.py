@@ -1,4 +1,4 @@
-from common.utils import storeResultsQuery1, storeResultsQuery2, storeResultsQuery3, storeResultsQuery4, storeResultsQuery5
+from common.utils import storeResultsQuery1, storeResultsQuery, storeHeader
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryName import EntryName
@@ -16,29 +16,28 @@ def receiveQuery1Answer(data):
     logging.info(f'action: store query 1 data | data received: {response}')
     storeResultsQuery1(str(response))
     
-def receiveCSVAnswer(data, includeHeader: bool, entryType, storageFunction, queryNum):
-    responses = entryType.deserialize(data)
-    csvData = ""
-    loggingData = ""
+def receiveCSVAnswer(data, includeHeader: bool, entryType, queryNum):
     if includeHeader:
-        csvData += entryType.header()
+        storeHeader(entryType.header(), f'/query{queryNum}.csv')
+    responses = entryType.deserialize(data)
+    csvData, loggingData = "", ""
     for response in responses:
         csvData += response.csv()
         loggingData += str(response)
     logging.info(f'action: store query {queryNum} data | data received: {loggingData}')
-    storageFunction(csvData)
+    storeResultsQuery(csvData, f'/query{queryNum}.csv')
 
 def receiveQuery2Answer(data, includeHeader: bool):
-    receiveCSVAnswer(data, includeHeader, entryType=EntryNameAvgPlaytime, storageFunction=storeResultsQuery2, queryNum=2)
+    receiveCSVAnswer(data, includeHeader, entryType=EntryNameAvgPlaytime, queryNum=2)
 
 def receiveQuery3Answer(data, includeHeader: bool):
-    receiveCSVAnswer(data, includeHeader, entryType=EntryNameReviewCount, storageFunction=storeResultsQuery3, queryNum=3)
+    receiveCSVAnswer(data, includeHeader, entryType=EntryNameReviewCount, queryNum=3)
 
 def receiveQuery4Answer(data, includeHeader: bool):
-    receiveCSVAnswer(data, includeHeader, entryType=EntryName, storageFunction=storeResultsQuery4, queryNum = 4)
+    receiveCSVAnswer(data, includeHeader, entryType=EntryName, queryNum = 4)
     
 def receiveQuery5Answer(data, includeHeader: bool):
-    receiveCSVAnswer(data, includeHeader, entryType=EntryAppIDName, storageFunction=storeResultsQuery5, queryNum=5)
+    receiveCSVAnswer(data, includeHeader, entryType=EntryAppIDName, queryNum=5)
 
 def processResponse(data: bytes) -> bool:
     header, data = HeaderWithQueryNumber.deserialize(data)
@@ -72,7 +71,6 @@ def serializeAndFragmentWithTable(client: Client, maxDataBytes: int, generatorFu
             else:
                 headerBytes = HeaderWithTable(table, fragment, False).serialize()
                 fragment += 1
-                #sleep(1)
                 client.sendToServer(headerBytes + currPacket)
                 currPacket = entryBytes
     except StopIteration:

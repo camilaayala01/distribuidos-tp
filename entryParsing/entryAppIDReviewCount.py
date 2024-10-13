@@ -13,6 +13,9 @@ class EntryAppIDReviewCount(EntryInterface):
     def getCount(self):
         return self._count
     
+    def addToCount(self, count: int):
+        self._count += count
+    
     def serialize(self) -> bytes:
         appIDBytes = serializeAppID(self._appID)
         countBytes = serializeCount(self._count)

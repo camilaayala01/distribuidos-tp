@@ -14,26 +14,17 @@ QUERY_RESPONSES_PATH = "/responses"
 
 def storeResultsQuery1(response: str) -> None:
     filepath = QUERY_RESPONSES_PATH + "/query1.txt"
-    storeResultsQuery(response, filepath)
+    with open(filepath, 'w+') as file:
+        file.write(response)
 
-def storeResultsQuery2(response: str) -> None:
-    filepath = QUERY_RESPONSES_PATH + "/query2.csv"
-    storeResultsQuery(response, filepath)
-    
-def storeResultsQuery3(response: str) -> None:
-    filepath = QUERY_RESPONSES_PATH + "/query3.csv"
-    storeResultsQuery(response, filepath)
-                
-def storeResultsQuery4(response: str) -> None:
-    filepath = QUERY_RESPONSES_PATH + "/query4.csv"
-    storeResultsQuery(response, filepath)
-
-def storeResultsQuery5(response: str) -> None:
-    filepath = QUERY_RESPONSES_PATH + "/query5.csv"
-    storeResultsQuery(response, filepath)
+def storeHeader(header: str, filepath: str):
+    path = QUERY_RESPONSES_PATH + filepath
+    with open(path, 'w+') as file:
+        file.write(header)
                 
 def storeResultsQuery(result: str, filepath: str) -> None:
-    with open(filepath, 'a+') as file:
+    path = QUERY_RESPONSES_PATH + filepath
+    with open(path, 'a+') as file:
         file.write(result)
     
 def loadGames() -> list[GameEntry]: # type: ignore
