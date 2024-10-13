@@ -43,14 +43,14 @@ class InternalCommunication:
 
         try:
             self._channel.start_consuming()
-        except: # cambiar 
+        except OSError:
             logging.info(f'action: gracefully shutting down | result: success')
+            self._channel.close()
+            self._connection.close()
 
     def stop(self):
         self._channel.stop_consuming()
-        self._channel.close()
-        self._connection.close()
-
+    
     def basicSend(self, queueName: str, message: bytes):
         self._channel.queue_declare(queue=queueName)
         self._channel.basic_publish(
