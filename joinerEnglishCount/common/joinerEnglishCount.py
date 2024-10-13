@@ -10,7 +10,7 @@ from packetTracker.defaultTracker import DefaultTracker
 from entryParsing.common.utils import initializeLog
 
 REQUIRED_REVIEWS=5000
-
+PRINT_FREQ = 100
 """
 Entities that join all partial counts and streams results to clients
 More than one entity
@@ -62,7 +62,8 @@ class JoinerNegativeReviewsEnglishCount:
     # should have a fragment number to stream results to client
     def handleMessage(self, ch, method, properties, body):
         header, data = Header.deserialize(body)
-        logging.info(f'action: received batch | {header} | result: success')
+        if header.getFragmentNumber() % PRINT_FREQ == 0:
+            logging.info(f'action: received batch | {header} | result: success')
         if self._packetTracker.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return

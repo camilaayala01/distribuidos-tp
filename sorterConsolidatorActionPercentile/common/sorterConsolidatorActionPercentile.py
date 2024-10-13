@@ -4,7 +4,6 @@ import logging
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithQueryNumber
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
-from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from entryParsing.entryAppIDName import EntryAppIDName
 from packetTracker.multiTracker import MultiTracker
 from sorter.common.sorter import Sorter
