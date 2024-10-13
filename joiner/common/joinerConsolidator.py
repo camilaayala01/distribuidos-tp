@@ -7,7 +7,7 @@ from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.utils import initializeLog
 from packetTracker.multiTracker import MultiTracker
-
+PRINT_FREQUENCY = 100
 class JoinerConsolidator(ABC):
     def __init__(self, type: str, nextNodeCount: int, priorNodeCount: int, entriesType: EntryInterface): 
         initializeLog()
@@ -37,7 +37,8 @@ class JoinerConsolidator(ABC):
 
     def handleMessage(self, ch, method, properties, body):
         header, data = HeaderWithSender.deserialize(body)
-        logging.info(f'action: received batch | {header} | result: success')
+        if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
+            logging.info(f'action: received batch | {header} | result: success')
         if self._tracker.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return

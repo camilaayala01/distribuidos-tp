@@ -6,7 +6,8 @@ from internalCommunication.internalCommunication import InternalCommunication
 import logging
 from entryParsing.common.utils import initializeLog
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
-from sendingStrategy.sendingStrategy import SendingStrategy
+
+PRINT_FREQUENCY = 100
 
 class Filterer:
     def __init__(self):
@@ -26,10 +27,10 @@ class Filterer:
 
     def handleMessage(self, ch, method, properties, body):
         header, data = self._filtererType.headerType().deserialize(body)
-        logging.info(f'action: received batch | {header} | result: success')
+        if header.getFragmentNumber() % PRINT_FREQUENCY == 0 | header.isEOF():
+            logging.info(f'action: received batch | {header} | result: success')
         entries = self._filtererType.entryType().deserialize(data)
         filteredEntries = self.filterBatch(entries)
-        logging.info(f'action: filtering batch | result: success')
         self._sendToNext(header, filteredEntries)
         ch.basic_ack(delivery_tag = method.delivery_tag)
     

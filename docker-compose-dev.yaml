@@ -375,7 +375,7 @@ services:
       - HOST=rabbitmq
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
-      - NEXT_NODES=GrouperActionEnglishNegativeReviews
+      - NEXT_NODES=GrouperActionEnglish
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -392,7 +392,7 @@ services:
       - HOST=rabbitmq
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
-      - NEXT_NODES=GrouperActionEnglishNegativeReviews
+      - NEXT_NODES=GrouperActionEnglish
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -409,7 +409,7 @@ services:
       - HOST=rabbitmq
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
-      - NEXT_NODES=GrouperActionEnglishNegativeReviews
+      - NEXT_NODES=GrouperActionEnglish
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -426,7 +426,7 @@ services:
       - HOST=rabbitmq
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
-      - NEXT_NODES=GrouperActionEnglishNegativeReviews
+      - NEXT_NODES=GrouperActionEnglish
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -443,7 +443,7 @@ services:
       - HOST=rabbitmq
       - GROUPER_TYPE=2
       - LISTENING_QUEUE=GrouperActionEnglish
-      - NEXT_NODES=EnglishReviewsJoinerConsolidator
+      - NEXT_NODES=ConsolidatorJoinerActionNegativeReviewsEnglish
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -525,7 +525,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - GROUPER_TYPE=1
-      - LISTENING_QUEUE=GrouperActionPercentileNegativeReviews
+      - LISTENING_QUEUE=GrouperActionPercentile
       - NEXT_NODES=JoinerActionPercentile,2,0
     volumes:
       - ./internalCommunication:/internalCommunication

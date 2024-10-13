@@ -29,7 +29,7 @@ class Grouper:
 
     def handleMessage(self, ch, method, properties, body):
         header, data = self._grouperType.headerType().deserialize(body)
-        if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
+        if header.getFragmentNumber() % PRINT_FREQUENCY == 0 | header.isEOF():
             logging.info(f'action: received batch | {header} | result: success')
         entries = self._grouperType.entryType().deserialize(data)
         result = self._grouperType.getResults(entries)
