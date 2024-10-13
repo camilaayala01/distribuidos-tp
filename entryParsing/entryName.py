@@ -5,7 +5,6 @@ class EntryName(EntryInterface):
     def __init__(self, name: str):
         self._name =  name
 
-    @staticmethod
     def serialize(self) -> bytes:
         return serializeGameName(self._name)
     

@@ -75,6 +75,37 @@ services:
       - ./entryParsing:/entryParsing
     networks:
       - sa_net
+  grouper-os-counts:
+    build:
+      context: ./grouper
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HOST=rabbitmq
+      - GROUPER_TYPE=0
+      - LISTENING_QUEUE=GrouperOSCounts
+      - NEXT_NODES=JoinerOsCounts
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./sendingStrategy:/sendingStrategy
+    networks:
+      - sa_net
+
+  joiner-os-counts:
+    build:
+      context: ./joinerOSCount
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./packetTracker:/packetTracker
+    networks:
+      - sa_net
 
   filterer-indie:
     build:
@@ -216,17 +247,20 @@ services:
 
   joiner-indie-consolidator:
     build:
-      context: ./joinerIndieConsolidator
+      context: ./joinerConsolidator
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
+      - JOINER_CONSOLIDATOR_TYPE=2
+      - LISTENING_QUEUE=ConsolidatorJoinerIndiePositiveReviews
+      - NEXT_NODES=SorterIndiePositiveReviews,2,1
+      - PRIOR_NODE_COUNT=2
+      - HOST=rabbitmq
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
@@ -283,38 +317,7 @@ services:
     networks:
       - sa_net
 
-  grouper-os-counts:
-    build:
-      context: ./grouper
-      dockerfile: ../rabbitUser.Dockerfile
-    environment:
-      - PYTHONUNBUFFERED=1
-      - HOST=rabbitmq
-      - GROUPER_TYPE=0
-      - LISTENING_QUEUE=GrouperOSCounts
-      - NEXT_NODES=JoinerOsCounts
-    volumes:
-      - ./internalCommunication:/internalCommunication
-      - ./entryParsing:/entryParsing
-      - ./sendingStrategy:/sendingStrategy
-    networks:
-      - sa_net
-
-  joiner-os-counts:
-    build:
-      context: ./joinerOSCount
-      dockerfile: ../rabbitUser.Dockerfile
-    environment:
-      - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
-    volumes:
-      - ./internalCommunication:/internalCommunication
-      - ./entryParsing:/entryParsing
-      - ./packetTracker:/packetTracker
-    networks:
-      - sa_net
-
+  
   filterer-action:
     build:
       context: ./filterer
@@ -443,7 +446,7 @@ services:
       - HOST=rabbitmq
       - GROUPER_TYPE=2
       - LISTENING_QUEUE=GrouperActionEnglish
-      - NEXT_NODES=ConsolidatorJoinerActionNegativeReviewsEnglish
+      - NEXT_NODES=ConsolidatorJoinerActionEnglish
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -453,17 +456,20 @@ services:
 
   joiner-english-consolidator:
     build:
-      context: ./joinerEnglishConsolidator
+      context: ./joinerConsolidator
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
+      - JOINER_CONSOLIDATOR_TYPE=1
+      - PRIOR_NODE_COUNT=2
+      - LISTENING_QUEUE=ConsolidatorJoinerActionEnglish
+      - NEXT_NODES=JoinerNegativeReviewsEnglishCount,2,0
+      - HOST=rabbitmq
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
@@ -503,17 +509,20 @@ services:
 
   joiner-stream-consolidator:
     build:
-      context: ./joinerStreamConsolidator
+      context: ./joinerConsolidator
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
+      - PRIOR_NODE_COUNT=2
+      - JOINER_CONSOLIDATOR_TYPE=0
+      - LISTENING_QUEUE=JoinerStreamConsolidator
+      - NEXT_NODES=Dispatcher
+      - HOST=rabbitmq
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
