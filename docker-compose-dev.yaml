@@ -165,16 +165,18 @@ services:
 
   grouper-indie:
     build:
-      context: ./grouperIndiePositiveReviews
+      context: ./grouper
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
+      - HOST=rabbitmq
+      - GROUPER_TYPE=1
+      - LISTENING_QUEUE=GrouperIndiePositiveReviews
+      - NEXT_NODES=JoinerIndiePositiveReviews,2,0
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
-      - ./grouperReviews:/grouperReviews
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
@@ -283,15 +285,18 @@ services:
 
   grouper-os-counts:
     build:
-      context: ./grouperOSCounts
+      context: ./grouper
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
+      - HOST=rabbitmq
+      - GROUPER_TYPE=0
+      - LISTENING_QUEUE=GrouperOSCounts
+      - NEXT_NODES=JoinerOsCounts
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
@@ -431,16 +436,18 @@ services:
 
   grouper-action-english:
     build:
-      context: ./grouperActionEnglish
+      context: ./grouper
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
+      - HOST=rabbitmq
+      - GROUPER_TYPE=2
+      - LISTENING_QUEUE=GrouperActionEnglish
+      - NEXT_NODES=EnglishReviewsJoinerConsolidator
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
-      - ./grouperReviews:/grouperReviews
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
@@ -512,16 +519,18 @@ services:
 
   grouper-action-percentile:
     build:
-      context: ./grouperActionPercentile
+      context: ./grouper
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
+      - HOST=rabbitmq
+      - GROUPER_TYPE=1
+      - LISTENING_QUEUE=GrouperOSCounts
+      - NEXT_NODES=JoinerActionPercentile,2,0
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
-      - ./grouperReviews:/grouperReviews
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 

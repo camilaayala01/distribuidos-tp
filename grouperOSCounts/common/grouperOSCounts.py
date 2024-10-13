@@ -45,6 +45,7 @@ class GrouperOSCounts:
                 macCount +=1
             if entry._linux:
                 linuxCount +=1
+        
         logging.info(f'action: finish count | total: {total} | windows: {windowsCount} | mac: {macCount} | linux: {linuxCount} | result: success')
         return [windowsCount, macCount, linuxCount, total]
         

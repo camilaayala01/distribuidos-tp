@@ -20,7 +20,7 @@ run_tests() {
 
 run_tests "Entry Parsing" "./entryParsing/tests"
 run_tests "Packet Tracker" "./packetTracker/tests"
-run_tests "Grouper Reviews" "./grouperReviews/tests"
+run_tests "Grouper" "./grouper/tests"
 run_tests "Sorters" "./sorter/tests"
 run_tests "Joiner OS Support" "./joinerOSCount/tests"
 run_tests "Filterers" "./filterer/tests"

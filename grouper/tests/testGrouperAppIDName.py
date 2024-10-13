@@ -2,12 +2,10 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch
 
-from entryParsing.entryAppID import EntryAppID
 from entryParsing.entryAppIDName import EntryAppIDName
-from grouperActionEnglish.common.grouperActionEnglish import GrouperActionEnglishNegativeReviews
+from grouper.common.grouper import Grouper
 
-
-class TestGrouperPositiveReviews(unittest.TestCase):
+class TestGrouperAppIDName(unittest.TestCase):
     @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
     def setUp(self):
         self._entries = [
@@ -22,17 +20,19 @@ class TestGrouperPositiveReviews(unittest.TestCase):
             EntryAppIDName('2', 'Grand Theft Auto V'),
             EntryAppIDName('1', 'Rust'),
         ]
-        os.environ['NODE_ID'] = '1'
-        os.environ['GROUP_ENG_NEG_REV'] = 'grouper'
-        self._grouper = GrouperActionEnglishNegativeReviews()
+        os.environ['GROUPER_TYPE'] = '2'
+        os.environ['LISTENING_QUEUE'] = 'Grouper'
+        os.environ['NEXT_NODES'] = 'Joiner'
+        self._grouper = Grouper()
 
     def testCountEntries(self):
-        result = self._grouper._count(self._entries)
-        self.assertEqual(result["1"].getCount(), 4)
-        self.assertEqual(result["2"].getCount(), 3)
-        self.assertEqual(result["3"].getCount(), 2)
-        self.assertEqual(result["4"].getCount(), 1)
-        self.assertEqual(result.get("5"), None)
+        result = self._grouper._grouperType.getResults(self._entries)
+        hash_dict = {entry._appID: entry for entry in result}
+        self.assertEqual(hash_dict["1"].getCount(), 4)
+        self.assertEqual(hash_dict["2"].getCount(), 3)
+        self.assertEqual(hash_dict["3"].getCount(), 2)
+        self.assertEqual(hash_dict["4"].getCount(), 1)
+        self.assertEqual(hash_dict.get("5"), None)
 
 if __name__ == '__main__':
     unittest.main()
