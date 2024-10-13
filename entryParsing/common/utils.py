@@ -1,6 +1,7 @@
 import math
 import logging
 from entryParsing.entry import EntryInterface
+import hashlib
 
 MAX_PACKET_SIZE = 8192
 
@@ -48,7 +49,7 @@ def strToBoolInt(string: str) -> int:
 
 
 def getShardingKey(id: str, nodeCount: int) -> int:
-    return int(id) % nodeCount
+    return int(hashlib.sha256(id.encode()).hexdigest(), 16) % nodeCount
 
 def maxDataBytes(headerType: type) -> int:
     return MAX_PACKET_SIZE - headerType.size()
