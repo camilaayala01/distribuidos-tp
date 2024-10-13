@@ -15,3 +15,6 @@ class TestBoolIntConversion(unittest.TestCase):
     def testBoolInt(self):
         self.assertEqual(boolToInt(True), 1)
         self.assertEqual(boolToInt(False), 0)
+    
+if __name__ == "__main__":
+    unittest.main()

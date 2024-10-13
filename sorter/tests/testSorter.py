@@ -36,6 +36,7 @@ class TestSorterGeneral(unittest.TestCase):
         os.environ['CONS_SORT_PERC_NEG_REV'] = 'sorterAction'
         os.environ['SORT_INDIE_POS_REV'] = 'sorterIndie'
         os.environ['JOIN_PERC_NEG_REV_COUNT'] = '2'
+        os.environ['SORT_INDIE_POS_REV_COUNT'] = '2'
 
         self.sorterIndieFew = SorterIndiePositiveReviews(SMALL_TEST_TOP_AMOUNT)
         self.sorterAction = SorterConsolidatorActionPercentile()

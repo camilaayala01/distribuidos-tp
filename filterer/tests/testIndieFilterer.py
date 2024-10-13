@@ -1,8 +1,9 @@
+import os
 import unittest
 from unittest.mock import MagicMock, patch
 
 from entryParsing.entryAppIDNameGenresReleaseDateAvgPlaytime import EntryAppIDNameGenresReleaseDateAvgPlaytime
-from filtererIndie.common.filtererIndie import FiltererIndie
+from filterer.common.filterer import Filterer
 
 
 class TestEnglishFilterer(unittest.TestCase):
@@ -25,7 +26,11 @@ class TestEnglishFilterer(unittest.TestCase):
             EntryAppIDNameGenresReleaseDateAvgPlaytime("124", "Danganronpa", "Visual novel", "2015-01-01", 12),
         ]
         
-        self.filterer = FiltererIndie()
+        os.environ['FILTERER_TYPE'] = '1'
+        os.environ['LISTENING_QUEUE'] = 'FilterIndie'
+        os.environ['NEXT_NODES'] = 'FilterDecade;JoinerIndiePositiveReviews,2,0'
+
+        self.filterer = Filterer()
 
     def testAllIndie(self):
         result = self.filterer.filterBatch(self.allIndie)

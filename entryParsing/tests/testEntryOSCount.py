@@ -18,3 +18,6 @@ class TestEntryOSCount(unittest.TestCase):
         self.assertEqual(deserialized._mac, 600000)
         self.assertEqual(deserialized._linux, 500)
         self.assertEqual(deserialized._total, 600200)
+    
+if __name__ == "__main__":
+    unittest.main()

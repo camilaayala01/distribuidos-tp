@@ -5,14 +5,14 @@ from entryParsing.entry import EntryInterface
 
 class EntryAppIDNameGenresReleaseDateAvgPlaytime(EntryInterface):
     def __init__(self, id: str, name: str, genres: str, releaseDate: str, avgPlaytimeForever: int):
-        self._id = id
+        self._appID = id
         self._name = name
         self._genres = genres
         self._releaseDate = releaseDate
         self._avgPlaytimeForever = avgPlaytimeForever
 
     def serialize(self) -> bytes:
-        idBytes = fieldParsing.serializeAppID(self._id)
+        idBytes = fieldParsing.serializeAppID(self._appID)
         nameBytes = fieldParsing.serializeGameName(self._name)
         genresBytes = fieldParsing.serializeGenres(self._genres)
         releaseDateBytes = fieldParsing.serializeReleaseDate(self._releaseDate)

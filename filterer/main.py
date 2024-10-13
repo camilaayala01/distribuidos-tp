@@ -1,8 +1,8 @@
-from common.filtererIndie import FiltererIndie
+from common.filterer import Filterer
 import signal
 
 def main():
-    filterer = FiltererIndie()
+    filterer = Filterer()
     signal.signal(signal.SIGTERM, filterer.stop)
     filterer.execute()
 

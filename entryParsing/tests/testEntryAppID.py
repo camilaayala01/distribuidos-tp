@@ -22,7 +22,6 @@ class TestEntryAppID(unittest.TestCase):
         self.assertEqual(deserialized[1]._appID, self._entry2._appID)
         self.assertEqual(deserialized[2]._appID, self._entry3._appID)
         self.assertEqual(len(deserialized), 3)
-
         
 if __name__ == "__main__":
     unittest.main()

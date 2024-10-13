@@ -46,3 +46,6 @@ class TestHeader(unittest.TestCase):
         self.assertEqual(deserializedOsCount._mac, 600000)
         self.assertEqual(deserializedOsCount._linux, 500)
         self.assertEqual(deserializedOsCount._total, 600200)
+    
+if __name__ == "__main__":
+    unittest.main()

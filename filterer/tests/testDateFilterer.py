@@ -1,8 +1,9 @@
+import os
 import unittest
 from unittest.mock import MagicMock, patch
 
 from entryParsing.entryNameDateAvgPlaytime import EntryNameDateAvgPlaytime
-from filtererDate.common.filtererDate import FiltererDate
+from filterer.common.filterer import Filterer
 
 class TestDateFilterer(unittest.TestCase):
     @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
@@ -24,7 +25,10 @@ class TestDateFilterer(unittest.TestCase):
             EntryNameDateAvgPlaytime("Danganronpa", "2020-01-01", 1),
         ]
         
-        self.filterer = FiltererDate()
+        os.environ['FILTERER_TYPE'] = '0'
+        os.environ['LISTENING_QUEUE'] = 'FilterDecade'
+        os.environ['NEXT_NODES'] = 'SorterAvgPlaytime,2,1'
+        self.filterer = Filterer()
 
     def testAllDecade(self):
         result = self.filterer.filterBatch(self.allDecade)
