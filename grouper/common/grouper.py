@@ -1,12 +1,12 @@
 from entryParsing.entry import EntryInterface
-from entryParsing.entryAppID import EntryAppID
 from entryParsing.common.header import Header
-from grouper.common.grouperTypes import GrouperType
+from .grouperTypes import GrouperType
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.utils import initializeLog
 import logging
 import os
 
+PRINT_FREQUENCY = 100
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
 class Grouper:
@@ -29,7 +29,8 @@ class Grouper:
 
     def handleMessage(self, ch, method, properties, body):
         header, data = self._grouperType.headerType().deserialize(body)
-        logging.info(f'action: received batch | {header} | result: success')
+        if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
+            logging.info(f'action: received batch | {header} | result: success')
         entries = self._grouperType.entryType().deserialize(data)
         result = self._grouperType.getResults(entries)
         self._sendToNext(header, result)

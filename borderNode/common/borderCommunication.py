@@ -39,7 +39,6 @@ class BorderNodeCommunication:
     def receiveFromClient(self):
         try:
             msg = self._clientSocket.recv()
-            logging.info(f'action: receiving batch from client | result: success')
         except:
             msg = None
         return msg

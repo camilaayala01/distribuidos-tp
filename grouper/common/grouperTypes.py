@@ -1,6 +1,4 @@
-from collections import defaultdict
 from enum import Enum
-from langid import classify
 from entryParsing.common.header import Header
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.headerWithTable import HeaderWithTable
@@ -45,7 +43,6 @@ class GrouperType(Enum):
             if entry._linux:
                 linuxCount +=1
         return [EntryOSCount(windows=windowsCount, mac=macCount, linux=linuxCount, total=len(entries))]
-    
     
     def buildResultingEntry(self, entry: EntryInterface) -> EntryInterface:
         if self == GrouperType.APP_ID_NAME_COUNT:

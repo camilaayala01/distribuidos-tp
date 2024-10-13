@@ -12,6 +12,7 @@ from entryParsing.common.utils import initializeLog
 import os
 
 MAX_DATA_BYTES = 8000
+PRINT_FREQUENCY = 500
 
 class Initializer:
     def __init__(self): 
@@ -47,11 +48,11 @@ class Initializer:
 
     def handleMessage(self, ch, method, properties, body):
         header, data = HeaderWithTable.deserialize(body)
-        logging.info(f'action: received msg corresponding to table {header.getTable()} | {header}')
+        if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
+            logging.info(f'action: received msg corresponding to table {header.getTable()} | {header}')
         serializedHeader = header.serialize()
 
         if header.isGamesTable():
-            logging.info(f'action: sending Games table batch | result: in progress')
             gameEntries = ReducedGameEntry.deserialize(data)
 
             #Query 1
@@ -96,10 +97,8 @@ class Initializer:
                 self._internalCommunication.sendToActionFilter(headerBytes + self._query_4_5_games)
 
             ch.basic_ack(delivery_tag = method.delivery_tag)
-            logging.info(f'action: sending Games table batch | result: success')
 
         elif header.isReviewsTable():
-            logging.info(f'action: sending Reviews table batch | result: in progress | fragment: {header.getFragmentNumber()} | eof: {header.isEOF()}')
             reviewEntries = ReviewEntry.deserialize(data)
             positiveReviewEntries, negativeReviewEntries = self.separatePositiveAndNegative(reviewEntries)
 
@@ -148,7 +147,6 @@ class Initializer:
                 self._internalCommunication.sendToActionAllNegativeReviewsGrouper(headerBytes + self._query_5_reviews)
 
             ch.basic_ack(delivery_tag = method.delivery_tag)
-            logging.info(f'action: sending Reviews table batch | result: success')
 
         else:
             raise ValueError()

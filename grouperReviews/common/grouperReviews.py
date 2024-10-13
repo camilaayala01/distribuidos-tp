@@ -1,7 +1,6 @@
 from entryParsing.entryAppID import EntryAppID
 from abc import ABC, abstractmethod
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
-from entryParsing.common.header import Header
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.utils import initializeLog
 import logging
@@ -47,7 +46,3 @@ class GrouperReviews(ABC):
         result = self._applyStep(entries)
         self.sendToNextStep(header, result)
         ch.basic_ack(delivery_tag = method.delivery_tag)
-
-    
-
-   

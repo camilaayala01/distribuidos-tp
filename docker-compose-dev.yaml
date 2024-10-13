@@ -525,7 +525,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - GROUPER_TYPE=1
-      - LISTENING_QUEUE=GrouperOSCounts
+      - LISTENING_QUEUE=GrouperActionPercentileNegativeReviews
       - NEXT_NODES=JoinerActionPercentile,2,0
     volumes:
       - ./internalCommunication:/internalCommunication
