@@ -3,11 +3,11 @@ from sendingStrategy.common.shardingAtribute import ShardingAttribute
 class NextNode:
     def __init__(self, queueName: str, nextNodeCount: int = None, shardingAtribute: ShardingAttribute = None):
         self._queueName = queueName
-        self._nextNodeCount = nextNodeCount
+        self._count = nextNodeCount
         self._shardingAttribute = shardingAtribute
 
     def hasCountAndShardingAttribute(self):
-        return self._nextNodeCount is not None and self._shardingAttribute is not None
+        return self._count is not None and self._shardingAttribute is not None
 
     @staticmethod
     def createFromList(attributes: list[str]):

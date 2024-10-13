@@ -7,10 +7,7 @@ from sendingStrategy.sendingStrategy import SendingStrategy
 
 class DirectSend(SendingStrategy):
     def __init__(self, nextNode):
-        self._nextNode = nextNode
-
-    def getNextNodeName(self):
-        return self._nextNode._nextNodeName
+        super().__init__(nextNode)
     
     def send(self, middleware: InternalCommunication, header: Header, batch: list[EntryInterface]):
         self.shardAndSend(middleware, header, batch)
@@ -20,11 +17,11 @@ class DirectSend(SendingStrategy):
         for entry in batch:
             msg += entry.serialize()
 
-        shardingKey = header.getFragmentNumber() % self._nextNode._nextNodeCount
+        shardingKey = header.getFragmentNumber() % self._nextNode._count
         
         if header.isEOF():
             # announce eof to all
-            for i in range(self._nextNode._nextNodeCount):
+            for i in range(self._nextNode._count):
                 if shardingKey == i:
                     middleware.directSend(self._nextNode._queueName, str(i), msg)
                 else:
@@ -34,13 +31,13 @@ class DirectSend(SendingStrategy):
             middleware.directSend(self._nextNode._queueName, str(shardingKey), msg)
 
     def shardAndSendByAppID(self, middleware: InternalCommunication, header: Header, batch: list[EntryInterface]):
-        resultingBatches = [bytes() for _ in range(self._nextNode._nextNodeCount)]
+        resultingBatches = [bytes() for _ in range(self._nextNode._count)]
         for entry in batch:
-            routingKey = getShardingKey(entry._appID, self._nextNode._nextNodeCount)
+            routingKey = getShardingKey(entry._appID, self._nextNode._count)
             resultingBatches[routingKey] += entry.serialize()
 
         serializedHeader = header.serialize()
-        for i in range(self._nextNodeCount):
+        for i in range(self._nextNode._count):
             middleware.directSend(self._nextNode._queueName, str(i), serializedHeader + resultingBatches[i])
 
     def shardAndSend(self, middleware: InternalCommunication, header: Header, batch: list[EntryInterface]):

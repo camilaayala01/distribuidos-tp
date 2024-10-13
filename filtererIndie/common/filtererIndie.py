@@ -2,7 +2,7 @@ from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDNameGenresReleaseDateAvgPlaytime import EntryAppIDNameGenresReleaseDateAvgPlaytime
 from entryParsing.entryNameReleaseDateAvgPlaytime import EntryNameReleaseDateAvgPlaytime
-from filterer.filterer import Filterer
+from filterer.common.filterer import Filterer
 from entryParsing.common.header import Header
 import os
 
@@ -17,7 +17,7 @@ class FiltererIndie(Filterer):
         listQuery3 = []
         for entry in filteredEntries:
             forQuery2 += EntryNameReleaseDateAvgPlaytime(entry._name, entry._releaseDate, entry._avgPlaytimeForever).serialize()
-            listQuery3 += [EntryAppIDName(entry._id, entry._name)]
+            listQuery3 += [EntryAppIDName(entry._appID, entry._name)]
 
         listQuery3 = EntryAppIDName.shardBatch(int(os.getenv('JOIN_INDIE_POS_REV_COUNT')), listQuery3)
 

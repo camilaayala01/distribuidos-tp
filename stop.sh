@@ -1,3 +1,3 @@
 #!/bin/bash
-docker compose -f docker-compose-queries.yaml stop -t 10
-docker compose -f docker-compose-queries.yaml down
+docker compose -f docker-compose-dev.yaml stop -t 10
+docker compose -f docker-compose-dev.yaml down

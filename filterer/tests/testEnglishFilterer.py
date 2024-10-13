@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
-from filterer.filterer import Filterer
+from filterer.common.filterer import Filterer
 
 
 class TestEnglishFilterer(unittest.TestCase):

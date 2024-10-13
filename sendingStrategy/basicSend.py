@@ -6,7 +6,7 @@ from sendingStrategy.sendingStrategy import SendingStrategy
 
 class BasicSend(SendingStrategy):
     def __init__(self, nextNode: NextNode):
-        self._nextNode = nextNode
+        super().__init__(nextNode)
 
     def send(self, middleware: InternalCommunication, header: Header, batch: list[EntryInterface]):
         msg = header.serialize()

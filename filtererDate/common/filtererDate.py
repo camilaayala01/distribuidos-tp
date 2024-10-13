@@ -1,6 +1,6 @@
 from entryParsing.entryNameDateAvgPlaytime import EntryNameDateAvgPlaytime
 from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
-from filterer.filterer import Filterer
+from filterer.common.filterer import Filterer
 from entryParsing.common.header import Header
 from entryParsing.common.utils import getShardingKey
 import os

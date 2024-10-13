@@ -1,7 +1,7 @@
 import os
 from entryParsing.common.header import Header
 from entryParsing.entry import EntryInterface
-from filterer.common.filtererTypes import FiltererType
+from .filtererTypes import FiltererType
 from internalCommunication.internalCommunication import InternalCommunication
 import logging
 from entryParsing.common.utils import initializeLog

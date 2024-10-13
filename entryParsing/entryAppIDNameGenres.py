@@ -6,12 +6,12 @@ from .entry import EntryInterface
 
 class EntryAppIDNameGenres(EntryInterface):
     def __init__(self, id: str, name: str, genres: str):
-        self._id = id
+        self._appID = id
         self._name = name
         self._genres = genres
 
     def serialize(self) -> bytes:
-        idBytes = serializeAppID(self._id)
+        idBytes = serializeAppID(self._appID)
         nameBytes = serializeGameName(self._name)
         genresBytes = serializeGenres(self._genres)
         return idBytes + nameBytes + genresBytes
@@ -38,8 +38,8 @@ class EntryAppIDNameGenres(EntryInterface):
     def shardBatch(nodeCount: int, result: list['EntryAppIDNameGenres']) -> list[bytes]:
         resultingBatches = [bytes() for _ in range(nodeCount)]
         for entry in result:
-            shardResult = getShardingKey(entry._id, nodeCount)
-            resultingBatches[shardResult] = resultingBatches[shardResult] + EntryAppIDName(entry._id, entry._name).serialize()
+            shardResult = getShardingKey(entry._appID, nodeCount)
+            resultingBatches[shardResult] = resultingBatches[shardResult] + EntryAppIDName(entry._appID, entry._name).serialize()
         return resultingBatches
 
     def getGenres(self) -> str:

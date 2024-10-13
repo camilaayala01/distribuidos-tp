@@ -40,6 +40,7 @@ class InternalCommunication:
             queueName = self._executerName
             self._channel.queue_declare(queue=self._executerName, durable=False)
         self._channel.basic_consume(queue=queueName, on_message_callback=callback)
+
         try:
             self._channel.start_consuming()
         except: # cambiar 

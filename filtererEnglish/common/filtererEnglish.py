@@ -1,7 +1,7 @@
 from entryParsing.entryAppIDName import EntryAppIDName
 from langid import classify
 import logging
-from filterer.filterer import Filterer
+from filterer.common.filterer import Filterer
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
