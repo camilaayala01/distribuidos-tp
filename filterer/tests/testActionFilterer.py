@@ -31,7 +31,7 @@ class TestActionFilterer(unittest.TestCase):
 
     def testAllAction(self):
         result = self.filterer.filterBatch(self.allAction)
-        ids = [entry._id for entry in result]
+        ids = [entry._appID for entry in result]
         expectedIds = ["12345", "12346", "12347"]
 
         self.assertEqual(len(result), len(self.allAction))
@@ -43,7 +43,7 @@ class TestActionFilterer(unittest.TestCase):
 
     def testOneAction(self):
         result = self.filterer.filterBatch(self.oneAction)
-        ids = [entry._id for entry in result]
+        ids = [entry._appID for entry in result]
         expectedIds = ["12346"]
         self.assertEqual(len(result), 1)
         self.assertEqual(ids, expectedIds)
