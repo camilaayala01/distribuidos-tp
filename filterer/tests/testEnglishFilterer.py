@@ -1,8 +1,9 @@
+import os
 import unittest
 from unittest.mock import MagicMock, patch
 
 from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
-from filtererEnglish.common.filtererEnglish import FiltererEnglish
+from filterer.filterer import Filterer
 
 
 class TestEnglishFilterer(unittest.TestCase):
@@ -25,7 +26,11 @@ class TestEnglishFilterer(unittest.TestCase):
             EntryAppIDNameReviewText("124", "Danganronpa", "Me gustan las monas chinas"),
         ]
         
-        self.filterer = FiltererEnglish()
+        os.environ['FILTERER_TYPE'] = '3'
+        os.environ['LISTENING_QUEUE'] = 'FilterEnglish'
+        os.environ['NEXT_NODES'] = 'GrouperActionEnglishNegativeReviews'
+
+        self.filterer = Filterer()
 
     def testAllEnglish(self):
         result = self.filterer.filterBatch(self.allEnglish)

@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 import os
 from entryParsing.common.header import Header
 from entryParsing.entry import EntryInterface
@@ -9,8 +8,8 @@ from entryParsing.common.utils import initializeLog
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 from sendingStrategy.sendingStrategy import SendingStrategy
 
-class Filterer(ABC):
-    def __init__(self, sendingStrategies: list[SendingStrategy]):
+class Filterer:
+    def __init__(self):
         initializeLog()
         self._filtererType = FiltererType(int(os.getenv('FILTERER_TYPE')))
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'))

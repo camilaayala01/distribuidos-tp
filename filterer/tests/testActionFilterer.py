@@ -1,8 +1,8 @@
+import os
 import unittest
 from unittest.mock import MagicMock, patch
-
 from entryParsing.entryAppIDNameGenres import EntryAppIDNameGenres
-from filtererAction.common.filtererAction import FiltererAction
+from filterer.filterer import Filterer
 
 class TestActionFilterer(unittest.TestCase):
     @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
@@ -24,7 +24,10 @@ class TestActionFilterer(unittest.TestCase):
             EntryAppIDNameGenres("124", "Danganronpa", "Visual novel"),
         ]
         
-        self.filterer = FiltererAction()
+        os.environ['FILTERER_TYPE'] = '2'
+        os.environ['LISTENING_QUEUE'] = 'FilterAction'
+        os.environ['NEXT_NODES'] = 'JoinerActionNegativeReviewsEnglish,2,0;JoinerActionPercentile,2,0'
+        self.filterer = Filterer()
 
     def testAllAction(self):
         result = self.filterer.filterBatch(self.allAction)

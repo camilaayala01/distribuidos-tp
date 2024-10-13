@@ -1,7 +1,7 @@
 from entryParsing.common.header import Header
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
-from nextNode.nextNode import NextNode
+from sendingStrategy.common.nextNode import NextNode
 from sendingStrategy.sendingStrategy import SendingStrategy
 
 class BasicSend(SendingStrategy):
