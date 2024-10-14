@@ -39,6 +39,7 @@ class Joiner:
             id = review.getAppID()
             name = self._games.get(id)
             if name is None:
+                print(f"name is none, {id}")
                 return
             priorJoined = self._joinedEntries.get(id, self._joinerType.defaultEntry(name))
             self._joinedEntries[id] = self._joinerType.applyJoining(id, name, priorJoined, review)
@@ -72,7 +73,8 @@ class Joiner:
         toSend = self._joinerType.entriesToSend(self._joinedEntries, self.finishedReceiving())
         if not self.shouldSendPackets(toSend):
             return
-        
+        if self._joinerType != JoinerType.ENGLISH:
+            print("sending dataa")
         packets, self._fragment = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(self._joinerType.headerType()), 
                                                  data=toSend, 
                                                  id=self._id,
@@ -83,6 +85,7 @@ class Joiner:
         self._joinedEntries = {}
 
     def reset(self):
+        print("resetting")
         self._gamesTracker.reset()
         self._reviewsTracker.reset()
         self._fragment = 1

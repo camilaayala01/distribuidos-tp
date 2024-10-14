@@ -40,8 +40,7 @@ class JoinerType(Enum):
                 priorJoined.append(EntryAppIDNameReviewText(id, name, review.getReviewText()))
             case _:
                 priorJoined.addToCount(review.getCount())
-
-        print(priorJoined)
+                
         return priorJoined
 
     def entriesForEnglish(self, joinedEntries, isDone):
