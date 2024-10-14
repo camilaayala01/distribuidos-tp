@@ -6,7 +6,9 @@ from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSend
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
 from packetTracker.defaultTracker import DefaultTracker
+
 PRINT_FREQUENCY = 100
+
 class JoinerByAppID(ABC):
     def __init__(self, type: str, id: str):
         initializeLog()
@@ -66,6 +68,8 @@ class JoinerByAppID(ABC):
         packets = serializeAndFragmentWithSender(maxDataBytes(HeaderWithSender), self.entriesToSend(), self._id)
         for pack in packets:
             self._sendToNextStep(pack)
+
+        logging.info(f'action: sending batches to next | result: success')
         self.reset()
 
     def reset(self):

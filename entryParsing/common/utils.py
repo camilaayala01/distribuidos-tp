@@ -57,10 +57,8 @@ def maxDataBytes(headerType: type) -> int:
 def amountOfPacketsNeeded(headerType: type, byteCount: int) -> int:
     return math.ceil(byteCount / maxDataBytes(headerType))
 
-"""returns serialized data"""
-def serializeAndFragmentWithSender(maxDataBytes: int, data: list[EntryInterface], id: int)-> list[bytes]: # recv max data bytes for testing purposes
+def serializeAndFragmentWithSender(maxDataBytes: int, data: list[EntryInterface], id: int, fragment: int = 1, hasEOF: bool = True)-> tuple[list[bytes], int]: # recv max data bytes for testing purposes
     from entryParsing.common.headerWithSender import HeaderWithSender
-    fragment = 1
     packets = []
     currPacket = bytes()
 
@@ -74,8 +72,10 @@ def serializeAndFragmentWithSender(maxDataBytes: int, data: list[EntryInterface]
             packets.append(headerBytes + currPacket)
             currPacket = entryBytes
 
-    packets.append(HeaderWithSender(id, fragment, True).serialize() + currPacket)
-    return packets
+    packets.append(HeaderWithSender(id, fragment, hasEOF).serialize() + currPacket)
+    fragment += 1
+    return packets, fragment
+
 
 # same as fragmenting with sender, but couldnt modularize
 def serializeAndFragmentWithQueryNumber(maxDataBytes: int, data: list[EntryInterface], queryNumber: int)-> list[bytes]:
