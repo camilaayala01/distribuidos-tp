@@ -39,8 +39,7 @@ class Joiner:
             id = review.getAppID()
             name = self._games.get(id)
             if name is None:
-                print(f"name is none, {id}")
-                return
+                continue
             priorJoined = self._joinedEntries.get(id, self._joinerType.defaultEntry(name))
             self._joinedEntries[id] = self._joinerType.applyJoining(id, name, priorJoined, review)
 
@@ -50,7 +49,6 @@ class Joiner:
     def handleReviewsMessage(self, header: HeaderWithTable, data: bytes):
         self._reviewsTracker.update(header)
         reviews = self._joinerType.reviewsEntryType().deserialize(data)
-
         if not self._gamesTracker.isDone():
             self._unjoinedReviews.extend(reviews)
             return
@@ -73,8 +71,6 @@ class Joiner:
         toSend = self._joinerType.entriesToSend(self._joinedEntries, self.finishedReceiving())
         if not self.shouldSendPackets(toSend):
             return
-        if self._joinerType != JoinerType.ENGLISH:
-            print("sending dataa")
         packets, self._fragment = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(self._joinerType.headerType()), 
                                                  data=toSend, 
                                                  id=self._id,
@@ -82,10 +78,10 @@ class Joiner:
                                                  hasEOF=self.finishedReceiving())
         for packet in packets:
             self._sendToNext(packet)
+        #[print(self._joinedEntries[x]) for x in self._joinedEntries]
         self._joinedEntries = {}
 
     def reset(self):
-        print("resetting")
         self._gamesTracker.reset()
         self._reviewsTracker.reset()
         self._fragment = 1
@@ -113,7 +109,7 @@ class Joiner:
             self.handleReviewsMessage(header, batch)
         
         if self._gamesTracker.isDone():
-            self.joinReviews(self._unjoinedReviews)
+            self.joinReviews(self._unjoinedReviews, False)
             self._unjoinedReviews = []
 
         self._handleSending() 

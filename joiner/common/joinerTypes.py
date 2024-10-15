@@ -39,6 +39,8 @@ class JoinerType(Enum):
             case JoinerType.ENGLISH:
                 priorJoined.append(EntryAppIDNameReviewText(id, name, review.getReviewText()))
             case _:
+                if review.getAppID() == "105600":
+                    print(f"terraria 2: {review.getCount()}")
                 priorJoined.addToCount(review.getCount())
                 
         return priorJoined
