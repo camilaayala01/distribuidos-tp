@@ -51,6 +51,10 @@ services:
       - filterer-english-2
       - filterer-english-3
       - filterer-english-4
+      - filterer-english-5
+      - filterer-english-6
+      - filterer-english-7
+      - filterer-english-8
       - grouper-action-english
       - joiner-english-count-1
       - joiner-english-count-2

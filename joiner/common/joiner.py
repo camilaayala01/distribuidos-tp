@@ -78,7 +78,6 @@ class Joiner:
                                                  hasEOF=self.finishedReceiving())
         for packet in packets:
             self._sendToNext(packet)
-        #[print(self._joinedEntries[x]) for x in self._joinedEntries]
         self._joinedEntries = {}
 
     def reset(self):
@@ -109,7 +108,7 @@ class Joiner:
             self.handleReviewsMessage(header, batch)
         
         if self._gamesTracker.isDone():
-            self.joinReviews(self._unjoinedReviews, False)
+            self.joinReviews(self._unjoinedReviews)
             self._unjoinedReviews = []
 
         self._handleSending() 
