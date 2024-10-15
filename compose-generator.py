@@ -238,9 +238,8 @@ def add_groupers_indie(compose: dict[str, Any]):
 def add_groupers_os_count(compose: dict[str, Any]):
     return add_depending_count(compose, int(os.getenv('GROUPER_OS_COUNT')), add_grouper, name='os-counts', type=GrouperType.OS_COUNT.value, queue='GrouperOSCounts', next_nodes='JoinerOsCounts')
 
-
-def add_groupers_action_percentile(compose: dict[str, Any], count=DEFAULT_GROUPER_COUNT):
-    return add_depending_count(compose, count, add_grouper, name='action-percentile', type=GrouperType.APP_ID_COUNT.value, queue='GrouperActionPercentile', next_nodes='JoinerActionPercentile,2,0')
+def add_groupers_action_percentile(compose: dict[str, Any]):
+    return add_depending_count(compose, int(os.getenv('GROUPER_ACTION_PERCENTILE_COUNT')), add_grouper, name='action-percentile', type=GrouperType.APP_ID_COUNT.value, queue='GrouperActionPercentile', next_nodes='JoinerActionPercentile,2,0')
 
 def add_joiners_action_percentile(compose: dict[str, Any]):
     containers = []
@@ -262,7 +261,7 @@ def add_sorters_avg_playtime(compose: dict[str, Any], top):
 
 def add_sorters_indie(compose: dict[str, Any], top):
     containers = []
-    for i in range(1, count + 1):
+    for i in range(1, int(os.getenv('SORTER_INDIE_COUNT')) + 1):
         compose, new_container = add_sorter(compose, name=f'indie-positive-reviews-{i}', type=SorterType.INDIE.value, queue='SorterIndiePositiveReviews', next_nodes='ConsolidatorSorterIndiePositiveReviews',node_id=i,node_count=count, top=top)
         containers.append(new_container)
     return compose, containers
@@ -275,7 +274,7 @@ def add_sorter_consolidator_indie(compose: dict[str, Any], prior_node_count, top
 
 def add_joiners_indie(compose: dict[str, Any], count = DEFAULT_JOINER_COUNT):
     containers = []
-    for i in range(1, count + 1):
+    for i in range(1, int(os.getenv('JOINER_INDIE_COUNT')) + 1):
         compose, new_container = add_joiner(compose, name=f'indie-positive-{i}', type=JoinerType.INDIE.value, queue='JoinerIndiePositiveReviews', next_nodes='ConsolidatorJoinerIndiePositiveReviews',node_id=i)
         containers.append(new_container)
     return compose, containers
@@ -283,26 +282,23 @@ def add_joiners_indie(compose: dict[str, Any], count = DEFAULT_JOINER_COUNT):
 
 def add_joiner_action_english(compose: dict[str, Any], count = DEFAULT_JOINER_COUNT):
     containers = []
-    for i in range(1, count + 1):
+    for i in range(1, int(os.getenv('JOINER_ENGLISH_COUNT')) + 1):
         compose, new_container = add_joiner(compose, name=f'action-english-{i}', type=JoinerType.ENGLISH.value, queue='JoinerActionNegativeReviewsEnglish', next_nodes='FilterEnglish',node_id=i)
         containers.append(new_container)
     return compose, containers
 
 
-def add_joiner_indie_consolidator(compose: dict[str, Any], prior_node_count):
-    return add_joiner_consolidator(compose, name='joiner-indie', type=JoinerConsolidatorType.INDIE.value, queue='ConsolidatorJoinerIndiePositiveReviews', next_nodes='SorterIndiePositiveReviews,2,1', prior_node_count=prior_node_count)
+def add_joiner_indie_consolidator(compose: dict[str, Any]):
+    return add_joiner_consolidator(compose, name='joiner-indie', type=JoinerConsolidatorType.INDIE.value, queue='ConsolidatorJoinerIndiePositiveReviews', next_nodes='SorterIndiePositiveReviews,2,1', prior_node_count=int(os.getenv('JOINER_INDIE_COUNT')))
 
-def add_joiner_english_consolidator(compose: dict[str, Any], prior_node_count):
-    return add_joiner_consolidator(compose, name='joiner-english', type=JoinerConsolidatorType.ENGLISH.value, queue='ConsolidatorJoinerActionEnglish', next_nodes='JoinerNegativeReviewsEnglishCount,2,0', prior_node_count=prior_node_count)
+def add_joiner_english_consolidator(compose: dict[str, Any]):
+    return add_joiner_consolidator(compose, name='joiner-english', type=JoinerConsolidatorType.ENGLISH.value, queue='ConsolidatorJoinerActionEnglish', next_nodes='JoinerNegativeReviewsEnglishCount,2,0', prior_node_count=int(os.getenv('JOINER_ENGLISH_COUNT')))
 
-def add_joiner_stream_consolidator(compose: dict[str, Any], prior_node_count):
-    return add_joiner_consolidator(compose, name='stream', type=JoinerConsolidatorType.STREAM.value, queue='JoinerStreamConsolidator', next_nodes='Dispatcher', prior_node_count=prior_node_count)
+def add_joiner_stream_consolidator(compose: dict[str, Any]):
+    return add_joiner_consolidator(compose, name='stream', type=JoinerConsolidatorType.STREAM.value, queue='JoinerStreamConsolidator', next_nodes='Dispatcher', prior_node_count=int(os.getenv('JOINER_ENGLISH_COUNTER_COUNT')))
 
-def add_container(compose, containers, generation, count=None):
-    if count:
-        compose, new_containers = generation(compose, count)
-    else: 
-        compose, new_containers = generation(compose)
+def add_container(compose, containers, generation):
+    compose, new_containers = generation(compose)
     containers.extend(new_containers)
     return compose, containers
 
@@ -336,12 +332,12 @@ def generate_compose(output_file: str, client_number: int):
     compose, containers = add_container(compose, containers, generation=add_filterers_indie)
     compose, containers = add_container(compose, containers, generation=add_filterers_date)
     compose, containers = add_container(compose, containers, generation=add_sorters_avg_playtime)
-    #sorter-consolidator-avg-playtime
+     compose, containers = add_container(compose, containers, generation=add_sorter_consolidator)
 
     # Query 3
     compose, containers = add_container(compose, containers, generation=add_groupers_indie)
-    compose, containers = add_container(compose, containers, generation=add_joiners_indie) #SI SE AGREGA UN COUNT ACA, CAMBIARLO TAMBIEN EN LA SIGUENTE LINEA
-    compose, new_container = add_joiner_indie_consolidator(compose, prior_node_count=DEFAULT_JOINER_COUNT)
+    compose, containers = add_container(compose, containers, generation=add_joiners_indie) 
+    compose, new_container = add_joiner_indie_consolidator(compose)
     containers.append(new_container)
     #sorter-indie-positive-reviews
     #sorter-consolidator-indie-top
@@ -349,8 +345,8 @@ def generate_compose(output_file: str, client_number: int):
     #Query 4
     compose, containers = add_container(compose, containers, generation=add_filterers_action)
     compose, containers = add_container(compose, containers, generation=add_joiner_action_english)
-    compose, containers = add_container(compose, containers, generation=add_filterers_english, count=8)
-    compose, containers = add_container(compose, containers, generation=add_groupers_action_english) # SI SE AGREGA UN COUNT ACA, CAMBIARLO TAMBIEN EN LA SIGUENTE LINEA
+    compose, containers = add_container(compose, containers, generation=add_filterers_english)
+    compose, containers = add_container(compose, containers, generation=add_groupers_action_english)
     compose, new_container = add_joiner_english_consolidator(compose, prior_node_count=DEFAULT_GROUPER_COUNT)
     containers.append(new_container)
     #joiner-english-count # SI SE AGREGA UN COUNT ACA, CAMBIARLO TAMBIEN EN LA SIGUENTE LINEA
