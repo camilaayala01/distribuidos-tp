@@ -39,13 +39,10 @@ class JoinerType(Enum):
             case JoinerType.ENGLISH:
                 priorJoined.append(EntryAppIDNameReviewText(id, name, review.getReviewText()))
             case _:
-                if review.getAppID() == "105600":
-                    print(f"terraria 2: {review.getCount()}")
-                priorJoined.addToCount(review.getCount())
-                
+                priorJoined.addToCount(review.getCount()) 
         return priorJoined
 
-    def entriesForEnglish(self, joinedEntries, isDone):
+    def entriesForEnglish(self, joinedEntries, _isDone):
         # no matter if it is done, if some entries are joined it will send them
         return [value for values in joinedEntries.values() for value in values]
     
@@ -55,11 +52,10 @@ class JoinerType(Enum):
         return joinedEntries.values()
 
     def entriesForPercentile(self, joinedEntries, isDone):
-        if not isDone:
-            return []
         entries = []
-        for id, entry in joinedEntries.items():
-            entries.append(EntryAppIDNameReviewCount(id, entry.getName(), entry.getCount()))
+        if isDone:
+            for id, entry in joinedEntries.items():
+                entries.append(EntryAppIDNameReviewCount(id, entry.getName(), entry.getCount()))
         return entries
 
     def entriesToSend(self, joinedEntries, isDone)-> list[EntryInterface]: 
