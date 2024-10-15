@@ -33,5 +33,5 @@ class EntryNameAvgPlaytime(EntrySorterTopFinder):
         return self._avgPlaytime
     
     @classmethod
-    def sort(cls, entries: list['EntrySorterTopFinder']) -> list['EntrySorterTopFinder']:
-        return super().sort(entries, True)
+    def sort(cls, entries: list['EntrySorterTopFinder'], reversed: bool) -> list['EntrySorterTopFinder']:
+        return super().sort(entries, reversed)
