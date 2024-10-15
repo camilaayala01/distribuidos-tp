@@ -9,7 +9,7 @@ from packetTracker.multiTracker import MultiTracker
 import os
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
-PRINT_FREQUENCY = 51
+PRINT_FREQUENCY = 50
 
 class JoinerConsolidator:
     def __init__(self): 

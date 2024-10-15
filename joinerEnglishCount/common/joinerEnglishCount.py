@@ -11,6 +11,7 @@ from entryParsing.common.utils import initializeLog
 
 REQUIRED_REVIEWS=5000
 PRINT_FREQ = 100
+
 """
 Entities that join all partial counts and streams results to clients
 More than one entity
@@ -59,7 +60,6 @@ class JoinerNegativeReviewsEnglishCount:
 
         return ready
 
-    # should have a fragment number to stream results to client
     def handleMessage(self, ch, method, properties, body):
         header, data = Header.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQ == 0:
@@ -76,22 +76,15 @@ class JoinerNegativeReviewsEnglishCount:
     def _sendToNextStep(self, data: bytes):
         self._internalCommunication.sendToStreamJoinerConsolidator(data)
 
+    def shouldSendPackets(self, toSend: list[EntryName]):
+        return self._packetTracker.isDone() or (not self._packetTracker.isDone() and len(toSend) != 0)
+    
     def _handleSending(self, ready: list[EntryName]):
         header = HeaderWithSender(self._id, self._fragnum, self._packetTracker.isDone())
-        if self._packetTracker.isDone() and len(ready) == 0:
-            self._sendToNextStep(header.serialize())
-            logging.info(f'action: sending to consolidator empty batch | {header} | result: success')
-            self.reset()
-            self._fragnum+=1
-            return
-
-        if len(ready) == 0:
-            return
-        
-        logging.info(f'action: sending to consolidator batch | {header} | result: success')
-        namesBytes = EntryName.serializeAll(ready)        
-        self._sendToNextStep(header.serialize() + namesBytes)
-        self._fragnum += 1
+        if self.shouldSendPackets(ready):
+            namesBytes = EntryName.serializeAll(ready) 
+            self._sendToNextStep(header.serialize() + namesBytes)
+            self._fragnum += 1
 
         if self._packetTracker.isDone():
             self.reset()
