@@ -51,6 +51,10 @@ services:
       - filterer-english-2
       - filterer-english-3
       - filterer-english-4
+      - filterer-english-5
+      - filterer-english-6
+      - filterer-english-7
+      - filterer-english-8
       - grouper-action-english
       - joiner-english-count-1
       - joiner-english-count-2
@@ -94,7 +98,7 @@ services:
 
   joiner-os-counts:
     build:
-      context: ./joinerOSCount
+      context: ./joinerCount
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
@@ -213,35 +217,39 @@ services:
 
   joiner-indie-positive-1:
     build:
-      context: ./joinerIndiePositive
+      context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
       - NODE_ID=0
-    env_file:
-      - .env
+      - JOINER_TYPE=1
+      - LISTENING_QUEUE=JoinerIndiePositiveReviews
+      - NEXT_NODES=ConsolidatorJoinerIndiePositiveReviews
+      - HOST=rabbitmq
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
   joiner-indie-positive-2:
     build:
-      context: ./joinerIndiePositive
+      context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
       - NODE_ID=1
-    env_file:
-      - .env
+      - JOINER_TYPE=1
+      - LISTENING_QUEUE=JoinerIndiePositiveReviews
+      - NEXT_NODES=ConsolidatorJoinerIndiePositiveReviews
+      - HOST=rabbitmq
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
@@ -317,7 +325,6 @@ services:
     networks:
       - sa_net
 
-  
   filterer-action:
     build:
       context: ./filterer
@@ -337,35 +344,39 @@ services:
 
   joiner-action-english-1:
     build:
-      context: ./joinerActionEnglish
+      context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-      - PYTHONUNBUFFERED=1
+      - PYTHONUNBUFFERED=17
+      - HOST=rabbitmq
+      - JOINER_TYPE=2
       - NODE_ID=0
-    env_file:
-      - .env
+      - LISTENING_QUEUE=JoinerActionNegativeReviewsEnglish
+      - NEXT_NODES=FilterEnglish
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
   joiner-action-english-2:
     build:
-      context: ./joinerActionEnglish
+      context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - HOST=rabbitmq
+      - JOINER_TYPE=2
       - NODE_ID=1
-    env_file:
-      - .env
+      - LISTENING_QUEUE=JoinerActionNegativeReviewsEnglish
+      - NEXT_NODES=FilterEnglish
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
@@ -421,6 +432,74 @@ services:
       - sa_net
 
   filterer-english-4:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HOST=rabbitmq
+      - FILTERER_TYPE=3
+      - LISTENING_QUEUE=FilterEnglish
+      - NEXT_NODES=GrouperActionEnglish
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./sendingStrategy:/sendingStrategy
+    networks:
+      - sa_net
+
+  filterer-english-5:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HOST=rabbitmq
+      - FILTERER_TYPE=3
+      - LISTENING_QUEUE=FilterEnglish
+      - NEXT_NODES=GrouperActionEnglish
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./sendingStrategy:/sendingStrategy
+    networks:
+      - sa_net
+
+  filterer-english-6:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HOST=rabbitmq
+      - FILTERER_TYPE=3
+      - LISTENING_QUEUE=FilterEnglish
+      - NEXT_NODES=GrouperActionEnglish
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./sendingStrategy:/sendingStrategy
+    networks:
+      - sa_net
+
+  filterer-english-7:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HOST=rabbitmq
+      - FILTERER_TYPE=3
+      - LISTENING_QUEUE=FilterEnglish
+      - NEXT_NODES=GrouperActionEnglish
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./sendingStrategy:/sendingStrategy
+    networks:
+      - sa_net
+
+  filterer-english-8:
     build:
       context: ./filterer
       dockerfile: ../rabbitUser.Dockerfile
@@ -545,35 +624,39 @@ services:
 
   joiner-action-percentile-1:
     build:
-      context: ./joinerActionPercentile
+      context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - JOINER_TYPE=0
+      - HOST=rabbitmq
       - NODE_ID=0
-    env_file:
-      - .env
+      - LISTENING_QUEUE=JoinerActionPercentile
+      - NEXT_NODES=ConsolidatorSorterActionPercentile
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
   joiner-action-percentile-2:
     build:
-      context: ./joinerActionPercentile
+      context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - HOST=rabbitmq
+      - JOINER_TYPE=0
       - NODE_ID=1
-    env_file:
-      - .env
+      - LISTENING_QUEUE=JoinerActionPercentile
+      - NEXT_NODES=ConsolidatorSorterActionPercentile
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 

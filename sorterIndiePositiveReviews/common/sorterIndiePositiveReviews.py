@@ -24,7 +24,8 @@ class SorterIndiePositiveReviews(Sorter):
         return sortedBatch[:self._topAmount]
     
     def _serializeAndFragment(self):
-        return serializeAndFragmentWithSender(maxDataBytes(self._headerType), self._partialTop, self._id)
+        packets, _ = serializeAndFragmentWithSender(maxDataBytes(self._headerType), self._partialTop, self._id)
+        return packets
         
     def _sendToNextStep(self, data: bytes):
         self._internalCommunication.sendToPositiveReviewsSorterConsolidator(data)

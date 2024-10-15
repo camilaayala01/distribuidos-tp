@@ -25,7 +25,7 @@ class TestSerializeFragmentWithHeader(unittest.TestCase):
         self.sorterAction._partialTop = self.entriesEqual
         self.sorterAction._id = 1
 
-        packets = serializeAndFragmentWithSender(15, self.sorterAction._partialTop, self.sorterAction._id)
+        packets, _ = serializeAndFragmentWithSender(15, self.sorterAction._partialTop, self.sorterAction._id)
         self.assertEqual(len(packets), 3)
         deserialized = []
 
@@ -43,7 +43,7 @@ class TestSerializeFragmentWithHeader(unittest.TestCase):
     def testSerializeDataWithBigMaxDataBytes(self):
         self.sorterAction._partialTop = self.entriesEqual
         self.sorterAction._id = 1
-        packets = serializeAndFragmentWithSender(1000, self.sorterAction._partialTop, self.sorterAction._id)
+        packets, _ = serializeAndFragmentWithSender(1000, self.sorterAction._partialTop, self.sorterAction._id)
         self.assertEqual(len(packets), 1)
         header, _ = HeaderWithSender.deserialize(packets[0])
 
@@ -57,7 +57,7 @@ class TestSerializeFragmentWithHeader(unittest.TestCase):
             entriesLen += len(entry.serialize())
 
         self.sorterAction._id = 1
-        packets = serializeAndFragmentWithSender(entriesLen, self.sorterAction._partialTop, self.sorterAction._id)
+        packets, _ = serializeAndFragmentWithSender(entriesLen, self.sorterAction._partialTop, self.sorterAction._id)
         self.assertEqual(len(packets), 1)
         header, _ = HeaderWithSender.deserialize(packets[0])
 
