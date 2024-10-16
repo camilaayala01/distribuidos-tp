@@ -3,9 +3,8 @@ from entryParsing.entry import EntryInterface
 from .common.fieldParsing import deserializeAppID, deserializeCount, serializeAppID, serializeCount
 
 class EntryAppIDReviewCount(EntryInterface):
-    def __init__(self, appID: str, count: int):
-        self._appID =  appID
-        self._count = count
+    def __init__(self, _appID: str, _count: int):
+        super().__init__(_appID=_appID, _count=_count)
 
     def getAppID(self):
         return self._appID

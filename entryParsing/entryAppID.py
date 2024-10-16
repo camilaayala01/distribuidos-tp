@@ -2,8 +2,8 @@ from entryParsing.entry import EntryInterface
 from .common.fieldParsing import deserializeAppID, serializeAppID
 
 class EntryAppID(EntryInterface):
-    def __init__(self, appID: str):
-        self._appID =  appID
+    def __init__(self, _appID: str):
+        super().__init__(_appID=_appID)
 
     def serialize(self) -> bytes:
         return serializeAppID(self._appID)

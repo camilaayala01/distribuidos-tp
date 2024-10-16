@@ -1,12 +1,11 @@
 # amount of bytes dedicated to stating the length of the name
 from entryParsing.common import fieldParsing
 from entryParsing.common.fieldParsing import *
+from entryParsing.entry import EntryInterface
 
-class EntryNameDateAvgPlaytime():
-    def __init__(self, name: str, releaseDate: str, avgPlaytimeForever: int):
-        self._name = name
-        self._releaseDate = releaseDate
-        self._avgPlaytimeForever = avgPlaytimeForever
+class EntryNameDateAvgPlaytime(EntryInterface):
+    def __init__(self, _name: str, _releaseDate: str, _avgPlaytimeForever: int):
+        super().__init__(_name=_name, _releaseDate=_releaseDate, _avgPlaytimeForever=_avgPlaytimeForever)
 
     def serialize(self) -> bytes:
         nameBytes = fieldParsing.serializeGameName(self._name)
@@ -19,7 +18,7 @@ class EntryNameDateAvgPlaytime():
         name, curr = fieldParsing.deserializeGameName(curr, data)
         releaseDate, curr = fieldParsing.deserializeReleaseDate(curr, data)
         avgPlaytimeForever, curr = fieldParsing.deserializePlaytime(curr, data)
-        return cls(name, releaseDate, avgPlaytimeForever), curr
+        return cls(_name=name, _releaseDate=releaseDate, _avgPlaytimeForever=avgPlaytimeForever), curr
     
     @classmethod
     def deserialize(cls, data: bytes): 

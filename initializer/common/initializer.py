@@ -56,7 +56,7 @@ class Initializer:
             gameEntries = ReducedGameEntry.deserialize(data)
 
             #Query 1
-            entriesQuery1 = b''.join([EntryOSSupport(entry.windows, entry.mac, entry.linux).serialize() for entry in gameEntries])
+            entriesQuery1 = b''.join([EntryOSSupport(entry._windows, entry._mac, entry._linux).serialize() for entry in gameEntries])
             
             if len(entriesQuery1) + len(self._query_1_games) <= MAX_DATA_BYTES:
                 self._query_1_games += entriesQuery1
@@ -67,7 +67,7 @@ class Initializer:
                 self._query_1_games = entriesQuery1
 
             #Query 2 and 3
-            entriesQuery2And3 = b''.join([EntryAppIDNameGenresReleaseDateAvgPlaytime(entry.appID, entry.name, entry.genres, entry.releaseDate, entry.avgPlaytime).serialize() for entry in gameEntries])
+            entriesQuery2And3 = b''.join([EntryAppIDNameGenresReleaseDateAvgPlaytime(entry._appID, entry._name, entry._genres, entry._releaseDate, entry._avgPlaytime).serialize() for entry in gameEntries])
             
             if len(entriesQuery2And3) + len(self._query_2_3_games) <= MAX_DATA_BYTES:
                 self._query_2_3_games += entriesQuery2And3
@@ -78,7 +78,7 @@ class Initializer:
                 self._query_2_3_games = entriesQuery2And3
 
             #Query 4 and 5
-            entriesQuery4And5 = b''.join([EntryAppIDNameGenres(entry.appID, entry.name, entry.genres).serialize() for entry in gameEntries])
+            entriesQuery4And5 = b''.join([EntryAppIDNameGenres(entry._appID, entry._name, entry._genres).serialize() for entry in gameEntries])
             
             if len(entriesQuery4And5) + len(self._query_4_5_games) <= MAX_DATA_BYTES:
                 self._query_4_5_games += entriesQuery4And5
@@ -103,7 +103,7 @@ class Initializer:
             positiveReviewEntries, negativeReviewEntries = self.separatePositiveAndNegative(reviewEntries)
 
             #Query 3
-            entriesQuery3 = b''.join([EntryAppID(entry.appID).serialize() for entry in positiveReviewEntries])
+            entriesQuery3 = b''.join([EntryAppID(entry._appID).serialize() for entry in positiveReviewEntries])
 
             if len(entriesQuery3) + len(self._query_3_reviews) <= MAX_DATA_BYTES:
                 self._query_3_reviews += entriesQuery3
@@ -125,7 +125,7 @@ class Initializer:
                     self._query_4_reviews[i] = shardedResults[i]
 
             # Query 5
-            entriesQuery5 = b''.join([EntryAppID(entry.appID).serialize() for entry in negativeReviewEntries])
+            entriesQuery5 = b''.join([EntryAppID(entry._appID).serialize() for entry in negativeReviewEntries])
 
             if len(entriesQuery5) + len(self._query_5_reviews) <= MAX_DATA_BYTES:
                 self._query_5_reviews += entriesQuery5

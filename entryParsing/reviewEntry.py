@@ -7,23 +7,20 @@ SCORE_LEN = 3
 VOTE_LEN = 1
 
 class ReviewEntry(EntryInterface):
-    def __init__(self, appID, appName, reviewText, reviewScore, reviewVotes):
-            self.appID = appID # max len 6
-            self.appName = appName # max len 83
-            self.reviewText = reviewText # max len 8873
-            self.reviewScore = int(reviewScore)
-            self.reviewVotes = int(reviewVotes) # 0 o 1
+    def __init__(self, _appID, _appName, _reviewText, _reviewScore, _reviewVotes):
+        super().__init__(_appID=_appID, _appName=_appName, _reviewText=_reviewText,
+                         _reviewScore=int(_reviewScore), _reviewVotes=int(_reviewVotes))
 
     def __str__(self):
         return f"EntryReview(appID={self.appID}, name={self.appName})"
     
     def serialize(self) -> bytes:
-        return (fieldParsing.serializeAppID(self.appID) + fieldParsing.serializeGameName(self.appName) +
-               fieldParsing.serializeReviewText(self.reviewText) + fieldParsing.serializeSignedInt(self.reviewScore)
-               + fieldParsing.serializeNumber(self.reviewVotes, VOTE_LEN))
+        return (fieldParsing.serializeAppID(self._appID) + fieldParsing.serializeGameName(self._appName) +
+               fieldParsing.serializeReviewText(self._reviewText) + fieldParsing.serializeSignedInt(self._reviewScore)
+               + fieldParsing.serializeNumber(self._reviewVotes, VOTE_LEN))
 
     def isPositive(self) -> bool:
-        return True if self.reviewScore == 1 else False 
+        return True if self._reviewScore == 1 else False 
 
     @classmethod
     def deserialize(cls, data: bytes) -> list['ReviewEntry']: 
@@ -48,7 +45,7 @@ class ReviewEntry(EntryInterface):
     def shardBatch(nodeCount: int, result: list['ReviewEntry']) -> list[bytes]:
         resultingBatches = [bytes() for _ in range(nodeCount)]
         for entry in result:
-            shardResult = getShardingKey(entry.appID, nodeCount)
-            resultingBatches[shardResult] = resultingBatches[shardResult] + EntryAppIDReviewText(entry.appID, entry.reviewText).serialize()
+            shardResult = getShardingKey(entry._appID, nodeCount)
+            resultingBatches[shardResult] = resultingBatches[shardResult] + EntryAppIDReviewText(entry._appID, entry._reviewText).serialize()
         return resultingBatches
 

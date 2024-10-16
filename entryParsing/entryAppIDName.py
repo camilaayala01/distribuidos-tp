@@ -3,9 +3,8 @@ from .common.fieldParsing import  deserializeAppID, deserializeGameName, seriali
 from entryParsing.common.utils import getShardingKey
 
 class EntryAppIDName(EntryInterface):
-    def __init__(self, appID: str, name: str):
-        self._appID = appID
-        self._name = name
+    def __init__(self, _appID: str, _name: str):
+        super().__init__(_appID=_appID, _name=_name)
 
     def serialize(self) -> bytes:
         appIDBytes = serializeAppID(self._appID)

@@ -2,10 +2,9 @@ from abc import ABC, abstractmethod
 from .entry import EntryInterface
 
 class EntrySorterTopFinder(EntryInterface):
-
-    def __init__(self, name: str):
-        self._name = name
-
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
     @abstractmethod
     def serialize(self) -> bytes:
         pass

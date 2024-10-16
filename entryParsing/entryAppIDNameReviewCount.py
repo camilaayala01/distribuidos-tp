@@ -2,10 +2,8 @@ from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from .common.fieldParsing import deserializeAppID, deserializeCount, deserializeGameName, serializeAppID, serializeCount, serializeGameName
 
 class EntryAppIDNameReviewCount(EntrySorterTopFinder):
-    def __init__(self, appID: str, name: str, count: int):
-        self._appID =  appID
-        self._name = name
-        self._count = count
+    def __init__(self, _appID: str, _name: str, _count: int):
+        super().__init__(_appID=_appID, _name=_name, _count=_count)
 
     def getAppID(self):
         return self._appID

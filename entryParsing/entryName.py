@@ -2,8 +2,8 @@ from entryParsing.entry import EntryInterface
 from .common.fieldParsing import deserializeGameName, serializeGameName
 
 class EntryName(EntryInterface):
-    def __init__(self, name: str):
-        self._name =  name
+    def __init__(self, _name: str):
+        super().__init__(_name=_name)
 
     def serialize(self) -> bytes:
         return serializeGameName(self._name)
