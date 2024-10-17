@@ -1,10 +1,10 @@
 import signal
-from common.joinerOSCount import JoinerOSCount
 from entryParsing.common.utils import initializeLog
+from common.joinerCount import JoinerCount
 
 def main():
     initializeLog()
-    joiner = JoinerOSCount()
+    joiner = JoinerCount()
     signal.signal(signal.SIGTERM, joiner.stop)
     joiner.execute()
 
