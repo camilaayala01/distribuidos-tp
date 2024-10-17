@@ -79,6 +79,7 @@ services:
       - ./entryParsing:/entryParsing
     networks:
       - sa_net
+    
   grouper-os-counts:
     build:
       context: ./grouper
@@ -102,12 +103,16 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
+      - JOINER_COUNT_TYPE=0
+      - HOST=rabbitmq
+      - LISTENING_QUEUE=JoinerOsCounts
+      - NEXT_NODES=Dispatcher
+      - QUERY_NUMBER=1
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
@@ -574,35 +579,41 @@ services:
 
   joiner-english-count-1:
     build:
-      context: ./joinerEnglishCount
+      context: ./joinerCount
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - JOINER_COUNT_TYPE=1
+      - HOST=rabbitmq
       - NODE_ID=0
-    env_file:
-      - .env
+      - REQUIRED_REVIEWS=5000
+      - LISTENING_QUEUE=JoinerNegativeReviewsEnglishCount
+      - NEXT_NODES=JoinerStreamConsolidator
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
   joiner-english-count-2:
     build:
-      context: ./joinerEnglishCount
+      context: ./joinerCount
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - JOINER_COUNT_TYPE=1
+      - HOST=rabbitmq
       - NODE_ID=1
-    env_file:
-      - .env
+      - REQUIRED_REVIEWS=5000
+      - LISTENING_QUEUE=JoinerNegativeReviewsEnglishCount
+      - NEXT_NODES=JoinerStreamConsolidator
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 

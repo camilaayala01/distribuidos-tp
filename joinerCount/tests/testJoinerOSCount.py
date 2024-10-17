@@ -12,6 +12,11 @@ class TestJoinerOSCount(unittest.TestCase):
             EntryOSCount(1, 2, 3, 5),
             EntryOSCount(1, 2, 3, 5),
         ]
+        os.environ['JOINER_COUNT_TYPE']=0
+      - HOST=rabbitmq
+      - LISTENING_QUEUE=JoinerOsCounts
+      - NEXT_NODES=Dispatcher
+      - QUERY_NUMBER=1
         self._joiner = JoinerOSCount()
 
     def testCountEntries(self):
