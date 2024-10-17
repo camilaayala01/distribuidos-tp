@@ -82,7 +82,7 @@ class SorterType(Enum):
         if index >= len(packets):
             index = len(packets) - 1
 
-        while index > 0 and packets[index] == packets[index-1]:
+        while index > 0 and packets[index].getCount() == packets[index-1].getCount():
             index -= 1
         
         return packets[index:]
