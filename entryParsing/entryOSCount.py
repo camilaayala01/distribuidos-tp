@@ -17,7 +17,13 @@ class EntryOSCount(EntryInterface):
 
     def getTotalCount(self):
         return self._total
-    
+
+    def sumEntry(self, entry: 'EntryOSCount'):
+        self._windows += entry.getWindowsCount()
+        self._mac += entry.getMacCount()
+        self._linux += entry.getLinuxCount()
+        self._total += entry.getTotalCount()
+
     def serialize(self) -> bytes: 
         windowsBytes = serializeCount(self._windows)
         macBytes = serializeCount(self._mac)

@@ -4,7 +4,6 @@ from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender, initializeLog
 from entryParsing.entry import EntryInterface
-from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from internalCommunication.internalCommunication import InternalCommunication
 from .joinerTypes import JoinerType
 from packetTracker.defaultTracker import DefaultTracker
@@ -27,6 +26,7 @@ class Joiner:
         # key: app id, value: name
         self._games = {}
         self._joinedEntries = {}
+        self._sent = set()
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
@@ -68,7 +68,9 @@ class Joiner:
         return self.finishedReceiving() or (not self.finishedReceiving() and len(toSend) != 0)
 
     def _handleSending(self):
-        toSend = self._joinerType.entriesToSend(self._joinedEntries, self.finishedReceiving())
+        toSend, self._joinedEntries, self._sent = self._joinerType.entriesToSend(joinedEntries=self._joinedEntries, 
+                                                                                 isDone=self.finishedReceiving(),
+                                                                                 sent=self._sent)
         if not self.shouldSendPackets(toSend):
             return
         packets, self._fragment = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(self._joinerType.headerType()), 
@@ -78,7 +80,6 @@ class Joiner:
                                                  hasEOF=self.finishedReceiving())
         for packet in packets:
             self._sendToNext(packet)
-        self._joinedEntries = {}
 
     def reset(self):
         self._gamesTracker.reset()

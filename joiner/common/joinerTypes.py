@@ -9,6 +9,8 @@ from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from entryParsing.entryAppIDReviewText import EntryAppIDReviewText
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 
+REQUIRED_ENTRIES = 5000
+
 class JoinerType(Enum):
     PERCENTILE = 0
     INDIE = 1
@@ -42,26 +44,41 @@ class JoinerType(Enum):
                 priorJoined.addToCount(review.getCount()) 
         return priorJoined
 
-    def entriesForEnglish(self, joinedEntries, _isDone):
-        # no matter if it is done, if some entries are joined it will send them
-        return [value for values in joinedEntries.values() for value in values]
+    def entriesForEnglish(self, joinedEntries, sent):
+        toSend = []
+        newSent = set()
+        for id, entries in joinedEntries.items():
+            # if it had already reached 5000, or just reached it
+            if len(entries) >= REQUIRED_ENTRIES or id in sent:
+                newSent.add(id)
+                toSend.extend(entries)
+                if len(entries) >= REQUIRED_ENTRIES:
+                    print(f"sent with id {id}")
+
+        for id in newSent:
+            del joinedEntries[id]
+            sent.add(id)
+            
+        return toSend, joinedEntries, sent
     
     def entriesForIndie(self, joinedEntries, isDone):
         if not isDone:
-            return []
-        return joinedEntries.values()
+            return [], joinedEntries, set() 
+        return joinedEntries.values(), {}, set()
 
     def entriesForPercentile(self, joinedEntries, isDone):
         entries = []
         if isDone:
             for id, entry in joinedEntries.items():
                 entries.append(EntryAppIDNameReviewCount(id, entry.getName(), entry.getCount()))
-        return entries
+            joinedEntries = {}
+        return entries, joinedEntries, set()
 
-    def entriesToSend(self, joinedEntries, isDone)-> list[EntryInterface]: 
+    # returns a tuple of entries to send, joined entries, sent ids that will be ignored from now on
+    def entriesToSend(self, joinedEntries, isDone, sent): 
         match self:
             case JoinerType.ENGLISH:
-                return self.entriesForEnglish(joinedEntries, isDone)
+                return self.entriesForEnglish(joinedEntries, sent)
             case JoinerType.INDIE:
                 return self.entriesForIndie(joinedEntries, isDone)
             case JoinerType.PERCENTILE:

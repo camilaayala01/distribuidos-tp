@@ -3,10 +3,8 @@ import random
 import unittest
 from unittest.mock import MagicMock, patch
 
-from entryParsing.common.headerWithSender import HeaderWithSender
-from sorterConsolidatorActionPercentile.common.sorterConsolidatorActionPercentile import SorterConsolidatorActionPercentile
-from sorterIndiePositiveReviews.common.sorterIndiePositiveReviews import SorterIndiePositiveReviews
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
+from sorter.common.sorter import Sorter
 
 SMALL_TEST_TOP_AMOUNT = 3
 BIG_TEST_TOP_AMOUNT = 20
@@ -33,14 +31,20 @@ class TestSorterGeneral(unittest.TestCase):
             EntryNameReviewCount("Game I", 250),
         ]
         os.environ['NODE_ID'] = '1'
-        os.environ['CONS_SORT_PERC_NEG_REV'] = 'sorterAction'
-        os.environ['SORT_INDIE_POS_REV'] = 'sorterIndie'
-        os.environ['JOIN_PERC_NEG_REV_COUNT'] = '2'
-        os.environ['SORT_INDIE_POS_REV_COUNT'] = '2'
-
-        self.sorterIndieFew = SorterIndiePositiveReviews(SMALL_TEST_TOP_AMOUNT)
-        self.sorterAction = SorterConsolidatorActionPercentile()
-        self.sorterBig = SorterIndiePositiveReviews(BIG_TEST_TOP_AMOUNT)
+        os.environ['NODE_COUNT'] = '2'
+        os.environ['PRIOR_NODE_COUNT'] = '2'
+        os.environ['LISTENING_QUEUE'] = 'sorter'
+        os.environ['NEXT_NODES'] = 'ConsolidatorSorterIndiePositiveReviews'
+        os.environ['SORTER_TYPE'] = '1'
+        os.environ['TOP_AMOUNT'] = '3'
+        # indie
+        self.sorterIndieFew = Sorter()
+        os.environ['TOP_AMOUNT'] = '20'
+        self.sorterBig = Sorter()
+        os.environ['SORTER_TYPE'] = '4'
+        # action consolidator
+        self.sorterAction = Sorter()
+        
 
     def generateEntries(self):
         entries = []
@@ -50,7 +54,7 @@ class TestSorterGeneral(unittest.TestCase):
         return entries
 
     def testGetBatchTopInAscendingOrder(self):
-        result = self.sorterAction.getBatchTop(self.entriesMore)
+        result = self.sorterAction._sorterType.getBatchTop(self.entriesMore, self.sorterAction._topAmount)
         topNames = [entry._name for entry in result]
         expectedNames = ["Game F", "Game G", "Game I", "Game H"]
 
@@ -68,7 +72,7 @@ class TestSorterGeneral(unittest.TestCase):
         self.assertEqual(len(self.sorterAction._partialTop), len(entries1) + len(entries2))
 
     def testGetBatchTopWithEqualEntriesToTop(self):
-        result = self.sorterIndieFew.getBatchTop(self.entriesEqual)
+        result = self.sorterIndieFew._sorterType.getBatchTop(self.entriesEqual, self.sorterIndieFew._topAmount)
         topNames = [entry._name for entry in result]
         expectedNames = ["Game C", "Game B", "Game A"]
 
@@ -76,7 +80,7 @@ class TestSorterGeneral(unittest.TestCase):
         self.assertEqual(topNames, expectedNames)
 
     def testGetBatchTopWithLessEntriesThanTop(self):
-        result = self.sorterIndieFew.getBatchTop(self.entriesLess)
+        result = self.sorterIndieFew._sorterType.getBatchTop(self.entriesLess, self.sorterIndieFew._topAmount)
         topNames = [entry._name for entry in result]
         expectedNames = ["Game E", "Game D"]
 
@@ -84,7 +88,7 @@ class TestSorterGeneral(unittest.TestCase):
         self.assertEqual(topNames, expectedNames)
 
     def testGetBatchTopMoreThanTop(self):
-        result = self.sorterIndieFew.getBatchTop(self.entriesMore)
+        result = self.sorterIndieFew._sorterType.getBatchTop(self.entriesMore,self.sorterIndieFew._topAmount)
         topNames = [entry._name for entry in result]
         expectedNames = ["Game H", "Game I", "Game G"]
 
@@ -103,7 +107,7 @@ class TestSorterGeneral(unittest.TestCase):
 
     def testMergeWithBiggerAmountThanTop(self):
         allEntries = self.entriesEqual + self.entriesLess + self.entriesMore
-        ordered = self.sorterBig.getBatchTop(allEntries)
+        ordered = self.sorterBig._sorterType.getBatchTop(allEntries, self.sorterBig._topAmount)
 
         self.sorterBig.mergeKeepTop(self.entriesMore)
         self.sorterBig.mergeKeepTop(self.entriesLess)
