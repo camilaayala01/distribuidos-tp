@@ -2,17 +2,9 @@ from enum import Enum
 from entryParsing.common.header import Header
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from entryParsing.common.headerWithSender import HeaderWithSender
-from entryParsing.common.headerWithTable import HeaderWithTable
-from entryParsing.entry import EntryInterface
-from entryParsing.entryAppIDName import EntryAppIDName
-from entryParsing.entryAppIDNameGenres import EntryAppIDNameGenres
-from entryParsing.entryAppIDNameGenresReleaseDateAvgPlaytime import EntryAppIDNameGenresReleaseDateAvgPlaytime
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
-from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
+from entryParsing.entry import EntryInterface
 from entryParsing.entryName import EntryName
-from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
-from entryParsing.entryNameDateAvgPlaytime import EntryNameDateAvgPlaytime
-from entryParsing.entryNameReleaseDateAvgPlaytime import EntryNameReleaseDateAvgPlaytime
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 
 class JoinerConsolidatorType(Enum):
