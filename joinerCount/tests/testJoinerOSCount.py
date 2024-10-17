@@ -1,7 +1,8 @@
 import unittest
+import os
 from unittest.mock import MagicMock, patch
 from entryParsing.entryOSCount import EntryOSCount
-from ..common.joinerOSCount import JoinerOSCount
+from ..common.joinerCount import JoinerCount
 
 class TestJoinerOSCount(unittest.TestCase):
     @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
@@ -12,16 +13,19 @@ class TestJoinerOSCount(unittest.TestCase):
             EntryOSCount(1, 2, 3, 5),
             EntryOSCount(1, 2, 3, 5),
         ]
-        self._joiner = JoinerOSCount()
+        os.environ['JOINER_COUNT_TYPE'] = '0'
+        os.environ['LISTENING_QUEUE'] = 'JoinerOsCounts'
+        os.environ['NEXT_NODES'] = 'Some'
+        self.joiner = JoinerCount()
 
     def testCountEntries(self):
+        results = self.joiner._counts
         for entry in self._entries:
-            self._joiner._sum(entry)
-        result = self._joiner._buildResult()
-        self.assertEqual(result._windows, 4)
-        self.assertEqual(result._mac, 8)
-        self.assertEqual(result._linux, 12)
-        self.assertEqual(result._total, 20)
+            _, results, _ = self.joiner._joinerCountType.getOSCountResults(results, entry, False)
+        self.assertEqual(results._windows, 4)
+        self.assertEqual(results._mac, 8)
+        self.assertEqual(results._linux, 12)
+        self.assertEqual(results._total, 20)
 
 if __name__ == '__main__':
     unittest.main()
