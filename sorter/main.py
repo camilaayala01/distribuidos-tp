@@ -1,9 +1,8 @@
-import os
-from common.sorterAvgPlaytime import SorterAvgPlaytime
+from common.sorter import Sorter
 import signal
 
 def main():
-    sorter = SorterAvgPlaytime(int(os.getenv('TOP_AMOUNT')))
+    sorter = Sorter()
     signal.signal(signal.SIGTERM, sorter.stop)
     sorter.execute()
 
