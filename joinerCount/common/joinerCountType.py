@@ -36,17 +36,7 @@ class JoinerCountType(Enum):
     
     def sumEnglish(self, incoming, prior):
         pass
-        # for entry in incoming:
-        #     appID = entry.getAppID()
-        #     priorEntry = prior.get(appID, EntryAppIDNameReviewCount(entry.getName(), 0))
-        #     if priorEntry.getCount() + entry.getCount() >= os.getenv('REQUIRED_ENTRIES'):
-        #         ready.append(EntryName(priorEntry.getName()))
-        #         self._sent.add(appID)
-        #         self._counts.pop(appID, None)
-        #     else:
-        #         priorEntry.addToCount(entry.getCount())
-        #         self._counts[appID] = priorEntry
-            
+
     def applySum(self, entry, priorCounts) -> EntryInterface:
         match self: 
             case JoinerCountType.OS:
