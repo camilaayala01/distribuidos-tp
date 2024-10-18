@@ -79,7 +79,7 @@ services:
       - ./entryParsing:/entryParsing
     networks:
       - sa_net
-    
+
   grouper-os-counts:
     build:
       context: ./grouper
@@ -123,9 +123,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - FILTERER_TYPE=1
+      - ENTRY_TYPE=EntryAppIDNameGenresReleaseDateAvgPlaytime
       - LISTENING_QUEUE=FilterIndie
       - NEXT_NODES=FilterDecade;JoinerIndiePositiveReviews,2,0
       - HOST=rabbitmq
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -140,9 +143,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryNameDateAvgPlaytime
       - FILTERER_TYPE=0
       - LISTENING_QUEUE=FilterDecade
       - NEXT_NODES=SorterAvgPlaytime,2,1
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -357,9 +363,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryAppIDNameGenres
       - FILTERER_TYPE=2
       - LISTENING_QUEUE=FilterAction
       - NEXT_NODES=JoinerActionNegativeReviewsEnglish,2,0;JoinerActionPercentile,2,0
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -412,9 +421,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglish
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -429,9 +441,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglish
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -446,9 +461,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglish
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -463,9 +481,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglish
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -480,9 +501,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglish
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -497,9 +521,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglish
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -514,9 +541,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglish
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -531,9 +561,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglish
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing

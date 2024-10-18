@@ -4,7 +4,7 @@ from entryParsing.entry import EntryInterface
 from .filtererTypes import FiltererType
 from internalCommunication.internalCommunication import InternalCommunication
 import logging
-from entryParsing.common.utils import initializeLog
+from entryParsing.common.utils import getEntryTypeFromEnv, initializeLog
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
 PRINT_FREQUENCY = 100
@@ -29,7 +29,7 @@ class Filterer:
         header, data = self._filtererType.headerType().deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0 | header.isEOF():
             logging.info(f'action: received batch | {header} | result: success')
-        entries = self._filtererType.entryType().deserialize(data)
+        entries = getEntryTypeFromEnv().deserialize(data)
         filteredEntries = self.filterBatch(entries)
         self._sendToNext(header, filteredEntries)
         ch.basic_ack(delivery_tag = method.delivery_tag)

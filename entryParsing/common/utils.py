@@ -1,3 +1,5 @@
+import os
+import importlib
 import math
 import logging
 from entryParsing.entry import EntryInterface
@@ -19,6 +21,23 @@ def initializeLog():
     )
     logging.getLogger("pika").setLevel(logging.WARNING)
 
+def convertFirstLetterToLowerCase(string: str):
+    return string[0].lower() + string[1:]
+
+def generateFullPath(path: str, module: str):
+    return path + '.' + module
+
+def getEntryTypeFromEnv():
+    entryType = os.getenv('ENTRY_TYPE')
+    entryPath = os.getenv('ENTRY_PATH')
+    if not entryType or not entryPath:
+        return None
+    classImport = generateFullPath(entryPath, convertFirstLetterToLowerCase(entryType)) + '.' + os.getenv('ENTRY_TYPE')
+    if classImport:
+        moduleName, classImport = classImport.rsplit('.', 1)
+        module = importlib.import_module(moduleName)
+        return getattr(module, classImport)
+    return None
 
 def boolToInt(boolean: bool) -> int:
     match boolean:
