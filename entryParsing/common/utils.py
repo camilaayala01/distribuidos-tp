@@ -27,17 +27,30 @@ def convertFirstLetterToLowerCase(string: str):
 def generateFullPath(path: str, module: str):
     return path + '.' + module
 
-def getEntryTypeFromEnv():
-    entryType = os.getenv('ENTRY_TYPE')
+def getEntryFromEnv(type: str):
+    entryType = os.getenv(type)
+    if not entryType:
+        raise ValueError("Entry type environment variable is missing.")
     entryPath = os.getenv('ENTRY_PATH')
-    if not entryType or not entryPath:
-        return None
-    classImport = generateFullPath(entryPath, convertFirstLetterToLowerCase(entryType)) + '.' + os.getenv('ENTRY_TYPE')
-    if classImport:
+    if not entryPath:
+        raise ValueError("ENTRY_PATH environment variable is missing.")
+    
+    try:
+        classImport = generateFullPath(entryPath, convertFirstLetterToLowerCase(entryType)) + '.' + entryType
         moduleName, classImport = classImport.rsplit('.', 1)
         module = importlib.import_module(moduleName)
         return getattr(module, classImport)
-    return None
+    except Exception as e:
+        raise ImportError(f"Class '{classImport}' could not be found in module '{moduleName}'.")
+
+def getEntryTypeFromEnv():
+    return getEntryFromEnv('ENTRY_TYPE')
+
+def getGamesEntryTypeFromEnv():
+    return getEntryFromEnv('GAMES_ENTRY_TYPE')
+
+def getReviewsEntryTypeFromEnv():
+    return getEntryFromEnv('REVIEWS_ENTRY_TYPE')
 
 def boolToInt(boolean: bool) -> int:
     match boolean:

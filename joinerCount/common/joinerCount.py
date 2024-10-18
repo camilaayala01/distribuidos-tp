@@ -5,7 +5,7 @@ from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
 from .joinerCountTypes import JoinerCountType
 from packetTracker.defaultTracker import DefaultTracker
-from entryParsing.common.utils import initializeLog
+from entryParsing.common.utils import getEntryTypeFromEnv, initializeLog
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
 PRINT_FREQ = 100
@@ -21,6 +21,7 @@ class JoinerCount:
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), os.getenv('NODE_ID'))
         self._joinerCountType = JoinerCountType(int(os.getenv('JOINER_COUNT_TYPE')))
         self._packetTracker = DefaultTracker()
+        self._entryType = getEntryTypeFromEnv() 
         self._counts = self._joinerCountType.getInitialResults()
         self._sent = set()
         self._fragnum = 1
@@ -47,7 +48,7 @@ class JoinerCount:
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
         self._packetTracker.update(header)
-        entries = self._joinerCountType.entryType().deserialize(data)
+        entries = self._entryType.deserialize(data)
         
         toSend, self._counts, self._sent = self._joinerCountType.handleResults(entries, 
                                                                                self._counts, 

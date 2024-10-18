@@ -16,13 +16,6 @@ class JoinerCountType(Enum):
 
     def headerType(self) -> type:
         return Header
-    
-    def entryType(self) -> type:
-        match self:
-            case JoinerCountType.ENGLISH:
-                return EntryAppIDNameReviewCount
-            case JoinerCountType.OS:
-                return EntryOSCount
             
     def getInitialResults(self):
         match self:

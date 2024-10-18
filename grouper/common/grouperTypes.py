@@ -15,15 +15,6 @@ class GrouperType(Enum):
     APP_ID_COUNT = 1
     APP_ID_NAME_COUNT = 2
 
-    def entryType(self) -> type:
-        match self:
-            case GrouperType.OS_COUNT:
-                return EntryOSSupport
-            case GrouperType.APP_ID_COUNT:
-                return EntryAppID
-            case GrouperType.APP_ID_NAME_COUNT:
-                return EntryAppIDName
-
     def headerType(self) -> type:
         match self:
             case GrouperType.OS_COUNT:

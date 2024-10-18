@@ -33,15 +33,6 @@ class SorterType(Enum):
             case _:
                 return HeaderWithSender
     
-    def entryType(self) -> type:
-        match self:
-            case SorterType.PLAYTIME | SorterType.CONSOLIDATOR_PLAYTIME:
-                return EntryNameAvgPlaytime
-            case SorterType.INDIE | SorterType.CONSOLIDATOR_INDIE:
-                return EntryNameReviewCount
-            case SorterType.CONSOLIDATOR_PERCENTILE:
-                return EntryAppIDNameReviewCount
-    
     def topHasCapacity(self, newElementsAmount: int, topAmount: int):
         match self:
             case SorterType.CONSOLIDATOR_PERCENTILE:
@@ -50,12 +41,12 @@ class SorterType(Enum):
                 return newElementsAmount < topAmount
         
         
-    def getBatchTop(self, batch: list[EntrySorterTopFinder], topAmount: int):
+    def getBatchTop(self, batch: list[EntrySorterTopFinder], topAmount: int, entryType: type):
         match self:
             case SorterType.CONSOLIDATOR_PERCENTILE:
-                return self.entryType().sort(batch, False)
+                return entryType.sort(batch, False)
             case _:
-                sortedBatch = self.entryType().sort(batch, True)
+                sortedBatch = entryType.sort(batch, True)
                 return sortedBatch[:topAmount]
         
 

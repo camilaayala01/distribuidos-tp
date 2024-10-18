@@ -3,7 +3,7 @@ from entryParsing.common.header import Header
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
-from entryParsing.common.utils import initializeLog
+from entryParsing.common.utils import getEntryTypeFromEnv, initializeLog
 from .joinerConsolidatorTypes import JoinerConsolidatorType
 from packetTracker.multiTracker import MultiTracker
 import os
@@ -17,6 +17,7 @@ class JoinerConsolidator:
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'))
         self._priorNodeCount = int(os.getenv('PRIOR_NODE_COUNT'))
         self._tracker = MultiTracker(self._priorNodeCount)
+        self._entryType = getEntryTypeFromEnv()
         self._consolidatorType  = JoinerConsolidatorType(int(os.getenv('JOINER_CONSOLIDATOR_TYPE')))
         self._sendingStrategies = createStrategiesFromNextNodes()
         self._currFragment = 1
@@ -44,11 +45,10 @@ class JoinerConsolidator:
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:                
             logging.info(f'action: receiving batch | {header} | result: success')
 
-        batch = self._consolidatorType.entryType().deserialize(data)
         if self._tracker.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
-        
+        batch = self._entryType.deserialize(data)
         self._tracker.update(header)
         
         if self._tracker.isDone() or (not self._tracker.isDone() and not len(data) == 0):

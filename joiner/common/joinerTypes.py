@@ -18,16 +18,6 @@ class JoinerType(Enum):
 
     def headerType(self) -> type:
         return HeaderWithTable
-    
-    def gamesEntryType(self) -> type:
-        return EntryAppIDName
-
-    def reviewsEntryType(self) -> type:
-        match self:
-            case JoinerType.ENGLISH:
-                return EntryAppIDReviewText
-            case _:
-                return EntryAppIDReviewCount
                 
     def defaultEntry(self, name: str):
         match self:

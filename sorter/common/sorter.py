@@ -2,7 +2,7 @@ import logging
 import os
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from internalCommunication.internalCommunication import InternalCommunication
-from entryParsing.common.utils import initializeLog
+from entryParsing.common.utils import getEntryTypeFromEnv, initializeLog
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 from .sorterTypes import SorterType
 
@@ -11,6 +11,7 @@ class Sorter:
         initializeLog()
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), os.getenv('NODE_ID'))
         self._sorterType = SorterType(int(os.getenv('SORTER_TYPE')))
+        self._entryType = getEntryTypeFromEnv()
         self._packetTracker = self._sorterType.initializeTracker()
         self._partialTop = []
         self._topAmount = int(os.getenv('TOP_AMOUNT')) if os.getenv('TOP_AMOUNT') is not None else None
@@ -31,7 +32,7 @@ class Sorter:
         if len(batch) == 0:
             return
         
-        newBatchTop = self._sorterType.getBatchTop(batch, self._topAmount)
+        newBatchTop = self._sorterType.getBatchTop(batch, self._topAmount, self._entryType)
 
         i, j = 0, 0
         mergedList = []
@@ -72,7 +73,7 @@ class Sorter:
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
         self._packetTracker.update(header)
-        entries = self._sorterType.entryType().deserialize(batch)
+        entries = self._entryType.deserialize(batch)
         self.mergeKeepTop(entries)
         self._handleSending()
         ch.basic_ack(delivery_tag = method.delivery_tag)

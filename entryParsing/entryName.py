@@ -16,7 +16,7 @@ class EntryName(EntryInterface):
         return entryBytes
 
     def __str__(self):
-        return f"EntryName(name={self._name})"
+        return f"name: {self._name}"
     
     @classmethod
     def header(cls):

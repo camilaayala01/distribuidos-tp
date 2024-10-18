@@ -51,10 +51,6 @@ services:
       - filterer-english-2
       - filterer-english-3
       - filterer-english-4
-      - filterer-english-5
-      - filterer-english-6
-      - filterer-english-7
-      - filterer-english-8
       - grouper-action-english
       - joiner-english-count-1
       - joiner-english-count-2
@@ -87,9 +83,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryOSSupport
       - GROUPER_TYPE=0
       - LISTENING_QUEUE=GrouperOSCounts
       - NEXT_NODES=JoinerOsCounts
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -104,10 +103,13 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - JOINER_COUNT_TYPE=0
+      - ENTRY_TYPE=EntryOSCount
       - HOST=rabbitmq
       - LISTENING_QUEUE=JoinerOsCounts
       - NEXT_NODES=Dispatcher
       - QUERY_NUMBER=1
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -163,12 +165,15 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryNameAvgPlaytime
       - SORTER_TYPE=0
       - NODE_ID=0
       - NODE_COUNT=2
       - TOP_AMOUNT=10
       - LISTENING_QUEUE=SorterAvgPlaytime
       - NEXT_NODES=ConsolidatorSorterAvgPlaytime
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -184,12 +189,15 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryNameAvgPlaytime
       - SORTER_TYPE=0
       - NODE_ID=1
       - NODE_COUNT=2
       - TOP_AMOUNT=10
       - LISTENING_QUEUE=SorterAvgPlaytime
       - NEXT_NODES=ConsolidatorSorterAvgPlaytime
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -205,12 +213,15 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryNameAvgPlaytime
       - SORTER_TYPE=2
       - TOP_AMOUNT=10
       - QUERY_NUMBER=2
       - PRIOR_NODE_COUNT=2
       - LISTENING_QUEUE=ConsolidatorSorterAvgPlaytime
       - NEXT_NODES=Dispatcher
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -226,9 +237,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryAppID
       - GROUPER_TYPE=1
       - LISTENING_QUEUE=GrouperIndiePositiveReviews
       - NEXT_NODES=JoinerIndiePositiveReviews,2,0
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -243,10 +257,14 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - NODE_ID=0
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
       - JOINER_TYPE=1
       - LISTENING_QUEUE=JoinerIndiePositiveReviews
       - NEXT_NODES=ConsolidatorJoinerIndiePositiveReviews
       - HOST=rabbitmq
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -262,10 +280,14 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - NODE_ID=1
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
       - JOINER_TYPE=1
       - LISTENING_QUEUE=JoinerIndiePositiveReviews
       - NEXT_NODES=ConsolidatorJoinerIndiePositiveReviews
       - HOST=rabbitmq
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -281,10 +303,13 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - JOINER_CONSOLIDATOR_TYPE=2
+      - ENTRY_TYPE=EntryNameReviewCount
       - LISTENING_QUEUE=ConsolidatorJoinerIndiePositiveReviews
       - NEXT_NODES=SorterIndiePositiveReviews,2,1
       - PRIOR_NODE_COUNT=2
       - HOST=rabbitmq
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -300,12 +325,15 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryNameReviewCount
       - SORTER_TYPE=1
       - NODE_ID=0
       - NODE_COUNT=2
       - TOP_AMOUNT=5
       - LISTENING_QUEUE=SorterIndiePositiveReviews
       - NEXT_NODES=ConsolidatorSorterIndiePositiveReviews
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -321,12 +349,15 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryNameReviewCount
       - SORTER_TYPE=1
       - NODE_ID=1
       - NODE_COUNT=2
       - TOP_AMOUNT=5
       - LISTENING_QUEUE=SorterIndiePositiveReviews
       - NEXT_NODES=ConsolidatorSorterIndiePositiveReviews
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -342,12 +373,15 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryNameReviewCount
       - SORTER_TYPE=3
       - TOP_AMOUNT=5
       - QUERY_NUMBER=3
       - PRIOR_NODE_COUNT=2
       - LISTENING_QUEUE=ConsolidatorSorterIndiePositiveReviews
       - NEXT_NODES=Dispatcher
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -383,10 +417,14 @@ services:
     environment:
       - PYTHONUNBUFFERED=17
       - HOST=rabbitmq
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
       - JOINER_TYPE=2
       - NODE_ID=0
       - LISTENING_QUEUE=JoinerActionNegativeReviewsEnglish
       - NEXT_NODES=FilterEnglish
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -402,10 +440,14 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
       - JOINER_TYPE=2
       - NODE_ID=1
       - LISTENING_QUEUE=JoinerActionNegativeReviewsEnglish
       - NEXT_NODES=FilterEnglish
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -494,86 +536,6 @@ services:
     networks:
       - sa_net
 
-  filterer-english-5:
-    build:
-      context: ./filterer
-      dockerfile: ../rabbitUser.Dockerfile
-    environment:
-      - PYTHONUNBUFFERED=1
-      - HOST=rabbitmq
-      - ENTRY_TYPE=EntryAppIDNameReviewText
-      - FILTERER_TYPE=3
-      - LISTENING_QUEUE=FilterEnglish
-      - NEXT_NODES=GrouperActionEnglish
-    env_file:
-      - .env
-    volumes:
-      - ./internalCommunication:/internalCommunication
-      - ./entryParsing:/entryParsing
-      - ./sendingStrategy:/sendingStrategy
-    networks:
-      - sa_net
-
-  filterer-english-6:
-    build:
-      context: ./filterer
-      dockerfile: ../rabbitUser.Dockerfile
-    environment:
-      - PYTHONUNBUFFERED=1
-      - HOST=rabbitmq
-      - ENTRY_TYPE=EntryAppIDNameReviewText
-      - FILTERER_TYPE=3
-      - LISTENING_QUEUE=FilterEnglish
-      - NEXT_NODES=GrouperActionEnglish
-    env_file:
-      - .env
-    volumes:
-      - ./internalCommunication:/internalCommunication
-      - ./entryParsing:/entryParsing
-      - ./sendingStrategy:/sendingStrategy
-    networks:
-      - sa_net
-
-  filterer-english-7:
-    build:
-      context: ./filterer
-      dockerfile: ../rabbitUser.Dockerfile
-    environment:
-      - PYTHONUNBUFFERED=1
-      - HOST=rabbitmq
-      - ENTRY_TYPE=EntryAppIDNameReviewText
-      - FILTERER_TYPE=3
-      - LISTENING_QUEUE=FilterEnglish
-      - NEXT_NODES=GrouperActionEnglish
-    env_file:
-      - .env
-    volumes:
-      - ./internalCommunication:/internalCommunication
-      - ./entryParsing:/entryParsing
-      - ./sendingStrategy:/sendingStrategy
-    networks:
-      - sa_net
-
-  filterer-english-8:
-    build:
-      context: ./filterer
-      dockerfile: ../rabbitUser.Dockerfile
-    environment:
-      - PYTHONUNBUFFERED=1
-      - HOST=rabbitmq
-      - ENTRY_TYPE=EntryAppIDNameReviewText
-      - FILTERER_TYPE=3
-      - LISTENING_QUEUE=FilterEnglish
-      - NEXT_NODES=GrouperActionEnglish
-    env_file:
-      - .env
-    volumes:
-      - ./internalCommunication:/internalCommunication
-      - ./entryParsing:/entryParsing
-      - ./sendingStrategy:/sendingStrategy
-    networks:
-      - sa_net
-
   grouper-action-english:
     build:
       context: ./grouper
@@ -581,9 +543,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryAppIDName
       - GROUPER_TYPE=2
       - LISTENING_QUEUE=GrouperActionEnglish
       - NEXT_NODES=ConsolidatorJoinerActionEnglish
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -598,10 +563,13 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - JOINER_CONSOLIDATOR_TYPE=1
+      - ENTRY_TYPE=EntryAppIDNameReviewCount
       - PRIOR_NODE_COUNT=2
       - LISTENING_QUEUE=ConsolidatorJoinerActionEnglish
       - NEXT_NODES=JoinerNegativeReviewsEnglishCount,2,0
       - HOST=rabbitmq
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -617,11 +585,14 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - JOINER_COUNT_TYPE=1
+      - ENTRY_TYPE=EntryAppIDNameReviewCount
       - HOST=rabbitmq
       - NODE_ID=0
       - REQUIRED_REVIEWS=5000
       - LISTENING_QUEUE=JoinerNegativeReviewsEnglishCount
       - NEXT_NODES=JoinerStreamConsolidator
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -637,11 +608,14 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - JOINER_COUNT_TYPE=1
+      - ENTRY_TYPE=EntryAppIDNameReviewCount
       - HOST=rabbitmq
       - NODE_ID=1
       - REQUIRED_REVIEWS=5000
       - LISTENING_QUEUE=JoinerNegativeReviewsEnglishCount
       - NEXT_NODES=JoinerStreamConsolidator
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -657,10 +631,13 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - PRIOR_NODE_COUNT=2
+      - ENTRY_TYPE=EntryName
       - JOINER_CONSOLIDATOR_TYPE=0
       - LISTENING_QUEUE=JoinerStreamConsolidator
       - NEXT_NODES=Dispatcher
       - HOST=rabbitmq
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -676,9 +653,12 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryAppID
       - GROUPER_TYPE=1
       - LISTENING_QUEUE=GrouperActionPercentile
       - NEXT_NODES=JoinerActionPercentile,2,0
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -693,10 +673,14 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - JOINER_TYPE=0
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
       - HOST=rabbitmq
       - NODE_ID=0
       - LISTENING_QUEUE=JoinerActionPercentile
       - NEXT_NODES=ConsolidatorSorterActionPercentile
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -712,10 +696,14 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
       - JOINER_TYPE=0
       - NODE_ID=1
       - LISTENING_QUEUE=JoinerActionPercentile
       - NEXT_NODES=ConsolidatorSorterActionPercentile
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -731,12 +719,15 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
+      - ENTRY_TYPE=EntryAppIDNameReviewCount
       - SORTER_TYPE=4
       - PERCENTILE=90
       - QUERY_NUMBER=5
       - PRIOR_NODE_COUNT=2
       - LISTENING_QUEUE=ConsolidatorSorterActionPercentile
       - NEXT_NODES=Dispatcher
+    env_file:
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing

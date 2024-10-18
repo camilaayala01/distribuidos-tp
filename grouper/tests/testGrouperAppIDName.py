@@ -20,6 +20,8 @@ class TestGrouperAppIDName(unittest.TestCase):
             EntryAppIDName('2', 'Grand Theft Auto V'),
             EntryAppIDName('1', 'Rust'),
         ]
+        os.environ['ENTRY_PATH']='entryParsing'
+        os.environ['ENTRY_TYPE'] = 'EntryAppIDName'
         os.environ['GROUPER_TYPE'] = '2'
         os.environ['LISTENING_QUEUE'] = 'Grouper'
         os.environ['NEXT_NODES'] = 'Joiner'

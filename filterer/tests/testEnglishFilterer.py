@@ -29,7 +29,8 @@ class TestEnglishFilterer(unittest.TestCase):
         os.environ['FILTERER_TYPE'] = '3'
         os.environ['LISTENING_QUEUE'] = 'FilterEnglish'
         os.environ['NEXT_NODES'] = 'GrouperActionEnglishNegativeReviews'
-
+        os.environ['ENTRY_TYPE']='EntryAppIDNameReviewText'
+        os.environ['ENTRY_PATH']='entryParsing'
         self.filterer = Filterer()
 
     def testAllEnglish(self):

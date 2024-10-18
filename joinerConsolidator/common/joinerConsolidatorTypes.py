@@ -12,15 +12,6 @@ class JoinerConsolidatorType(Enum):
     ENGLISH = 1
     INDIE = 2
 
-    def entryType(self) -> type:
-        match self:
-            case JoinerConsolidatorType.STREAM:
-                return EntryName
-            case JoinerConsolidatorType.ENGLISH:
-                return EntryAppIDNameReviewCount
-            case JoinerConsolidatorType.INDIE:
-                return EntryNameReviewCount
-
     def headerType(self) -> type:
         return HeaderWithSender
 
