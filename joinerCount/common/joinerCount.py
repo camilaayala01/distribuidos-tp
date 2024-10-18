@@ -1,62 +1,73 @@
 import os
 import logging
 from entryParsing.common.header import Header
-from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
-from entryParsing.entryOSCount import EntryOSCount
+from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
+from .joinerCountTypes import JoinerCountType
 from packetTracker.defaultTracker import DefaultTracker
+from entryParsing.common.utils import initializeLog
+from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
+PRINT_FREQ = 100
 """
-Joins counts 
+Entities that join all partial counts and streams results to clients
+More than one entity
+Query 4
 """
+
 class JoinerCount:
     def __init__(self):
+        initializeLog()
+        self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), os.getenv('NODE_ID'))
+        self._joinerCountType = JoinerCountType(int(os.getenv('JOINER_COUNT_TYPE')))
         self._packetTracker = DefaultTracker()
-        self._internalCommunication = InternalCommunication(os.getenv('JOIN_OS'))
+        self._counts = self._joinerCountType.getInitialResults()
+        self._sent = set()
+        self._fragnum = 1
+        self._sendingStrategies = createStrategiesFromNextNodes()
+
+    def stop(self, _signum, _frame):
+        self._internalCommunication.stop()
 
     def reset(self):
         self._packetTracker.reset()
-        
-        
-    def stop(self, _signum, _frame):
-        self._internalCommunication.stop()
-    
+        self._counts = self._joinerCountType.getInitialResults()
+        self._sent = set()
+        self._fragnum = 1
+
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 
+    # should have a fragment number to stream results to client
     def handleMessage(self, ch, method, properties, body):
-        logging.info(f'action: receiving batch from grouper OS counts | result: success')
-        header, data = Header.deserialize(body)
+        header, data = self._joinerCountType.headerType().deserialize(body)
+        if header.getFragmentNumber() % PRINT_FREQ == 0:
+            logging.info(f'action: received batch | {header} | result: success')
         if self._packetTracker.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
         self._packetTracker.update(header)
-        osCount = EntryOSCount.deserialize(data)
-        self._sum(osCount)
-        logging.info(f'action: joining received batches by supported OS | result: success')
-        self._handleSending()
+        entries = self._joinerCountType.entryType().deserialize(data)
+        
+        toSend, self._counts, self._sent = self._joinerCountType.handleResults(entries, 
+                                                                               self._counts, 
+                                                                               self._packetTracker.isDone(), 
+                                                                               self._sent)
+        self._handleSending(toSend)
         ch.basic_ack(delivery_tag = method.delivery_tag)
-        
-    def _sendToNextStep(self, data: bytes):
-        self._internalCommunication.sendToDispatcher(data)
 
-    def _handleSending(self):
-        if not self._packetTracker.isDone():
-            return
-        # only one node is in charge of calculating counts, in only one packet 
-        # (never 3 numbers and a header will take up more than 4096 bytes)
-        headerBytes = HeaderWithQueryNumber(fragment=1, eof=True, queryNumber=1).serialize()
-        countsBytes = self._buildResult().serialize()
-        self._sendToNextStep(headerBytes + countsBytes)
-        logging.info(f'action: sending results to dispatcher | result: success')
-        self.reset()
+    def _sendToNext(self, header: Header, entries: list[EntryInterface]):
+        for strategy in self._sendingStrategies:
+            strategy.send(self._internalCommunication, header, entries)
 
-    def _sum(self, entry: EntryOSCount):
-        self._windows += entry.getWindowsCount()
-        self._mac += entry.getMacCount()
-        self._linux += entry.getLinuxCount()
-        self._total += entry.getTotalCount()
-        logging.info(f'action: finish batch count | new total: {self._total} | windows: {self._windows} | mac: {self._mac} | linux: {self._linux} | result: success')
-        
-    def _buildResult(self) -> EntryOSCount:
-        return EntryOSCount(self._windows, self._mac, self._linux, self._total)
+    def shouldSendPackets(self, toSend: list[EntryInterface]):
+        return self._packetTracker.isDone() or (not self._packetTracker.isDone() and len(toSend) != 0)
+    
+    def _handleSending(self, ready: list[EntryInterface]):
+        header = self._joinerCountType.getResultingHeader(self._fragnum, self._packetTracker.isDone())
+        if self.shouldSendPackets(ready):
+            self._sendToNext(header, ready)
+            self._fragnum += 1
+
+        if self._packetTracker.isDone():
+            self.reset()

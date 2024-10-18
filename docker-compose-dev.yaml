@@ -79,6 +79,7 @@ services:
       - ./entryParsing:/entryParsing
     networks:
       - sa_net
+    
   grouper-os-counts:
     build:
       context: ./grouper
@@ -102,12 +103,16 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
+      - JOINER_COUNT_TYPE=0
+      - HOST=rabbitmq
+      - LISTENING_QUEUE=JoinerOsCounts
+      - NEXT_NODES=Dispatcher
+      - QUERY_NUMBER=1
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
@@ -147,54 +152,64 @@ services:
 
   sorter-avg-playtime-1:
     build:
-      context: ./sorterAvgPlaytime
+      context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - HOST=rabbitmq
+      - SORTER_TYPE=0
       - NODE_ID=0
+      - NODE_COUNT=2
       - TOP_AMOUNT=10
-    env_file:
-      - .env
+      - LISTENING_QUEUE=SorterAvgPlaytime
+      - NEXT_NODES=ConsolidatorSorterAvgPlaytime
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./sorter:/sorter
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
   sorter-avg-playtime-2:
     build:
-      context: ./sorterAvgPlaytime
+      context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - HOST=rabbitmq
+      - SORTER_TYPE=0
       - NODE_ID=1
+      - NODE_COUNT=2
       - TOP_AMOUNT=10
-    env_file:
-      - .env
+      - LISTENING_QUEUE=SorterAvgPlaytime
+      - NEXT_NODES=ConsolidatorSorterAvgPlaytime
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./sorter:/sorter
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
   sorter-consolidator-avg-playtime:
     build:
-      context: ./sorterConsolidatorAvgPlaytime
+      context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - HOST=rabbitmq
+      - SORTER_TYPE=2
       - TOP_AMOUNT=10
-    env_file:
-      - .env
+      - QUERY_NUMBER=2
+      - PRIOR_NODE_COUNT=2
+      - LISTENING_QUEUE=ConsolidatorSorterAvgPlaytime
+      - NEXT_NODES=Dispatcher
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./sorter:/sorter
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
@@ -274,54 +289,64 @@ services:
 
   sorter-indie-positive-reviews-1:
     build:
-      context: ./sorterIndiePositiveReviews
+      context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - HOST=rabbitmq
+      - SORTER_TYPE=1
       - NODE_ID=0
+      - NODE_COUNT=2
       - TOP_AMOUNT=5
-    env_file:
-      - .env
+      - LISTENING_QUEUE=SorterIndiePositiveReviews
+      - NEXT_NODES=ConsolidatorSorterIndiePositiveReviews
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./sorter:/sorter
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
   sorter-indie-positive-reviews-2:
     build:
-      context: ./sorterIndiePositiveReviews
+      context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - HOST=rabbitmq
+      - SORTER_TYPE=1
       - NODE_ID=1
+      - NODE_COUNT=2
       - TOP_AMOUNT=5
-    env_file:
-      - .env
+      - LISTENING_QUEUE=SorterIndiePositiveReviews
+      - NEXT_NODES=ConsolidatorSorterIndiePositiveReviews
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./sorter:/sorter
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
   sorter-consolidator-indie-top:
     build:
-      context: ./sorterConsolidatorIndieTop
+      context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - HOST=rabbitmq
+      - SORTER_TYPE=3
       - TOP_AMOUNT=5
-    env_file:
-      - .env
+      - QUERY_NUMBER=3
+      - PRIOR_NODE_COUNT=2
+      - LISTENING_QUEUE=ConsolidatorSorterIndiePositiveReviews
+      - NEXT_NODES=Dispatcher
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./sorter:/sorter
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
@@ -554,35 +579,41 @@ services:
 
   joiner-english-count-1:
     build:
-      context: ./joinerEnglishCount
+      context: ./joinerCount
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - JOINER_COUNT_TYPE=1
+      - HOST=rabbitmq
       - NODE_ID=0
-    env_file:
-      - .env
+      - REQUIRED_REVIEWS=5000
+      - LISTENING_QUEUE=JoinerNegativeReviewsEnglishCount
+      - NEXT_NODES=JoinerStreamConsolidator
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
   joiner-english-count-2:
     build:
-      context: ./joinerEnglishCount
+      context: ./joinerCount
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - JOINER_COUNT_TYPE=1
+      - HOST=rabbitmq
       - NODE_ID=1
-    env_file:
-      - .env
+      - REQUIRED_REVIEWS=5000
+      - LISTENING_QUEUE=JoinerNegativeReviewsEnglishCount
+      - NEXT_NODES=JoinerStreamConsolidator
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./joiner:/joiner
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
@@ -662,17 +693,22 @@ services:
 
   sorter-consolidator-action-percentile:
     build:
-      context: ./sorterConsolidatorActionPercentile
+      context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-    env_file:
-      - .env
+      - HOST=rabbitmq
+      - SORTER_TYPE=4
+      - PERCENTILE=90
+      - QUERY_NUMBER=5
+      - PRIOR_NODE_COUNT=2
+      - LISTENING_QUEUE=ConsolidatorSorterActionPercentile
+      - NEXT_NODES=Dispatcher
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./packetTracker:/packetTracker
-      - ./sorter:/sorter
+      - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
 
