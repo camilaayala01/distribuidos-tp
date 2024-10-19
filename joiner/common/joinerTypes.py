@@ -1,12 +1,8 @@
 from enum import Enum
 from entryParsing.common.header import Header
-from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.entry import EntryInterface
-from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
 from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
-from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
-from entryParsing.entryAppIDReviewText import EntryAppIDReviewText
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 
 REQUIRED_ENTRIES = 5000
@@ -15,9 +11,6 @@ class JoinerType(Enum):
     PERCENTILE = 0
     INDIE = 1
     ENGLISH = 2
-
-    def headerType(self) -> type:
-        return HeaderWithTable
                 
     def defaultEntry(self, name: str):
         match self:
