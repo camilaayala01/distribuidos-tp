@@ -3,7 +3,7 @@ from entryParsing.common.header import Header
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
-from entryParsing.common.utils import getEntryTypeFromEnv, initializeLog
+from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
 from .joinerConsolidatorTypes import JoinerConsolidatorType
 from packetTracker.multiTracker import MultiTracker
 import os
@@ -18,6 +18,7 @@ class JoinerConsolidator:
         self._priorNodeCount = int(os.getenv('PRIOR_NODE_COUNT'))
         self._tracker = MultiTracker(self._priorNodeCount)
         self._entryType = getEntryTypeFromEnv()
+        self._headerType = getHeaderTypeFromEnv()
         self._consolidatorType  = JoinerConsolidatorType(int(os.getenv('JOINER_CONSOLIDATOR_TYPE')))
         self._sendingStrategies = createStrategiesFromNextNodes()
         self._currFragment = 1

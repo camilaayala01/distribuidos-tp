@@ -104,6 +104,7 @@ services:
       - PYTHONUNBUFFERED=1
       - JOINER_COUNT_TYPE=0
       - ENTRY_TYPE=EntryOSCount
+      - HEADER_TYPE=Header
       - HOST=rabbitmq
       - LISTENING_QUEUE=JoinerOsCounts
       - NEXT_NODES=Dispatcher
@@ -259,6 +260,7 @@ services:
       - NODE_ID=0
       - GAMES_ENTRY_TYPE=EntryAppIDName
       - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - HEADER_TYPE=HeaderWithTable
       - JOINER_TYPE=1
       - LISTENING_QUEUE=JoinerIndiePositiveReviews
       - NEXT_NODES=ConsolidatorJoinerIndiePositiveReviews
@@ -282,6 +284,7 @@ services:
       - NODE_ID=1
       - GAMES_ENTRY_TYPE=EntryAppIDName
       - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - HEADER_TYPE=HeaderWithTable
       - JOINER_TYPE=1
       - LISTENING_QUEUE=JoinerIndiePositiveReviews
       - NEXT_NODES=ConsolidatorJoinerIndiePositiveReviews
@@ -304,6 +307,7 @@ services:
       - PYTHONUNBUFFERED=1
       - JOINER_CONSOLIDATOR_TYPE=2
       - ENTRY_TYPE=EntryNameReviewCount
+      - HEADER_TYPE=HeaderWithSender
       - LISTENING_QUEUE=ConsolidatorJoinerIndiePositiveReviews
       - NEXT_NODES=SorterIndiePositiveReviews,2,1
       - PRIOR_NODE_COUNT=2
@@ -419,6 +423,7 @@ services:
       - HOST=rabbitmq
       - GAMES_ENTRY_TYPE=EntryAppIDName
       - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
+      - HEADER_TYPE=HeaderWithTable
       - JOINER_TYPE=2
       - NODE_ID=0
       - LISTENING_QUEUE=JoinerActionNegativeReviewsEnglish
@@ -442,6 +447,7 @@ services:
       - HOST=rabbitmq
       - GAMES_ENTRY_TYPE=EntryAppIDName
       - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
+      - HEADER_TYPE=HeaderWithTable
       - JOINER_TYPE=2
       - NODE_ID=1
       - LISTENING_QUEUE=JoinerActionNegativeReviewsEnglish
@@ -564,6 +570,7 @@ services:
       - PYTHONUNBUFFERED=1
       - JOINER_CONSOLIDATOR_TYPE=1
       - ENTRY_TYPE=EntryAppIDNameReviewCount
+      - HEADER_TYPE=HeaderWithSender
       - PRIOR_NODE_COUNT=2
       - LISTENING_QUEUE=ConsolidatorJoinerActionEnglish
       - NEXT_NODES=JoinerNegativeReviewsEnglishCount,2,0
@@ -586,6 +593,7 @@ services:
       - PYTHONUNBUFFERED=1
       - JOINER_COUNT_TYPE=1
       - ENTRY_TYPE=EntryAppIDNameReviewCount
+      - HEADER_TYPE=Header
       - HOST=rabbitmq
       - NODE_ID=0
       - REQUIRED_REVIEWS=5000
@@ -609,6 +617,7 @@ services:
       - PYTHONUNBUFFERED=1
       - JOINER_COUNT_TYPE=1
       - ENTRY_TYPE=EntryAppIDNameReviewCount
+      - HEADER_TYPE=Header
       - HOST=rabbitmq
       - NODE_ID=1
       - REQUIRED_REVIEWS=5000
@@ -632,6 +641,7 @@ services:
       - PYTHONUNBUFFERED=1
       - PRIOR_NODE_COUNT=2
       - ENTRY_TYPE=EntryName
+      - HEADER_TYPE=HeaderWithSender
       - JOINER_CONSOLIDATOR_TYPE=0
       - LISTENING_QUEUE=JoinerStreamConsolidator
       - NEXT_NODES=Dispatcher
@@ -675,6 +685,7 @@ services:
       - JOINER_TYPE=0
       - GAMES_ENTRY_TYPE=EntryAppIDName
       - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - HEADER_TYPE=HeaderWithTable
       - HOST=rabbitmq
       - NODE_ID=0
       - LISTENING_QUEUE=JoinerActionPercentile
@@ -698,6 +709,7 @@ services:
       - HOST=rabbitmq
       - GAMES_ENTRY_TYPE=EntryAppIDName
       - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - HEADER_TYPE=HeaderWithTable
       - JOINER_TYPE=0
       - NODE_ID=1
       - LISTENING_QUEUE=JoinerActionPercentile

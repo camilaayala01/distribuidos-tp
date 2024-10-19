@@ -1,7 +1,7 @@
 import logging
 import os
 from entryParsing.common.headerWithTable import HeaderWithTable
-from entryParsing.common.utils import getGamesEntryTypeFromEnv, getReviewsEntryTypeFromEnv, maxDataBytes, serializeAndFragmentWithSender, initializeLog
+from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, maxDataBytes, serializeAndFragmentWithSender, initializeLog
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
 from .joinerTypes import JoinerType
@@ -21,6 +21,7 @@ class Joiner:
         self._fragment = 1
         self._gamesEntry = getGamesEntryTypeFromEnv()
         self._reviewsEntry = getReviewsEntryTypeFromEnv()
+        self._headerType = getHeaderTypeFromEnv()
         self._gamesTracker = DefaultTracker()
         self._reviewsTracker = DefaultTracker()
         self._unjoinedReviews = []
@@ -94,7 +95,7 @@ class Joiner:
             strategy.sendBytes(self._internalCommunication, msg)
 
     def handleMessage(self, ch, method, properties, body):
-        header, batch = self._joinerType.headerType().deserialize(body)
+        header, batch = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
             logging.info(f'action: received batch from table {header.getTable()} | {header} | result: success')
         if header.isGamesTable():

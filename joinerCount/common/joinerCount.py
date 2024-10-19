@@ -5,7 +5,7 @@ from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
 from .joinerCountTypes import JoinerCountType
 from packetTracker.defaultTracker import DefaultTracker
-from entryParsing.common.utils import getEntryTypeFromEnv, initializeLog
+from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
 PRINT_FREQ = 100
@@ -21,7 +21,8 @@ class JoinerCount:
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), os.getenv('NODE_ID'))
         self._joinerCountType = JoinerCountType(int(os.getenv('JOINER_COUNT_TYPE')))
         self._packetTracker = DefaultTracker()
-        self._entryType = getEntryTypeFromEnv() 
+        self._entryType = getEntryTypeFromEnv()
+        self._headerType = getHeaderTypeFromEnv() 
         self._counts = self._joinerCountType.getInitialResults()
         self._sent = set()
         self._fragnum = 1
@@ -41,7 +42,7 @@ class JoinerCount:
 
     # should have a fragment number to stream results to client
     def handleMessage(self, ch, method, properties, body):
-        header, data = self._joinerCountType.headerType().deserialize(body)
+        header, data = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQ == 0:
             logging.info(f'action: received batch | {header} | result: success')
         if self._packetTracker.isDuplicate(header):
