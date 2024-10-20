@@ -2,7 +2,7 @@ import logging
 import os
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from internalCommunication.internalCommunication import InternalCommunication
-from entryParsing.common.utils import getEntryTypeFromEnv, initializeLog
+from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 from .sorterTypes import SorterType
 
@@ -12,6 +12,7 @@ class Sorter:
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), os.getenv('NODE_ID'))
         self._sorterType = SorterType(int(os.getenv('SORTER_TYPE')))
         self._entryType = getEntryTypeFromEnv()
+        self._headerType = getHeaderTypeFromEnv()
         self._packetTracker = self._sorterType.initializeTracker()
         self._partialTop = []
         self._topAmount = int(os.getenv('TOP_AMOUNT')) if os.getenv('TOP_AMOUNT') is not None else None
@@ -61,13 +62,13 @@ class Sorter:
             return
         logging.info(f'action: received all required batches | result: success')
         packets = self._sorterType.preprocessPackets(self._partialTop)
-        data = self._sorterType.serializeAndFragment(packets)
+        data = self._sorterType.serializeAndFragment(packets, self._headerType)
         for pack in data:
             self._sendToNext(pack)
         self.reset()
 
     def handleMessage(self, ch, method, properties, body):
-        header, batch = self._sorterType.headerType().deserialize(body)
+        header, batch = self._headerType.deserialize(body)
         logging.info(f'action: receive batch | {header} | result: success')
         if self._packetTracker.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)

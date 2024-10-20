@@ -15,6 +15,8 @@ class TestSorterGeneral(unittest.TestCase):
         os.environ['PERCENTILE'] = '90'
         os.environ['ENTRY_PATH']='entryParsing'
         os.environ['ENTRY_TYPE']='EntryAppIDNameReviewCount'
+        os.environ['HEADER_PATH']='entryParsing.common'
+        os.environ['HEADER_TYPE']='HeaderWithSender'
         self.consolidator = Sorter()
 
     def generateEntries(self, reviewCounts):

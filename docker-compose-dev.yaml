@@ -170,6 +170,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryNameAvgPlaytime
+      - HEADER_TYPE=Header
       - SORTER_TYPE=0
       - NODE_ID=0
       - NODE_COUNT=2
@@ -194,6 +195,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryNameAvgPlaytime
+      - HEADER_TYPE=Header
       - SORTER_TYPE=0
       - NODE_ID=1
       - NODE_COUNT=2
@@ -218,6 +220,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryNameAvgPlaytime
+      - HEADER_TYPE=HeaderWithSender
       - SORTER_TYPE=2
       - TOP_AMOUNT=10
       - QUERY_NUMBER=2
@@ -334,6 +337,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryNameReviewCount
+      - HEADER_TYPE=Header
       - SORTER_TYPE=1
       - NODE_ID=0
       - NODE_COUNT=2
@@ -358,6 +362,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryNameReviewCount
+      - HEADER_TYPE=Header
       - SORTER_TYPE=1
       - NODE_ID=1
       - NODE_COUNT=2
@@ -382,6 +387,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryNameReviewCount
+      - HEADER_TYPE=HeaderWithSender
       - SORTER_TYPE=3
       - TOP_AMOUNT=5
       - QUERY_NUMBER=3
@@ -743,6 +749,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryAppIDNameReviewCount
+      - HEADER_TYPE=HeaderWithSender
       - SORTER_TYPE=4
       - PERCENTILE=90
       - QUERY_NUMBER=5

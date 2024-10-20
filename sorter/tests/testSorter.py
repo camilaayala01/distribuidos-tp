@@ -38,7 +38,8 @@ class TestSorterGeneral(unittest.TestCase):
         os.environ['SORTER_TYPE'] = '1'
         os.environ['TOP_AMOUNT'] = '3'
         os.environ['ENTRY_PATH']='entryParsing'
-        
+        os.environ['HEADER_PATH']='entryParsing.common'
+        os.environ['HEADER_TYPE']='Header'
         # indie
         os.environ['ENTRY_TYPE']='EntryNameReviewCount'
         self.sorterIndieFew = Sorter()
