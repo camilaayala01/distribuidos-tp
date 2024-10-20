@@ -35,8 +35,6 @@ class JoinerType(Enum):
             if len(entries) >= REQUIRED_ENTRIES or id in sent:
                 newSent.add(id)
                 toSend.extend(entries)
-                if len(entries) >= REQUIRED_ENTRIES:
-                    print(f"sent with id {id}")
 
         for id in newSent:
             del joinedEntries[id]

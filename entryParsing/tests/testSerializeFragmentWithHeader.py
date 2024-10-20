@@ -21,6 +21,8 @@ class TestSerializeFragmentWithHeader(unittest.TestCase):
         os.environ['NEXT_NODES'] = 'nextnode'
         os.environ['SORTER_TYPE'] = '4'
         os.environ['PERCENTILE'] = '90'
+        os.environ['ENTRY_PATH']='entryParsing'
+        os.environ['ENTRY_TYPE']='EntryAppIDNameReviewCount'
         self.sorterAction = Sorter()
 
     def testSerializeDataWithSmallMaxDataBytes(self):

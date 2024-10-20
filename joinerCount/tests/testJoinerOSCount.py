@@ -16,6 +16,10 @@ class TestJoinerOSCount(unittest.TestCase):
         os.environ['JOINER_COUNT_TYPE'] = '0'
         os.environ['LISTENING_QUEUE'] = 'JoinerOsCounts'
         os.environ['NEXT_NODES'] = 'Some'
+        os.environ['ENTRY_PATH']='entryParsing'
+        os.environ['ENTRY_TYPE']='EntryOSSupport'
+        os.environ['HEADER_PATH']='entryParsing.common'
+        os.environ['HEADER_TYPE']='Header'
         self.joiner = JoinerCount()
 
     def testCountEntries(self):
