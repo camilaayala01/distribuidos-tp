@@ -75,7 +75,7 @@ class Joiner:
                                                                                  sent=self._sent)
         if not self.shouldSendPackets(toSend):
             return
-        packets, self._fragment = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(self._joinerType.headerType()), 
+        packets, self._fragment = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(self._headerType), 
                                                  data=toSend, 
                                                  id=self._id,
                                                  fragment=self._fragment,

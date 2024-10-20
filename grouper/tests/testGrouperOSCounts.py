@@ -21,6 +21,8 @@ class TestGrouperOSCount(unittest.TestCase):
         os.environ['GROUPER_TYPE'] = '0'
         os.environ['LISTENING_QUEUE'] = 'Grouper'
         os.environ['NEXT_NODES'] = 'Joiner'
+        os.environ['HEADER_PATH']='entryParsing.common'
+        os.environ['HEADER_TYPE']='Header'
         self._grouper = Grouper()
 
     def testCountEntries(self):

@@ -2,7 +2,7 @@ from entryParsing.entry import EntryInterface
 from entryParsing.common.header import Header
 from .grouperTypes import GrouperType
 from internalCommunication.internalCommunication import InternalCommunication
-from entryParsing.common.utils import getEntryTypeFromEnv, initializeLog
+from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
 import logging
 import os
 
@@ -14,6 +14,7 @@ class Grouper:
         initializeLog()
         self._grouperType = GrouperType(int(os.getenv('GROUPER_TYPE')))
         self._entryType = getEntryTypeFromEnv()
+        self._headerType = getHeaderTypeFromEnv()
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'))
         self._sendingStrategies = createStrategiesFromNextNodes()
 
@@ -29,7 +30,7 @@ class Grouper:
             strategy.send(self._internalCommunication, newHeader, batch)
 
     def handleMessage(self, ch, method, properties, body):
-        header, data = self._grouperType.headerType().deserialize(body)
+        header, data = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0 | header.isEOF():
             logging.info(f'action: received batch | {header} | result: success')
         entries = self._entryType.deserialize(data)

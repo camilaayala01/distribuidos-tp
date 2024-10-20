@@ -31,6 +31,8 @@ class TestEnglishFilterer(unittest.TestCase):
         os.environ['NEXT_NODES'] = 'FilterDecade;JoinerIndiePositiveReviews,2,0'
         os.environ['ENTRY_TYPE']='EntryAppIDNameGenresReleaseDateAvgPlaytime'
         os.environ['ENTRY_PATH']='entryParsing'
+        os.environ['HEADER_PATH']='entryParsing.common'
+        os.environ['HEADER_TYPE']='HeaderWithTable'
         self.filterer = Filterer()
 
     def testAllIndie(self):

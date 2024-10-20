@@ -14,15 +14,6 @@ class GrouperType(Enum):
     OS_COUNT= 0
     APP_ID_COUNT = 1
     APP_ID_NAME_COUNT = 2
-
-    def headerType(self) -> type:
-        match self:
-            case GrouperType.OS_COUNT:
-                return Header
-            case GrouperType.APP_ID_COUNT:
-                return HeaderWithTable
-            case GrouperType.APP_ID_NAME_COUNT:
-                return HeaderWithSender
             
     def getOSCountResults(self, entries: list[EntryInterface]) -> list[EntryInterface]:
         windowsCount, macCount, linuxCount= 0, 0, 0

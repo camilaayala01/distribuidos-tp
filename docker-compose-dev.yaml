@@ -84,6 +84,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryOSSupport
+      - HEADER_TYPE=Header
       - GROUPER_TYPE=0
       - LISTENING_QUEUE=GrouperOSCounts
       - NEXT_NODES=JoinerOsCounts
@@ -127,6 +128,7 @@ services:
       - PYTHONUNBUFFERED=1
       - FILTERER_TYPE=1
       - ENTRY_TYPE=EntryAppIDNameGenresReleaseDateAvgPlaytime
+      - HEADER_TYPE=HeaderWithTable
       - LISTENING_QUEUE=FilterIndie
       - NEXT_NODES=FilterDecade;JoinerIndiePositiveReviews,2,0
       - HOST=rabbitmq
@@ -147,6 +149,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryNameDateAvgPlaytime
+      - HEADER_TYPE=Header
       - FILTERER_TYPE=0
       - LISTENING_QUEUE=FilterDecade
       - NEXT_NODES=SorterAvgPlaytime,2,1
@@ -239,6 +242,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryAppID
+      - HEADER_TYPE=HeaderWithTable
       - GROUPER_TYPE=1
       - LISTENING_QUEUE=GrouperIndiePositiveReviews
       - NEXT_NODES=JoinerIndiePositiveReviews,2,0
@@ -402,6 +406,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryAppIDNameGenres
+      - HEADER_TYPE=HeaderWithTable
       - FILTERER_TYPE=2
       - LISTENING_QUEUE=FilterAction
       - NEXT_NODES=JoinerActionNegativeReviewsEnglish,2,0;JoinerActionPercentile,2,0
@@ -470,6 +475,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryAppIDNameReviewText
+      - HEADER_TYPE=HeaderWithSender
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglish
@@ -490,6 +496,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryAppIDNameReviewText
+      - HEADER_TYPE=HeaderWithSender
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglish
@@ -510,6 +517,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryAppIDNameReviewText
+      - HEADER_TYPE=HeaderWithSender
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglish
@@ -530,6 +538,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryAppIDNameReviewText
+      - HEADER_TYPE=HeaderWithSender
       - FILTERER_TYPE=3
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglish
@@ -550,6 +559,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
       - GROUPER_TYPE=2
       - LISTENING_QUEUE=GrouperActionEnglish
       - NEXT_NODES=ConsolidatorJoinerActionEnglish
@@ -664,6 +674,7 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - ENTRY_TYPE=EntryAppID
+      - HEADER_TYPE=HeaderWithTable
       - GROUPER_TYPE=1
       - LISTENING_QUEUE=GrouperActionPercentile
       - NEXT_NODES=JoinerActionPercentile,2,0
