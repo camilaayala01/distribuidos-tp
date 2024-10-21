@@ -1,7 +1,8 @@
 import os
 from typing import Any
 import yaml, sys
-import argparse
+
+from dotenv import load_dotenv
 
 from filterer.common.filtererTypes import FiltererType
 from grouper.common.grouperTypes import GrouperType
@@ -10,8 +11,6 @@ from joinerConsolidator.common.joinerConsolidatorTypes import JoinerConsolidator
 from joinerCount.common.joinerCountTypes import JoinerCountType
 from sendingStrategy.common.shardingAtribute import ShardingAttribute
 from sorter.common.sorterTypes import SorterType
-
-from dotenv import load_dotenv
 load_dotenv('compose.env')
 
 def add_to_list(list, new_list):
@@ -409,8 +408,13 @@ def generate_compose(output_file: str, client_number: int):
 
 
 def main():
+    if len(sys.argv) != 3:
+        print("run with: python3 compose-generator.py <output_file> <client_number>")
+        return
+    
     try:
-        generate_compose('docker-compose-test.yaml', 1)
+        client_number = int(sys.argv[2])
+        generate_compose(sys.argv[1], client_number)
     except ValueError:
         print(f"Error: second argument has to be a number (amount of clients desired)")
 
