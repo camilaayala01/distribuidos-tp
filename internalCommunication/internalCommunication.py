@@ -95,19 +95,19 @@ class InternalCommunication:
     # indie filter comes here
 
     def sendToIndiePositiveReviewsGrouper(self, message: bytes):
-        self.basicSend(os.getenv('GROUP_INDIE_POS_REV'), message)
+        self.basicSend(os.getenv('GROUP_INDIE'), message)
 
     def sendToIndiePositiveReviewsJoiner(self, shardingKey: str, message: bytes):
-        self.directSend(os.getenv('JOIN_INDIE_POS_REV'), shardingKey, message)
+        self.directSend(os.getenv('JOIN_INDIE'), shardingKey, message)
 
     def sendToIndiePositiveReviewsConsolidator(self, message: bytes):
-        self.basicSend(os.getenv('CONS_JOIN_INDIE_POS_REV'), message)
+        self.basicSend(os.getenv('CONS_JOIN_INDIE'), message)
 
     def sendToPositiveReviewsSorter(self, shardingKey: str, message: bytes):
-        self.directSend(os.getenv('SORT_INDIE_POS_REV'), shardingKey, message)
+        self.directSend(os.getenv('SORT_INDIE'), shardingKey, message)
 
     def sendToPositiveReviewsSorterConsolidator(self, message: bytes):
-         self.basicSend(os.getenv('CONS_SORT_INDIE_POS_REV'), message)
+         self.basicSend(os.getenv('CONS_SORT_INDIE'), message)
 
 
     # Query 4
@@ -116,19 +116,19 @@ class InternalCommunication:
         self.basicSend(os.getenv('FILT_ACT'), message)
 
     def sendToActionNegativeReviewsEnglishJoiner(self, shardingKey: str, message: bytes):
-        self.directSend(os.getenv('JOIN_ENG_NEG_REV'), shardingKey, message)
+        self.directSend(os.getenv('JOIN_ACT'), shardingKey, message)
     
     def sendToEnglishFilter(self, message: bytes):
         self.basicSend(os.getenv('FILT_ENG'), message)
 
     def sendToEnglishNegativeReviewsGrouper(self, message: bytes):
-        self.basicSend(os.getenv('GROUP_ENG_NEG_REV'), message)
+        self.basicSend(os.getenv('GROUP_ENG'), message)
 
     def sendToEnglishReviewsJoinerConsolidator(self, message: bytes):
-        self.basicSend(os.getenv('CONS_JOIN_ENG_NEG_REV'), message) 
+        self.basicSend(os.getenv('CONS_JOIN_ENG'), message) 
 
     def sendToEnglishNegativeReviewsCounter(self, shardingKey: str, message: bytes):
-        self.directSend(os.getenv('JOIN_ENG_COUNT_MORE_REV'), shardingKey, message)
+        self.directSend(os.getenv('JOIN_ENG'), shardingKey, message)
 
     def sendToStreamJoinerConsolidator(self, message: bytes):
         self.basicSend(os.getenv('CONS_JOIN_STREAM'), message)
@@ -139,19 +139,19 @@ class InternalCommunication:
     # action filter comes here, goes to joiner
 
     def sendToActionAllNegativeReviewsGrouper(self, message: bytes):
-        self.basicSend(os.getenv('GROUP_PERC_NEG_REV'), message)
+        self.basicSend(os.getenv('GROUP_PERC'), message)
     
     def sendToActionNegativeReviewsJoiner(self,  shardingKey: str, message: bytes):
-        self.directSend(os.getenv('JOIN_PERC_NEG_REV'), shardingKey, message)
+        self.directSend(os.getenv('JOIN_PERC'), shardingKey, message)
     
     def sendToActionPercentileSorterConsolidator(self, message: bytes): 
-        self.basicSend(os.getenv('CONS_SORT_PERC_NEG_REV'), message)
+        self.basicSend(os.getenv('CONS_SORT_PERC'), message)
 
     
     #End
 
     def sendToDispatcher(self, message: bytes):
-        self.basicSend(os.getenv('RESP_DISP'), message)
+        self.basicSend(os.getenv('DISP'), message)
 
     def sendToInitializer(self, message: bytes):
         self.basicSend(os.getenv('INIT'), message)
