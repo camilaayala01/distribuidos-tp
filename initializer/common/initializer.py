@@ -19,18 +19,18 @@ class Initializer:
         initializeLog()
         queueName = os.getenv('INIT')
         self._internalCommunication = InternalCommunication(queueName, os.getenv('NODE_ID'))
-        self._nodeCount = int(os.getenv('JOIN_ENG_NEG_REV_COUNT'))
+        self._nodeCount = int(os.getenv('JOIN_ACT_COUNT'))
         self._query_1_games = bytes()
         self._query_2_3_games = bytes()
         self._query_4_5_games = bytes()
         self._query_3_reviews = bytes()
-        self._query_4_reviews = [bytes() for _ in range(int(os.getenv('JOIN_ENG_NEG_REV_COUNT')))]
+        self._query_4_reviews = [bytes() for _ in range(int(os.getenv('JOIN_ACT_COUNT')))]
         self._query_5_reviews = bytes()
         self._query_1_games_fragment = 1
         self._query_2_3_games_fragment = 1
         self._query_4_5_games_fragment = 1
         self._query_3_reviews_fragment = 1
-        self._query_4_reviews_fragment = [1 for _ in range(int(os.getenv('JOIN_ENG_NEG_REV_COUNT')))]
+        self._query_4_reviews_fragment = [1 for _ in range(int(os.getenv('JOIN_ACT_COUNT')))]
         self._query_5_reviews_fragment = 1
 
     def separatePositiveAndNegative(self, reviews: list[ReviewEntry]):
