@@ -42,7 +42,15 @@ Se debe contar con la imagen base. Para descargar esta, se debe correr desde el 
 ```
 ./base-images/build.sh
 ``` 
+Se debe contar a su vez con un archivo docker-compose-dev.yaml. Este puede ser generador a través del script de generación.
 
+## Generación del compose
+Para generar un compose, se debe correr 
+```
+generate-compose <output-path> <cantidad-clientes>
+```
+En caso de querer cambiar la cantidad de nodos específicos de algún tipo, se debe modificar el contenido del archivo `compose.env`
+En caso de elegir un output path que no sea `docker-compose-dev.yaml`, se debe modificar el script de corrida (`run.sh`) y el de frenada del programa (`stop.sh`).
 ## Para ejecutar todas las queries
 En primer lugar, se debe activar rabbit. Esto se hace corriendo desde el root el script de rabbit
 ```

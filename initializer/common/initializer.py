@@ -20,6 +20,7 @@ class Initializer:
         self._internalCommunication = InternalCommunication(queueName, os.getenv('NODE_ID'))
         self._nodeCount = int(os.getenv('JOIN_ENG_NEG_REV_COUNT'))
 
+
     def separatePositiveAndNegative(self, reviews: list[ReviewEntry]):
         positiveReviewEntries, negativeReviewEntries = [], []
         for entry in reviews:
