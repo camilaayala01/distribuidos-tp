@@ -3,7 +3,7 @@ import zmq
 class Client:
     def __init__(self):
         context = zmq.Context()
-        socket = context.socket(zmq.PAIR)
+        socket = context.socket(zmq.DEALER)
         socket.connect("tcp://border-node:%s" % "5556")
         self._socket = socket
         self._socket.setsockopt(zmq.RCVTIMEO, 100)

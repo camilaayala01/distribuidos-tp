@@ -16,9 +16,9 @@ PRINT_FREQUENCY = 500
 class Initializer:
     def __init__(self): 
         initializeLog()
-        queueName = os.getenv('INIT')
+        queueName = os.getenv('LISTENING_QUEUE')
         self._internalCommunication = InternalCommunication(queueName, os.getenv('NODE_ID'))
-        self._nodeCount = int(os.getenv('JOIN_ENG_NEG_REV_COUNT'))
+        self._nodeCount = int(os.getenv('JOIN_ACT_COUNT'))
 
     def separatePositiveAndNegative(self, reviews: list[ReviewEntry]):
         positiveReviewEntries, negativeReviewEntries = [], []
@@ -75,10 +75,8 @@ class Initializer:
             self._internalCommunication.sendToIndiePositiveReviewsGrouper(serializedHeader + entriesQuery3)
 
             #Query 4
-            nodeCount = int(os.getenv('JOIN_ENG_NEG_REV_COUNT'))
-
-            shardedResults = ReviewEntry.shardBatch(nodeCount, negativeReviewEntries)
-            for i in range(nodeCount):
+            shardedResults = ReviewEntry.shardBatch(self._nodeCount, negativeReviewEntries)
+            for i in range(self._nodeCount):
                 self._internalCommunication.sendToActionNegativeReviewsEnglishJoiner(str(i), serializedHeader + shardedResults[i])
 
             # Query 5

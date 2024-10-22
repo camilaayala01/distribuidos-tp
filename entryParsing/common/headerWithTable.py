@@ -1,12 +1,12 @@
 from entryParsing.common.table import Table
 from entryParsing.common.fieldLen import TABLE_LEN
-from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, deserializeTable, serializeTable
+from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, deserializeTable, getClientID, serializeTable
 from entryParsing.common.header import Header
 
 class HeaderWithTable(Header):
-    def __init__(self, table: Table, fragment: int, eof: bool):
+    def __init__(self, clientId: bytes, table: Table, fragment: int, eof: bool):
+        super().__init__(clientId, fragment, eof)
         self._table = table
-        super().__init__(fragment, eof)
 
     def getTable(self):
         return self._table
@@ -18,7 +18,7 @@ class HeaderWithTable(Header):
         return Table.REVIEWS == self._table
 
     def serialize(self) -> bytes:
-        return serializeTable(self._table) + super().serialize()
+        return super().serialize() + serializeTable(self._table)
     
     def serializeWithoutTable(self) -> bytes:
         return super().serialize()
@@ -34,10 +34,11 @@ class HeaderWithTable(Header):
     def deserialize(data: bytes) -> tuple['HeaderWithTable', bytes]:
         curr = 0
         try:
-            table, curr = deserializeTable(curr, data)
+            clientId, curr = getClientID(curr, data)
             fragment, curr = deserializeCount(curr, data)
             eof, curr = deserializeBoolean(curr, data)
+            table, curr = deserializeTable(curr, data)
         except (IndexError, UnicodeDecodeError):
             raise Exception("There was an error parsing data in header")
         
-        return HeaderWithTable(table, fragment, eof), data[curr:]
+        return HeaderWithTable(clientId, table, fragment, eof), data[curr:]

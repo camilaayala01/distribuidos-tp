@@ -1,5 +1,6 @@
 import os
 import signal
+from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from internalCommunication.internalCommunication import InternalCommunication
 import zmq
 import logging
@@ -12,7 +13,7 @@ class BorderNodeCommunication:
     def __init__(self):
         initializeLog()
         context = zmq.Context()
-        socket = context.socket(zmq.PAIR)
+        socket = context.socket(zmq.ROUTER)
         socket.bind("tcp://*:5556")
         self._clientSocket = socket
         self._clientSocket.setsockopt(zmq.RCVTIMEO, 100)
@@ -28,7 +29,6 @@ class BorderNodeCommunication:
         self._running = False
         self._internalCommunication.stop()
         self._accepterCommunication.stop()
-        #self._clientSocket.close()
         
     def closeClientSocket(self):
         self._clientSocket.close()
@@ -38,15 +38,16 @@ class BorderNodeCommunication:
 
     def receiveFromClient(self):
         try:
-            msg = self._clientSocket.recv()
+            id, msg = self._clientSocket.recv_multipart()
+            return id + msg
         except:
-            msg = None
-        return msg
+            return None
     
     def sendClient(self, ch, method, properties, body):
         if not self.isRunning():
             return
-        self._clientSocket.send(body)
+        header, _ = HeaderWithQueryNumber.deserialize(body)
+        self._clientSocket.send_multipart([header.getClient(), body])
         logging.info(f'action: sending query info to client | result: success')
         ch.basic_ack(delivery_tag = method.delivery_tag)
 
