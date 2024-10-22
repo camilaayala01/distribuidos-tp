@@ -1,4 +1,5 @@
 from enum import Enum
+import os
 from langid import classify
 from entryParsing.common.header import Header
 from entryParsing.common.headerWithSender import HeaderWithSender
@@ -17,28 +18,6 @@ class FiltererType(Enum):
     INDIE = 1
     ACTION = 2
     ENGLISH = 3
-
-    def entryType(self) -> type:
-        match self:
-            case FiltererType.DECADE:
-                return EntryNameDateAvgPlaytime
-            case FiltererType.ENGLISH:
-                return EntryAppIDNameReviewText
-            case FiltererType.INDIE:
-                return EntryAppIDNameGenresReleaseDateAvgPlaytime
-            case FiltererType.ACTION:
-                return EntryAppIDNameGenres
-
-    def headerType(self) -> type:
-        match self:
-            case FiltererType.DECADE:
-                return Header
-            case FiltererType.ENGLISH:
-                return HeaderWithSender
-            case FiltererType.INDIE:
-                return HeaderWithTable
-            case FiltererType.ACTION:
-                return HeaderWithTable
 
     def executeCondition(self, entry: EntryInterface) -> bool:
         match self:

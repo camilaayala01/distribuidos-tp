@@ -1,12 +1,8 @@
 from enum import Enum
 from entryParsing.common.header import Header
-from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.entry import EntryInterface
-from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
 from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
-from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
-from entryParsing.entryAppIDReviewText import EntryAppIDReviewText
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 
 REQUIRED_ENTRIES = 5000
@@ -15,19 +11,6 @@ class JoinerType(Enum):
     PERCENTILE = 0
     INDIE = 1
     ENGLISH = 2
-
-    def headerType(self) -> type:
-        return HeaderWithTable
-    
-    def gamesEntryType(self) -> type:
-        return EntryAppIDName
-
-    def reviewsEntryType(self) -> type:
-        match self:
-            case JoinerType.ENGLISH:
-                return EntryAppIDReviewText
-            case _:
-                return EntryAppIDReviewCount
                 
     def defaultEntry(self, name: str):
         match self:
@@ -52,8 +35,6 @@ class JoinerType(Enum):
             if len(entries) >= REQUIRED_ENTRIES or id in sent:
                 newSent.add(id)
                 toSend.extend(entries)
-                if len(entries) >= REQUIRED_ENTRIES:
-                    print(f"sent with id {id}")
 
         for id in newSent:
             del joinedEntries[id]

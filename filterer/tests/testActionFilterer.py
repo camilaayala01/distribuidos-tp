@@ -27,6 +27,10 @@ class TestActionFilterer(unittest.TestCase):
         os.environ['FILTERER_TYPE'] = '2'
         os.environ['LISTENING_QUEUE'] = 'FilterAction'
         os.environ['NEXT_NODES'] = 'JoinerActionNegativeReviewsEnglish,2,0;JoinerActionPercentile,2,0'
+        os.environ['ENTRY_TYPE']='EntryAppIDNameGenres'
+        os.environ['ENTRY_PATH']='entryParsing'
+        os.environ['HEADER_PATH']='entryParsing.common'
+        os.environ['HEADER_TYPE']='HeaderWithTable'
         self.filterer = Filterer()
 
     def testAllAction(self):

@@ -1,11 +1,9 @@
 from enum import Enum
 import os
 
-from entryParsing.common.header import Header
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entry import EntryInterface
-from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
 from entryParsing.entryName import EntryName
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from entryParsing.entryOSCount import EntryOSCount
@@ -13,16 +11,6 @@ from entryParsing.entryOSCount import EntryOSCount
 class JoinerCountType(Enum):
     OS = 0
     ENGLISH = 1
-
-    def headerType(self) -> type:
-        return Header
-    
-    def entryType(self) -> type:
-        match self:
-            case JoinerCountType.ENGLISH:
-                return EntryAppIDNameReviewCount
-            case JoinerCountType.OS:
-                return EntryOSCount
             
     def getInitialResults(self):
         match self:

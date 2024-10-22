@@ -2,10 +2,8 @@ from entryParsing.common.fieldParsing import deserializeAppID, deserializeGameNa
 from entryParsing.entry import EntryInterface
 
 class EntryAppIDNameReviewText(EntryInterface):
-    def __init__(self, appID: str, name: str, reviewText: str):
-        self._appID = appID
-        self._name = name
-        self._reviewText = reviewText
+    def __init__(self, _appID: str, _name: str, _reviewText: str):
+        super().__init__(_appID=_appID, _name=_name, _reviewText=_reviewText)
 
     def serialize(self) -> bytes:
         appIDBytes = serializeAppID(self._appID)

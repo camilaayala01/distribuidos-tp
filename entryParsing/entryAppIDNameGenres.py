@@ -5,10 +5,8 @@ from entryParsing.entryAppIDName import EntryAppIDName
 from .entry import EntryInterface
 
 class EntryAppIDNameGenres(EntryInterface):
-    def __init__(self, id: str, name: str, genres: str):
-        self._appID = id
-        self._name = name
-        self._genres = genres
+    def __init__(self, _appID: str, _name: str, _genres: str):
+        super().__init__(_appID=_appID, _name=_name, _genres=_genres)
 
     def serialize(self) -> bytes:
         idBytes = serializeAppID(self._appID)

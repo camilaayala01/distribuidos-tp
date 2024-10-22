@@ -3,11 +3,8 @@ from entryParsing.common.utils import boolToInt, intToBool
 from entryParsing.entry import EntryInterface
 
 class EntryOSCount(EntryInterface):
-    def __init__(self, windows: int, mac: int, linux: int, total: int):
-        self._windows =  windows
-        self._mac = mac
-        self._linux = linux
-        self._total = total
+    def __init__(self, _windows: int, _mac: int, _linux: int, _total: int):
+        super().__init__(_windows=_windows, _mac=_mac, _linux=_linux, _total=_total)
 
     def getWindowsCount(self):
         return self._windows

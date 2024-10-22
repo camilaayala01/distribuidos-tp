@@ -20,7 +20,6 @@ class Initializer:
         self._internalCommunication = InternalCommunication(queueName, os.getenv('NODE_ID'))
         self._nodeCount = int(os.getenv('JOIN_ENG_NEG_REV_COUNT'))
 
-
     def separatePositiveAndNegative(self, reviews: list[ReviewEntry]):
         positiveReviewEntries, negativeReviewEntries = [], []
         for entry in reviews:
@@ -53,6 +52,7 @@ class Initializer:
         if header.isGamesTable():
             logging.info(f'action: sending Games table batch | result: in progress')
             gameEntries = ReducedGameEntry.deserialize(data)
+
             entriesQuery1 = b''.join([EntryOSSupport(entry.windows, entry.mac, entry.linux).serialize() for entry in gameEntries])
             self._internalCommunication.sendToOSCountsGrouper(header.serializeWithoutTable() + entriesQuery1)
 

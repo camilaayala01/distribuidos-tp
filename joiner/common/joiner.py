@@ -1,8 +1,7 @@
 import logging
 import os
 from entryParsing.common.headerWithTable import HeaderWithTable
-from entryParsing.common.headerWithSender import HeaderWithSender
-from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithSender, initializeLog
+from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, maxDataBytes, serializeAndFragmentWithSender, initializeLog
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
 from .joinerTypes import JoinerType
@@ -20,6 +19,9 @@ class Joiner:
         self._sendingStrategies = createStrategiesFromNextNodes()
         self._id = int(nodeID)
         self._fragment = 1
+        self._gamesEntry = getGamesEntryTypeFromEnv()
+        self._reviewsEntry = getReviewsEntryTypeFromEnv()
+        self._headerType = getHeaderTypeFromEnv()
         self._gamesTracker = DefaultTracker()
         self._reviewsTracker = DefaultTracker()
         self._unjoinedReviews = []
@@ -48,7 +50,7 @@ class Joiner:
 
     def handleReviewsMessage(self, header: HeaderWithTable, data: bytes):
         self._reviewsTracker.update(header)
-        reviews = self._joinerType.reviewsEntryType().deserialize(data)
+        reviews = self._reviewsEntry.deserialize(data)
         if not self._gamesTracker.isDone():
             self._unjoinedReviews.extend(reviews)
             return
@@ -60,7 +62,7 @@ class Joiner:
 
     def handleGamesMessage(self, header: HeaderWithTable, data: bytes):
         self._gamesTracker.update(header)
-        entries = self._joinerType.gamesEntryType().deserialize(data)
+        entries = self._gamesEntry.deserialize(data)
         for entry in entries:
             self.storeGamesEntry(entry)
 
@@ -73,7 +75,7 @@ class Joiner:
                                                                                  sent=self._sent)
         if not self.shouldSendPackets(toSend):
             return
-        packets, self._fragment = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(self._joinerType.headerType()), 
+        packets, self._fragment = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(self._headerType), 
                                                  data=toSend, 
                                                  id=self._id,
                                                  fragment=self._fragment,
@@ -93,7 +95,7 @@ class Joiner:
             strategy.sendBytes(self._internalCommunication, msg)
 
     def handleMessage(self, ch, method, properties, body):
-        header, batch = self._joinerType.headerType().deserialize(body)
+        header, batch = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
             logging.info(f'action: received batch from table {header.getTable()} | {header} | result: success')
         if header.isGamesTable():

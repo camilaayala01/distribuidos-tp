@@ -28,6 +28,10 @@ class TestDateFilterer(unittest.TestCase):
         os.environ['FILTERER_TYPE'] = '0'
         os.environ['LISTENING_QUEUE'] = 'FilterDecade'
         os.environ['NEXT_NODES'] = 'SorterAvgPlaytime,2,1'
+        os.environ['ENTRY_TYPE']='EntryNameDateAvgPlaytime'
+        os.environ['ENTRY_PATH']='entryParsing'
+        os.environ['HEADER_PATH']='entryParsing.common'
+        os.environ['HEADER_TYPE']='Header'
         self.filterer = Filterer()
 
     def testAllDecade(self):

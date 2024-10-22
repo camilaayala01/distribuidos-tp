@@ -19,9 +19,13 @@ class TestGrouperAppIDName(unittest.TestCase):
             EntryAppID('2'),
             EntryAppID('1'),
         ]
+        os.environ['ENTRY_PATH']='entryParsing'
+        os.environ['ENTRY_TYPE'] = 'EntryAppID'
         os.environ['GROUPER_TYPE'] = '1'
         os.environ['LISTENING_QUEUE'] = 'Grouper'
         os.environ['NEXT_NODES'] = 'Joiner'
+        os.environ['HEADER_PATH']='entryParsing.common'
+        os.environ['HEADER_TYPE']='HeaderWithTable'
         self._grouper = Grouper()
 
     def testCountEntries(self):

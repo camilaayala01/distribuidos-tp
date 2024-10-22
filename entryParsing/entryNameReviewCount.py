@@ -3,9 +3,8 @@ from entryParsing.common.fieldParsing import deserializeCount, deserializeGameNa
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 
 class EntryNameReviewCount(EntrySorterTopFinder):
-    def __init__(self, name: str, reviewCount: int):
-        super().__init__(name)
-        self._reviewCount = reviewCount
+    def __init__(self, _name: str, _reviewCount: int):
+        super().__init__(_name=_name, _reviewCount=_reviewCount)
 
     def getName(self):
         return self._name

@@ -2,9 +2,8 @@ from entryParsing.common.fieldParsing import deserializeGameName, deserializePla
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 
 class EntryNameAvgPlaytime(EntrySorterTopFinder):
-    def __init__(self, name: str, avgPlaytime: int):
-        super().__init__(name)
-        self._avgPlaytime = avgPlaytime
+    def __init__(self, _name: str, _avgPlaytime: int):
+        super().__init__(_name=_name, _avgPlaytime=_avgPlaytime)
 
     def serialize(self) -> bytes:
         nameBytes = serializeGameName(self._name)

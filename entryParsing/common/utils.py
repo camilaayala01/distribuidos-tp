@@ -1,3 +1,5 @@
+import os
+import importlib
 import math
 import logging
 from entryParsing.entry import EntryInterface
@@ -19,6 +21,39 @@ def initializeLog():
     )
     logging.getLogger("pika").setLevel(logging.WARNING)
 
+def convertFirstLetterToLowerCase(string: str):
+    return string[0].lower() + string[1:]
+
+def generateFullPath(path: str, module: str):
+    return path + '.' + module
+
+def getModuleFromEnvVars(type: str, path: str):
+    entryType = os.getenv(type)
+    if not entryType:
+        raise ValueError("Type environment variable is missing.")
+    entryPath = os.getenv(path)
+    if not entryPath:
+        raise ValueError("Path environment variable is missing.")
+    
+    try:
+        classImport = generateFullPath(entryPath, convertFirstLetterToLowerCase(entryType)) + '.' + entryType
+        moduleName, classImport = classImport.rsplit('.', 1)
+        module = importlib.import_module(moduleName)
+        return getattr(module, classImport)
+    except Exception as e:
+        raise ImportError(f"Class '{classImport}' could not be found in module '{moduleName}'.")
+
+def getHeaderTypeFromEnv():
+    return getModuleFromEnvVars('HEADER_TYPE', 'HEADER_PATH')
+
+def getEntryTypeFromEnv():
+    return getModuleFromEnvVars('ENTRY_TYPE', 'ENTRY_PATH')
+
+def getGamesEntryTypeFromEnv():
+    return getModuleFromEnvVars('GAMES_ENTRY_TYPE', 'ENTRY_PATH')
+
+def getReviewsEntryTypeFromEnv():
+    return getModuleFromEnvVars('REVIEWS_ENTRY_TYPE', 'ENTRY_PATH')
 
 def boolToInt(boolean: bool) -> int:
     match boolean:
