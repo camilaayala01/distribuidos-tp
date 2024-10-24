@@ -41,8 +41,8 @@ class JoinerConsolidator:
         self._currentClient = self._activeClients.setdefault(clientID, ActiveClient(self._priorNodeCount))
     
     def shouldSendPackets(self, toSend: list[EntryInterface]):
-        return (self._currentClient.finishedReceiving() or 
-                (not self._currentClient.finishedReceiving() and len(toSend) != 0))
+        return (self._currentClient.isDone() or 
+                (not self._currentClient.isDone() and len(toSend) != 0))
 
     def handleMessage(self, ch, method, properties, body):
         header, data = HeaderWithSender.deserialize(body)
