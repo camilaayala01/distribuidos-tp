@@ -10,14 +10,14 @@ class TestPacketTracker(unittest.TestCase):
         self.defaultTracker = DefaultTracker()
     
     def testisDuplicateBiggerThanPriorBiggest(self):
-        header = Header(fragment=5, eof=False)
+        header = Header(clientId=bytes(), fragment=5, eof=False)
         self.tracker._biggestFragment = 3
         
         # bigger than the biggest received
         self.assertFalse(self.tracker.isDuplicate(header))
     
     def testIsDuplicateSmallerThanPriorBiggest(self):
-        header = Header(fragment=2, eof=False)
+        header = Header(clientId=bytes(), fragment=2, eof=False)
         self.tracker._biggestFragment = 5
         self.tracker._pending = set([2, 3])
         
@@ -29,7 +29,7 @@ class TestPacketTracker(unittest.TestCase):
         self.assertTrue(self.tracker.isDuplicate(header))
     
     def testUpdateWithNewFragmentBiggerInDefault(self):
-        header = Header(fragment=5, eof=False)
+        header = Header(clientId=bytes(), fragment=5, eof=False)
         self.defaultTracker._biggestFragment = 2
         
         self.defaultTracker.update(header)
@@ -40,7 +40,7 @@ class TestPacketTracker(unittest.TestCase):
         self.assertFalse(self.defaultTracker._receivedEnd)
     
     def testUpdateWithNewFragmentBigger(self):
-        header = Header(fragment=6, eof=False)
+        header = Header(clientId=bytes(), fragment=6, eof=False)
         self.tracker._biggestFragment=2
         
         self.tracker.update(header)
@@ -53,7 +53,7 @@ class TestPacketTracker(unittest.TestCase):
         self.assertFalse(self.tracker._receivedEnd)
     
     def testUpdateEof(self):
-        header = Header(fragment=8, eof=True)
+        header = Header(clientId=bytes(), fragment=8, eof=True)
         self.tracker._biggestFragment = 6
         
         self.tracker.update(header)
@@ -62,7 +62,7 @@ class TestPacketTracker(unittest.TestCase):
         self.assertTrue(self.tracker._receivedEnd)
     
     def testUpdateDiscardPending(self):
-        header = Header(fragment=2, eof=False)
+        header = Header(clientId=bytes(), fragment=2, eof=False)
         self.tracker._biggestFragment=6
         self.tracker._pending = set([2, 4])
         

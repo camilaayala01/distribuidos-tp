@@ -3,7 +3,7 @@ import os
 from unittest.mock import MagicMock, patch
 from entryParsing.entryOSCount import EntryOSCount
 from ..common.joinerCount import JoinerCount
-
+from ..common.activeClient import ActiveClient
 class TestJoinerOSCount(unittest.TestCase):
     @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
     def setUp(self):
@@ -21,9 +21,10 @@ class TestJoinerOSCount(unittest.TestCase):
         os.environ['HEADER_PATH']='entryParsing.common'
         os.environ['HEADER_TYPE']='Header'
         self.joiner = JoinerCount()
+        self.joiner._currentClient = ActiveClient(self.joiner._joinerCountType.getInitialResults())
 
     def testCountEntries(self):
-        results = self.joiner._counts
+        results = self.joiner._currentClient._counts
         for entry in self._entries:
             _, results, _ = self.joiner._joinerCountType.getOSCountResults(results, entry, False)
         self.assertEqual(results._windows, 4)

@@ -2,7 +2,7 @@ import os
 import random
 import unittest
 from unittest.mock import MagicMock, patch
-
+from sorter.common.activeClient import ActiveClient
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from sorter.common.sorter import Sorter
 
@@ -70,12 +70,13 @@ class TestSorterGeneral(unittest.TestCase):
     def testGetBatchTopWithNoLimit(self):
         entries1 = self.generateEntries()
         entries2 = self.generateEntries()
+        self.sorterAction._currentClient= ActiveClient(self.sorterAction._sorterType.initializeTracker())
         self.sorterAction.mergeKeepTop(entries1)
         self.sorterAction.mergeKeepTop(entries2)
 
-        for i in range(len(self.sorterAction._partialTop) - 1):
-            self.assertFalse(self.sorterAction._partialTop[i].isGreaterThan(self.sorterAction._partialTop[i + 1]))
-        self.assertEqual(len(self.sorterAction._partialTop), len(entries1) + len(entries2))
+        for i in range(len(self.sorterAction._currentClient._partialTop) - 1):
+            self.assertFalse(self.sorterAction._currentClient._partialTop[i].isGreaterThan(self.sorterAction._currentClient._partialTop[i + 1]))
+        self.assertEqual(len(self.sorterAction._currentClient._partialTop), len(entries1) + len(entries2))
 
     def testGetBatchTopWithEqualEntriesToTop(self):
         result = self.sorterIndieFew._sorterType.getBatchTop(self.entriesEqual, self.sorterIndieFew._topAmount, self.sorterIndieFew._entryType)
@@ -102,25 +103,27 @@ class TestSorterGeneral(unittest.TestCase):
         self.assertEqual(topNames, expectedNames)
 
     def testMergeKeepsTop(self):
+        self.sorterIndieFew._currentClient= ActiveClient(self.sorterIndieFew._sorterType.initializeTracker())
         self.sorterIndieFew.mergeKeepTop(self.entriesMore)
         self.sorterIndieFew.mergeKeepTop(self.entriesLess)
         self.sorterIndieFew.mergeKeepTop(self.entriesEqual)
 
-        topNames = [entry._name for entry in self.sorterIndieFew._partialTop]
+        topNames = [entry._name for entry in self.sorterIndieFew._currentClient._partialTop]
         expectedNames = ["Game C", "Game H", "Game I"]
-        self.assertEqual(len(self.sorterIndieFew._partialTop), SMALL_TEST_TOP_AMOUNT)
+        self.assertEqual(len(self.sorterIndieFew._currentClient._partialTop), SMALL_TEST_TOP_AMOUNT)
         self.assertEqual(topNames, expectedNames)
 
     def testMergeWithBiggerAmountThanTop(self):
         allEntries = self.entriesEqual + self.entriesLess + self.entriesMore
         ordered = self.sorterBig._sorterType.getBatchTop(allEntries, self.sorterBig._topAmount, self.sorterBig._entryType)
+        self.sorterBig._currentClient= ActiveClient(self.sorterBig._sorterType.initializeTracker())
 
         self.sorterBig.mergeKeepTop(self.entriesMore)
         self.sorterBig.mergeKeepTop(self.entriesLess)
         self.sorterBig.mergeKeepTop(self.entriesEqual)
 
-        self.assertEqual(len(self.sorterBig._partialTop), len(allEntries))
-        self.assertEqual(self.sorterBig._partialTop, ordered)
+        self.assertEqual(len(self.sorterBig._currentClient._partialTop), len(allEntries))
+        self.assertEqual(self.sorterBig._currentClient._partialTop, ordered)
 
 
 if __name__ == '__main__':

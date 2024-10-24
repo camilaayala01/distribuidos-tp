@@ -1,4 +1,4 @@
-from entryParsing.common.fieldLen import BOOLEAN_LEN, COUNT_LEN
+from entryParsing.common.fieldLen import BOOLEAN_LEN, CLIENT_ID_LEN, COUNT_LEN
 from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, serializeBoolean, serializeCount, getClientID
 
 class Header:
@@ -26,7 +26,7 @@ class Header:
 
     @classmethod
     def size(cls):
-        return COUNT_LEN + BOOLEAN_LEN
+        return COUNT_LEN + BOOLEAN_LEN + CLIENT_ID_LEN
 
     @staticmethod
     def deserialize(data: bytes) -> tuple['Header', bytes]: 

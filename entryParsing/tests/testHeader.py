@@ -5,9 +5,10 @@ from entryParsing.entryOSCount import EntryOSCount
 
 class TestHeader(unittest.TestCase):
     def setUp(self):
-        self._entrySome = Header(2, False)
-        self._entryLast = Header(10, True)
-        self._headerWithSender = HeaderWithSender(1, 2, False)
+        clientId = b'\x01\x02\x03\x04\x05'
+        self._entrySome = Header(clientId, 2, False)
+        self._entryLast = Header(clientId, 10, True)
+        self._headerWithSender = HeaderWithSender(clientId, 2, False, 1)
 
     def testSerializeDefault(self):
         serialized = self._entrySome.serialize()
