@@ -7,6 +7,8 @@ from sendingStrategy.common.utils import createStrategiesFromNextNodes
 from .sorterTypes import SorterType
 from .activeClient import ActiveClient
 
+PRINT_FREQUENCY=500
+
 class Sorter:
     def __init__(self):
         initializeLog()
@@ -34,9 +36,9 @@ class Sorter:
         i, j = 0, 0
         mergedList = []
 
-        while i < len(self._partialTop) and j < len(newBatchTop):
+        while i < len(self._currentClient._partialTop) and j < len(newBatchTop):
             if self._sorterType.mustElementGoFirst(self._currentClient._partialTop[i], newBatchTop[j]):
-                mergedList.append(self._partialTop[i])
+                mergedList.append(self._currentClient._partialTop[i])
                 i += 1
             else:
                 mergedList.append(newBatchTop[j])
@@ -47,7 +49,7 @@ class Sorter:
             mergedList.extend(self._currentClient._partialTop[i:])
             mergedList.extend(newBatchTop[j:])
 
-        self._partialTop = self._sorterType.updatePartialTop(mergedList, self._topAmount)
+        self._currentClient._partialTop = self._sorterType.updatePartialTop(mergedList, self._topAmount)
         
     def _sendToNext(self, msg: bytes):
         for strategy in self._sendingStrategies:
@@ -58,18 +60,19 @@ class Sorter:
             return
         logging.info(f'action: received all required batches | result: success')
         packets = self._sorterType.preprocessPackets(self._currentClient._partialTop)
-        data = self._sorterType.serializeAndFragment(packets, self._headerType)
+        data = self._sorterType.serializeAndFragment(clientId, packets, self._headerType)
         for pack in data:
             self._sendToNext(pack)
 
         self._activeClients.pop(clientId)
     
     def setCurrentClient(self, clientID: bytes):
-        self._currentClient = self._activeClients.setdefault(clientID, ActiveClient())
+        self._currentClient = self._activeClients.setdefault(clientID, ActiveClient(self._sorterType.initializeTracker()))
         
     def handleMessage(self, ch, method, properties, body):
         header, batch = self._headerType.deserialize(body)
-        logging.info(f'action: receive batch | {header} | result: success')
+        if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
+            logging.info(f'action: receive batch | {header} | result: success')
         clientId = header.getClient()
         self.setCurrentClient(clientId)
         if self._currentClient.isDuplicate(header):

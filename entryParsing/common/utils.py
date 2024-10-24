@@ -102,18 +102,18 @@ def serializeAndFragmentWithSender(maxDataBytes: int, data: list[EntryInterface]
         if len(currPacket) + len(entryBytes) <= maxDataBytes:
             currPacket += entryBytes
         else:
-            headerBytes = HeaderWithSender(clientId, senderId, fragment, False).serialize()
+            headerBytes = HeaderWithSender(clientId, fragment, False, senderId).serialize()
             fragment += 1
             packets.append(headerBytes + currPacket)
             currPacket = entryBytes
 
-    packets.append(HeaderWithSender(clientId, senderId, fragment, hasEOF).serialize() + currPacket)
+    packets.append(HeaderWithSender(clientId, fragment, hasEOF, senderId).serialize() + currPacket)
     fragment += 1
     return packets, fragment
 
 
 # same as fragmenting with sender, but couldnt modularize
-def serializeAndFragmentWithQueryNumber(maxDataBytes: int, data: list[EntryInterface], queryNumber: int, clientId: bytes) ->  list[bytes]:
+def serializeAndFragmentWithQueryNumber(maxDataBytes: int, data: list[EntryInterface], clientId: bytes, queryNumber: int) ->  list[bytes]:
     from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
     fragment = 1
     packets = []
@@ -124,11 +124,11 @@ def serializeAndFragmentWithQueryNumber(maxDataBytes: int, data: list[EntryInter
         if len(currPacket) + len(entryBytes) <= maxDataBytes:
             currPacket += entryBytes
         else:
-            headerBytes = HeaderWithQueryNumber(fragment, False, queryNumber).serialize()
+            headerBytes = HeaderWithQueryNumber(clientId, fragment, False, queryNumber).serialize()
             fragment += 1
             packets.append(headerBytes + currPacket)
             currPacket = entryBytes
 
     # will have to yield once we have memory restrictions
-    packets.append(HeaderWithQueryNumber(fragment, True, queryNumber).serialize() + currPacket)
+    packets.append(HeaderWithQueryNumber(clientId, fragment, True, queryNumber).serialize() + currPacket)
     return packets

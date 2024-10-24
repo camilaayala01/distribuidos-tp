@@ -9,7 +9,7 @@ from .joinerConsolidatorTypes import JoinerConsolidatorType
 import os
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
-PRINT_FREQUENCY = 50
+PRINT_FREQUENCY = 500
 
 class JoinerConsolidator:
     def __init__(self): 
@@ -38,7 +38,7 @@ class JoinerConsolidator:
         return Header(clientId=clientId, fragment=self._currentClient._fragment, eof=self._currentClient.isDone())
     
     def setCurrentClient(self, clientID: bytes):
-        self._currentClient = self._activeClients.setdefault(clientID, ActiveClient())
+        self._currentClient = self._activeClients.setdefault(clientID, ActiveClient(self._priorNodeCount))
     
     def shouldSendPackets(self, toSend: list[EntryInterface]):
         return (self._currentClient.finishedReceiving() or 
@@ -55,7 +55,7 @@ class JoinerConsolidator:
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
         batch = self._entryType.deserialize(data)
-        self.setCurrentClient.update(header)
+        self._currentClient.update(header)
         
         if self.shouldSendPackets(data):
             self._sendToNext(batch, header.getClient())

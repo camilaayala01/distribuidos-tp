@@ -72,13 +72,19 @@ class SorterType(Enum):
         return newEntries
 
     
-    def serializeAndFragment(self, packets: list[EntrySorterTopFinder], headerType: type):
+    def serializeAndFragment(self, clientId: bytes, packets: list[EntrySorterTopFinder], headerType: type):
         match self:
             case SorterType.PLAYTIME | SorterType.INDIE:
-                packets, _ = serializeAndFragmentWithSender(maxDataBytes(headerType), packets, int(os.getenv('NODE_ID')))
+                packets, _ = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(headerType), 
+                                                            data=packets, 
+                                                            clientId=clientId, 
+                                                            senderId=int(os.getenv('NODE_ID')))
                 return packets
             case _:
-                return serializeAndFragmentWithQueryNumber(maxDataBytes(headerType), packets, int(os.getenv('QUERY_NUMBER')))
+                return serializeAndFragmentWithQueryNumber(maxDataBytes=maxDataBytes(headerType), 
+                                                           data=packets, 
+                                                           clientId=clientId, 
+                                                           queryNumber=int(os.getenv('QUERY_NUMBER')))
     
     def preprocessPackets(self, packets: list[EntrySorterTopFinder]):
         match self:

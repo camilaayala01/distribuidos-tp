@@ -6,7 +6,7 @@ from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv,
 import logging
 import os
 
-PRINT_FREQUENCY = 100
+PRINT_FREQUENCY = 1000
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
 class Grouper:

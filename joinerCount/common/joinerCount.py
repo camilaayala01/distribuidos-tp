@@ -8,7 +8,7 @@ from .joinerCountTypes import JoinerCountType
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
-PRINT_FREQ = 100
+PRINT_FREQ = 1000
 
 class JoinerCount:
     def __init__(self):
@@ -28,7 +28,7 @@ class JoinerCount:
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 
     def setCurrentClient(self, clientID: bytes):
-        self._currentClient = self._activeClients.setdefault(clientID, ActiveClient())
+        self._currentClient = self._activeClients.setdefault(clientID, ActiveClient(self._joinerCountType.getInitialResults()))
         
     # should have a fragment number to stream results to client
     def handleMessage(self, ch, method, properties, body):

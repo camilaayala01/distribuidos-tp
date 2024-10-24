@@ -8,7 +8,7 @@ from .activeClient import ActiveClient
 from .joinerTypes import JoinerType
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
-PRINT_FREQUENCY = 100
+PRINT_FREQUENCY = 1000
 
 class Joiner:
     def __init__(self):
@@ -58,7 +58,7 @@ class Joiner:
         return (self._currentClient.finishedReceiving() or 
                 (not self._currentClient.finishedReceiving() and len(toSend) != 0))
 
-    def _handleSending(self) :
+    def _handleSending(self, clientId: bytes):
         currClient = self._currentClient
         toSend, self._currentClient._joinedEntries, self._currentClient._sent = self._joinerType.entriesToSend(joinedEntries=currClient._joinedEntries, 
                                                                                                                 isDone=currClient.finishedReceiving(),
@@ -66,8 +66,9 @@ class Joiner:
         if not self.shouldSendPackets(toSend):
             return
         packets, self._currentClient._fragment = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(self._headerType), 
-                                                 data=toSend, 
-                                                 id=self._id,
+                                                 data=toSend,
+                                                 clientId=clientId, 
+                                                 senderId=self._id,
                                                  fragment=currClient._fragment,
                                                  hasEOF=currClient.finishedReceiving())
         for packet in packets:
@@ -103,7 +104,7 @@ class Joiner:
             self.joinReviews(self._currentClient._unjoinedReviews)
             self._currentClient._unjoinedReviews = []
 
-        self._handleSending()
+        self._handleSending(clientId)
         self._activeClients[clientId] = self._currentClient
 
         if self._currentClient.finishedReceiving():

@@ -50,7 +50,6 @@ class Initializer:
         serializedHeader = header.serialize()
 
         if header.isGamesTable():
-            logging.info(f'action: sending Games table batch | result: in progress')
             gameEntries = ReducedGameEntry.deserialize(data)
 
             entriesQuery1 = b''.join([EntryOSSupport(entry._windows, entry._mac, entry._linux).serialize() for entry in gameEntries])
@@ -63,10 +62,8 @@ class Initializer:
             self._internalCommunication.sendToActionFilter(serializedHeader + entriesQuery4And5)
 
             ch.basic_ack(delivery_tag = method.delivery_tag)
-            logging.info(f'action: sending Games table batch | result: success')
 
         elif header.isReviewsTable():
-            logging.info(f'action: sending Reviews table batch | result: in progress | fragment: {header.getFragmentNumber()} | eof: {header.isEOF()}')
             reviewEntries = ReviewEntry.deserialize(data)
             positiveReviewEntries, negativeReviewEntries = self.separatePositiveAndNegative(reviewEntries)
 
@@ -84,7 +81,6 @@ class Initializer:
             self._internalCommunication.sendToActionAllNegativeReviewsGrouper(serializedHeader + entriesQuery5)
 
             ch.basic_ack(delivery_tag = method.delivery_tag)
-            logging.info(f'action: sending Reviews table batch | result: success')
 
         else:
             raise ValueError()
