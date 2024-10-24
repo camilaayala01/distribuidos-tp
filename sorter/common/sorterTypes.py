@@ -1,12 +1,7 @@
 import os
 import math
 from enum import Enum
-from entryParsing.common.header import Header
-from entryParsing.common.headerWithSender import HeaderWithSender
-from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
 from entryParsing.entryAppIDName import EntryAppIDName
-from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
-from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from packetTracker.multiTracker import MultiTracker
 from packetTracker.packetTracker import PacketTracker
@@ -76,6 +71,7 @@ class SorterType(Enum):
             newEntries.append(EntryAppIDName(entry.getAppID(), entry.getName()))
         return newEntries
 
+    
     def serializeAndFragment(self, packets: list[EntrySorterTopFinder], headerType: type):
         match self:
             case SorterType.PLAYTIME | SorterType.INDIE:

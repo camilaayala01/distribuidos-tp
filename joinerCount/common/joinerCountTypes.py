@@ -51,11 +51,11 @@ class JoinerCountType(Enum):
             case JoinerCountType.OS:
                 return self.getOSCountResults(priorResult, entries, isDone) 
 
-    def getResultingHeader(self, fragnum: int, isDone: bool) -> EntryInterface:
+    def getResultingHeader(self, clientId, fragnum: int, isDone: bool) -> EntryInterface:
         match self:
             case JoinerCountType.ENGLISH:
-                return HeaderWithSender(int(os.getenv('NODE_ID')), fragnum, isDone)
+                return HeaderWithSender(clientId ,int(os.getenv('NODE_ID')), fragnum, isDone)
             case JoinerCountType.OS:
-                return HeaderWithQueryNumber(fragnum, True, int(os.getenv('QUERY_NUMBER')))
+                return HeaderWithQueryNumber(clientId, fragnum, True, int(os.getenv('QUERY_NUMBER')))
                 
                

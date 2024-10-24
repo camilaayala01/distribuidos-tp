@@ -3,59 +3,52 @@ import logging
 from entryParsing.common.header import Header
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
+from .activeClient import ActiveClient
 from .joinerCountTypes import JoinerCountType
-from packetTracker.defaultTracker import DefaultTracker
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
 PRINT_FREQ = 100
-"""
-Entities that join all partial counts and streams results to clients
-More than one entity
-Query 4
-"""
 
 class JoinerCount:
     def __init__(self):
         initializeLog()
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), os.getenv('NODE_ID'))
         self._joinerCountType = JoinerCountType(int(os.getenv('JOINER_COUNT_TYPE')))
-        self._packetTracker = DefaultTracker()
         self._entryType = getEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv() 
-        self._counts = self._joinerCountType.getInitialResults()
-        self._sent = set()
-        self._fragnum = 1
         self._sendingStrategies = createStrategiesFromNextNodes()
+        self._activeClients = {}
+        self._currentClient = None
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
 
-    def reset(self):
-        self._packetTracker.reset()
-        self._counts = self._joinerCountType.getInitialResults()
-        self._sent = set()
-        self._fragnum = 1
-
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 
+    def setCurrentClient(self, clientID: bytes):
+        self._currentClient = self._activeClients.setdefault(clientID, ActiveClient())
+        
     # should have a fragment number to stream results to client
     def handleMessage(self, ch, method, properties, body):
         header, data = self._headerType.deserialize(body)
+        clientId = header.getClient()
+        self.setCurrentClient(header.getClient())
         if header.getFragmentNumber() % PRINT_FREQ == 0:
             logging.info(f'action: received batch | {header} | result: success')
-        if self._packetTracker.isDuplicate(header):
+        
+        if self._currentClient.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
-        self._packetTracker.update(header)
+        self._currentClient.update(header)
         entries = self._entryType.deserialize(data)
         
-        toSend, self._counts, self._sent = self._joinerCountType.handleResults(entries, 
-                                                                               self._counts, 
-                                                                               self._packetTracker.isDone(), 
-                                                                               self._sent)
-        self._handleSending(toSend)
+        toSend, self._currentClient._counts, self._currentClient._sent = self._joinerCountType.handleResults(entries, 
+                                                                               self._currentClient._counts, 
+                                                                               self._currentClient.isDone(), 
+                                                                               self._currentClient._sent)
+        self._handleSending(toSend, clientId)
         ch.basic_ack(delivery_tag = method.delivery_tag)
 
     def _sendToNext(self, header: Header, entries: list[EntryInterface]):
@@ -63,13 +56,15 @@ class JoinerCount:
             strategy.send(self._internalCommunication, header, entries)
 
     def shouldSendPackets(self, toSend: list[EntryInterface]):
-        return self._packetTracker.isDone() or (not self._packetTracker.isDone() and len(toSend) != 0)
+        return self._currentClient.isDone() or (not self._currentClient.isDone() and len(toSend) != 0)
     
-    def _handleSending(self, ready: list[EntryInterface]):
-        header = self._joinerCountType.getResultingHeader(self._fragnum, self._packetTracker.isDone())
+    def _handleSending(self, ready: list[EntryInterface], clientId):
+        header = self._joinerCountType.getResultingHeader(clientId, self._currentClient._fragment, self._currentClient.isDone())
         if self.shouldSendPackets(ready):
             self._sendToNext(header, ready)
-            self._fragnum += 1
+            self._currentClient._fragment += 1
+            
+        self._activeClients[clientId] = self._currentClient
 
-        if self._packetTracker.isDone():
-            self.reset()
+        if self._currentClient.isDone():
+            self._activeClients.pop(clientId)

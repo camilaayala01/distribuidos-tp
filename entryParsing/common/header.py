@@ -16,7 +16,7 @@ class Header:
         return f"client: {self._clientId} | fragment: {self._fragment} | eof: {self._eof}"
     
     def getClient(self) -> int:
-        return self._fragment
+        return self._clientId
 
     def getFragmentNumber(self) -> int:
         return self._fragment
