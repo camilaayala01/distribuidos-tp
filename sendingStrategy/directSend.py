@@ -8,7 +8,7 @@ from sendingStrategy.sendingStrategy import SendingStrategy
 class DirectSend(SendingStrategy):
     def __init__(self, nextNode):
         super().__init__(nextNode)
-    
+
     def send(self, middleware: InternalCommunication, header: Header, batch: list[EntryInterface]):
         self.shardAndSend(middleware, header, batch)
     

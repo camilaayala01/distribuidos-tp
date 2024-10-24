@@ -1,10 +1,10 @@
 from entryParsing.common.header import Header
-from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, deserializeQueryNumber, serializeQueryNumber
+from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, deserializeQueryNumber, serializeQueryNumber, getClientID
 from entryParsing.common.fieldLen import QUERY_NUMBER_LEN
 
 class HeaderWithQueryNumber(Header):
-    def __init__(self, fragment: int, eof: bool, queryNumber: int):
-        super().__init__(fragment, eof)
+    def __init__(self, clientId: bytes, fragment: int, eof: bool, queryNumber: int):
+        super().__init__(clientId, fragment, eof)
         self._queryNumber = queryNumber
 
     def serialize(self) -> bytes:
@@ -24,10 +24,11 @@ class HeaderWithQueryNumber(Header):
     def deserialize(data: bytes) -> tuple['Header', bytes]:
         curr = 0
         try:
+            clientId, curr = getClientID(curr, data)
             fragment, curr = deserializeCount(curr, data)
             eof, curr = deserializeBoolean(curr, data)
             queryNum, curr = deserializeQueryNumber(curr, data)
         except (IndexError, UnicodeDecodeError):
             raise Exception("There was an error parsing data in header")
         
-        return HeaderWithQueryNumber(fragment, eof, queryNum), data[curr:]
+        return HeaderWithQueryNumber(clientId ,fragment, eof, queryNum), data[curr:]

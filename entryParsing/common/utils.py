@@ -92,7 +92,7 @@ def maxDataBytes(headerType: type) -> int:
 def amountOfPacketsNeeded(headerType: type, byteCount: int) -> int:
     return math.ceil(byteCount / maxDataBytes(headerType))
 
-def serializeAndFragmentWithSender(maxDataBytes: int, data: list[EntryInterface], id: int, fragment: int = 1, hasEOF: bool = True)-> tuple[list[bytes], int]: # recv max data bytes for testing purposes
+def serializeAndFragmentWithSender(maxDataBytes: int, data: list[EntryInterface], clientId: bytes, senderId: int, fragment: int = 1, hasEOF: bool = True)-> tuple[list[bytes], int]: # recv max data bytes for testing purposes
     from entryParsing.common.headerWithSender import HeaderWithSender
     packets = []
     currPacket = bytes()
@@ -102,18 +102,18 @@ def serializeAndFragmentWithSender(maxDataBytes: int, data: list[EntryInterface]
         if len(currPacket) + len(entryBytes) <= maxDataBytes:
             currPacket += entryBytes
         else:
-            headerBytes = HeaderWithSender(id, fragment, False).serialize()
+            headerBytes = HeaderWithSender(clientId, fragment, False, senderId).serialize()
             fragment += 1
             packets.append(headerBytes + currPacket)
             currPacket = entryBytes
 
-    packets.append(HeaderWithSender(id, fragment, hasEOF).serialize() + currPacket)
+    packets.append(HeaderWithSender(clientId, fragment, hasEOF, senderId).serialize() + currPacket)
     fragment += 1
     return packets, fragment
 
 
 # same as fragmenting with sender, but couldnt modularize
-def serializeAndFragmentWithQueryNumber(maxDataBytes: int, data: list[EntryInterface], queryNumber: int)-> list[bytes]:
+def serializeAndFragmentWithQueryNumber(maxDataBytes: int, data: list[EntryInterface], clientId: bytes, queryNumber: int) ->  list[bytes]:
     from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
     fragment = 1
     packets = []
@@ -124,11 +124,11 @@ def serializeAndFragmentWithQueryNumber(maxDataBytes: int, data: list[EntryInter
         if len(currPacket) + len(entryBytes) <= maxDataBytes:
             currPacket += entryBytes
         else:
-            headerBytes = HeaderWithQueryNumber(fragment, False, queryNumber).serialize()
+            headerBytes = HeaderWithQueryNumber(clientId, fragment, False, queryNumber).serialize()
             fragment += 1
             packets.append(headerBytes + currPacket)
             currPacket = entryBytes
 
     # will have to yield once we have memory restrictions
-    packets.append(HeaderWithQueryNumber(fragment, True, queryNumber).serialize() + currPacket)
+    packets.append(HeaderWithQueryNumber(clientId, fragment, True, queryNumber).serialize() + currPacket)
     return packets

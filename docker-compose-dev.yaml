@@ -1,5 +1,5 @@
 services:
-  client:
+  client-1:
     build:
       context: ./client
       dockerfile: ../zmqUser.Dockerfile
@@ -8,12 +8,31 @@ services:
     volumes:
       - ./entryParsing:/entryParsing
       - ~/.kaggle/distribuidos:/datasets
-      - ./client/responses:/responses
+      - ./client1/responses:/responses
     networks:
       - sa_net
     depends_on:
       - border-node
-  initializer:
+  initializer-0:
+    build:
+      context: ./initializer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HOST=rabbitmq
+      - LISTENING_QUEUE=Initializer
+      - NEXT_NODES=
+      - HEADER_TYPE=
+      - ENTRY_TYPE=
+    env_file:
+      - .env
+    volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./sendingStrategy:/sendingStrategy
+    networks:
+      - sa_net
+  initializer-1:
     build:
       context: ./initializer
       dockerfile: ../rabbitUser.Dockerfile
@@ -806,7 +825,8 @@ services:
     networks:
       - sa_net
     depends_on:
-      - initializer
+      - initializer-0
+      - initializer-1
       - grouper-os-counts-0
       - grouper-os-counts-1
       - joiner-os-counts

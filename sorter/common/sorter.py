@@ -5,6 +5,9 @@ from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 from .sorterTypes import SorterType
+from .activeClient import ActiveClient
+
+PRINT_FREQUENCY=500
 
 class Sorter:
     def __init__(self):
@@ -13,21 +16,16 @@ class Sorter:
         self._sorterType = SorterType(int(os.getenv('SORTER_TYPE')))
         self._entryType = getEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
-        self._packetTracker = self._sorterType.initializeTracker()
-        self._partialTop = []
         self._topAmount = int(os.getenv('TOP_AMOUNT')) if os.getenv('TOP_AMOUNT') is not None else None
         self._sendingStrategies = createStrategiesFromNextNodes()
+        self._activeClients = {}
+        self._currentClient = None
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
 
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
-
-    def reset(self):
-        self._partialTop = []
-        self._packetTracker.reset()
-        logging.info(f'action: reseting stored data for next client | result: success')
 
     def mergeKeepTop(self, batch: list[EntrySorterTopFinder]):
         if len(batch) == 0:
@@ -38,9 +36,9 @@ class Sorter:
         i, j = 0, 0
         mergedList = []
 
-        while i < len(self._partialTop) and j < len(newBatchTop):
-            if self._sorterType.mustElementGoFirst(self._partialTop[i], newBatchTop[j]):
-                mergedList.append(self._partialTop[i])
+        while i < len(self._currentClient._partialTop) and j < len(newBatchTop):
+            if self._sorterType.mustElementGoFirst(self._currentClient._partialTop[i], newBatchTop[j]):
+                mergedList.append(self._currentClient._partialTop[i])
                 i += 1
             else:
                 mergedList.append(newBatchTop[j])
@@ -48,34 +46,43 @@ class Sorter:
         
         if self._sorterType.topHasCapacity(newElementsAmount=len(mergedList), topAmount=self._topAmount):
             # only 1 will have elements
-            mergedList.extend(self._partialTop[i:])
+            mergedList.extend(self._currentClient._partialTop[i:])
             mergedList.extend(newBatchTop[j:])
 
-        self._partialTop = self._sorterType.updatePartialTop(mergedList, self._topAmount)
+        self._currentClient._partialTop = self._sorterType.updatePartialTop(mergedList, self._topAmount)
         
     def _sendToNext(self, msg: bytes):
         for strategy in self._sendingStrategies:
             strategy.sendBytes(self._internalCommunication, msg)
 
-    def _handleSending(self):
-        if not self._packetTracker.isDone():
+    def _handleSending(self, clientId: bytes):
+        if not self._currentClient.isDone():
             return
         logging.info(f'action: received all required batches | result: success')
-        packets = self._sorterType.preprocessPackets(self._partialTop)
-        data = self._sorterType.serializeAndFragment(packets, self._headerType)
+        packets = self._sorterType.preprocessPackets(self._currentClient._partialTop)
+        data = self._sorterType.serializeAndFragment(clientId, packets, self._headerType)
         for pack in data:
             self._sendToNext(pack)
-        self.reset()
 
+        self._activeClients.pop(clientId)
+    
+    def setCurrentClient(self, clientID: bytes):
+        self._currentClient = self._activeClients.setdefault(clientID, ActiveClient(self._sorterType.initializeTracker()))
+        
     def handleMessage(self, ch, method, properties, body):
         header, batch = self._headerType.deserialize(body)
-        logging.info(f'action: receive batch | {header} | result: success')
-        if self._packetTracker.isDuplicate(header):
+        if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
+            logging.info(f'action: receive batch | {header} | result: success')
+        clientId = header.getClient()
+        self.setCurrentClient(clientId)
+        if self._currentClient.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
-        self._packetTracker.update(header)
+        
+        self._currentClient.update(header)
         entries = self._entryType.deserialize(batch)
         self.mergeKeepTop(entries)
-        self._handleSending()
+        self._activeClients[clientId] = self._currentClient
+        self._handleSending(clientId)
         ch.basic_ack(delivery_tag = method.delivery_tag)
 

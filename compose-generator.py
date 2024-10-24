@@ -21,7 +21,7 @@ def add_client(compose: dict[str, Any]):
     return add_client_with_id(compose,'')
 
 def add_client_with_id(compose: dict[str, Any], client_id: int):
-    compose['services'][f'client{client_id}']= {
+    compose['services'][f'client-{client_id}']= {
         'build': zmq_node_build('./client'),
         'environment':[
             'PYTHONUNBUFFERED=1'
@@ -345,7 +345,7 @@ def generate_compose(output_file: str, client_number: int):
     containers = [] #para agregarle todas las dependencias al border node
 
     #Client
-    compose = add_client(compose)
+    compose = add_all_clients(compose, client_number)
 
     #Network
     compose = add_network(compose)

@@ -1,4 +1,5 @@
 from common.utils import storeResultsQuery1, storeResultsQuery, storeHeader
+from entryParsing.common.clientHeader import ClientHeader
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryName import EntryName
@@ -69,11 +70,11 @@ def serializeAndFragmentWithTable(client: Client, maxDataBytes: int, generatorFu
             if len(currPacket) + len(entryBytes) <= maxDataBytes:
                 currPacket += entryBytes
             else:
-                headerBytes = HeaderWithTable(table, fragment, False).serialize()
+                headerBytes = ClientHeader(fragment, False, table).serialize()
                 fragment += 1
                 client.sendToServer(headerBytes + currPacket)
                 currPacket = entryBytes
     except StopIteration:
-        packet = HeaderWithTable(table, fragment, True).serialize() + currPacket
+        packet = ClientHeader(fragment, True, table).serialize() + currPacket
         client.sendToServer(packet)
         logging.info(f'action: send table {table} end of file | result: success')

@@ -7,7 +7,7 @@ import logging
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
-PRINT_FREQUENCY = 100
+PRINT_FREQUENCY = 1000
 
 class Filterer:
     def __init__(self):

@@ -7,7 +7,7 @@ from common.client import Client
 import signal 
 
 QUERY_COUNT = 5
-MAX_DATA_BYTES = 8000   
+MAX_DATA_BYTES = 24000   
 
 def main():
     initializeLog()

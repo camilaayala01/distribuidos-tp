@@ -1,14 +1,14 @@
-from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, deserializeSenderID, serializeSenderID
+from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, deserializeSenderID, serializeSenderID, getClientID
 from entryParsing.common.fieldLen import SENDER_ID_LEN
 from entryParsing.common.header import Header
 
 class HeaderWithSender(Header):
-    def __init__(self,  senderID: int, fragment: int, eof: bool):
+    def __init__(self, clientId: bytes, fragment: int, eof: bool, senderID: int):
+        super().__init__(clientId, fragment, eof)
         self._sender = senderID
-        super().__init__(fragment, eof)
 
     def serialize(self) -> bytes:
-        return serializeSenderID(self._sender) + super().serialize()
+        return super().serialize() + serializeSenderID(self._sender)
     
     @classmethod
     def size(cls):
@@ -24,10 +24,11 @@ class HeaderWithSender(Header):
     def deserialize(data: bytes) -> tuple['HeaderWithSender', bytes]:
         curr = 0
         try:
-            senderId, curr = deserializeSenderID(curr, data)
+            clientId, curr = getClientID(curr, data)
             fragment, curr = deserializeCount(curr, data)
             eof, curr = deserializeBoolean(curr, data)
+            senderId, curr = deserializeSenderID(curr, data)
         except (IndexError, UnicodeDecodeError):
             raise Exception("There was an error parsing data in header")
         
-        return HeaderWithSender(senderId, fragment, eof), data[curr:]
+        return HeaderWithSender(clientId,  fragment, eof, senderId), data[curr:]

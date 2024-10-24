@@ -48,6 +48,6 @@ class FiltererType(Enum):
                 return header
             case FiltererType.INDIE:
                 if nextNodeName == "FilterDecade":
-                    return Header(header.getFragmentNumber(), header.isEOF())
+                    return Header(header.getClient(), header.getFragmentNumber(), header.isEOF())
                 if nextNodeName == "JoinerIndiePositiveReviews":
                     return header

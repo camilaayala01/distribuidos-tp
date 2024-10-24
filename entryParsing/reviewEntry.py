@@ -5,6 +5,7 @@ from entryParsing.entryAppIDReviewText import EntryAppIDReviewText
 
 SCORE_LEN = 3 
 VOTE_LEN = 1
+MAX_REVIEW_TEXT = 300
 
 class ReviewEntry(EntryInterface):
     def __init__(self, _appID, _appName, _reviewText, _reviewScore, _reviewVotes):
@@ -35,7 +36,7 @@ class ReviewEntry(EntryInterface):
                 reviewScore, curr = fieldParsing.deserializeSignedInt(curr, data)
                 reviewVotes, curr = fieldParsing.deserializeNumber(curr, data, VOTE_LEN) 
 
-                entries.append(ReviewEntry(appID, appName,reviewText, reviewScore, reviewVotes))
+                entries.append(ReviewEntry(appID, appName, reviewText[:MAX_REVIEW_TEXT], reviewScore, reviewVotes))
                 
             except (IndexError, UnicodeDecodeError, ValueError):
                 raise Exception("There was an error parsing data")
