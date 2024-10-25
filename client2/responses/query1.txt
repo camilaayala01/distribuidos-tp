@@ -1,0 +1,4 @@
+Total de juegos: 23206
+Total de juegos soportados en Windows: 23198
+Total de juegos soportados en Linux: 3133
+Total de juegos soportados en Mac: 4427
