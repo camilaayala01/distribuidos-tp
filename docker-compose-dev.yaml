@@ -13,6 +13,20 @@ services:
       - sa_net
     depends_on:
       - border-node
+  client-2:
+    build:
+      context: ./client
+      dockerfile: ../zmqUser.Dockerfile
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./entryParsing:/entryParsing
+      - ~/.kaggle/distribuidos:/datasets
+      - ./client2/responses:/responses
+    networks:
+      - sa_net
+    depends_on:
+      - border-node
   initializer-0:
     build:
       context: ./initializer

@@ -5,7 +5,7 @@ from entryParsing.entryAppIDReviewText import EntryAppIDReviewText
 
 SCORE_LEN = 3 
 VOTE_LEN = 1
-MAX_REVIEW_TEXT = 300
+MAX_REVIEW_TEXT = 150
 
 class ReviewEntry(EntryInterface):
     def __init__(self, _appID, _appName, _reviewText, _reviewScore, _reviewVotes):
