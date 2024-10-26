@@ -14,5 +14,5 @@ class BasicSend(SendingStrategy):
     def send(self, middleware: InternalCommunication, header: Header, batch: list[EntryInterface]):
         msg = header.serialize()
         for entry in batch:
-            msg += entry.serialize()
+            msg += self._nextNode.entryForNextNode(entry).serialize()
         self.sendBytes(middleware, msg)

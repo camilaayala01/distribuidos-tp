@@ -7,16 +7,22 @@ class EntryInterface(ABC):
             setattr(self, key, value)
 
     @classmethod
-    def fromAnother(cls, other):
+    def fromAnother(cls, other, **additionalParams):
+        print(other)
+        print(additionalParams)
         if type(other).__name__ == cls.__name__:
             return other
         params = inspect.signature(cls.__init__).parameters
-        print(other.__dict__)
-        valid_params = {key: value for key, value in other.__dict__.items() if key in params}
-        missing_params = [p for p in params if p != 'self' and p not in valid_params]
-        if missing_params:
-            raise ValueError(f"Convertion from class {type(other).__name__} to {cls.__name__} not possible: missing params {missing_params}")
-        return cls(**valid_params)
+
+        validParams = {key: value for key, value in other.__dict__.items() if key in params}
+        additionalValidParams = {key: value for key, value in additionalParams.items() if key in params}
+        validParams.update(additionalValidParams)
+        
+        missingParams = [p for p in params if p != 'self' and p not in validParams]
+        if missingParams:
+            raise ValueError(f"Convertion from class {type(other).__name__} to {cls.__name__} not possible: missing params {missingParams}")
+        
+        return cls(**validParams)
 
     @abstractmethod
     def serialize(self) -> bytes:

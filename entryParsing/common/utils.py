@@ -27,8 +27,7 @@ def convertFirstLetterToLowerCase(string: str):
 def generateFullPath(path: str, module: str):
     return path + '.' + module
 
-def getModuleFromEnvVars(type: str, path: str):
-    entryType = os.getenv(type)
+def getModuleFromEnvVars(entryType: str, path: str):
     if not entryType:
         raise ValueError("Type environment variable is missing.")
     entryPath = os.getenv(path)
@@ -44,16 +43,19 @@ def getModuleFromEnvVars(type: str, path: str):
         raise ImportError(f"Class '{classImport}' could not be found in module '{moduleName}'.")
 
 def getHeaderTypeFromEnv():
-    return getModuleFromEnvVars('HEADER_TYPE', 'HEADER_PATH')
+    return getModuleFromEnvVars(os.getenv('HEADER_TYPE'), 'HEADER_PATH')
 
 def getEntryTypeFromEnv():
-    return getModuleFromEnvVars('ENTRY_TYPE', 'ENTRY_PATH')
+    return getModuleFromEnvVars(os.getenv('ENTRY_TYPE'), 'ENTRY_PATH')
 
 def getGamesEntryTypeFromEnv():
-    return getModuleFromEnvVars('GAMES_ENTRY_TYPE', 'ENTRY_PATH')
+    return getModuleFromEnvVars(os.getenv('GAMES_ENTRY_TYPE'), 'ENTRY_PATH')
 
 def getReviewsEntryTypeFromEnv():
-    return getModuleFromEnvVars('REVIEWS_ENTRY_TYPE', 'ENTRY_PATH')
+    return getModuleFromEnvVars(os.getenv('REVIEWS_ENTRY_TYPE'), 'ENTRY_PATH')
+
+def getEntryTypeFromString(type: str):
+    getModuleFromEnvVars(type, 'ENTRY_PATH')
 
 def boolToInt(boolean: bool) -> int:
     match boolean:
