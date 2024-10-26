@@ -176,12 +176,14 @@ def add_joiner_english_count(compose: dict[str, Any], name, node_id):
     container_name = f'{name}-{node_id}'
     compose = default_config_with_tracker(compose, entrypoint='./joinerCount', container_name=container_name, queue=os.getenv('JOIN_ENG'), next_nodes=os.getenv('CONS_JOIN_STREAM'), header_type = 'Header', entry_type = 'EntryAppIDNameReviewCount', extra_envs=[f"JOINER_COUNT_TYPE={JoinerCountType.ENGLISH.value}", f"NODE_ID={node_id}", "REQUIRED_REVIEWS=5000"])
     return compose, container_name
-
-def add_initializer(compose: dict[str, Any]):
-    container_name = 'initializer'
-    # should change next nodes, header type and entry type
-    compose = default_config(compose, entrypoint='./initializer', container_name=container_name, header_type='', entry_type='', queue=os.getenv('INIT'), next_nodes="", extra_envs=[])
+def add_initializer(compose, container_name, _type, queue, next_nodes, header_type, entry_type):
+    compose = default_config(compose, entrypoint='./initializer', container_name=container_name, header_type=header_type, entry_type=entry_type, queue=queue, next_nodes=next_nodes, extra_envs=[])
     return compose, container_name
+
+def add_initializers(compose: dict[str, Any]):
+  
+    # should change next nodes, header type and entry type
+    return add_depending_count(compose, count=int(os.getenv('INIT_COUNT')), generator_func=add_initializer,name= 'initializer', type = '',queue=os.getenv('INIT'), next_nodes='', header_type='', entry_type='')
 
 def add_border_node(compose: dict[str, Any], cluster_nodes):
     compose['services']['border-node']= {
@@ -351,9 +353,9 @@ def generate_compose(output_file: str, client_number: int):
     compose = add_network(compose)
 
     # Initializer
-    compose, initializer_container = add_initializer(compose)
+    compose, initializers_container = add_initializers(compose)
     
-    containers = [initializer_container]
+    containers = initializers_container
 
     # Query 1:
     compose, containers = add_container(compose, containers, generation=add_groupers_os_count)
