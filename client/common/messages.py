@@ -8,9 +8,7 @@ from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from entryParsing.entryOSCount import EntryOSCount
 import logging
 from common.client import Client
-from time import sleep
 from entryParsing.common.table import Table
-from entryParsing.common.headerWithTable import HeaderWithTable
 
 def receiveQuery1Answer(data):
     response = EntryOSCount.deserialize(data)

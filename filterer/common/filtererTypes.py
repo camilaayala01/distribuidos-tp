@@ -1,6 +1,6 @@
 from enum import Enum
 import os
-from langid import classify
+from py3langid.langid import classify
 from entryParsing.common.header import Header
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.headerWithTable import HeaderWithTable

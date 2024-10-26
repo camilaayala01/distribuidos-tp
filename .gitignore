@@ -2,4 +2,4 @@
 mockProducer
 mockJoiner
 client/responses
-client*/responses
+client[0-9]*/
