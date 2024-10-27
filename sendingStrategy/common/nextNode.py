@@ -1,17 +1,20 @@
 import re
-from entryParsing.common.utils import getEntryTypeFromString
+from entryParsing.common.header import Header
+from entryParsing.common.utils import getEntryTypeFromString, getHeaderTypeFromString
 from entryParsing.entry import EntryInterface
 from sendingStrategy.common.shardingAtribute import ShardingAttribute
 
 class NextNode:
-    def __init__(self, queueName: str, entryType: type, nextNodeCount: int = None, shardingAtribute: ShardingAttribute = None):
+    def __init__(self, queueName: str, entryType: type, headerType: type, nextNodeCount: int = None, shardingAtribute: ShardingAttribute = None):
         self._queueName = queueName
         self._entryType = entryType
+        self._headerType = headerType
         self._count = nextNodeCount
         self._shardingAttribute = shardingAtribute
 
     def __str__(self):
         return f'queueName {self._queueName} | entryType {self._entryType} | next node count {self._count} | sharding attr {self._shardingAttribute}'
+    
     def hasCountAndShardingAttribute(self):
         return self._count is not None and self._shardingAttribute is not None
     
@@ -19,7 +22,12 @@ class NextNode:
         if self._entryType is None:
             return entry
         return self._entryType.fromAnother(entry)
-
+    
+    def headerForNextNode(self, header: Header):
+        if self._headerType is None:
+            return header
+        return self._headerType.fromAnother(header)
+    
     @staticmethod
     def getEntryType(entryType: str) -> type:
         if not entryType: 
@@ -27,22 +35,32 @@ class NextNode:
         return getEntryTypeFromString(entryType)
 
     @staticmethod
-    def createFromList(attributes: list[str], entryType: str = None):
+    def getHeaderType(headerType: str) -> type:
+        if not headerType: 
+            return None
+        return getHeaderTypeFromString(headerType)
+
+    @staticmethod
+    def createFromList(attributes: list[str], entryType: str = None, headerType: str = None):
         if len(attributes) == 1:
-            return NextNode(queueName=attributes[0], entryType=NextNode.getEntryType(entryType))
+            return NextNode(queueName=attributes[0], 
+                            entryType=NextNode.getEntryType(entryType), 
+                            headerType=NextNode.getHeaderType(headerType))
         elif len(attributes) == 3:
             return NextNode(queueName=attributes[0], nextNodeCount=int(attributes[1]), 
                             shardingAtribute=ShardingAttribute(int(attributes[2])),
-                            entryType=NextNode.getEntryType(entryType))
+                            entryType=NextNode.getEntryType(entryType),
+                            headerType=NextNode.getHeaderType(headerType))
         else: 
             raise Exception("Next node attributes must be 1 if no sharding, 3 if sharding is desired")
 
     # NEXTNODE,NEXTNODECOUNT,SHARDINGATTR;NEXTNODE,NEXTNODECOUNT,SHARDINGATTR etc. 
     # next node count and sharding attributes are optional
     @staticmethod
-    def parseNodes(nextNodeStr: str, nextEntries: str = '') -> list['NextNode']:
+    def parseNodes(nextNodeStr: str, nextEntries: str = '', nextHeaders: str = '') -> list['NextNode']:
         # manually implement to avoid calling split repeatedly
-        tokens = re.split(r';', nextEntries)
+        tokensNextEntries = re.split(r';', nextEntries)
+        tokensNextHeaders = re.split(r';', nextHeaders)
         nextNodes = []
         currNode = 0 # it is equal to len but prettier to use
         currTokens = []
@@ -51,7 +69,9 @@ class NextNode:
             if i == ',':
                 currTokensIndex += 1
             elif i == ';':
-                nextNodes.append(NextNode.createFromList(currTokens, tokens[currNode] if currNode < len(tokens) else None))
+                nextNodes.append(NextNode.createFromList(currTokens, 
+                                                         tokensNextEntries[currNode] if currNode < len(tokensNextEntries) else None,
+                                                         tokensNextHeaders[currNode] if currNode < len(tokensNextHeaders) else None))
                 currTokens = []
                 currNode += 1
                 currTokensIndex = 0
@@ -60,5 +80,7 @@ class NextNode:
                     currTokens.append(i)
                 else:
                     currTokens[currTokensIndex] += i
-        nextNodes.append(NextNode.createFromList(currTokens, tokens[currNode] if currNode < len(tokens) else None))
+        nextNodes.append(NextNode.createFromList(currTokens, 
+                                                tokensNextEntries[currNode] if currNode < len(tokensNextEntries) else None,
+                                                tokensNextHeaders[currNode] if currNode < len(tokensNextHeaders) else None))
         return nextNodes

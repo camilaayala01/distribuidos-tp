@@ -57,6 +57,9 @@ def getReviewsEntryTypeFromEnv():
 def getEntryTypeFromString(type: str):
     return getModuleFromEnvVars(type, 'ENTRY_PATH')
 
+def getHeaderTypeFromString(type: str):
+    return getModuleFromEnvVars(type, 'HEADER_PATH')
+
 def boolToInt(boolean: bool) -> int:
     match boolean:
         case False:
@@ -90,9 +93,6 @@ def getShardingKey(id: str, nodeCount: int) -> int:
 
 def maxDataBytes(headerType: type) -> int:
     return MAX_PACKET_SIZE - headerType.size()
-
-def amountOfPacketsNeeded(headerType: type, byteCount: int) -> int:
-    return math.ceil(byteCount / maxDataBytes(headerType))
 
 def serializeAndFragmentWithSender(maxDataBytes: int, data: list[EntryInterface], clientId: bytes, senderId: int, fragment: int = 1, hasEOF: bool = True)-> tuple[list[bytes], int]: # recv max data bytes for testing purposes
     from entryParsing.common.headerWithSender import HeaderWithSender

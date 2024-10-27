@@ -3,7 +3,6 @@ from entryParsing.entry import EntryInterface
 from entryParsing.common.utils import getShardingKey
 from entryParsing.entryAppIDReviewText import EntryAppIDReviewText
 
-SCORE_LEN = 3 
 VOTE_LEN = 1
 MAX_REVIEW_TEXT = 150
 
@@ -42,11 +41,3 @@ class ReviewEntry(EntryInterface):
                 raise Exception("There was an error parsing data")
 
         return entries
-    
-    def shardBatch(nodeCount: int, result: list['ReviewEntry']) -> list[bytes]:
-        resultingBatches = [bytes() for _ in range(nodeCount)]
-        for entry in result:
-            shardResult = getShardingKey(entry._appID, nodeCount)
-            resultingBatches[shardResult] = resultingBatches[shardResult] + EntryAppIDReviewText(entry._appID, entry._reviewText).serialize()
-        return resultingBatches
-

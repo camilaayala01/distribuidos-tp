@@ -54,8 +54,8 @@ class JoinerCountType(Enum):
     def getResultingHeader(self, clientId, fragnum: int, isDone: bool) -> EntryInterface:
         match self:
             case JoinerCountType.ENGLISH:
-                return HeaderWithSender(clientId=clientId, fragment=fragnum, eof=isDone, senderID=int(os.getenv('NODE_ID')))
+                return HeaderWithSender(_clientId=clientId, _fragment=fragnum, _eof=isDone, _senderID=int(os.getenv('NODE_ID')))
             case JoinerCountType.OS:
-                return HeaderWithQueryNumber(clientId=clientId, fragment=fragnum, eof=True, queryNumber=int(os.getenv('QUERY_NUMBER')))
+                return HeaderWithQueryNumber(_clientId=clientId, _fragment=fragnum, _eof=True, _queryNumber=int(os.getenv('QUERY_NUMBER')))
                 
                

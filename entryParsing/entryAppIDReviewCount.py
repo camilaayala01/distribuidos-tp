@@ -3,26 +3,26 @@ from entryParsing.entry import EntryInterface
 from .common.fieldParsing import deserializeAppID, deserializeCount, serializeAppID, serializeCount
 
 class EntryAppIDReviewCount(EntryInterface):
-    def __init__(self, _appID: str, _count: int):
-        super().__init__(_appID=_appID, _count=_count)
+    def __init__(self, _appID: str, _reviewCount: int):
+        super().__init__(_appID=_appID, _reviewCount=_reviewCount)
 
     def getAppID(self):
         return self._appID
     
     def getCount(self):
-        return self._count
+        return self._reviewCount
     
     def addToCount(self, count: int):
-        self._count += count
+        self._reviewCount += count
     
     def serialize(self) -> bytes:
         appIDBytes = serializeAppID(self._appID)
-        countBytes = serializeCount(self._count)
+        countBytes = serializeCount(self._reviewCount)
 
         return appIDBytes + countBytes
 
     def __str__(self):
-        return f"EntryAppIDReviewCount(appID={self._appID}, count={self._count})"
+        return f"EntryAppIDReviewCount(appID={self._appID}, count={self._reviewCount})"
 
     @classmethod
     def deserialize(cls, data: bytes): 
@@ -38,11 +38,3 @@ class EntryAppIDReviewCount(EntryInterface):
                 raise Exception("There was an error parsing data")
 
         return entries
-    
- 
-    def _shardBatch(nodeCount: int, result: list['EntryAppIDReviewCount']) -> list[bytes]:
-        resultingBatches = [bytes() for _ in range(nodeCount)]
-        for entry in result:
-            shardResult = getShardingKey(entry._appID, nodeCount)
-            resultingBatches[shardResult] =  resultingBatches[shardResult] + entry.serialize()
-        return resultingBatches

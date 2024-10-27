@@ -35,7 +35,7 @@ class JoinerConsolidator:
             strategy.send(self._internalCommunication, newHeader, batch)
 
     def getHeader(self, clientId: bytes):
-        return Header(clientId=clientId, fragment=self._currentClient._fragment, eof=self._currentClient.isDone())
+        return Header(_clientId=clientId, _fragment=self._currentClient._fragment, _eof=self._currentClient.isDone())
     
     def setCurrentClient(self, clientID: bytes):
         self._currentClient = self._activeClients.setdefault(clientID, ActiveClient(self._priorNodeCount))

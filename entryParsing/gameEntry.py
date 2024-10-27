@@ -7,9 +7,6 @@ from entryParsing.entry import EntryInterface
 
 def floatToInt(number) -> int:
     return int(number * 100)
-
-def floatFromInt(number)-> float:
-    return float(number / 100)
         
 def tryToFloat(string)-> float:
     try: 

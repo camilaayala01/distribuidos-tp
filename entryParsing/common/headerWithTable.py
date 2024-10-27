@@ -4,9 +4,9 @@ from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCoun
 from entryParsing.common.header import Header
 
 class HeaderWithTable(Header):
-    def __init__(self, clientId: bytes, table: Table, fragment: int, eof: bool):
-        super().__init__(clientId, fragment, eof)
-        self._table = table
+    def __init__(self, _clientId: bytes, _table: Table, _fragment: int, _eof: bool):
+        super().__init__(_clientId, _fragment, _eof)
+        self._table = _table
 
     def getTable(self):
         return self._table

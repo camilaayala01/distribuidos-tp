@@ -23,9 +23,9 @@ class GrouperType(Enum):
     
     def buildResultingEntry(self, entry: EntryInterface) -> EntryInterface:
         if self == GrouperType.APP_ID_NAME_COUNT:
-            return EntryAppIDNameReviewCount(entry._appID, entry._name, 1)
+            return EntryAppIDNameReviewCount.fromAnother(entry, _reviewCount=1)
         elif self == GrouperType.APP_ID_COUNT: 
-            return EntryAppIDReviewCount(entry._appID, 1)
+            return EntryAppIDReviewCount.fromAnother(entry, _reviewCount=1)
     
     def getAppIDCountResults(self, entries: list[EntryInterface]) -> list[EntryInterface]:
         appIDCount = {}
@@ -43,9 +43,4 @@ class GrouperType(Enum):
                 return self.getOSCountResults(entries)
             case GrouperType.APP_ID_COUNT | GrouperType.APP_ID_NAME_COUNT: 
                 return self.getAppIDCountResults(entries)
-
-    def getResultingHeader(self, header: Header) -> EntryInterface:
-        # only to allow easy changes
-        return header
-            
     
