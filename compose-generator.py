@@ -126,7 +126,8 @@ def default_config_with_tracker(compose: dict[str, Any], entrypoint: str, contai
     }
     return compose
 
-def add_grouper(compose: dict[str, Any], name, type, queue, next_nodes, header_type, entry_type):
+def add_grouper(compose: dict[str, Any], params):
+    name, type, queue, next_nodes, header_type, entry_type = params
     container_name = f'grouper-{name}'
     compose = default_config(compose, entrypoint='./grouper', container_name=container_name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs= [f'GROUPER_TYPE={type}'])
     return compose, container_name
@@ -146,7 +147,8 @@ def add_sorter_consolidator_percentile(compose: dict[str, Any], name, type, queu
     compose = default_config_with_tracker(compose, entrypoint='./sorter', container_name=name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'SORTER_TYPE={type}', f'PRIOR_NODE_COUNT={prior_node_count}', f'PERCENTILE={percentile}', f'QUERY_NUMBER={query_number}'])
     return compose, [name]
 
-def add_joiner(compose: dict[str, Any], name, type, queue, next_nodes, review_entry_type, game_entry_type, node_id):
+def add_joiner(compose: dict[str, Any], params):
+    name, type, queue, next_nodes, review_entry_type, game_entry_type, node_id = params
     container_name = f'joiner-{name}'
     compose['services'][container_name] = {
         'build': rabbit_node_build('./joiner'),
@@ -157,12 +159,14 @@ def add_joiner(compose: dict[str, Any], name, type, queue, next_nodes, review_en
     }
     return compose, container_name
     
-def add_filterer(compose: dict[str, Any], name, type, queue, next_nodes, header_type, entry_type):
+def add_filterer(compose: dict[str, Any], params):
+    name, type, queue, next_nodes, next_entries, header_type, entry_type = params
     container_name = f'filterer-{name}'
-    compose = default_config(compose, entrypoint='./filterer', container_name=container_name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'FILTERER_TYPE={type}'])
+    compose = default_config(compose, entrypoint='./filterer', container_name=container_name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'FILTERER_TYPE={type}', f'NEXT_ENTRIES={next_entries}'])
     return compose, container_name
 
-def add_joiner_consolidator(compose: dict[str, Any], name, type, queue, next_nodes, header_type, entry_type, prior_node_count):
+def add_joiner_consolidator(compose: dict[str, Any], params):
+    name, type, queue, next_nodes, header_type, entry_type, prior_node_count = params
     container_name = f'{name}-consolidator'
     compose = default_config_with_tracker(compose, entrypoint='./joinerConsolidator', container_name=container_name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'JOINER_CONSOLIDATOR_TYPE={type}', f'PRIOR_NODE_COUNT={prior_node_count}'])
     return compose, [container_name]
@@ -176,14 +180,12 @@ def add_joiner_english_count(compose: dict[str, Any], name, node_id):
     container_name = f'{name}-{node_id}'
     compose = default_config_with_tracker(compose, entrypoint='./joinerCount', container_name=container_name, queue=os.getenv('JOIN_ENG'), next_nodes=os.getenv('CONS_JOIN_STREAM'), header_type = 'Header', entry_type = 'EntryAppIDNameReviewCount', extra_envs=[f"JOINER_COUNT_TYPE={JoinerCountType.ENGLISH.value}", f"NODE_ID={node_id}", "REQUIRED_REVIEWS=5000"])
     return compose, container_name
-def add_initializer(compose, container_name, _type, queue, next_nodes, header_type, entry_type):
-    compose = default_config(compose, entrypoint='./initializer', container_name=container_name, header_type=header_type, entry_type=entry_type, queue=queue, next_nodes=next_nodes, extra_envs=[])
-    return compose, container_name
 
-def add_initializers(compose: dict[str, Any]):
-  
+def add_initializer(compose: dict[str, Any]):
+    container_name = 'initializer'
     # should change next nodes, header type and entry type
-    return add_depending_count(compose, count=int(os.getenv('INIT_COUNT')), generator_func=add_initializer,name= 'initializer', type = '',queue=os.getenv('INIT'), next_nodes='', header_type='', entry_type='')
+    compose = default_config(compose, entrypoint='./initializer', container_name=container_name, header_type='', entry_type='', queue=os.getenv('INIT'), next_nodes="", extra_envs=[])
+    return compose, container_name
 
 def add_border_node(compose: dict[str, Any], cluster_nodes):
     compose['services']['border-node']= {
@@ -204,64 +206,77 @@ def add_border_node(compose: dict[str, Any], cluster_nodes):
     }
     return compose
 
-def add_multiple(compose: dict[str, Any], count, generator_func, name, type, queue, next_nodes, header_type, entry_type):
+def add_multiple(compose: dict[str, Any], count, generator_func, params):
+    name = params[0]
+
     containers = []
     for i in range(0, count):
-        compose, new_container = generator_func(compose, f'{name}-{i}', type, queue, next_nodes, header_type, entry_type)
+        params[0] = f'{name}-{i}'
+        compose, new_container = generator_func(compose, params)
         containers.append(new_container)
     return compose, containers
 
-def add_one(compose, generator_func, name, type, queue, next_nodes, header_type, entry_type):
-    compose, new_container = generator_func(compose, name, type, queue, next_nodes,  header_type, entry_type)
+def add_one(compose, generator_func, params):
+    compose, new_container = generator_func(compose, params)
     return compose, [new_container]
 
-def add_depending_count(compose, count, generator_func,name, type, queue, next_nodes, header_type, entry_type):
+def add_depending_count(compose, count, generator_func, params):
     if count == 1:
-        return add_one(compose, generator_func, name, type, queue, next_nodes,header_type, entry_type)
+        return add_one(compose, generator_func, params)
     else:
-        return add_multiple(compose, count, generator_func,name, type, queue, next_nodes, header_type, entry_type)
+        return add_multiple(compose, count, generator_func, params)
     
 def add_filterers_indie(compose: dict[str, Any]):
-    return add_depending_count(compose, int(os.getenv('FILT_INDIE_COUNT')), generator_func=add_filterer, name='indie', type=FiltererType.INDIE.value, 
-                               queue=os.getenv('FILT_INDIE'), next_nodes=f"{os.getenv('FILT_DEC')};{os.getenv('JOIN_INDIE')},{os.getenv('JOIN_INDIE_COUNT')},{ShardingAttribute.APP_ID.value}", 
-                                header_type='HeaderWithTable', entry_type='EntryAppIDNameGenresReleaseDateAvgPlaytime')
+    params = ['indie', FiltererType.INDIE.value, os.getenv('FILT_INDIE'),
+               f"{os.getenv('FILT_DEC')};{os.getenv('JOIN_INDIE')},{os.getenv('JOIN_INDIE_COUNT')},{ShardingAttribute.APP_ID.value}",
+               'EntryNameDateAvgPlaytime;EntryAppIDName', 'HeaderWithTable', 'EntryAppIDNameGenresReleaseDateAvgPlaytime'] 
+    return add_depending_count(compose, int(os.getenv('FILT_INDIE_COUNT')), generator_func=add_filterer, params=params)
     
 def add_filterers_date(compose: dict[str, Any]):
-    return add_depending_count(compose, int(os.getenv('FILT_DEC_COUNT')), generator_func=add_filterer, name='date',
-                               type = FiltererType.DECADE.value,queue=f"{os.getenv('FILT_DEC')}", 
-                               next_nodes=f"{os.getenv('SORT_AVG_PT')},{os.getenv('SORT_AVG_PT_COUNT')},{ShardingAttribute.FRAGMENT_NUMBER.value}", header_type='Header', entry_type='EntryNameDateAvgPlaytime')
+    params = ['date',FiltererType.DECADE.value, f"{os.getenv('FILT_DEC')}",
+               f"{os.getenv('SORT_AVG_PT')},{os.getenv('SORT_AVG_PT_COUNT')},{ShardingAttribute.FRAGMENT_NUMBER.value}",
+               'EntryNameAvgPlaytime', 'Header', 'EntryNameDateAvgPlaytime']
+    return add_depending_count(compose, int(os.getenv('FILT_DEC_COUNT')), generator_func=add_filterer, params=params)
    
 def add_filterers_action(compose: dict[str, Any]):
-    return add_depending_count(compose, int(os.getenv('FILT_ACT_COUNT')), generator_func=add_filterer, name='action',type=FiltererType.ACTION.value, queue=f"{os.getenv('FILT_ACT')}",
-                               next_nodes=f"{os.getenv('JOIN_ACT')},{os.getenv('JOIN_ACT_COUNT')},{ShardingAttribute.APP_ID.value};{os.getenv('JOIN_PERC')},{os.getenv('JOIN_PERC_COUNT')},{ShardingAttribute.APP_ID.value}", 
-                               header_type='HeaderWithTable', entry_type='EntryAppIDNameGenres')
+    params = ['action', FiltererType.ACTION.value, f"{os.getenv('FILT_ACT')}",
+              f"{os.getenv('JOIN_ACT')},{os.getenv('JOIN_ACT_COUNT')},{ShardingAttribute.APP_ID.value};{os.getenv('JOIN_PERC')},{os.getenv('JOIN_PERC_COUNT')},{ShardingAttribute.APP_ID.value}", 
+              'EntryAppIDName;EntryAppIDName', 'HeaderWithTable','EntryAppIDNameGenres']
+    return add_depending_count(compose, int(os.getenv('FILT_ACT_COUNT')), generator_func=add_filterer, params=params)
     
 def add_filterers_english(compose: dict[str, Any]):
-    return add_depending_count(compose, int(os.getenv('FILT_ENG_COUNT')), generator_func=add_filterer,name='english', type=FiltererType.ENGLISH.value, 
-                               queue=f"{os.getenv('FILT_ENG')}",next_nodes=f"{os.getenv('GROUP_ENG')}", header_type='HeaderWithSender', entry_type='EntryAppIDNameReviewText')
+    params = ['english', FiltererType.ENGLISH.value, 
+              f"{os.getenv('FILT_ENG')}", f"{os.getenv('GROUP_ENG')}",
+              'EntryAppIDName', 'HeaderWithSender','EntryAppIDNameReviewText']
+    return add_depending_count(compose, int(os.getenv('FILT_ENG_COUNT')), generator_func=add_filterer, params=params)
     
 def add_groupers_action_english(compose: dict[str, Any]):
-    return add_depending_count(compose, int(os.getenv('GROUP_ENG_COUNT')), generator_func=add_grouper,name='action-english',
-                                type=GrouperType.APP_ID_NAME_COUNT.value, queue=f"{os.getenv('GROUP_ENG')}",next_nodes=f"{os.getenv('CONS_JOIN_ENG')}", 
-                                header_type='HeaderWithSender', entry_type='EntryAppIDName')
+    params = ['action-english', GrouperType.APP_ID_NAME_COUNT.value, f"{os.getenv('GROUP_ENG')}", f"{os.getenv('CONS_JOIN_ENG')}", 
+              'HeaderWithSender', 'EntryAppIDName']
+    return add_depending_count(compose, int(os.getenv('GROUP_ENG_COUNT')), generator_func=add_grouper,params=params)
 
 def add_groupers_indie(compose: dict[str, Any]):
-    return add_depending_count(compose, int(os.getenv('GROUP_INDIE_COUNT')), generator_func=add_grouper,name='indie', type=GrouperType.APP_ID_COUNT.value, 
-                               queue=f"{os.getenv('GROUP_INDIE')}",next_nodes=f"{os.getenv('JOIN_INDIE')},{os.getenv('JOIN_INDIE_COUNT')},{ShardingAttribute.APP_ID.value}", 
-                               header_type='HeaderWithTable', entry_type='EntryAppID')
+    params = ['indie', GrouperType.APP_ID_COUNT.value,
+              f"{os.getenv('GROUP_INDIE')}",f"{os.getenv('JOIN_INDIE')},{os.getenv('JOIN_INDIE_COUNT')},{ShardingAttribute.APP_ID.value}", 
+              'HeaderWithTable', 'EntryAppID']
+    return add_depending_count(compose, int(os.getenv('GROUP_INDIE_COUNT')), generator_func=add_grouper,params=params)
 
 def add_groupers_os_count(compose: dict[str, Any]):
-    return add_depending_count(compose, int(os.getenv('GROUP_OS_COUNT')), add_grouper, name='os-counts', type=GrouperType.OS_COUNT.value, queue=f"{os.getenv('GROUP_OS')}", 
-                               next_nodes=f"{os.getenv('JOIN_OS')}", header_type='Header', entry_type='EntryOSSupport')
+    params = ['os-counts', GrouperType.OS_COUNT.value, f"{os.getenv('GROUP_OS')}", 
+                               f"{os.getenv('JOIN_OS')}", 'Header', 'EntryOSSupport']
+    return add_depending_count(compose, int(os.getenv('GROUP_OS_COUNT')), add_grouper, params=params)
 
 def add_groupers_action_percentile(compose: dict[str, Any]):
-    return add_depending_count(compose, int(os.getenv('GROUP_PERC_COUNT')), add_grouper, name='action-percentile', type=GrouperType.APP_ID_COUNT.value, queue=f"{os.getenv('GROUP_PERC')}", next_nodes=f"{os.getenv('JOIN_PERC')},{os.getenv('JOIN_PERC_COUNT')},{ShardingAttribute.APP_ID.value}",
-                               header_type='HeaderWithTable', entry_type='EntryAppID')
+    params = ['action-percentile', GrouperType.APP_ID_COUNT.value, f"{os.getenv('GROUP_PERC')}", f"{os.getenv('JOIN_PERC')},{os.getenv('JOIN_PERC_COUNT')},{ShardingAttribute.APP_ID.value}",
+              'HeaderWithTable', 'EntryAppID']
+    return add_depending_count(compose, int(os.getenv('GROUP_PERC_COUNT')), add_grouper, params=params)
 
 def add_joiners_action_percentile(compose: dict[str, Any]):
     containers = []
     for i in range(0, int(os.getenv('JOIN_PERC_COUNT'))):
-        compose, new_container = add_joiner(compose, name=f"action-percentile-{i}", type=JoinerType.PERCENTILE.value, queue=f"{os.getenv('JOIN_PERC')}", review_entry_type='EntryAppIDReviewCount', game_entry_type='EntryAppIDName', next_nodes=f"{os.getenv('CONS_SORT_PERC')}",node_id=i)
+        params = [f"action-percentile-{i}", JoinerType.PERCENTILE.value, f"{os.getenv('JOIN_PERC')}", 'EntryAppIDReviewCount', 
+                  'EntryAppIDName', f"{os.getenv('CONS_SORT_PERC')}",i]
+        compose, new_container = add_joiner(compose, params)
         containers.append(new_container)
     return compose, containers
 
@@ -302,7 +317,8 @@ def add_sorter_consolidator_action_percentile(compose: dict[str, Any]):
 def add_joiners_indie(compose: dict[str, Any]):
     containers = []
     for i in range(0, int(os.getenv('JOIN_INDIE_COUNT'))):
-        compose, new_container = add_joiner(compose, name=f'indie-positive-{i}', type=JoinerType.INDIE.value, queue=f"{os.getenv('JOIN_INDIE')}", next_nodes=f"{os.getenv('CONS_JOIN_INDIE')}", game_entry_type='EntryAppIDName', review_entry_type='EntryAppIDReviewCount', node_id=i)
+        params = [f'indie-positive-{i}', JoinerType.INDIE.value, f"{os.getenv('JOIN_INDIE')}", f"{os.getenv('CONS_JOIN_INDIE')}", 'EntryAppIDName', 'EntryAppIDReviewCount', i]
+        compose, new_container = add_joiner(compose, params)
         containers.append(new_container)
     return compose, containers
 
@@ -310,27 +326,31 @@ def add_joiners_indie(compose: dict[str, Any]):
 def add_joiner_action_english(compose: dict[str, Any]):
     containers = []
     for i in range(0, int(os.getenv('JOIN_ACT_COUNT'))):
-        compose, new_container = add_joiner(compose, name=f'action-english-{i}', type=JoinerType.ENGLISH.value, queue=f"{os.getenv('JOIN_ACT')}", next_nodes=f"{os.getenv('FILT_ENG')}", game_entry_type='EntryAppIDName', review_entry_type='EntryAppIDReviewText', node_id=i)
+        params = [f'action-english-{i}', JoinerType.ENGLISH.value, f"{os.getenv('JOIN_ACT')}", f"{os.getenv('FILT_ENG')}", 'EntryAppIDName', 'EntryAppIDReviewText', i]
+        compose, new_container = add_joiner(compose, params)
         containers.append(new_container)
     return compose, containers
 
 
 def add_joiner_indie_consolidator(compose: dict[str, Any]):
-    return add_joiner_consolidator(compose, name='joiner-indie', type=JoinerConsolidatorType.INDIE.value, 
-                                   queue=f"{os.getenv('CONS_JOIN_INDIE')}", 
-                                   next_nodes=f"{os.getenv('SORT_INDIE')},{os.getenv('SORT_INDIE_COUNT')},{ShardingAttribute.FRAGMENT_NUMBER.value}",
-                                    header_type='HeaderWithSender', entry_type='EntryNameReviewCount',
-                                prior_node_count=int(os.getenv('JOIN_INDIE_COUNT')))
+    params = ['joiner-indie', JoinerConsolidatorType.INDIE.value, f"{os.getenv('CONS_JOIN_INDIE')}", 
+              f"{os.getenv('SORT_INDIE')},{os.getenv('SORT_INDIE_COUNT')},{ShardingAttribute.FRAGMENT_NUMBER.value}",
+              'HeaderWithSender', 'EntryNameReviewCount',
+              int(os.getenv('JOIN_INDIE_COUNT'))]
+    return add_joiner_consolidator(compose, params)
 
 def add_joiner_english_consolidator(compose: dict[str, Any]):
-    return add_joiner_consolidator(compose, name='joiner-english', type=JoinerConsolidatorType.ENGLISH.value, 
-                                   queue=f"{os.getenv('CONS_JOIN_ENG')}", 
-                                   next_nodes=f"{os.getenv('JOIN_ENG')},{os.getenv('JOIN_ENG_COUNT')},{ShardingAttribute.APP_ID.value}",
-                                    header_type='HeaderWithSender', entry_type='EntryAppIDNameReviewCount',
-                                    prior_node_count=int(os.getenv('JOIN_ACT_COUNT')))
+    params = ['joiner-english', JoinerConsolidatorType.ENGLISH.value, 
+                                   f"{os.getenv('CONS_JOIN_ENG')}", 
+                                   f"{os.getenv('JOIN_ENG')},{os.getenv('JOIN_ENG_COUNT')},{ShardingAttribute.APP_ID.value}",
+                                    'HeaderWithSender', 'EntryAppIDNameReviewCount',
+                                    int(os.getenv('JOIN_ACT_COUNT'))]
+    return add_joiner_consolidator(compose, params)
 
 def add_joiner_stream_consolidator(compose: dict[str, Any]):
-    return add_joiner_consolidator(compose, name='stream', type=JoinerConsolidatorType.STREAM.value, queue=f"{os.getenv('CONS_JOIN_STREAM')}", next_nodes=f"{os.getenv('DISP')}", header_type='HeaderWithSender', entry_type='EntryName', prior_node_count=int(os.getenv('JOIN_ENG_COUNT')))
+    params = ['stream', JoinerConsolidatorType.STREAM.value, f"{os.getenv('CONS_JOIN_STREAM')}", f"{os.getenv('DISP')}", 
+    'HeaderWithSender', 'EntryName', int(os.getenv('JOIN_ENG_COUNT'))]
+    return add_joiner_consolidator(compose, params)
 
 def add_container(compose, containers, generation):
     compose, new_containers = generation(compose)
@@ -353,9 +373,9 @@ def generate_compose(output_file: str, client_number: int):
     compose = add_network(compose)
 
     # Initializer
-    compose, initializers_container = add_initializers(compose)
+    compose, initializer_container = add_initializer(compose)
     
-    containers = initializers_container
+    containers = [initializer_container]
 
     # Query 1:
     compose, containers = add_container(compose, containers, generation=add_groupers_os_count)
@@ -405,8 +425,9 @@ def main():
     try:
         client_number = int(sys.argv[2])
         generate_compose(sys.argv[1], client_number)
-    except ValueError:
+    except ValueError as e:
         print(f"Error: second argument has to be a number (amount of clients desired)")
+        raise e
 
 if __name__ == '__main__':
     main()
