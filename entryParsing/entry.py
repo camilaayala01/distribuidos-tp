@@ -8,8 +8,6 @@ class EntryInterface(ABC):
 
     @classmethod
     def fromAnother(cls, other, **additionalParams):
-        print(other)
-        print(additionalParams)
         if type(other).__name__ == cls.__name__:
             return other
         params = inspect.signature(cls.__init__).parameters

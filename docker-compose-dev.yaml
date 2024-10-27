@@ -136,6 +136,7 @@ services:
       - HOST=rabbitmq
       - LISTENING_QUEUE=FilterIndie
       - NEXT_NODES=FilterDecade;JoinerIndiePositiveReviews,2,0
+      - NEXT_ENTRIES=EntryNameDateAvgPlaytime;EntryAppIDName
       - HEADER_TYPE=HeaderWithTable
       - ENTRY_TYPE=EntryAppIDNameGenresReleaseDateAvgPlaytime
       - FILTERER_TYPE=1
@@ -156,6 +157,7 @@ services:
       - HOST=rabbitmq
       - LISTENING_QUEUE=FilterDecade
       - NEXT_NODES=SorterAvgPlaytime,2,1
+      - NEXT_ENTRIES=EntryNameAvgPlaytime
       - HEADER_TYPE=Header
       - ENTRY_TYPE=EntryNameDateAvgPlaytime
       - FILTERER_TYPE=0
@@ -408,6 +410,7 @@ services:
       - HOST=rabbitmq
       - LISTENING_QUEUE=FilterAction
       - NEXT_NODES=JoinerActionNegativeReviewsEnglish,2,0;JoinerActionPercentile,2,0
+      - NEXT_ENTRIES=EntryAppIDName;EntryAppIDName
       - HEADER_TYPE=HeaderWithTable
       - ENTRY_TYPE=EntryAppIDNameGenres
       - FILTERER_TYPE=2
@@ -474,6 +477,7 @@ services:
       - HOST=rabbitmq
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglishNegativeReviews
+      - NEXT_ENTRIES=EntryAppIDName
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
@@ -494,6 +498,7 @@ services:
       - HOST=rabbitmq
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglishNegativeReviews
+      - NEXT_ENTRIES=EntryAppIDName
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
@@ -514,6 +519,7 @@ services:
       - HOST=rabbitmq
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglishNegativeReviews
+      - NEXT_ENTRIES=EntryAppIDName
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
@@ -534,6 +540,7 @@ services:
       - HOST=rabbitmq
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglishNegativeReviews
+      - NEXT_ENTRIES=EntryAppIDName
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
@@ -554,6 +561,7 @@ services:
       - HOST=rabbitmq
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglishNegativeReviews
+      - NEXT_ENTRIES=EntryAppIDName
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
@@ -574,6 +582,7 @@ services:
       - HOST=rabbitmq
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglishNegativeReviews
+      - NEXT_ENTRIES=EntryAppIDName
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
@@ -594,6 +603,7 @@ services:
       - HOST=rabbitmq
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglishNegativeReviews
+      - NEXT_ENTRIES=EntryAppIDName
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3
@@ -614,6 +624,7 @@ services:
       - HOST=rabbitmq
       - LISTENING_QUEUE=FilterEnglish
       - NEXT_NODES=GrouperActionEnglishNegativeReviews
+      - NEXT_ENTRIES=EntryAppIDName
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - FILTERER_TYPE=3

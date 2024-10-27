@@ -28,7 +28,7 @@ class GameEntry(EntryInterface):
     def __init__(self, _appID, _name, _releaseDate, _estimatedOwners, _peakCCU, _reqAge, _price, _discCount, 
                  _about, _supLang, _audioLang, _reviews, _headerImg, _website, _supportUrl, _supportEmail, 
                  _windows, _mac, _linux, _metaScore, _metaUrl, _userScore, _positive, _negative, 
-                 _scoreRank, _achievements, _recs, _notes, _avgPlaytimeForever, _avgPlaytimeTwoWeeks,
+                 _scoreRank, _achievements, _recs, _notes, _avgPlaytime, _avgPlaytimeTwoWeeks,
                  _medianPlaytimeForever, _medianPlaytimeTwoWeeks, _devs, _pubs, _categories, 
                  _genres, _tags, _screens, _movies):
         """
@@ -48,7 +48,7 @@ class GameEntry(EntryInterface):
                          _metaScore=int(_metaScore), _metaUrl=_metaUrl, _userScore=int(_userScore), 
                          _positive=int(_positive), _negative=int(_negative), 
                          _scoreRank=tryToFloat(_scoreRank), _achievements=int(_achievements), 
-                         _recs=int(_recs), _notes=_notes, _avgPlaytimeForever=int(_avgPlaytimeForever), 
+                         _recs=int(_recs), _notes=_notes, _avgPlaytime=int(_avgPlaytime), 
                          _avgPlaytimeTwoWeeks=int(_avgPlaytimeTwoWeeks), 
                          _medianPlaytimeForever=int(_medianPlaytimeForever), 
                          _medianPlaytimeTwoWeeks=int(_medianPlaytimeTwoWeeks), _devs=_devs, 
@@ -86,7 +86,7 @@ class GameEntry(EntryInterface):
             serializeNumber(self._achievements, fieldLen.ACHIVEMENT_BYTES) +
             serializeNumber(self._recs, fieldLen.RECS_BYTES) +
             serializeVariableLen(self._notes, fieldLen.NOTES_LEN) +
-            serializePlaytime(self._avgPlaytimeForever) +
+            serializePlaytime(self._avgPlaytime) +
             serializePlaytime(self._avgPlaytimeTwoWeeks) +
             serializeNumber(self._medianPlaytimeForever, fieldLen.MEDIAN_BYTES) +
             serializeNumber(self._medianPlaytimeTwoWeeks, fieldLen.MEDIAN_BYTES) +

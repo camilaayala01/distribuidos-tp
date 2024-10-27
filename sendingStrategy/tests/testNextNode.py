@@ -1,8 +1,14 @@
+import os
 import unittest
+from entryParsing.entryAppID import EntryAppID
+from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
 from sendingStrategy.common.nextNode import NextNode
 from sendingStrategy.directSend import ShardingAttribute
 
 class TestNextNode(unittest.TestCase):
+    def setUp(self):
+        os.environ['ENTRY_PATH']='entryParsing'
+
     def testNextNodeOnlyOneNoShardingAttribute(self):
         nextNodes = NextNode.parseNodes("GROUPER")
         self.assertEqual(len(nextNodes), 1)
@@ -50,6 +56,12 @@ class TestNextNode(unittest.TestCase):
         self.assertEqual(nextNodes[1]._queueName, "JOINER")
         self.assertEqual(nextNodes[1]._count, 3)
         self.assertEqual(nextNodes[1]._shardingAttribute, ShardingAttribute(1))
+    
+    def testNextVariedWithEntryTypes(self):
+        nextNodes = NextNode.parseNodes("GROUPER;JOINER,3,1", "EntryAppID;EntryAppIDNameReviewCount")
+        self.assertEqual(len(nextNodes), 2)
+        self.assertEqual(nextNodes[0]._entryType, EntryAppID)
+        self.assertEqual(nextNodes[0]._entryType, EntryAppIDNameReviewCount)
 
 if __name__ == "__main__":
     unittest.main()

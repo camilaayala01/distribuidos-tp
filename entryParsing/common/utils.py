@@ -55,7 +55,7 @@ def getReviewsEntryTypeFromEnv():
     return getModuleFromEnvVars(os.getenv('REVIEWS_ENTRY_TYPE'), 'ENTRY_PATH')
 
 def getEntryTypeFromString(type: str):
-    getModuleFromEnvVars(type, 'ENTRY_PATH')
+    return getModuleFromEnvVars(type, 'ENTRY_PATH')
 
 def boolToInt(boolean: bool) -> int:
     match boolean:

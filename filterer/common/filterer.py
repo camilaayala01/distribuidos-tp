@@ -21,9 +21,8 @@ class Filterer:
 
     def _sendToNext(self, header: Header, batch: list[EntryInterface]):
         for strategy in self._sendingStrategies:
-            newBatch = [self._filtererType.getResultingEntry(entry, strategy.getNextNodeName()) for entry in batch]
             newHeader = self._filtererType.getResultingHeader(header, strategy.getNextNodeName())
-            strategy.send(self._internalCommunication, newHeader, newBatch)
+            strategy.send(self._internalCommunication, newHeader, batch)
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
