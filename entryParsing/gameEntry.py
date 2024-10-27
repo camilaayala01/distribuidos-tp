@@ -1,6 +1,6 @@
 import datetime
 
-from entryParsing.common.fieldParsing import serializeBoolean, serializeAppID, serializeGameName, serializeNumber, serializePlaytime, serializeReviewText, serializeVariableLen
+from entryParsing.common.fieldParsing import  serializeAppID, serializeGameName, serializeNumber, serializePlaytime, serializeReviewText, serializeVariableLen
 from entryParsing.common.utils import strToBoolInt
 from entryParsing.common import fieldLen
 from entryParsing.entry import EntryInterface

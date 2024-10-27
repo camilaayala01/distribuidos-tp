@@ -1,11 +1,9 @@
-# amount of bytes dedicated to stating the length of the name
-from typing import Tuple
 from entryParsing.common import fieldParsing
 from entryParsing.entry import EntryInterface
 
 class EntryAppIDNameGenresReleaseDateAvgPlaytime(EntryInterface):
-    def __init__(self, _id: str, _name: str, _genres: str, _releaseDate: str, _avgPlaytime: int):
-        super().__init__(_appID=_id, _name=_name, _genres=_genres, _releaseDate=_releaseDate, _avgPlaytime=_avgPlaytime)
+    def __init__(self, _appID: str, _name: str, _genres: str, _releaseDate: str, _avgPlaytime: int):
+        super().__init__(_appID=_appID, _name=_name, _genres=_genres, _releaseDate=_releaseDate, _avgPlaytime=_avgPlaytime)
 
 
     def serialize(self) -> bytes:
@@ -17,7 +15,7 @@ class EntryAppIDNameGenresReleaseDateAvgPlaytime(EntryInterface):
         return idBytes + nameBytes + genresBytes + releaseDateBytes + avgPlaytimeForeverBytes
     
     @classmethod
-    def deserializeEntry(cls, curr: int, data: bytes) -> Tuple['EntryAppIDNameGenresReleaseDateAvgPlaytime', int]:
+    def deserializeEntry(cls, curr: int, data: bytes) -> tuple['EntryAppIDNameGenresReleaseDateAvgPlaytime', int]:
         id, curr = fieldParsing.deserializeAppID(curr, data)
         name, curr = fieldParsing.deserializeGameName(curr, data)
         genres, curr = fieldParsing.deserializeGenres(curr, data)

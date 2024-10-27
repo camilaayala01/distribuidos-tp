@@ -1,5 +1,4 @@
 import pika
-import signal
 import os
 import logging
 

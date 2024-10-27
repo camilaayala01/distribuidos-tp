@@ -1,5 +1,4 @@
 import os
-import signal
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from internalCommunication.internalCommunication import InternalCommunication
 import zmq

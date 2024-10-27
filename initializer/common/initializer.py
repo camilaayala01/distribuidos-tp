@@ -20,16 +20,6 @@ class Initializer:
         self._internalCommunication = InternalCommunication(queueName, os.getenv('NODE_ID'))
         self._nodeCount = int(os.getenv('JOIN_ACT_COUNT'))
 
-    def separatePositiveAndNegative(self, reviews: list[ReviewEntry]):
-        positiveReviewEntries, negativeReviewEntries = [], []
-        for entry in reviews:
-            if entry.isPositive():
-                positiveReviewEntries.append(entry)
-            else:
-                negativeReviewEntries.append(entry)
-
-        return positiveReviewEntries, negativeReviewEntries
-
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
 

@@ -1,16 +1,7 @@
 from enum import Enum
-import os
 from py3langid.langid import classify
 from entryParsing.common.header import Header
-from entryParsing.common.headerWithSender import HeaderWithSender
-from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.entry import EntryInterface
-from entryParsing.entryAppIDName import EntryAppIDName
-from entryParsing.entryAppIDNameGenres import EntryAppIDNameGenres
-from entryParsing.entryAppIDNameGenresReleaseDateAvgPlaytime import EntryAppIDNameGenresReleaseDateAvgPlaytime
-from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
-from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
-from entryParsing.entryNameDateAvgPlaytime import EntryNameDateAvgPlaytime
 
 class FiltererType(Enum):
     DECADE = 0

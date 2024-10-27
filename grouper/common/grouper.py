@@ -34,6 +34,8 @@ class Grouper:
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0 | header.isEOF():
             logging.info(f'action: received batch | {header} | result: success')
         entries = self._entryType.deserialize(data)
+        if len(entries) and self._grouperType == GrouperType.APP_ID_NAME_COUNT:
+            print(entries[0])
         result = self._grouperType.getResults(entries)
         self._sendToNext(header, result)
         ch.basic_ack(delivery_tag = method.delivery_tag)
