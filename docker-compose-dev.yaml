@@ -21,9 +21,13 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - LISTENING_QUEUE=Initializer
-      - NEXT_NODES=
-      - HEADER_TYPE=
-      - ENTRY_TYPE=
+      - HEADER_TYPE=HeaderWithTable
+      - GAMES_ENTRY_TYPE=ReducedGameEntry
+      - REVIEWS_ENTRY_TYPE=ReviewEntry
+      - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
+      - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
+      - REVIEWS_NEXT_NODES=GrouperIndiePositiveReviews;JoinerActionNegativeReviewsEnglish,2,0;GrouperActionPercentile
+      - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
     env_file:
       - .env
     volumes:
@@ -40,9 +44,13 @@ services:
       - PYTHONUNBUFFERED=1
       - HOST=rabbitmq
       - LISTENING_QUEUE=Initializer
-      - NEXT_NODES=
-      - HEADER_TYPE=
-      - ENTRY_TYPE=
+      - HEADER_TYPE=HeaderWithTable
+      - GAMES_ENTRY_TYPE=ReducedGameEntry
+      - REVIEWS_ENTRY_TYPE=ReviewEntry
+      - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
+      - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
+      - REVIEWS_NEXT_NODES=GrouperIndiePositiveReviews;JoinerActionNegativeReviewsEnglish,2,0;GrouperActionPercentile
+      - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
     env_file:
       - .env
     volumes:

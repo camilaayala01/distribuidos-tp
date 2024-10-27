@@ -1,4 +1,3 @@
-from typing import Tuple
 from entryParsing.common.fieldParsing import deserializeAppID, deserializeGameName, deserializeGenres, serializeAppID, serializeGameName, serializeGenres
 from entryParsing.common.utils import getShardingKey
 from entryParsing.entryAppIDName import EntryAppIDName
@@ -15,7 +14,7 @@ class EntryAppIDNameGenres(EntryInterface):
         return idBytes + nameBytes + genresBytes
 
     @classmethod
-    def deserializeEntry(cls, curr: int, data: bytes) -> Tuple['EntryAppIDNameGenres', int]:
+    def deserializeEntry(cls, curr: int, data: bytes) -> tuple['EntryAppIDNameGenres', int]:
         id, curr = deserializeAppID(curr, data)
         name, curr = deserializeGameName(curr, data)
         genres, curr = deserializeGenres(curr, data)

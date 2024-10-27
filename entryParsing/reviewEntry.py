@@ -13,7 +13,7 @@ class ReviewEntry(EntryInterface):
                          _reviewScore=int(_reviewScore), _reviewVotes=int(_reviewVotes))
 
     def __str__(self):
-        return f"EntryReview(appID={self.appID}, name={self.appName})"
+        return f"EntryReview(appID={self._appID}, name={self._appName})"
     
     def serialize(self) -> bytes:
         return (fieldParsing.serializeAppID(self._appID) + fieldParsing.serializeGameName(self._appName) +

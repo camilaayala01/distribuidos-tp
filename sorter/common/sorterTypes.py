@@ -70,7 +70,6 @@ class SorterType(Enum):
         for entry in packets:
             newEntries.append(EntryAppIDName(entry.getAppID(), entry.getName()))
         return newEntries
-
     
     def serializeAndFragment(self, clientId: bytes, packets: list[EntrySorterTopFinder], headerType: type):
         match self:

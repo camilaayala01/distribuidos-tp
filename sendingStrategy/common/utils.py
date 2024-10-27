@@ -4,8 +4,8 @@ from sendingStrategy.common.nextNode import NextNode
 from sendingStrategy.directSend import DirectSend
 from sendingStrategy.sendingStrategy import SendingStrategy
 
-def createStrategiesFromNextNodes() -> list[SendingStrategy]:
-    nextNodes = NextNode.parseNodes(os.getenv('NEXT_NODES'), os.getenv('NEXT_ENTRIES') or "")
+def createStrategiesFromNextNodes(nextNodesStr: str = 'NEXT_NODES', nextEntriesStr: str= 'NEXT_ENTRIES') -> list[SendingStrategy]:
+    nextNodes = NextNode.parseNodes(os.getenv(nextNodesStr), os.getenv(nextEntriesStr) or "")
     strategies = []
     for node in nextNodes:
         strategies.append(getStrategyFromNextNode(node))
