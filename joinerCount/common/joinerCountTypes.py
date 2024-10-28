@@ -1,7 +1,7 @@
 from enum import Enum
 import os
-
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
+from entryParsing.common.header import Header
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entry import EntryInterface
 from entryParsing.entryName import EntryName
@@ -51,11 +51,11 @@ class JoinerCountType(Enum):
             case JoinerCountType.OS:
                 return self.getOSCountResults(priorResult, entries, isDone) 
 
-    def getResultingHeader(self, clientId, fragnum: int, isDone: bool) -> EntryInterface:
+    def getResultingHeader(self, header: Header) -> EntryInterface:
         match self:
             case JoinerCountType.ENGLISH:
-                return HeaderWithSender(_clientId=clientId, _fragment=fragnum, _eof=isDone, _senderID=int(os.getenv('NODE_ID')))
+                return HeaderWithSender.fromAnother(header, _senderID=int(os.getenv('NODE_ID')))
             case JoinerCountType.OS:
-                return HeaderWithQueryNumber(_clientId=clientId, _fragment=fragnum, _eof=True, _queryNumber=int(os.getenv('QUERY_NUMBER')))
+                return HeaderWithQueryNumber.fromAnother(header, _queryNumber=int(os.getenv('QUERY_NUMBER')))
                 
                

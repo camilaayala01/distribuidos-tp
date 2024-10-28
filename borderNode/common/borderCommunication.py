@@ -42,7 +42,7 @@ class BorderNodeCommunication:
         except:
             return None
     
-    def sendClient(self, ch, method, properties, body):
+    def sendClient(self, ch, method, _properties, body):
         if not self.isRunning():
             return
         header, _ = HeaderWithQueryNumber.deserialize(body)

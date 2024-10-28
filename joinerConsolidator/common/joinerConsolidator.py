@@ -44,7 +44,7 @@ class JoinerConsolidator:
         return (self._currentClient.isDone() or 
                 (not self._currentClient.isDone() and len(toSend) != 0))
 
-    def handleMessage(self, ch, method, properties, body):
+    def handleMessage(self, ch, method, _properties, body):
         header, data = HeaderWithSender.deserialize(body)
         clientId = header.getClient()
         self.setCurrentClient(clientId)

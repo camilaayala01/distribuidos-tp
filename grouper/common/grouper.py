@@ -28,7 +28,7 @@ class Grouper:
         for strategy in self._sendingStrategies:
             strategy.send(self._internalCommunication, header, batch)
 
-    def handleMessage(self, ch, method, properties, body):
+    def handleMessage(self, ch, method, _properties, body):
         header, data = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0 | header.isEOF():
             logging.info(f'action: received batch | {header} | result: success')

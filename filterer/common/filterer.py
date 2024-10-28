@@ -25,7 +25,7 @@ class Filterer:
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
 
-    def handleMessage(self, ch, method, properties, body):
+    def handleMessage(self, ch, method, _properties, body):
         header, data = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0 | header.isEOF():
             logging.info(f'action: received batch | {header} | result: success')

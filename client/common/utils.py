@@ -31,7 +31,7 @@ def loadGames() -> list[GameEntry]: # type: ignore
     with open(GAMES_STORAGE_FILEPATH, 'r') as file:
         reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
         next(reader)  # Skip header
-        for line_number, row in enumerate(reader, start=2):
+        for row in reader:
             try:
                 yield GameEntry(row[0], row[1], row[2], row[3], row[4], row[5],
                                 row[6], row[7], row[9], row[10], row[11], row[12],

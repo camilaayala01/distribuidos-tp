@@ -10,9 +10,6 @@ class SendingStrategy(ABC):
         
     def __str__(self):
         return f"Strategy: {type(self).__name__}, Next node: {self._nextNode}"
-
-    def getNextNodeName(self):
-        return self._nextNode._queueName
     
     @abstractmethod
     def send(self, middleware: InternalCommunication, header: Header, batch: list[EntryInterface]):
