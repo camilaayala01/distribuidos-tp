@@ -13,7 +13,6 @@ class Filterer:
     def __init__(self):
         initializeLog()
         self._filtererType = FiltererType(int(os.getenv('FILTERER_TYPE')))
-        # only fetch once
         self._entryType = getEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'))

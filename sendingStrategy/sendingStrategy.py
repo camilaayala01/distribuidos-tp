@@ -8,6 +8,9 @@ class SendingStrategy(ABC):
     def __init__(self, nextNode: NextNode):
         self._nextNode = nextNode
         
+    def __str__(self):
+        return f"Strategy: {type(self).__name__}, Next node: {self._nextNode}"
+
     def getNextNodeName(self):
         return self._nextNode._queueName
     

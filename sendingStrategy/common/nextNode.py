@@ -13,7 +13,7 @@ class NextNode:
         self._shardingAttribute = shardingAtribute
 
     def __str__(self):
-        return f'queueName {self._queueName} | entryType {self._entryType} | next node count {self._count} | sharding attr {self._shardingAttribute}'
+        return f'queueName {self._queueName} | entryType {self._entryType} | headerType: {self._headerType}'
     
     def hasCountAndShardingAttribute(self):
         return self._count is not None and self._shardingAttribute is not None

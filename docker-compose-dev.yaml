@@ -26,6 +26,7 @@ services:
       - REVIEWS_ENTRY_TYPE=ReviewEntry
       - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
       - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
+      - GAMES_NEXT_HEADERS=Header;;
       - REVIEWS_NEXT_NODES=GrouperIndiePositiveReviews;JoinerActionNegativeReviewsEnglish,2,0;GrouperActionPercentile
       - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
     env_file:
