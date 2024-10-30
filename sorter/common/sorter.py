@@ -69,7 +69,7 @@ class Sorter:
     def setCurrentClient(self, clientID: bytes):
         self._currentClient = self._activeClients.setdefault(clientID, ActiveClient(self._sorterType.initializeTracker()))
         
-    def handleMessage(self, ch, method, properties, body):
+    def handleMessage(self, ch, method, _properties, body):
         header, batch = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
             logging.info(f'action: receive batch | {header} | result: success')

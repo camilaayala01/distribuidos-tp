@@ -81,7 +81,7 @@ class Joiner:
         for strategy in self._sendingStrategies:
             strategy.sendBytes(self._internalCommunication, msg)
 
-    def handleMessage(self, ch, method, properties, body):
+    def handleMessage(self, ch, method, _properties, body):
         header, batch = self._headerType.deserialize(body)
         clientId = header.getClient()
         self.setCurrentClient(clientId)

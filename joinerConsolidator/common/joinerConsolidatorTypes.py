@@ -11,6 +11,6 @@ class JoinerConsolidatorType(Enum):
     def getResultingHeader(self, header: Header) -> EntryInterface:
         match self:
             case JoinerConsolidatorType.STREAM:
-                return HeaderWithQueryNumber(clientId=header.getClient(), fragment=header.getFragmentNumber(), eof=header.isEOF(), queryNumber=4)
+                return HeaderWithQueryNumber.fromAnother(header, _queryNumber=4)
             case JoinerConsolidatorType.INDIE | JoinerConsolidatorType.ENGLISH:
                 return header

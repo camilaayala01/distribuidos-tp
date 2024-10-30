@@ -3,9 +3,9 @@ from entryParsing.common.fieldLen import SENDER_ID_LEN
 from entryParsing.common.header import Header
 
 class HeaderWithSender(Header):
-    def __init__(self, clientId: bytes, fragment: int, eof: bool, senderID: int):
-        super().__init__(clientId, fragment, eof)
-        self._sender = senderID
+    def __init__(self, _clientId: bytes, _fragment: int, _eof: bool, _senderID: int):
+        super().__init__(_clientId, _fragment, _eof)
+        self._sender = _senderID
 
     def serialize(self) -> bytes:
         return super().serialize() + serializeSenderID(self._sender)

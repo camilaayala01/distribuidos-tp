@@ -51,7 +51,7 @@ class JoinerType(Enum):
         entries = []
         if isDone:
             for id, entry in joinedEntries.items():
-                entries.append(EntryAppIDNameReviewCount(id, entry.getName(), entry.getCount()))
+                entries.append(EntryAppIDNameReviewCount.fromAnother(entry, _appID=id))
             joinedEntries = {}
         return entries, joinedEntries, set()
 
@@ -64,9 +64,4 @@ class JoinerType(Enum):
                 return self.entriesForIndie(joinedEntries, isDone)
             case JoinerType.PERCENTILE:
                 return self.entriesForPercentile(joinedEntries, isDone)
-    
-    def getResultingHeader(self, header: Header) -> EntryInterface:
-        # only to allow easy changes
-        return header
-            
     

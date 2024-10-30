@@ -12,7 +12,7 @@ class BasicSend(SendingStrategy):
         middleware.basicSend(self._nextNode._queueName, msg)
 
     def send(self, middleware: InternalCommunication, header: Header, batch: list[EntryInterface]):
-        msg = header.serialize()
+        msg = self._nextNode.headerForNextNode(header).serialize()
         for entry in batch:
-            msg += entry.serialize()
+            msg += self._nextNode.entryForNextNode(entry).serialize()
         self.sendBytes(middleware, msg)

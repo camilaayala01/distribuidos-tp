@@ -7,13 +7,6 @@ class EntryName(EntryInterface):
 
     def serialize(self) -> bytes:
         return serializeGameName(self._name)
-    
-    @staticmethod
-    def serializeAll(names: list['EntryName']) -> bytes:
-        entryBytes = bytes()
-        for entry in names:
-            entryBytes+=serializeGameName(entry._name)
-        return entryBytes
 
     def __str__(self):
         return f"name: {self._name}"

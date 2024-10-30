@@ -13,7 +13,6 @@ class Filterer:
     def __init__(self):
         initializeLog()
         self._filtererType = FiltererType(int(os.getenv('FILTERER_TYPE')))
-        # only fetch once
         self._entryType = getEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'))
@@ -21,14 +20,12 @@ class Filterer:
 
     def _sendToNext(self, header: Header, batch: list[EntryInterface]):
         for strategy in self._sendingStrategies:
-            newBatch = [self._filtererType.getResultingEntry(entry, strategy.getNextNodeName()) for entry in batch]
-            newHeader = self._filtererType.getResultingHeader(header, strategy.getNextNodeName())
-            strategy.send(self._internalCommunication, newHeader, newBatch)
+            strategy.send(self._internalCommunication, header, batch)
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
 
-    def handleMessage(self, ch, method, properties, body):
+    def handleMessage(self, ch, method, _properties, body):
         header, data = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0 | header.isEOF():
             logging.info(f'action: received batch | {header} | result: success')

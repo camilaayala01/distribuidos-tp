@@ -1,4 +1,5 @@
 import logging
+from entryParsing.common.header import Header
 from entryParsing.reducedGameEntry import ReducedGameEntry
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.headerWithTable import HeaderWithTable
@@ -7,8 +8,10 @@ from entryParsing.entryOSSupport import EntryOSSupport
 from entryParsing.entryAppIDNameGenresReleaseDateAvgPlaytime import EntryAppIDNameGenresReleaseDateAvgPlaytime
 from entryParsing.entryAppIDNameGenres import EntryAppIDNameGenres
 from entryParsing.entryAppID import EntryAppID
-from entryParsing.common.utils import initializeLog
+from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, initializeLog
 import os
+
+from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
 MAX_DATA_BYTES = 8000
 PRINT_FREQUENCY = 5000
@@ -17,18 +20,12 @@ class Initializer:
     def __init__(self): 
         initializeLog()
         queueName = os.getenv('LISTENING_QUEUE')
+        self._gamesEntry = getGamesEntryTypeFromEnv()
+        self._reviewsEntry = getReviewsEntryTypeFromEnv()
+        self._headerType = getHeaderTypeFromEnv()
+        self._gamesSendingStrategies = createStrategiesFromNextNodes('GAMES_NEXT_NODES', 'GAMES_NEXT_ENTRIES', 'GAMES_NEXT_HEADERS')
+        self._reviewsSendingStrategies = createStrategiesFromNextNodes('REVIEWS_NEXT_NODES', 'REVIEWS_NEXT_ENTRIES')
         self._internalCommunication = InternalCommunication(queueName, os.getenv('NODE_ID'))
-        self._nodeCount = int(os.getenv('JOIN_ACT_COUNT'))
-
-    def separatePositiveAndNegative(self, reviews: list[ReviewEntry]):
-        positiveReviewEntries, negativeReviewEntries = [], []
-        for entry in reviews:
-            if entry.isPositive():
-                positiveReviewEntries.append(entry)
-            else:
-                negativeReviewEntries.append(entry)
-
-        return positiveReviewEntries, negativeReviewEntries
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
@@ -40,46 +37,26 @@ class Initializer:
                 positiveReviewEntries.append(entry)
             else:
                 negativeReviewEntries.append(entry)
-
         return positiveReviewEntries, negativeReviewEntries
 
     def handleMessage(self, ch, method, _properties, body):
-        header, data = HeaderWithTable.deserialize(body)
+        header, data = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
             logging.info(f'action: received msg corresponding to table {header.getTable()} | {header}')
-        serializedHeader = header.serialize()
 
         if header.isGamesTable():
-            gameEntries = ReducedGameEntry.deserialize(data)
-
-            entriesQuery1 = b''.join([EntryOSSupport(entry._windows, entry._mac, entry._linux).serialize() for entry in gameEntries])
-            self._internalCommunication.sendToOSCountsGrouper(header.serializeWithoutTable() + entriesQuery1)
-
-            entriesQuery2And3 = b''.join([EntryAppIDNameGenresReleaseDateAvgPlaytime(entry._appID, entry._name, entry._genres, entry._releaseDate, entry._avgPlaytime).serialize() for entry in gameEntries])
-            self._internalCommunication.sendToIndieFilter(serializedHeader + entriesQuery2And3)
-
-            entriesQuery4And5 = b''.join([EntryAppIDNameGenres(entry._appID, entry._name, entry._genres).serialize() for entry in gameEntries])
-            self._internalCommunication.sendToActionFilter(serializedHeader + entriesQuery4And5)
+            gameEntries = self._gamesEntry.deserialize(data)
+            for index, strategy in enumerate(self._gamesSendingStrategies):
+                strategy.send(self._internalCommunication, header, gameEntries)
 
             ch.basic_ack(delivery_tag = method.delivery_tag)
 
         elif header.isReviewsTable():
-            reviewEntries = ReviewEntry.deserialize(data)
+            reviewEntries = self._reviewsEntry.deserialize(data)
             positiveReviewEntries, negativeReviewEntries = self.separatePositiveAndNegative(reviewEntries)
-
-            #Query 3
-            entriesQuery3 = b''.join([EntryAppID(entry._appID).serialize() for entry in positiveReviewEntries])
-            self._internalCommunication.sendToIndiePositiveReviewsGrouper(serializedHeader + entriesQuery3)
-
-            #Query 4
-            shardedResults = ReviewEntry.shardBatch(self._nodeCount, negativeReviewEntries)
-            for i in range(self._nodeCount):
-                self._internalCommunication.sendToActionNegativeReviewsEnglishJoiner(str(i), serializedHeader + shardedResults[i])
-
-            # Query 5
-            entriesQuery5 = b''.join([EntryAppID(entry._appID).serialize() for entry in negativeReviewEntries])
-            self._internalCommunication.sendToActionAllNegativeReviewsGrouper(serializedHeader + entriesQuery5)
-
+            toSend = [positiveReviewEntries, negativeReviewEntries, negativeReviewEntries]
+            for index, strategy in enumerate(self._reviewsSendingStrategies):
+                strategy.send(self._internalCommunication, header, toSend[index])
             ch.basic_ack(delivery_tag = method.delivery_tag)
 
         else:

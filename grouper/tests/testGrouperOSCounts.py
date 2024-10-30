@@ -1,7 +1,6 @@
 import os
 import unittest
 from unittest.mock import MagicMock, patch
-from entryParsing.entryOSCount import EntryOSCount
 from entryParsing.entryOSSupport import EntryOSSupport
 from grouper.common.grouper import Grouper
 

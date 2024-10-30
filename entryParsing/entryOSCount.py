@@ -1,5 +1,4 @@
 from entryParsing.common.fieldParsing import deserializeCount, serializeCount
-from entryParsing.common.utils import boolToInt, intToBool
 from entryParsing.entry import EntryInterface
 
 class EntryOSCount(EntryInterface):
