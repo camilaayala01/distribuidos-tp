@@ -26,8 +26,6 @@ class Initializer:
         self._gamesSendingStrategies = createStrategiesFromNextNodes('GAMES_NEXT_NODES', 'GAMES_NEXT_ENTRIES', 'GAMES_NEXT_HEADERS')
         self._reviewsSendingStrategies = createStrategiesFromNextNodes('REVIEWS_NEXT_NODES', 'REVIEWS_NEXT_ENTRIES')
         self._internalCommunication = InternalCommunication(queueName, os.getenv('NODE_ID'))
-        for strategy in self._gamesSendingStrategies:
-            print(f"{strategy}")
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
