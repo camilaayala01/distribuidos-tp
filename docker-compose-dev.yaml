@@ -5,6 +5,7 @@ services:
       dockerfile: ../zmqUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
+      - MAX_DATA_BYTES=51200
     volumes:
       - ./entryParsing:/entryParsing
       - ~/.kaggle/distribuidos:/datasets

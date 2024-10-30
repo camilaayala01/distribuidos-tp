@@ -1,4 +1,5 @@
 import csv
+import logging
 import sys
 from entryParsing.gameEntry import GameEntry
 from entryParsing.reviewEntry import ReviewEntry
@@ -11,6 +12,17 @@ GAMES_STORAGE_FILEPATH = "./datasets/games-reducido.csv"
 REVIEWS_STORAGE_FILEPATH = "./datasets/reviews-reducido.csv"
 
 QUERY_RESPONSES_PATH = "/responses"
+
+def receiveCSVAnswer(data, includeHeader: bool, entryType, queryNum):
+    if includeHeader:
+        storeHeader(entryType.header(), f'/query{queryNum}.csv')
+    responses = entryType.deserialize(data)
+    csvData, loggingData = "", ""
+    for response in responses:
+        csvData += response.csv()
+        loggingData += str(response)
+    logging.info(f'action: store query {queryNum} data | data received: {loggingData}')
+    storeResultsQuery(csvData, f'/query{queryNum}.csv')
 
 def storeResultsQuery1(response: str) -> None:
     filepath = QUERY_RESPONSES_PATH + "/query1.txt"

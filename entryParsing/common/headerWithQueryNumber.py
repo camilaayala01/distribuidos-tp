@@ -21,7 +21,7 @@ class HeaderWithQueryNumber(Header):
         return super().size() + QUERY_NUMBER_LEN
 
     @staticmethod
-    def deserialize(data: bytes) -> tuple['Header', bytes]:
+    def deserialize(data: bytes) -> tuple['HeaderWithQueryNumber', bytes]:
         curr = 0
         try:
             clientId, curr = getClientID(curr, data)
