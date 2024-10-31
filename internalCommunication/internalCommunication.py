@@ -16,7 +16,7 @@ class InternalCommunication:
 
     def startConnection(self) -> pika.BlockingConnection:
         return pika.BlockingConnection(
-        pika.ConnectionParameters(host=os.getenv('HOST')))
+        pika.ConnectionParameters(host=os.getenv('HOST'), heartbeat=0))
 
     def createChannel(self) -> pika.adapters.blocking_connection.BlockingChannel:
         channel = self._connection.channel()
@@ -25,7 +25,7 @@ class InternalCommunication:
 
     def declareExchange(self, exchangeName: str, routingKey: str) -> str:
         self._channel.exchange_declare(exchange=exchangeName, exchange_type='direct')
-        result = self._channel.queue_declare(queue='', auto_delete = True) # CHANGE IN PRODUCTION, JUST FOR TESTING
+        result = self._channel.queue_declare(queue='', auto_delete = True)
         queueName = result.method.queue
         self._channel.queue_bind(
                 exchange=exchangeName, queue=queueName, routing_key=routingKey)

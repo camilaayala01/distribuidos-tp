@@ -17,7 +17,7 @@ class BorderNodeCommunication:
         self._clientSocket = socket
         self._clientSocket.setsockopt(zmq.RCVTIMEO, 100)
         # dispatcher
-        self._internalCommunication = InternalCommunication(os.getenv('DISP'), os.getenv('NODE_ID'))
+        self._internalCommunication = InternalCommunication(os.getenv('DISP'))
         self._accepterCommunication = InternalCommunication()
         self._running = True
 

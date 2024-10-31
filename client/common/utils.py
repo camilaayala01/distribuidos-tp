@@ -12,21 +12,21 @@ GAMES_STORAGE_FILEPATH = os.getenv('GAMES_STORAGE_FILEPATH')
 """ Reviews storage location. """
 REVIEWS_STORAGE_FILEPATH = os.getenv('REVIEWS_STORAGE_FILEPATH')
 
-QUERY_RESPONSES_PATH = "/responses"
+QUERY_RESPONSES_PATH = "/responses/"
 
-def receiveCSVAnswer(data, includeHeader: bool, entryType, queryNum):
+def receiveCSVAnswer(data, includeHeader: bool, entryType, queryNum, currentExecution):
     if includeHeader:
-        storeHeader(entryType.header(), f'/query{queryNum}.csv')
+        storeHeader(entryType.header(), f'exec-{currentExecution}/query{queryNum}.csv')
     responses = entryType.deserialize(data)
     csvData, loggingData = "", ""
     for response in responses:
         csvData += response.csv()
         loggingData += str(response)
     logging.info(f'action: store query {queryNum} data | data received: {loggingData}')
-    storeResultsQuery(csvData, f'/query{queryNum}.csv')
+    storeResultsQuery(csvData, f'exec-{currentExecution}/query{queryNum}.csv')
 
-def storeResultsQuery1(response: str) -> None:
-    filepath = QUERY_RESPONSES_PATH + "/query1.txt"
+def storeResultsQuery1(response: str, currentExecution) -> None:
+    filepath = QUERY_RESPONSES_PATH + f'exec-{currentExecution}/query1.txt'
     with open(filepath, 'w+') as file:
         file.write(response)
 

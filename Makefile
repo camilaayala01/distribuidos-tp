@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-CONTAINER_NAME := tp1-distribuidos-rabbitmq-1
+CONTAINER_NAME := distribuidos-tp-rabbitmq-1
 
 run-rabbit:
 	docker compose -f docker-compose-rabbit.yaml up --build

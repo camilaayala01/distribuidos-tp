@@ -17,12 +17,17 @@ class Client:
         self._queriesReceived = set()
         self._maxData = int(os.getenv('MAX_DATA_BYTES'))
         self._communication = ClientCommunication()
+        self._currentExecution = 1
 
     def isRunning(self):
         return self._working
     
-    def stopWorking(self):
+    def stopWorking(self, _signum, _frame):
         self._working = False
+
+    def reset(self):
+        self._currentExecution += 1
+        self._queriesReceived = set()
 
     def shutdown(self):
         self._communication.stop()
@@ -36,19 +41,19 @@ class Client:
     def receiveQuery1Answer(self, data):
         response = EntryOSCount.deserialize(data)
         logging.info(f'action: store query 1 data | data received: {response}')
-        storeResultsQuery1(str(response))
+        storeResultsQuery1(str(response), self._currentExecution)
 
     def receiveQuery2Answer(self, data, includeHeader: bool):
-        receiveCSVAnswer(data, includeHeader, entryType=EntryNameAvgPlaytime, queryNum=2)
+        receiveCSVAnswer(data, includeHeader, entryType=EntryNameAvgPlaytime, queryNum=2, currentExecution=self._currentExecution)
 
     def receiveQuery3Answer(self, data, includeHeader: bool):
-        receiveCSVAnswer(data, includeHeader, entryType=EntryNameReviewCount, queryNum=3)
+        receiveCSVAnswer(data, includeHeader, entryType=EntryNameReviewCount, queryNum=3, currentExecution=self._currentExecution)
 
     def receiveQuery4Answer(self, data, includeHeader: bool):
-        receiveCSVAnswer(data, includeHeader, entryType=EntryName, queryNum = 4)
+        receiveCSVAnswer(data, includeHeader, entryType=EntryName, queryNum = 4, currentExecution=self._currentExecution)
         
     def receiveQuery5Answer(self, data, includeHeader: bool):
-        receiveCSVAnswer(data, includeHeader, entryType=EntryAppIDName, queryNum=5)
+        receiveCSVAnswer(data, includeHeader, entryType=EntryAppIDName, queryNum=5, currentExecution=self._currentExecution)
 
     def processResponse(self, data: bytes, header: HeaderWithQueryNumber) -> bool:
         logging.info(f'action: receive response for query {header.getQueryNumber()} | {header} | result: success ')
@@ -58,7 +63,7 @@ class Client:
             case 3: self.receiveQuery3Answer(data, header.getFragmentNumber() == 1)
             case 4: self.receiveQuery4Answer(data, header.getFragmentNumber() == 1)
             case 5: self.receiveQuery5Answer(data, header.getFragmentNumber() == 1)
-            case default:
+            case _:
                 raise(Exception("invalid query num"))
             
         return header.isEOF()
@@ -67,6 +72,7 @@ class Client:
         return header._queryNumber in self._queriesReceived
 
     def waitForResponses(self):
+        os.makedirs(f"/responses/exec-{self._currentExecution}", exist_ok=True)
         while not self.isDoneReceiving() and self.isRunning():
             msg = self._communication.receiveFromServer()
             if msg == None:
