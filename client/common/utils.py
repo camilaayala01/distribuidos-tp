@@ -1,15 +1,16 @@
 import csv
 import logging
+import os
 import sys
 from entryParsing.gameEntry import GameEntry
 from entryParsing.reviewEntry import ReviewEntry
 csv.field_size_limit(sys.maxsize)
 
 """ Games storage location. """
-GAMES_STORAGE_FILEPATH = "./datasets/games-reducido.csv"
+GAMES_STORAGE_FILEPATH = os.getenv('GAMES_STORAGE_FILEPATH')
 
 """ Reviews storage location. """
-REVIEWS_STORAGE_FILEPATH = "./datasets/reviews-reducido.csv"
+REVIEWS_STORAGE_FILEPATH = os.getenv('REVIEWS_STORAGE_FILEPATH')
 
 QUERY_RESPONSES_PATH = "/responses"
 
