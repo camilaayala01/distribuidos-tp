@@ -64,9 +64,7 @@ class Client:
         return header.isEOF()
 
     def hasReceivedQueryBefore(self, header: HeaderWithQueryNumber):
-        return header._queryNumber in self._queriesReceived or \
-            header._queryNumber < 0 or \
-            header._queryNumber > QUERY_COUNT
+        return header._queryNumber in self._queriesReceived
 
     def waitForResponses(self):
         while not self.isDoneReceiving() and self.isRunning():
