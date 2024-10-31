@@ -1,17 +1,7 @@
 from enum import Enum
-import os
 from py3langid.langid import classify
 from entryParsing.common.header import Header
-from entryParsing.common.headerWithSender import HeaderWithSender
-from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.entry import EntryInterface
-from entryParsing.entryAppIDName import EntryAppIDName
-from entryParsing.entryAppIDNameGenres import EntryAppIDNameGenres
-from entryParsing.entryAppIDNameGenresReleaseDateAvgPlaytime import EntryAppIDNameGenresReleaseDateAvgPlaytime
-from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
-from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
-from entryParsing.entryNameDateAvgPlaytime import EntryNameDateAvgPlaytime
-from entryParsing.entryNameReleaseDateAvgPlaytime import EntryNameReleaseDateAvgPlaytime
 
 class FiltererType(Enum):
     DECADE = 0
@@ -29,18 +19,6 @@ class FiltererType(Enum):
                 return "indie" in entry.getGenres().lower()
             case FiltererType.ACTION:
                 return "action" in entry.getGenres().lower()
-
-    def getResultingEntry(self, entry: EntryInterface, nextNodeName: str) -> EntryInterface:
-        match self:
-            case FiltererType.DECADE:
-                return EntryNameAvgPlaytime(entry._name, entry._avgPlaytimeForever)
-            case FiltererType.ENGLISH | FiltererType.ACTION:
-                return EntryAppIDName(entry._appID, entry._name)
-            case FiltererType.INDIE:
-                if nextNodeName == "FilterDecade":
-                    return EntryNameReleaseDateAvgPlaytime(entry._name, entry._releaseDate, entry._avgPlaytimeForever)
-                if nextNodeName == "JoinerIndiePositiveReviews":
-                    return EntryAppIDName(entry._appID, entry._name)
 
     def getResultingHeader(self, header: Header, nextNodeName: str) -> EntryInterface:
         match self:

@@ -3,9 +3,9 @@ from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCoun
 from entryParsing.common.fieldLen import QUERY_NUMBER_LEN
 
 class HeaderWithQueryNumber(Header):
-    def __init__(self, clientId: bytes, fragment: int, eof: bool, queryNumber: int):
-        super().__init__(clientId, fragment, eof)
-        self._queryNumber = queryNumber
+    def __init__(self, _clientId: bytes, _fragment: int, _eof: bool, _queryNumber: int):
+        super().__init__(_clientId, _fragment, _eof)
+        self._queryNumber = _queryNumber
 
     def serialize(self) -> bytes:
         return  super().serialize() + serializeQueryNumber(self._queryNumber)
@@ -21,7 +21,7 @@ class HeaderWithQueryNumber(Header):
         return super().size() + QUERY_NUMBER_LEN
 
     @staticmethod
-    def deserialize(data: bytes) -> tuple['Header', bytes]:
+    def deserialize(data: bytes) -> tuple['HeaderWithQueryNumber', bytes]:
         curr = 0
         try:
             clientId, curr = getClientID(curr, data)

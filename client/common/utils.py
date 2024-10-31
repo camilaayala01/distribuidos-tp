@@ -1,19 +1,32 @@
 import csv
+import logging
+import os
 import sys
 from entryParsing.gameEntry import GameEntry
 from entryParsing.reviewEntry import ReviewEntry
 csv.field_size_limit(sys.maxsize)
 
 """ Games storage location. """
-GAMES_STORAGE_FILEPATH = "./datasets/games-reducido.csv"
+GAMES_STORAGE_FILEPATH = os.getenv('GAMES_STORAGE_FILEPATH')
 
 """ Reviews storage location. """
-REVIEWS_STORAGE_FILEPATH = "./datasets/reviews-reducido.csv"
+REVIEWS_STORAGE_FILEPATH = os.getenv('REVIEWS_STORAGE_FILEPATH')
 
-QUERY_RESPONSES_PATH = "/responses"
+QUERY_RESPONSES_PATH = "/responses/"
 
-def storeResultsQuery1(response: str) -> None:
-    filepath = QUERY_RESPONSES_PATH + "/query1.txt"
+def receiveCSVAnswer(data, includeHeader: bool, entryType, queryNum, currentExecution):
+    if includeHeader:
+        storeHeader(entryType.header(), f'exec-{currentExecution}/query{queryNum}.csv')
+    responses = entryType.deserialize(data)
+    csvData, loggingData = "", ""
+    for response in responses:
+        csvData += response.csv()
+        loggingData += str(response)
+    logging.info(f'action: store query {queryNum} data | data received: {loggingData}')
+    storeResultsQuery(csvData, f'exec-{currentExecution}/query{queryNum}.csv')
+
+def storeResultsQuery1(response: str, currentExecution) -> None:
+    filepath = QUERY_RESPONSES_PATH + f'exec-{currentExecution}/query1.txt'
     with open(filepath, 'w+') as file:
         file.write(response)
 
@@ -31,7 +44,7 @@ def loadGames() -> list[GameEntry]: # type: ignore
     with open(GAMES_STORAGE_FILEPATH, 'r') as file:
         reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
         next(reader)  # Skip header
-        for line_number, row in enumerate(reader, start=2):
+        for row in reader:
             try:
                 yield GameEntry(row[0], row[1], row[2], row[3], row[4], row[5],
                                 row[6], row[7], row[9], row[10], row[11], row[12],

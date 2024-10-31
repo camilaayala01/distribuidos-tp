@@ -1,5 +1,4 @@
 from .entry import EntryInterface
-#from .common.utils import boolToInt, intToBool
 from .common.fieldParsing import deserializeBoolean, serializeBoolean
 
 class EntryOSSupport(EntryInterface):

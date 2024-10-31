@@ -31,7 +31,7 @@ class JoinerCount:
         self._currentClient = self._activeClients.setdefault(clientID, ActiveClient(self._joinerCountType.getInitialResults()))
         
     # should have a fragment number to stream results to client
-    def handleMessage(self, ch, method, properties, body):
+    def handleMessage(self, ch, method, _properties, body):
         header, data = self._headerType.deserialize(body)
         clientId = header.getClient()
         self.setCurrentClient(header.getClient())
@@ -58,8 +58,11 @@ class JoinerCount:
     def shouldSendPackets(self, toSend: list[EntryInterface]):
         return self._currentClient.isDone() or (not self._currentClient.isDone() and len(toSend) != 0)
     
+    def getHeader(self, clientId: bytes):
+        return Header(_clientId=clientId, _fragment=self._currentClient._fragment, _eof=self._currentClient.isDone())
+
     def _handleSending(self, ready: list[EntryInterface], clientId):
-        header = self._joinerCountType.getResultingHeader(clientId, self._currentClient._fragment, self._currentClient.isDone())
+        header = self._joinerCountType.getResultingHeader(self.getHeader(clientId))
         if self.shouldSendPackets(ready):
             self._sendToNext(header, ready)
             self._currentClient._fragment += 1

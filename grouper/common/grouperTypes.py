@@ -1,14 +1,9 @@
 from enum import Enum
 from entryParsing.common.header import Header
-from entryParsing.common.headerWithSender import HeaderWithSender
-from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.entry import EntryInterface
-from entryParsing.entryAppID import EntryAppID
-from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
 from entryParsing.entryOSCount import EntryOSCount
-from entryParsing.entryOSSupport import EntryOSSupport
 
 class GrouperType(Enum):
     OS_COUNT= 0
@@ -28,9 +23,9 @@ class GrouperType(Enum):
     
     def buildResultingEntry(self, entry: EntryInterface) -> EntryInterface:
         if self == GrouperType.APP_ID_NAME_COUNT:
-            return EntryAppIDNameReviewCount(entry._appID, entry._name, 1)
+            return EntryAppIDNameReviewCount.fromAnother(entry, _reviewCount=1)
         elif self == GrouperType.APP_ID_COUNT: 
-            return EntryAppIDReviewCount(entry._appID, 1)
+            return EntryAppIDReviewCount.fromAnother(entry, _reviewCount=1)
     
     def getAppIDCountResults(self, entries: list[EntryInterface]) -> list[EntryInterface]:
         appIDCount = {}
@@ -48,9 +43,4 @@ class GrouperType(Enum):
                 return self.getOSCountResults(entries)
             case GrouperType.APP_ID_COUNT | GrouperType.APP_ID_NAME_COUNT: 
                 return self.getAppIDCountResults(entries)
-
-    def getResultingHeader(self, header: Header) -> EntryInterface:
-        # only to allow easy changes
-        return header
-            
     

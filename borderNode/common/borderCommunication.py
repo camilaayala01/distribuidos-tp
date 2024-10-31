@@ -1,5 +1,4 @@
 import os
-import signal
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from internalCommunication.internalCommunication import InternalCommunication
 import zmq
@@ -18,7 +17,7 @@ class BorderNodeCommunication:
         self._clientSocket = socket
         self._clientSocket.setsockopt(zmq.RCVTIMEO, 100)
         # dispatcher
-        self._internalCommunication = InternalCommunication(os.getenv('DISP'), os.getenv('NODE_ID'))
+        self._internalCommunication = InternalCommunication(os.getenv('DISP'))
         self._accepterCommunication = InternalCommunication()
         self._running = True
 
@@ -43,7 +42,7 @@ class BorderNodeCommunication:
         except:
             return None
     
-    def sendClient(self, ch, method, properties, body):
+    def sendClient(self, ch, method, _properties, body):
         if not self.isRunning():
             return
         header, _ = HeaderWithQueryNumber.deserialize(body)

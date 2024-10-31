@@ -27,8 +27,7 @@ def convertFirstLetterToLowerCase(string: str):
 def generateFullPath(path: str, module: str):
     return path + '.' + module
 
-def getModuleFromEnvVars(type: str, path: str):
-    entryType = os.getenv(type)
+def getModuleFromEnvVars(entryType: str, path: str):
     if not entryType:
         raise ValueError("Type environment variable is missing.")
     entryPath = os.getenv(path)
@@ -44,16 +43,22 @@ def getModuleFromEnvVars(type: str, path: str):
         raise ImportError(f"Class '{classImport}' could not be found in module '{moduleName}'.")
 
 def getHeaderTypeFromEnv():
-    return getModuleFromEnvVars('HEADER_TYPE', 'HEADER_PATH')
+    return getModuleFromEnvVars(os.getenv('HEADER_TYPE'), 'HEADER_PATH')
 
 def getEntryTypeFromEnv():
-    return getModuleFromEnvVars('ENTRY_TYPE', 'ENTRY_PATH')
+    return getModuleFromEnvVars(os.getenv('ENTRY_TYPE'), 'ENTRY_PATH')
 
 def getGamesEntryTypeFromEnv():
-    return getModuleFromEnvVars('GAMES_ENTRY_TYPE', 'ENTRY_PATH')
+    return getModuleFromEnvVars(os.getenv('GAMES_ENTRY_TYPE'), 'ENTRY_PATH')
 
 def getReviewsEntryTypeFromEnv():
-    return getModuleFromEnvVars('REVIEWS_ENTRY_TYPE', 'ENTRY_PATH')
+    return getModuleFromEnvVars(os.getenv('REVIEWS_ENTRY_TYPE'), 'ENTRY_PATH')
+
+def getEntryTypeFromString(type: str):
+    return getModuleFromEnvVars(type, 'ENTRY_PATH')
+
+def getHeaderTypeFromString(type: str):
+    return getModuleFromEnvVars(type, 'HEADER_PATH')
 
 def boolToInt(boolean: bool) -> int:
     match boolean:
@@ -88,9 +93,6 @@ def getShardingKey(id: str, nodeCount: int) -> int:
 
 def maxDataBytes(headerType: type) -> int:
     return MAX_PACKET_SIZE - headerType.size()
-
-def amountOfPacketsNeeded(headerType: type, byteCount: int) -> int:
-    return math.ceil(byteCount / maxDataBytes(headerType))
 
 def serializeAndFragmentWithSender(maxDataBytes: int, data: list[EntryInterface], clientId: bytes, senderId: int, fragment: int = 1, hasEOF: bool = True)-> tuple[list[bytes], int]: # recv max data bytes for testing purposes
     from entryParsing.common.headerWithSender import HeaderWithSender

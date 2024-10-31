@@ -4,13 +4,13 @@ from entryParsing.common.fieldParsing import *
 from entryParsing.entry import EntryInterface
 
 class EntryNameDateAvgPlaytime(EntryInterface):
-    def __init__(self, _name: str, _releaseDate: str, _avgPlaytimeForever: int):
-        super().__init__(_name=_name, _releaseDate=_releaseDate, _avgPlaytimeForever=_avgPlaytimeForever)
+    def __init__(self, _name: str, _releaseDate: str, _avgPlaytime: int):
+        super().__init__(_name=_name, _releaseDate=_releaseDate, _avgPlaytime=_avgPlaytime)
 
     def serialize(self) -> bytes:
         nameBytes = fieldParsing.serializeGameName(self._name)
         releaseDateBytes = fieldParsing.serializeReleaseDate(self._releaseDate)
-        avgPlaytimeForeverBytes = fieldParsing.serializePlaytime(self._avgPlaytimeForever)
+        avgPlaytimeForeverBytes = fieldParsing.serializePlaytime(self._avgPlaytime)
         return nameBytes + releaseDateBytes + avgPlaytimeForeverBytes
         
     @classmethod
@@ -18,7 +18,7 @@ class EntryNameDateAvgPlaytime(EntryInterface):
         name, curr = fieldParsing.deserializeGameName(curr, data)
         releaseDate, curr = fieldParsing.deserializeReleaseDate(curr, data)
         avgPlaytimeForever, curr = fieldParsing.deserializePlaytime(curr, data)
-        return cls(_name=name, _releaseDate=releaseDate, _avgPlaytimeForever=avgPlaytimeForever), curr
+        return cls(_name=name, _releaseDate=releaseDate, _avgPlaytime=avgPlaytimeForever), curr
     
     @classmethod
     def deserialize(cls, data: bytes): 

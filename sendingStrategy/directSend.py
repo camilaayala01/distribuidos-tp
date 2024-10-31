@@ -13,9 +13,10 @@ class DirectSend(SendingStrategy):
         self.shardAndSend(middleware, header, batch)
     
     def shardByFragmentNumber(self, middleware: InternalCommunication, header: Header, batch: list[EntryInterface]):
-        msg = header.serialize()
+        headerSerialized = self._nextNode.headerForNextNode(header).serialize()
+        msg = headerSerialized
         for entry in batch:
-            msg += entry.serialize()
+            msg += self._nextNode.entryForNextNode(entry).serialize()
 
         shardingKey = header.getFragmentNumber() % self._nextNode._count
         
@@ -25,7 +26,7 @@ class DirectSend(SendingStrategy):
                 if shardingKey == i:
                     middleware.directSend(self._nextNode._queueName, str(i), msg)
                 else:
-                    middleware.directSend(self._nextNode._queueName, str(i), header.serialize())
+                    middleware.directSend(self._nextNode._queueName, str(i), headerSerialized)
         else:
             # only send to the corresponding node
             middleware.directSend(self._nextNode._queueName, str(shardingKey), msg)
@@ -34,9 +35,9 @@ class DirectSend(SendingStrategy):
         resultingBatches = [bytes() for _ in range(self._nextNode._count)]
         for entry in batch:
             routingKey = getShardingKey(entry._appID, self._nextNode._count)
-            resultingBatches[routingKey] += entry.serialize()
+            resultingBatches[routingKey] += self._nextNode.entryForNextNode(entry).serialize()
 
-        serializedHeader = header.serialize()
+        serializedHeader = self._nextNode.headerForNextNode(header).serialize()
         for i in range(self._nextNode._count):
             middleware.directSend(self._nextNode._queueName, str(i), serializedHeader + resultingBatches[i])
 

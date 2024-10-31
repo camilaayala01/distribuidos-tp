@@ -91,13 +91,6 @@ def deserializePlaytime(curr: int, data: bytes)-> tuple[int, int]:
     avgPlaytime = int.from_bytes(data[curr:curr + fieldLen.AVG_PLAYTIME_LEN], 'big')
     return avgPlaytime, curr + fieldLen.AVG_PLAYTIME_LEN
 
-def serializeTopCount(top: int):
-    return top.to_bytes(fieldLen.TOP_BYTES_LEN,'big')
-
-def deserializeTopCount(curr: int, data: bytes)-> tuple[int, int]:
-    top = int.from_bytes(data[curr:curr + fieldLen.TOP_BYTES_LEN], 'big')
-    return top, curr + fieldLen.TOP_BYTES_LEN
-
 def serializeQueryNumber(queryNumber: int):
     return queryNumber.to_bytes(fieldLen.QUERY_NUMBER_LEN,'big')
 

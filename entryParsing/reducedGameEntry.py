@@ -1,5 +1,5 @@
 from entryParsing.common import fieldParsing, fieldLen
-from entryParsing.gameEntry import *
+from entryParsing.entry import EntryInterface
 
 class ReducedGameEntry(EntryInterface):
     def __init__(self, _appID, _name, _releaseDate, _windows, _mac, _linux, _avgPlaytime, _genres):
