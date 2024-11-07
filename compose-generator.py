@@ -30,7 +30,7 @@ def add_client_with_id(compose: dict[str, Any], client_id: int,):
         'volumes':[
             './entryParsing:/entryParsing',
             '~/.kaggle/distribuidos:/datasets',
-            f'./client{client_id}/responses:/responses',
+            f'./client-{client_id}/responses:/responses',
         ],
         'networks': default_network(),
         'depends_on':
@@ -60,6 +60,11 @@ def default_volumes():
             './entryParsing:/entryParsing',
             './sendingStrategy:/sendingStrategy'
     ]
+
+def stateful_volumes(type, name, node_id):
+    if node_id is None:
+        return f'./{type}/{name}:/'
+    return f'./{type}/{name}-{node_id}:/'
 
 def default_network():
     return [
@@ -179,7 +184,7 @@ def add_joiner(compose: dict[str, Any], params):
         'build': rabbit_node_build('./joiner'),
         'environment': add_to_list(default_environment(queue), add_to_list(joiner_nodes_environment(next_nodes, review_entry_type, game_entry_type), [f'JOINER_TYPE={type}', f'NODE_ID={node_id}'])),
         'env_file': default_env_file(),
-        'volumes': add_to_list(default_volumes(), ['./packetTracker:/packetTracker']),
+        'volumes': add_to_list(default_volumes(), ['./packetTracker:/packetTracker', stateful_volumes('joiner', container_name, node_id)]),
         'networks': default_network()
     }
     return compose, container_name

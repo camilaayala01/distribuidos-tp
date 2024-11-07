@@ -1,4 +1,5 @@
 import os
+import uuid
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from internalCommunication.internalCommunication import InternalCommunication
 import zmq
@@ -8,6 +9,7 @@ from entryParsing.common.utils import initializeLog
 PREFETCH_COUNT = 1 # break round robin
 DELIVERY_MODE = 1 # make message transient, es lo mismo por ahora
 PRINT_FREQUENCY = 1000
+
 class BorderNodeCommunication:
     def __init__(self):
         initializeLog()

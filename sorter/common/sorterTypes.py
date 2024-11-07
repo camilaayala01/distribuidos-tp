@@ -20,13 +20,6 @@ class SorterType(Enum):
                 return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')))
             case _:
                 return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')))
-    
-    def topHasCapacity(self, newElementsAmount: int, topAmount: int):
-        match self:
-            case SorterType.CONSOLIDATOR_PERCENTILE:
-                return True
-            case _:
-                return newElementsAmount < topAmount
         
     def getBatchTop(self, batch: list[EntrySorterTopFinder], topAmount: int, entryType: type):
         match self:

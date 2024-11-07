@@ -8,7 +8,7 @@ from .sorterTypes import SorterType
 from .activeClient import ActiveClient
 
 PRINT_FREQUENCY=500
-
+PATH="/client-"
 class Sorter:
     def __init__(self):
         initializeLog()
@@ -26,6 +26,11 @@ class Sorter:
 
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
+
+    def topHasCapacity(self, newElementsAmount: int, topAmount: int):
+        if self._topAmount is None:
+            return True
+        return newElementsAmount < topAmount
 
     def mergeKeepTop(self, batch: list[EntrySorterTopFinder]):
         if len(batch) == 0:
@@ -64,6 +69,7 @@ class Sorter:
         for pack in data:
             self._sendToNext(pack)
 
+        ##
         self._activeClients.pop(clientId)
     
     def setCurrentClient(self, clientID: bytes):
