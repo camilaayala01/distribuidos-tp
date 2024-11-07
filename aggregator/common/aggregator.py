@@ -4,17 +4,17 @@ from entryParsing.common.header import Header
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
 from .activeClient import ActiveClient
-from .joinerCountTypes import JoinerCountType
+from .aggregatorTypes import AggregatorTypes
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
 from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
 PRINT_FREQ = 1000
 
-class JoinerCount:
+class Aggregator:
     def __init__(self):
         initializeLog()
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), os.getenv('NODE_ID'))
-        self._joinerCountType = JoinerCountType(int(os.getenv('JOINER_COUNT_TYPE')))
+        self._aggregatorType = AggregatorTypes(int(os.getenv('JOINER_COUNT_TYPE')))
         self._entryType = getEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv() 
         self._sendingStrategies = createStrategiesFromNextNodes()
@@ -28,9 +28,29 @@ class JoinerCount:
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 
     def setCurrentClient(self, clientID: bytes):
-        self._currentClient = self._activeClients.setdefault(clientID, ActiveClient(self._joinerCountType.getInitialResults()))
-        
-    # should have a fragment number to stream results to client
+        self._currentClient = self._activeClients.setdefault(clientID, ActiveClient(self._aggregatorType.getInitialResults(), self._aggregatorType.initializeTracker()))
+
+    def _sendToNext(self, header: Header, entries: list[EntryInterface]):
+        for strategy in self._sendingStrategies:
+            strategy.send(self._internalCommunication, header, entries)
+
+    def shouldSendPackets(self, toSend: list[EntryInterface]):
+        return self._currentClient.isDone() or (not self._currentClient.isDone() and len(toSend) != 0)
+    
+    def getHeader(self, clientId: bytes):
+        return Header(_clientId=clientId, _fragment=self._currentClient._fragment, _eof=self._currentClient.isDone())
+
+    def _handleSending(self, ready: list[EntryInterface], clientId):
+        header = self._aggregatorType.getResultingHeader(self.getHeader(clientId))
+        if self.shouldSendPackets(ready):
+            self._sendToNext(header, ready)
+            self._currentClient._fragment += 1
+            
+        self._activeClients[clientId] = self._currentClient
+
+        if self._currentClient.isDone():
+            self._activeClients.pop(clientId)
+
     def handleMessage(self, ch, method, _properties, body):
         header, data = self._headerType.deserialize(body)
         clientId = header.getClient()
@@ -44,30 +64,9 @@ class JoinerCount:
         self._currentClient.update(header)
         entries = self._entryType.deserialize(data)
         
-        toSend, self._currentClient._counts, self._currentClient._sent = self._joinerCountType.handleResults(entries, 
-                                                                               self._currentClient._counts, 
+        toSend, self._currentClient._partialRes, self._currentClient._sent = self._aggregatorType.handleResults(entries, 
+                                                                               self._currentClient._partialRes, 
                                                                                self._currentClient.isDone(), 
-                                                                               self._currentClient._sent)
+                                                                          self._currentClient._sent) #partialRes es count
         self._handleSending(toSend, clientId)
         ch.basic_ack(delivery_tag = method.delivery_tag)
-
-    def _sendToNext(self, header: Header, entries: list[EntryInterface]):
-        for strategy in self._sendingStrategies:
-            strategy.send(self._internalCommunication, header, entries)
-
-    def shouldSendPackets(self, toSend: list[EntryInterface]):
-        return self._currentClient.isDone() or (not self._currentClient.isDone() and len(toSend) != 0)
-    
-    def getHeader(self, clientId: bytes):
-        return Header(_clientId=clientId, _fragment=self._currentClient._fragment, _eof=self._currentClient.isDone())
-
-    def _handleSending(self, ready: list[EntryInterface], clientId):
-        header = self._joinerCountType.getResultingHeader(self.getHeader(clientId))
-        if self.shouldSendPackets(ready):
-            self._sendToNext(header, ready)
-            self._currentClient._fragment += 1
-            
-        self._activeClients[clientId] = self._currentClient
-
-        if self._currentClient.isDone():
-            self._activeClients.pop(clientId)

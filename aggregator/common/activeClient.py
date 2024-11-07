@@ -2,11 +2,11 @@ from entryParsing.common.header import Header
 from packetTracker.defaultTracker import DefaultTracker
 
 class ActiveClient:
-    def __init__(self, initialResults):
+    def __init__(self, initialResults, tracker):
         self._fragment = 1
-        self._tracker = DefaultTracker()
+        self._tracker = tracker
         self._sent = set()
-        self._counts = initialResults
+        self._partialRes = initialResults
 
     def isDone(self):
         return self._tracker.isDone()
