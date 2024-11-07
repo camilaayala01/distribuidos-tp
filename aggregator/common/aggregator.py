@@ -14,7 +14,7 @@ class Aggregator:
     def __init__(self):
         initializeLog()
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), os.getenv('NODE_ID'))
-        self._aggregatorType = AggregatorTypes(int(os.getenv('JOINER_COUNT_TYPE')))
+        self._aggregatorType = AggregatorTypes(int(os.getenv('AGGREGATOR_TYPE')))
         self._entryType = getEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv() 
         self._sendingStrategies = createStrategiesFromNextNodes()

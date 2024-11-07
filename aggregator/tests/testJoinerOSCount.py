@@ -14,7 +14,7 @@ class TestJoinerOSCount(unittest.TestCase):
             EntryOSCount(1, 2, 3, 5),
             EntryOSCount(1, 2, 3, 5),
         ]
-        os.environ['JOINER_COUNT_TYPE'] = '0'
+        os.environ['AGGREGATOR_TYPE'] = '0'
         os.environ['LISTENING_QUEUE'] = 'JoinerOsCounts'
         os.environ['NEXT_NODES'] = 'Some'
         os.environ['ENTRY_PATH']='entryParsing'
