@@ -7,17 +7,30 @@ from entryParsing.entry import EntryInterface
 from entryParsing.entryName import EntryName
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from entryParsing.entryOSCount import EntryOSCount
+from packetTracker.defaultTracker import DefaultTracker
+from packetTracker.multiTracker import MultiTracker
+from packetTracker.packetTracker import PacketTracker
 
-class JoinerCountType(Enum):
+class AggregatorTypes(Enum):
     OS = 0
     ENGLISH = 1
-            
+    INDIE = 2
+    
+    def initializeTracker(self) -> PacketTracker:
+        match self:
+            case AggregatorTypes.OS:
+                return DefaultTracker()
+            case _:
+                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')))
+
     def getInitialResults(self):
         match self:
-            case JoinerCountType.ENGLISH:
+            case AggregatorTypes.ENGLISH:
                 return {}
-            case JoinerCountType.OS:
+            case AggregatorTypes.OS:
                 return EntryOSCount(0,0,0,0)
+            case _:
+                return None
       
     def getEnglishCountResults(self, priorResults, entries, sent):
         toSend = []
@@ -36,26 +49,31 @@ class JoinerCountType(Enum):
                 priorResults[id] = priorEntry
 
         return toSend, priorResults, sent
-
+    
     def getOSCountResults(self, priorResult, entry, isDone):
         priorResult.sumEntry(entry)
         if not isDone:
             return [], priorResult, set()
         return [priorResult], self.getInitialResults(), set()
-        
+    
+    def getIndieResults(self, entries):
+        return entries, self.getInitialResults(), set()
+    
     # returns toSend, joinedEntries, sent set
     def handleResults(self, entries, priorResult, isDone, sent):
         match self:
-            case JoinerCountType.ENGLISH:
+            case AggregatorTypes.ENGLISH:
                 return self.getEnglishCountResults(priorResult, entries, sent)
-            case JoinerCountType.OS:
-                return self.getOSCountResults(priorResult, entries, isDone) 
+            case AggregatorTypes.OS:
+                return self.getOSCountResults(priorResult, entries, isDone)
+            case AggregatorTypes.INDIE:
+                return self.getIndieResults(entries)
 
     def getResultingHeader(self, header: Header) -> EntryInterface:
         match self:
-            case JoinerCountType.ENGLISH:
-                return HeaderWithSender.fromAnother(header, _senderID=int(os.getenv('NODE_ID')))
-            case JoinerCountType.OS:
+            case AggregatorTypes.OS | AggregatorTypes.ENGLISH:
                 return HeaderWithQueryNumber.fromAnother(header, _queryNumber=int(os.getenv('QUERY_NUMBER')))
+            case _:
+                return header
                 
                

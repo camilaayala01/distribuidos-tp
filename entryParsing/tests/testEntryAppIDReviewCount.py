@@ -19,11 +19,11 @@ class TestEntryAppID(unittest.TestCase):
         deserialized = EntryAppIDReviewCount.deserialize(serialized)
         self.assertEqual(len(serialized), expectedLen)
         self.assertEqual(deserialized[0]._appID, self._entry1._appID)
-        self.assertEqual(deserialized[0]._count, self._entry1._count)
+        self.assertEqual(deserialized[0]._reviewCount, self._entry1._reviewCount)
         self.assertEqual(deserialized[1]._appID, self._entry2._appID)
-        self.assertEqual(deserialized[1]._count, self._entry2._count)
+        self.assertEqual(deserialized[1]._reviewCount, self._entry2._reviewCount)
         self.assertEqual(deserialized[2]._appID, self._entry3._appID)
-        self.assertEqual(deserialized[2]._count, self._entry3._count)
+        self.assertEqual(deserialized[2]._reviewCount, self._entry3._reviewCount)
         self.assertEqual(len(deserialized), 3)
 
 if __name__ == "__main__":

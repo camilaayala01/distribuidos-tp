@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-CONTAINER_NAME := distribuidos-tp-rabbitmq-1
+CONTAINER_NAME := tp1-distribuidos-rabbitmq-1
 
 run-rabbit:
 	docker compose -f docker-compose-rabbit.yaml up --build
@@ -19,11 +19,11 @@ purge-queues:
 .PHONY: purge-queues
 
 run:
-	docker compose -f docker-compose-dev.yaml up --build
+	docker compose -f docker-compose-test.yaml up --build
 .PHONY: run
 
 stop:
-	docker compose -f docker-compose-dev.yaml stop -t 10
-	docker compose -f docker-compose-dev.yaml down
+	docker compose -f docker-compose-test.yaml stop -t 10
+	docker compose -f docker-compose-test.yaml down
 	docker image prune -f
 .PHONY: stop
