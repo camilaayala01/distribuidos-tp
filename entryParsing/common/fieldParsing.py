@@ -111,5 +111,13 @@ def serializeSignedInt(number: int):
 def deserializeSignedInt(curr: int, data: bytes) -> int:
     return struct.unpack('b', data[curr:curr+1])[0], curr + 1
 
-def getClientID(curr: int, data: bytes) -> bytes:
+def getClientID(curr: int, data: bytes) -> tuple[bytes, int]:
     return data[curr:curr + fieldLen.CLIENT_ID_LEN], curr + fieldLen.CLIENT_ID_LEN
+
+def deserializeClientID(data: bytes)-> int:
+    count = int.from_bytes(data, 'big')
+    return count
+
+def serializeClientID(id: int)-> bytes:
+    idBytes = id.to_bytes(fieldLen.CLIENT_ID_LEN, 'big')
+    return idBytes
