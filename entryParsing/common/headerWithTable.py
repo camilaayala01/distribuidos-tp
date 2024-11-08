@@ -20,15 +20,12 @@ class HeaderWithTable(Header):
     def serialize(self) -> bytes:
         return super().serialize() + serializeTable(self._table)
     
-    def serializeWithoutTable(self) -> bytes:
-        return super().serialize()
-    
     @classmethod
     def size(cls):
         return super().size() + TABLE_LEN
     
     def __str__(self):
-        return f"fragment: {self._fragment} | eof: {self._eof} | table: {self._table}"
+        return f" clientID: {self._clientId}, fragment: {self._fragment} | eof: {self._eof} | table: {self._table}"
     
     @staticmethod
     def deserialize(data: bytes) -> tuple['HeaderWithTable', bytes]:
@@ -40,5 +37,5 @@ class HeaderWithTable(Header):
             table, curr = deserializeTable(curr, data)
         except (IndexError, UnicodeDecodeError):
             raise Exception("There was an error parsing data in header")
-        
+
         return HeaderWithTable(clientId, table, fragment, eof), data[curr:]
