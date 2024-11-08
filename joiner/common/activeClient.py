@@ -3,14 +3,15 @@ from entryParsing.entry import EntryInterface
 from packetTracker.defaultTracker import DefaultTracker
 
 class ActiveClient:
-    def __init__(self):
+    def __init__(self, clientId: str):
+        self._clientId = clientId
         self._fragment = 1
         self._games = {} #appid, name
         self._unjoinedReviews = []
         self._joinedEntries = {} #appid, entryType
         self._sent = set() 
-        self._gamesTracker = DefaultTracker()
-        self._reviewsTracker = DefaultTracker()
+        self._gamesTracker = DefaultTracker(clientId)
+        self._reviewsTracker = DefaultTracker(clientId)
 
     def finishedReceiving(self):
         return self._gamesTracker.isDone() and self._reviewsTracker.isDone()

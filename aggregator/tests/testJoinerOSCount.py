@@ -22,7 +22,7 @@ class TestJoinerOSCount(unittest.TestCase):
         os.environ['HEADER_PATH']='entryParsing.common'
         os.environ['HEADER_TYPE']='Header'
         self.joiner = Aggregator()
-        self.joiner._currentClient = ActiveClient(self.joiner._aggregatorType.getInitialResults(), DefaultTracker())
+        self.joiner._currentClient = ActiveClient(self.joiner._aggregatorType.getInitialResults(), DefaultTracker("test"))
 
     def testCountEntries(self):
         results = self.joiner._currentClient._partialRes

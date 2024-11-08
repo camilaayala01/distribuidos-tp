@@ -2,12 +2,13 @@ from entryParsing.common.header import Header
 from packetTracker.tracker import TrackerInterface
 
 class PacketTracker(TrackerInterface):
-    def __init__(self, nodesInCluster: int, module: int):
+    def __init__(self, nodesInCluster: int, module: int, storagePath: str):
         self._nodesInCluster = nodesInCluster
         self._module = module
         self._biggestFragment = 0
         self._pending = set()
         self._receivedEnd = False
+        self._storagePath = storagePath
 
     def isDuplicate(self, header: Header):
         newFrag = header.getFragmentNumber()

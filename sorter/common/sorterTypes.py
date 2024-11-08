@@ -14,12 +14,12 @@ class SorterType(Enum):
     CONSOLIDATOR_INDIE = 3
     CONSOLIDATOR_PERCENTILE = 4
 
-    def initializeTracker(self) -> PacketTracker:
+    def initializeTracker(self, clientId) -> PacketTracker:
         match self:
             case SorterType.PLAYTIME | SorterType.INDIE:
-                return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')))
+                return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')), clientId)
             case _:
-                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')))
+                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), clientId)
         
     def getBatchTop(self, batch: list[EntrySorterTopFinder], topAmount: int, entryType: type):
         match self:

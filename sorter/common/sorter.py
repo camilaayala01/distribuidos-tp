@@ -9,6 +9,7 @@ from .activeClient import ActiveClient
 
 PRINT_FREQUENCY=500
 PATH="/client-"
+
 class Sorter:
     def __init__(self):
         initializeLog()
@@ -49,7 +50,7 @@ class Sorter:
                 mergedList.append(newBatchTop[j])
                 j += 1
         
-        if self._sorterType.topHasCapacity(newElementsAmount=len(mergedList), topAmount=self._topAmount):
+        if self.topHasCapacity(newElementsAmount=len(mergedList), topAmount=self._topAmount):
             # only 1 will have elements
             mergedList.extend(self._currentClient._partialTop[i:])
             mergedList.extend(newBatchTop[j:])
@@ -69,11 +70,10 @@ class Sorter:
         for pack in data:
             self._sendToNext(pack)
 
-        ##
         self._activeClients.pop(clientId)
     
-    def setCurrentClient(self, clientID: bytes):
-        self._currentClient = self._activeClients.setdefault(clientID, ActiveClient(self._sorterType.initializeTracker()))
+    def setCurrentClient(self, clientId: bytes):
+        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(self._sorterType.initializeTracker(clientId)))
         
     def handleMessage(self, ch, method, _properties, body):
         header, batch = self._headerType.deserialize(body)

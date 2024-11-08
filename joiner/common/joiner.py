@@ -74,8 +74,8 @@ class Joiner:
         for packet in packets:
             self._sendToNext(packet)
         
-    def setCurrentClient(self, clientID: bytes):
-        self._currentClient = self._activeClients.setdefault(clientID, ActiveClient())
+    def setCurrentClient(self, clientId: bytes):
+        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(clientId))
 
     def _sendToNext(self, msg: bytes):
         for strategy in self._sendingStrategies:

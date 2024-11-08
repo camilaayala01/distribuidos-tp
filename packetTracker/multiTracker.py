@@ -3,8 +3,8 @@ from packetTracker.defaultTracker import DefaultTracker
 from packetTracker.tracker import TrackerInterface
 
 class MultiTracker(TrackerInterface):
-    def __init__(self, priorNodeCount: int):
-        self._trackers = [DefaultTracker() for _ in range(priorNodeCount)]
+    def __init__(self, priorNodeCount: int, storagePath: str):
+        self._trackers = [DefaultTracker(storagePath) for _ in range(priorNodeCount)]
 
     def getProcessingTracker(self, header: HeaderWithSender):
         return self._trackers[header.getSenderID()]

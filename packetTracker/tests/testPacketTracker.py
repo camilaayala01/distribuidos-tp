@@ -7,7 +7,7 @@ class TestPacketTracker(unittest.TestCase):
     def setUp(self):
         # this tracker expects even numbers
         self.tracker = PacketTracker(nodesInCluster=2, module=0)
-        self.defaultTracker = DefaultTracker()
+        self.defaultTracker = DefaultTracker("test")
     
     def testisDuplicateBiggerThanPriorBiggest(self):
         header = Header(_clientId=bytes(), _fragment=5, _eof=False)
