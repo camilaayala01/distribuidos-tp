@@ -1,21 +1,26 @@
 import os
+from entryParsing.common.fieldParsing import serializeClientID
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
+from entryParsing.common.messageType import MessageType
 from internalCommunication.internalCommunication import InternalCommunication
 import zmq
+import uuid
 import logging
 from entryParsing.common.utils import initializeLog
 
 PREFETCH_COUNT = 1 # break round robin
 DELIVERY_MODE = 1 # make message transient, es lo mismo por ahora
 PRINT_FREQUENCY = 1000
+
 class BorderNodeCommunication:
     def __init__(self):
         initializeLog()
         context = zmq.Context()
         socket = context.socket(zmq.ROUTER)
-        socket.bind("tcp://*:5556")
+        socket.bind("tcp://*:5556") #TODO: SACAR HARDCODEO
         self._clientSocket = socket
-        self._clientSocket.setsockopt(zmq.RCVTIMEO, 100)
+        self._clientSocket.setsockopt(zmq.RCVTIMEO, 10000) #TODO: PENSARLO
+        self._currentClientID = 1
         # dispatcher
         self._internalCommunication = InternalCommunication(os.getenv('DISP'))
         self._accepterCommunication = InternalCommunication()
@@ -37,7 +42,11 @@ class BorderNodeCommunication:
 
     def receiveFromClient(self):
         try:
-            id, msg = self._clientSocket.recv_multipart()
+            id, data = self._clientSocket.recv_multipart()  
+            type, msg = MessageType.deserialize(data)
+            if type == MessageType.CONNECT:
+                self._clientSocket.send_multipart([id, uuid.uuid4().bytes])
+                return None
             return id + msg
         except:
             return None
