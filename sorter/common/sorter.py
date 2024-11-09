@@ -33,16 +33,30 @@ class Sorter:
             return True
         return newElementsAmount < self._topAmount
 
+    def getBatchTop(self, batch: list[EntrySorterTopFinder]):
+        sortedBatch = self._entryType.sort(batch, True)
+        if self._topAmount is None:
+            return sortedBatch
+        return sortedBatch[:self._topAmount]
+            
+    def mustElementGoFirst(self, first: EntrySorterTopFinder, other: EntrySorterTopFinder):
+        return first.isGreaterThanOrEqual(other)
+            
+    def updatedPartialTop(self, newOrderedList: list[EntrySorterTopFinder]):
+        if self._topAmount is None:
+            return newOrderedList
+        return newOrderedList[:self._topAmount]
+
     def mergeKeepTop(self, batch: list[EntrySorterTopFinder]):
         if len(batch) == 0:
             return
         
-        newBatchTop = self._sorterType.getBatchTop(batch, self._topAmount, self._entryType)
+        newBatchTop = self.getBatchTop(batch)
         i, j = 0, 0
         mergedList = []
 
         while i < len(self._currentClient._partialTop) and j < len(newBatchTop):
-            if self._sorterType.mustElementGoFirst(self._currentClient._partialTop[i], newBatchTop[j]):
+            if self.mustElementGoFirst(self._currentClient._partialTop[i], newBatchTop[j]):
                 mergedList.append(self._currentClient._partialTop[i])
                 i += 1
             else:
@@ -53,7 +67,7 @@ class Sorter:
             # only 1 will have elements
             mergedList.extend(self._currentClient._partialTop[i:])
             mergedList.extend(newBatchTop[j:])
-        self._currentClient._partialTop = self._sorterType.updatePartialTop(mergedList, self._topAmount)
+        self._currentClient._partialTop = self.updatedPartialTop(mergedList)
         
     def _sendToNext(self, msg: bytes):
         for strategy in self._sendingStrategies:

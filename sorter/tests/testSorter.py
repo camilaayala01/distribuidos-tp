@@ -64,9 +64,10 @@ class TestSorterGeneral(unittest.TestCase):
         return entries
 
     def testGetBatchTopInAscendingOrder(self):
-        result = self.sorterAction._sorterType.getBatchTop(self.entriesMore, self.sorterAction._topAmount, self.sorterAction._entryType)
+        result = self.sorterAction.getBatchTop(self.entriesMore)
         topNames = [entry._name for entry in result]
-        expectedNames = ["Game F", "Game G", "Game I", "Game H"]
+        expectedNames = ["Game H", "Game I", "Game G", "Game F"]
+
 
         self.assertEqual(len(result), len(self.entriesMore))
         self.assertEqual(topNames, expectedNames)
@@ -79,11 +80,11 @@ class TestSorterGeneral(unittest.TestCase):
         self.sorterAction.mergeKeepTop(entries1)
         self.sorterAction.mergeKeepTop(entries2)
         for i in range(len(self.sorterAction._currentClient._partialTop) - 1):
-            self.assertFalse(self.sorterAction._currentClient._partialTop[i].isGreaterThan(self.sorterAction._currentClient._partialTop[i + 1]))
+            self.assertTrue(self.sorterAction._currentClient._partialTop[i].isGreaterThanOrEqual(self.sorterAction._currentClient._partialTop[i + 1]))
         self.assertEqual(len(self.sorterAction._currentClient._partialTop), len(entries1) + len(entries2))
 
     def testGetBatchTopWithEqualEntriesToTop(self):
-        result = self.sorterIndieFew._sorterType.getBatchTop(self.entriesEqual, self.sorterIndieFew._topAmount, self.sorterIndieFew._entryType)
+        result = self.sorterIndieFew.getBatchTop(self.entriesEqual)
         topNames = [entry._name for entry in result]
         expectedNames = ["Game C", "Game B", "Game A"]
 
@@ -91,7 +92,7 @@ class TestSorterGeneral(unittest.TestCase):
         self.assertEqual(topNames, expectedNames)
 
     def testGetBatchTopWithLessEntriesThanTop(self):
-        result = self.sorterIndieFew._sorterType.getBatchTop(self.entriesLess, self.sorterIndieFew._topAmount, self.sorterIndieFew._entryType)
+        result = self.sorterIndieFew.getBatchTop(self.entriesLess)
         topNames = [entry._name for entry in result]
         expectedNames = ["Game E", "Game D"]
 
@@ -99,7 +100,7 @@ class TestSorterGeneral(unittest.TestCase):
         self.assertEqual(topNames, expectedNames)
 
     def testGetBatchTopMoreThanTop(self):
-        result = self.sorterIndieFew._sorterType.getBatchTop(self.entriesMore,self.sorterIndieFew._topAmount, self.sorterIndieFew._entryType)
+        result = self.sorterIndieFew.getBatchTop(self.entriesMore)
         topNames = [entry._name for entry in result]
         expectedNames = ["Game H", "Game I", "Game G"]
 
@@ -121,7 +122,7 @@ class TestSorterGeneral(unittest.TestCase):
     @patch('os.makedirs', MagicMock(return_value=None))
     def testMergeWithBiggerAmountThanTop(self):
         allEntries = self.entriesEqual + self.entriesLess + self.entriesMore
-        ordered = self.sorterBig._sorterType.getBatchTop(allEntries, self.sorterBig._topAmount, self.sorterBig._entryType)
+        ordered = self.sorterBig.getBatchTop(allEntries)
         self.sorterBig._currentClient= ActiveClient(self.sorterBig._sorterType.initializeTracker(self._clientId))
         self.sorterBig.mergeKeepTop(self.entriesMore)
         self.sorterBig.mergeKeepTop(self.entriesLess)

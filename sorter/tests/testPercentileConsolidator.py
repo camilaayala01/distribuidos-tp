@@ -26,13 +26,13 @@ class TestSorterGeneral(unittest.TestCase):
         return entries
 
     def testUniqueValues(self):
-        results = self.consolidator._sorterType.filterByPercentile(self.generateEntries([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]))
-        self.assertEqual(9, results[0].getCount())
-        self.assertEqual(10, results[1].getCount())
+        results = self.consolidator._sorterType.filterByPercentile(self.generateEntries([10, 9, 8, 7, 6, 5, 4, 3, 2, 1]))
+        self.assertEqual(10, results[0].getCount())
+        self.assertEqual(9, results[1].getCount())
         self.assertEqual(len(results), 2)
 
     def testSomeRepeatedValues(self):
-        results = self.consolidator._sorterType.filterByPercentile(self.generateEntries([1, 2, 2, 2, 3, 3, 4, 5, 5, 5]))
+        results = self.consolidator._sorterType.filterByPercentile(self.generateEntries([5, 5, 5, 4, 3, 3, 2, 2, 2, 1]))
         self.assertEqual(5, results[0].getCount())
         self.assertEqual(5, results[1].getCount())
         self.assertEqual(5, results[2].getCount())
@@ -45,7 +45,7 @@ class TestSorterGeneral(unittest.TestCase):
         self.assertEqual(len(results), len(data))
 
     def testSmallList(self):
-        results = self.consolidator._sorterType.filterByPercentile(self.generateEntries([1, 2, 3]))
+        results = self.consolidator._sorterType.filterByPercentile(self.generateEntries([3, 2, 1]))
         self.assertEqual(3, results[0].getCount())
         self.assertEqual(len(results), 1)
 
