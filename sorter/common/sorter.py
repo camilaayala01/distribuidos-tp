@@ -28,17 +28,16 @@ class Sorter:
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 
-    def topHasCapacity(self, newElementsAmount: int, topAmount: int):
+    def topHasCapacity(self, newElementsAmount: int):
         if self._topAmount is None:
             return True
-        return newElementsAmount < topAmount
+        return newElementsAmount < self._topAmount
 
     def mergeKeepTop(self, batch: list[EntrySorterTopFinder]):
         if len(batch) == 0:
             return
         
         newBatchTop = self._sorterType.getBatchTop(batch, self._topAmount, self._entryType)
-
         i, j = 0, 0
         mergedList = []
 
@@ -50,11 +49,10 @@ class Sorter:
                 mergedList.append(newBatchTop[j])
                 j += 1
         
-        if self.topHasCapacity(newElementsAmount=len(mergedList), topAmount=self._topAmount):
+        if self.topHasCapacity(newElementsAmount=len(mergedList)):
             # only 1 will have elements
             mergedList.extend(self._currentClient._partialTop[i:])
             mergedList.extend(newBatchTop[j:])
-
         self._currentClient._partialTop = self._sorterType.updatePartialTop(mergedList, self._topAmount)
         
     def _sendToNext(self, msg: bytes):
