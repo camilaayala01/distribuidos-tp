@@ -115,5 +115,5 @@ def deserializeSignedInt(curr: int, data: bytes) -> int:
 def getClientID(curr: int, data: bytes) -> tuple[bytes, int]:
     return data[curr:curr + fieldLen.CLIENT_ID_LEN], curr + fieldLen.CLIENT_ID_LEN
 
-def getClientIDString(clientId: bytes):
+def getClientIdUUID(clientId: bytes):
     return uuid.UUID(bytes=clientId)

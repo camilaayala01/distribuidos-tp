@@ -1,5 +1,6 @@
 import logging
 import os
+from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
@@ -43,6 +44,7 @@ class Sorter:
         return first.isGreaterThanOrEqual(other)
             
     def updatedPartialTop(self, newOrderedList: list[EntrySorterTopFinder]):
+        # replace with a function that replaces tmp file with 
         if self._topAmount is None:
             return newOrderedList
         return newOrderedList[:self._topAmount]
@@ -55,12 +57,15 @@ class Sorter:
         i, j = 0, 0
         mergedList = []
 
-        while i < len(self._currentClient._partialTop) and j < len(newBatchTop):
+        while i < len(self._currentClient._partialTop) and j < len(newBatchTop) and self.topHasCapacity(len(mergedList)):
             if self.mustElementGoFirst(self._currentClient._partialTop[i], newBatchTop[j]):
                 mergedList.append(self._currentClient._partialTop[i])
+                self._currentClient.storeEntry(self._currentClient._partialTop[i])
+                # next(partialTop)
                 i += 1
             else:
                 mergedList.append(newBatchTop[j])
+                self._currentClient.storeEntry(newBatchTop[j])
                 j += 1
         
         if self.topHasCapacity(newElementsAmount=len(mergedList)):
@@ -85,7 +90,10 @@ class Sorter:
         self._activeClients.pop(clientId)
     
     def setCurrentClient(self, clientId: bytes):
-        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(self._sorterType.initializeTracker(clientId)))
+        self._currentClient = self._activeClients.setdefault(clientId, 
+                                                             ActiveClient(self._sorterType.initializeTracker(clientId), 
+                                                                          getClientIdUUID(clientId),
+                                                                          self._entryType))
         
     def handleMessage(self, ch, method, _properties, body):
         header, batch = self._headerType.deserialize(body)

@@ -5,7 +5,16 @@ class EntryInterface(ABC):
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
-
+    
+    @classmethod
+    def fromArgs(cls, *args):
+        params = list(inspect.signature(cls.__init__).parameters.keys())[1:]
+        kwargs = {param: value for param, value in zip(params, args)}
+        return cls(kwargs)
+    
+    def csv(self):
+        return ','.join(map(str, self.__dict__.values())) + '\n'
+        
     @classmethod
     def fromAnother(cls, other, **additionalParams):
         if type(other).__name__ == cls.__name__:

@@ -1,7 +1,7 @@
 import os
 import math
 from enum import Enum
-from entryParsing.common.fieldParsing import getClientIDString
+from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from packetTracker.multiTracker import MultiTracker
@@ -18,9 +18,9 @@ class SorterType(Enum):
     def initializeTracker(self, clientId: bytes) -> PacketTracker:
         match self:
             case SorterType.PLAYTIME | SorterType.INDIE:
-                return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')), getClientIDString(clientId))
+                return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')), getClientIdUUID(clientId))
             case _:
-                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), getClientIDString(clientId))        
+                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), getClientIdUUID(clientId))        
 
     def filterByPercentile(self, packets: list[EntrySorterTopFinder]):
         if not packets:
