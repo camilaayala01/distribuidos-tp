@@ -1,6 +1,7 @@
 import os
 import math
 from enum import Enum
+from entryParsing.common.fieldParsing import getClientIDString
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from packetTracker.multiTracker import MultiTracker
@@ -14,61 +15,30 @@ class SorterType(Enum):
     CONSOLIDATOR_INDIE = 3
     CONSOLIDATOR_PERCENTILE = 4
 
-    def initializeTracker(self) -> PacketTracker:
+    def initializeTracker(self, clientId: bytes) -> PacketTracker:
         match self:
             case SorterType.PLAYTIME | SorterType.INDIE:
-                return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')))
+                return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')), getClientIDString(clientId))
             case _:
-                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')))
-    
-    def topHasCapacity(self, newElementsAmount: int, topAmount: int):
-        match self:
-            case SorterType.CONSOLIDATOR_PERCENTILE:
-                return True
-            case _:
-                return newElementsAmount < topAmount
-        
-    def getBatchTop(self, batch: list[EntrySorterTopFinder], topAmount: int, entryType: type):
-        match self:
-            case SorterType.CONSOLIDATOR_PERCENTILE:
-                return entryType.sort(batch, False)
-            case _:
-                sortedBatch = entryType.sort(batch, True)
-                return sortedBatch[:topAmount]
-        
-
-    def updatePartialTop(self, newOrderedList: list[EntrySorterTopFinder], topAmount: int):
-        match self:
-            case SorterType.CONSOLIDATOR_PERCENTILE:
-                return newOrderedList
-            case _:
-                return newOrderedList[:topAmount]
-        
-    def mustElementGoFirst(self, first: EntrySorterTopFinder, other: EntrySorterTopFinder):
-        greaterThan = first.isGreaterThan(other)
-        match self:
-            case SorterType.CONSOLIDATOR_PERCENTILE:
-                return not greaterThan
-            case _:
-                return greaterThan
+                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), getClientIDString(clientId))        
 
     def filterByPercentile(self, packets: list[EntrySorterTopFinder]):
         if not packets:
             return packets
 
-        index = max(0, math.ceil(int(os.getenv('PERCENTILE')) / 100 * len(packets)) - 1)
-        if index >= len(packets):
-            index = len(packets) - 1
+        index = min(len(packets) - 1, math.floor((100 - int(os.getenv('PERCENTILE'))) / 100 * len(packets)))
+        if index < 0:
+            index = 0
 
-        while index > 0 and packets[index].getCount() == packets[index-1].getCount():
-            index -= 1
+        while index < len(packets) - 1 and packets[index].getCount() == packets[index+1].getCount():
+            index += 1
         
-        return packets[index:]
+        return packets[:index + 1]
     
     def removeCountFromEntries(self, packets: list[EntrySorterTopFinder]):
         newEntries = []
         for entry in packets:
-            newEntries.append(EntryAppIDName(entry.getAppID(), entry.getName()))
+            newEntries.append(EntryAppIDName.fromAnother(entry))
         return newEntries
     
     def serializeAndFragment(self, clientId: bytes, packets: list[EntrySorterTopFinder], headerType: type):

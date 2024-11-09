@@ -93,7 +93,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LISTENING_QUEUE=GrouperOSCounts
-      - NEXT_NODES=JoinerOsCounts
+      - NEXT_NODES=AggregatorOs
       - HEADER_TYPE=Header
       - ENTRY_TYPE=EntryOSSupport
       - GROUPER_TYPE=0
@@ -112,7 +112,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LISTENING_QUEUE=GrouperOSCounts
-      - NEXT_NODES=JoinerOsCounts
+      - NEXT_NODES=AggregatorOs
       - HEADER_TYPE=Header
       - ENTRY_TYPE=EntryOSSupport
       - GROUPER_TYPE=0
@@ -124,17 +124,17 @@ services:
       - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
-  joiner-os-counts:
+  aggregator-os:
     build:
       context: ./aggregator
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-      - LISTENING_QUEUE=JoinerOsCounts
+      - LISTENING_QUEUE=AggregatorOs
       - NEXT_NODES=Dispatcher
       - HEADER_TYPE=Header
       - ENTRY_TYPE=EntryOSCount
-      - JOINER_COUNT_TYPE=0
+      - AGGREGATOR_TYPE=0
       - QUERY_NUMBER=1
     env_file:
       - .env
@@ -281,7 +281,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LISTENING_QUEUE=JoinerIndiePositiveReviews
-      - NEXT_NODES=ConsolidatorJoinerIndiePositiveReviews
+      - NEXT_NODES=AggregatorIndie
       - HEADER_TYPE=HeaderWithTable
       - GAMES_ENTRY_TYPE=EntryAppIDName
       - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
@@ -303,7 +303,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LISTENING_QUEUE=JoinerIndiePositiveReviews
-      - NEXT_NODES=ConsolidatorJoinerIndiePositiveReviews
+      - NEXT_NODES=AggregatorIndie
       - HEADER_TYPE=HeaderWithTable
       - GAMES_ENTRY_TYPE=EntryAppIDName
       - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
@@ -318,17 +318,17 @@ services:
       - ./packetTracker:/packetTracker
     networks:
       - sa_net
-  joiner-indie-consolidator:
+  aggregator-indie:
     build:
       context: ./aggregator
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-      - LISTENING_QUEUE=ConsolidatorJoinerIndiePositiveReviews
+      - LISTENING_QUEUE=AggregatorIndie
       - NEXT_NODES=SorterIndiePositiveReviews,2,1
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryNameReviewCount
-      - JOINER_COUNT_TYPE=2
+      - AGGREGATOR_TYPE=2
       - PRIOR_NODE_COUNT=2
     env_file:
       - .env
@@ -639,7 +639,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LISTENING_QUEUE=GrouperActionEnglishNegativeReviews
-      - NEXT_NODES=JoinerNegativeReviewsEnglishCount
+      - NEXT_NODES=AggregatorEnglish
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDName
       - GROUPER_TYPE=2
@@ -651,20 +651,20 @@ services:
       - ./sendingStrategy:/sendingStrategy
     networks:
       - sa_net
-  joiner-english-count:
+  aggregator-english:
     build:
       context: ./aggregator
       dockerfile: ../rabbitUser.Dockerfile
     environment:
       - PYTHONUNBUFFERED=1
-      - LISTENING_QUEUE=JoinerNegativeReviewsEnglishCount
+      - LISTENING_QUEUE=AggregatorEnglish
       - NEXT_NODES=Dispatcher
-      - PRIOR_NODE_COUNT=2
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewCount
-      - JOINER_COUNT_TYPE=1
-      - QUERY_NUMBER=4
+      - AGGREGATOR_TYPE=1
+      - PRIOR_NODE_COUNT=2
       - REQUIRED_REVIEWS=5000
+      - QUERY_NUMBER=4
     env_file:
       - .env
     volumes:
@@ -779,7 +779,7 @@ services:
       - initializer-2
       - grouper-os-counts-0
       - grouper-os-counts-1
-      - joiner-os-counts
+      - aggregator-os
       - filterer-indie
       - filterer-date
       - sorter-avg-playtime-0
@@ -788,7 +788,7 @@ services:
       - grouper-indie
       - joiner-indie-positive-0
       - joiner-indie-positive-1
-      - joiner-indie-consolidator
+      - aggregator-indie
       - sorter-indie-positive-reviews-0
       - sorter-indie-positive-reviews-1
       - sorter-consolidator-indie-top
@@ -804,7 +804,7 @@ services:
       - filterer-english-6
       - filterer-english-7
       - grouper-action-english
-      - joiner-english-count
+      - aggregator-english
       - grouper-action-percentile
       - joiner-action-percentile-0
       - joiner-action-percentile-1

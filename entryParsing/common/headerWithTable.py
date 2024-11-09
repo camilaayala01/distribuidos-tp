@@ -25,7 +25,7 @@ class HeaderWithTable(Header):
         return super().size() + TABLE_LEN
     
     def __str__(self):
-        return f" clientID: {self._clientId}, fragment: {self._fragment} | eof: {self._eof} | table: {self._table}"
+        return f" clientId: {self._clientId}, fragment: {self._fragment} | eof: {self._eof} | table: {self._table}"
     
     @staticmethod
     def deserialize(data: bytes) -> tuple['HeaderWithTable', bytes]:

@@ -28,8 +28,8 @@ class EntrySorterTopFinder(EntryInterface):
 
         return entries
 
-    def isGreaterThan(self, otherEntry: 'EntrySorterTopFinder') -> bool:
-        return self.getSortingAtribute() > otherEntry.getSortingAtribute()
+    def isGreaterThanOrEqual(self, otherEntry: 'EntrySorterTopFinder') -> bool:
+        return self.getSortingAtribute() >= otherEntry.getSortingAtribute()
     
     @abstractmethod
     def getSortingAtribute(self) -> int:

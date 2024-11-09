@@ -1,10 +1,9 @@
 import os
-from entryParsing.common.fieldParsing import serializeClientID
+import uuid
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from entryParsing.common.messageType import MessageType
 from internalCommunication.internalCommunication import InternalCommunication
 import zmq
-import uuid
 import logging
 from entryParsing.common.utils import initializeLog
 

@@ -27,8 +27,8 @@ class Aggregator:
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 
-    def setCurrentClient(self, clientID: bytes):
-        self._currentClient = self._activeClients.setdefault(clientID, ActiveClient(self._aggregatorType.getInitialResults(), self._aggregatorType.initializeTracker()))
+    def setCurrentClient(self, clientId: bytes):
+        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(self._aggregatorType.getInitialResults(), self._aggregatorType.initializeTracker(clientId)))
 
     def _sendToNext(self, header: Header, entries: list[EntryInterface]):
         for strategy in self._sendingStrategies:

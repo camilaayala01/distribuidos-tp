@@ -1,5 +1,6 @@
 from enum import Enum
 import os
+from entryParsing.common.fieldParsing import getClientIDString
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from entryParsing.common.header import Header
 from entryParsing.common.headerWithSender import HeaderWithSender
@@ -16,12 +17,12 @@ class AggregatorTypes(Enum):
     ENGLISH = 1
     INDIE = 2
     
-    def initializeTracker(self) -> PacketTracker:
+    def initializeTracker(self, clientId: bytes) -> PacketTracker:
         match self:
             case AggregatorTypes.OS:
-                return DefaultTracker()
+                return DefaultTracker(getClientIDString(clientId))
             case _:
-                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')))
+                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), getClientIDString(clientId))
 
     def getInitialResults(self):
         match self:

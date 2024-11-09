@@ -1,11 +1,12 @@
 import unittest
+import uuid
 from entryParsing.common.header import Header
 from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entryOSCount import EntryOSCount
 
 class TestHeader(unittest.TestCase):
     def setUp(self):
-        clientId = b'\x01\x02\x03\x04\x05'
+        clientId = uuid.UUID('6bbe9f2a-1c58-4951-a92c-3f2b05147a29').bytes
         self._entrySome = Header(clientId, 2, False)
         self._entryLast = Header(clientId, 10, True)
         self._headerWithSender = HeaderWithSender(clientId, 2, False, 1)

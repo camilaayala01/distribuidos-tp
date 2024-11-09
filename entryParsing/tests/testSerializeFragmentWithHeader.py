@@ -1,6 +1,7 @@
 import os
 import unittest
 from unittest.mock import MagicMock, patch
+import uuid
 
 from sorter.common.sorter import Sorter
 from ..common.headerWithSender import HeaderWithSender
@@ -10,6 +11,7 @@ from ..entryNameReviewCount import EntryNameReviewCount
 class TestSerializeFragmentWithHeader(unittest.TestCase):
     @patch('internalCommunication.internalCommunication.InternalCommunication.__init__', MagicMock(return_value=None))
     def setUp(self):
+        self._clientId = uuid.UUID('6bbe9f2a-1c58-4951-a92c-3f2b05147a29').bytes
         self.entriesEqual = [
             EntryNameReviewCount("Game A", 100),
             EntryNameReviewCount("Game B", 120),
@@ -31,7 +33,7 @@ class TestSerializeFragmentWithHeader(unittest.TestCase):
         self.sorterAction._partialTop = self.entriesEqual
         self.sorterAction._id = 1
 
-        packets, _ = serializeAndFragmentWithSender(15, self.sorterAction._partialTop, b'\x01\x02\x03\x04\x05', self.sorterAction._id)
+        packets, _ = serializeAndFragmentWithSender(15, self.sorterAction._partialTop, self._clientId, self.sorterAction._id)
         self.assertEqual(len(packets), 3)
         deserialized = []
 
@@ -49,13 +51,13 @@ class TestSerializeFragmentWithHeader(unittest.TestCase):
     def testSerializeDataWithBigMaxDataBytes(self):
         self.sorterAction._partialTop = self.entriesEqual
         self.sorterAction._id = 1
-        packets, _ = serializeAndFragmentWithSender(1000, self.sorterAction._partialTop, b'\xB0\x0B\xCA\xCA\x01', self.sorterAction._id)
+        packets, _ = serializeAndFragmentWithSender(1000, self.sorterAction._partialTop, self._clientId, self.sorterAction._id)
         self.assertEqual(len(packets), 1)
         header, _ = HeaderWithSender.deserialize(packets[0])
 
         self.assertEqual(header._eof, True)
         self.assertEqual(header._fragment, 1)
-        self.assertEqual(header._clientId, b'\xB0\x0B\xCA\xCA\x01')
+        self.assertEqual(header._clientId, self._clientId)
 
     def testSerializeDataWithExactMaxDataBytes(self):
         self.sorterAction._partialTop = self.entriesEqual
@@ -64,13 +66,13 @@ class TestSerializeFragmentWithHeader(unittest.TestCase):
             entriesLen += len(entry.serialize())
 
         self.sorterAction._id = 1
-        packets, _ = serializeAndFragmentWithSender(entriesLen, self.sorterAction._partialTop, b'\xB0\x0B\xCA\xCA\x01', self.sorterAction._id)
+        packets, _ = serializeAndFragmentWithSender(entriesLen, self.sorterAction._partialTop, self._clientId, self.sorterAction._id)
         self.assertEqual(len(packets), 1)
         header, _ = HeaderWithSender.deserialize(packets[0])
 
         self.assertEqual(header._eof, True)
         self.assertEqual(header._fragment, 1)
-        self.assertEqual(header._clientId, b'\xB0\x0B\xCA\xCA\x01')
+        self.assertEqual(header._clientId, self._clientId)
     
 if __name__ == "__main__":
     unittest.main()

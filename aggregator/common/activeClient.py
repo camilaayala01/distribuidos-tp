@@ -1,8 +1,8 @@
 from entryParsing.common.header import Header
-from packetTracker.defaultTracker import DefaultTracker
+from packetTracker.tracker import TrackerInterface
 
 class ActiveClient:
-    def __init__(self, initialResults, tracker):
+    def __init__(self, initialResults, tracker: TrackerInterface):
         self._fragment = 1
         self._tracker = tracker
         self._sent = set()

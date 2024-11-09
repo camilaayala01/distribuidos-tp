@@ -2,4 +2,9 @@
 mockProducer
 mockJoiner
 client/responses
+client-[0-9]*/
 client[0-9]*/
+sorter/ConsolidatorSorter*
+sorter/Sorter*
+aggregator/Aggregator*
+joiner/Joiner*

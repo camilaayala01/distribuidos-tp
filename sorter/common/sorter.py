@@ -8,6 +8,7 @@ from .sorterTypes import SorterType
 from .activeClient import ActiveClient
 
 PRINT_FREQUENCY=500
+PATH="/client-"
 
 class Sorter:
     def __init__(self):
@@ -27,29 +28,46 @@ class Sorter:
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 
+    def topHasCapacity(self, newElementsAmount: int):
+        if self._topAmount is None:
+            return True
+        return newElementsAmount < self._topAmount
+
+    def getBatchTop(self, batch: list[EntrySorterTopFinder]):
+        sortedBatch = self._entryType.sort(batch, True)
+        if self._topAmount is None:
+            return sortedBatch
+        return sortedBatch[:self._topAmount]
+            
+    def mustElementGoFirst(self, first: EntrySorterTopFinder, other: EntrySorterTopFinder):
+        return first.isGreaterThanOrEqual(other)
+            
+    def updatedPartialTop(self, newOrderedList: list[EntrySorterTopFinder]):
+        if self._topAmount is None:
+            return newOrderedList
+        return newOrderedList[:self._topAmount]
+
     def mergeKeepTop(self, batch: list[EntrySorterTopFinder]):
         if len(batch) == 0:
             return
         
-        newBatchTop = self._sorterType.getBatchTop(batch, self._topAmount, self._entryType)
-
+        newBatchTop = self.getBatchTop(batch)
         i, j = 0, 0
         mergedList = []
 
         while i < len(self._currentClient._partialTop) and j < len(newBatchTop):
-            if self._sorterType.mustElementGoFirst(self._currentClient._partialTop[i], newBatchTop[j]):
+            if self.mustElementGoFirst(self._currentClient._partialTop[i], newBatchTop[j]):
                 mergedList.append(self._currentClient._partialTop[i])
                 i += 1
             else:
                 mergedList.append(newBatchTop[j])
                 j += 1
         
-        if self._sorterType.topHasCapacity(newElementsAmount=len(mergedList), topAmount=self._topAmount):
+        if self.topHasCapacity(newElementsAmount=len(mergedList)):
             # only 1 will have elements
             mergedList.extend(self._currentClient._partialTop[i:])
             mergedList.extend(newBatchTop[j:])
-
-        self._currentClient._partialTop = self._sorterType.updatePartialTop(mergedList, self._topAmount)
+        self._currentClient._partialTop = self.updatedPartialTop(mergedList)
         
     def _sendToNext(self, msg: bytes):
         for strategy in self._sendingStrategies:
@@ -66,8 +84,8 @@ class Sorter:
 
         self._activeClients.pop(clientId)
     
-    def setCurrentClient(self, clientID: bytes):
-        self._currentClient = self._activeClients.setdefault(clientID, ActiveClient(self._sorterType.initializeTracker()))
+    def setCurrentClient(self, clientId: bytes):
+        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(self._sorterType.initializeTracker(clientId)))
         
     def handleMessage(self, ch, method, _properties, body):
         header, batch = self._headerType.deserialize(body)
