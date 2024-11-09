@@ -1,5 +1,6 @@
 import logging
 import os
+from entryParsing.common.fieldParsing import getClientIDString
 from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, maxDataBytes, serializeAndFragmentWithSender, initializeLog
 from entryParsing.entry import EntryInterface
@@ -75,7 +76,7 @@ class Joiner:
             self._sendToNext(packet)
         
     def setCurrentClient(self, clientId: bytes):
-        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(clientId))
+        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(getClientIDString(clientId)))
 
     def _sendToNext(self, msg: bytes):
         for strategy in self._sendingStrategies:

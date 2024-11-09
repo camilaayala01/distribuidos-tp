@@ -1,5 +1,6 @@
 import struct
 import logging
+import uuid
 from entryParsing.common.table import Table
 from entryParsing.common.utils import boolToInt, intToBool
 from entryParsing.common import fieldLen
@@ -114,10 +115,5 @@ def deserializeSignedInt(curr: int, data: bytes) -> int:
 def getClientID(curr: int, data: bytes) -> tuple[bytes, int]:
     return data[curr:curr + fieldLen.CLIENT_ID_LEN], curr + fieldLen.CLIENT_ID_LEN
 
-def deserializeClientID(data: bytes)-> int:
-    count = int.from_bytes(data, 'big')
-    return count
-
-def serializeClientID(id: int)-> bytes:
-    idBytes = id.to_bytes(fieldLen.CLIENT_ID_LEN, 'big')
-    return idBytes
+def getClientIDString(clientId: bytes):
+    return uuid.UUID(bytes=clientId)

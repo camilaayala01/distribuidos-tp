@@ -1,6 +1,7 @@
 import os
 import math
 from enum import Enum
+from entryParsing.common.fieldParsing import getClientIDString
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from packetTracker.multiTracker import MultiTracker
@@ -14,12 +15,12 @@ class SorterType(Enum):
     CONSOLIDATOR_INDIE = 3
     CONSOLIDATOR_PERCENTILE = 4
 
-    def initializeTracker(self, clientId) -> PacketTracker:
+    def initializeTracker(self, clientId: bytes) -> PacketTracker:
         match self:
             case SorterType.PLAYTIME | SorterType.INDIE:
-                return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')), clientId)
+                return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')), getClientIDString(clientId))
             case _:
-                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), clientId)
+                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), getClientIDString(clientId))
         
     def getBatchTop(self, batch: list[EntrySorterTopFinder], topAmount: int, entryType: type):
         match self:

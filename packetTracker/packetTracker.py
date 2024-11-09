@@ -6,15 +6,16 @@ class PacketTracker(TrackerInterface):
     def __init__(self, nodesInCluster: int, module: int, storagePath: str):
         self._nodesInCluster = nodesInCluster
         self._module = module
-        self._biggestFragment = 0 #escribir
+        self._biggestFragment = 0
         self._pending = set()
         self._receivedEnd = False
-        self._storagePath = f"/packetTracker/{storagePath}.txt"
-        os.makedirs(f"/packetTracker", exist_ok=True)
+        folderPath = f"/{os.getenv('LISTENING_QUEUE')}/packetTracker/"
+        self._storagePath = folderPath + f"{storagePath}.txt"
+        os.makedirs(folderPath, exist_ok=True)
 
     def store(self):
-        with open(self._storagePath, 'w+') as file:
-            file.write(f"MAX={self._biggestFragment};MISSING={self._pending}")
+        with open(self._storagePath, 'a+') as file:
+            file.write(f"MAX={self._biggestFragment};MISSING={self._pending}\n")
 
     def isDuplicate(self, header: Header):
         newFrag = header.getFragmentNumber()

@@ -61,8 +61,11 @@ def default_volumes():
             './sendingStrategy:/sendingStrategy'
     ]
 
-def stateful_volumes(type, name):
-    return f'./{type}/{name}:/'
+def stateful_volumes(type, name, node_id: str = None):
+    if node_id is not None:
+        return f'./{type}/{name}{node_id}:/{name}'
+    
+    return f'./{type}/{name}:/{name}'
 
 def default_network():
     return [
@@ -92,12 +95,19 @@ def zmq_node_build(context)-> dict[str, Any]:
         'dockerfile': '../zmqUser.Dockerfile'
     })
 
-def component_nodes_environment(next_nodes, header_type, entry_type):
+def component_nodes_environment(next_nodes, header_type, entry_type, node_id: str = None):
+    if node_id is not None:
+        return ([
+            f'NEXT_NODES={next_nodes}',
+            f'HEADER_TYPE={header_type}',
+            f'ENTRY_TYPE={entry_type}',
+            f'NODE_ID={node_id}'
+        ])
     return ([
         f'NEXT_NODES={next_nodes}',
         f'HEADER_TYPE={header_type}',
         f'ENTRY_TYPE={entry_type}',
-    ])
+    ])    
 
 def joiner_nodes_environment(next_nodes, review_entry_type, game_entry_type):
     return ([
@@ -117,12 +127,12 @@ def default_config(compose: dict[str, Any], entrypoint: str, container_name: str
     }
     return compose
     
-def default_config_with_tracker(compose: dict[str, Any], entrypoint: str, container_name: str, queue: str, next_nodes: str, header_type: str, entry_type: str, extra_envs: list[str], type: str):
+def default_config_with_tracker(compose: dict[str, Any], entrypoint: str, container_name: str, queue: str, next_nodes: str, header_type: str, entry_type: str, extra_envs: list[str], type: str, node_id: str = None):
     compose['services'][container_name] = {
         'build': rabbit_node_build(entrypoint),
-        'environment': add_to_list(default_environment(queue), add_to_list(component_nodes_environment(next_nodes, header_type, entry_type), extra_envs)),
+        'environment': add_to_list(default_environment(queue), add_to_list(component_nodes_environment(next_nodes, header_type, entry_type, node_id), extra_envs)),
         'env_file': default_env_file(),
-        'volumes': add_to_list(default_volumes(), ['./packetTracker:/packetTracker', stateful_volumes(type, container_name)]),
+        'volumes': add_to_list(default_volumes(), ['./packetTracker:/packetTracker', stateful_volumes(type, queue, node_id)]),
         'networks': default_network()
     }
     return compose
@@ -163,7 +173,7 @@ def add_grouper(compose: dict[str, Any], params):
 
 def add_sorter(compose: dict[str, Any], name, type, queue, next_nodes, header_type, entry_type, node_id, node_count, top):
     container_name = f'sorter-{name}'
-    compose = default_config_with_tracker(compose, entrypoint='./sorter', container_name=container_name, queue= queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'SORTER_TYPE={type}', f'NODE_ID={node_id}', f'TOP_AMOUNT={top}', f'NODE_COUNT={node_count}'], type='sorter')
+    compose = default_config_with_tracker(compose, entrypoint='./sorter', container_name=container_name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'SORTER_TYPE={type}', f'TOP_AMOUNT={top}', f'NODE_COUNT={node_count}'], type='sorter', node_id=node_id)
     return compose, container_name
 
 def add_sorter_consolidator_top(compose: dict[str, Any], name, type, queue, next_nodes,header_type, entry_type, prior_node_count, top, query_number):
@@ -182,7 +192,7 @@ def add_joiner(compose: dict[str, Any], params):
         'build': rabbit_node_build('./joiner'),
         'environment': add_to_list(default_environment(queue), add_to_list(joiner_nodes_environment(next_nodes, review_entry_type, game_entry_type), [f'JOINER_TYPE={type}', f'NODE_ID={node_id}'])),
         'env_file': default_env_file(),
-        'volumes': add_to_list(default_volumes(), ['./packetTracker:/packetTracker', stateful_volumes('joiner', container_name)]),
+        'volumes': add_to_list(default_volumes(), ['./packetTracker:/packetTracker', stateful_volumes('joiner', queue, node_id)]),
         'networks': default_network()
     }
     return compose, container_name
