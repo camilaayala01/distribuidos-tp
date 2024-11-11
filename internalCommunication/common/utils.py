@@ -2,7 +2,7 @@ import os
 from basicSend import BasicSend
 from common.nextNode import NextNode
 from directSend import DirectSend
-from sendingStrategy import SendingStrategy
+from internalCommunication import SendingStrategy
 
 def createStrategiesFromNextNodes(nextNodesStr: str = 'NEXT_NODES', nextEntriesStr: str='NEXT_ENTRIES', nextHeadersStr: str='NEXT_HEADERS') -> list[SendingStrategy]:
     nextNodes = NextNode.parseNodes(os.getenv(nextNodesStr), os.getenv(nextEntriesStr) or "", os.getenv(nextHeadersStr) or "")

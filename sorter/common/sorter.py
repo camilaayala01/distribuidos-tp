@@ -2,9 +2,9 @@ import logging
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
+from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
-from sendingStrategy.common.utils import createStrategiesFromNextNodes
 from .sorterTypes import SorterType
 from .activeClient import ActiveClient
 

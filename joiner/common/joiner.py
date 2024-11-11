@@ -4,10 +4,10 @@ from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, maxDataBytes, serializeAndFragmentWithSender, initializeLog
 from entryParsing.entry import EntryInterface
+from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
 from .activeClient import ActiveClient
 from .joinerTypes import JoinerType
-from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
 PRINT_FREQUENCY = 1000
 
