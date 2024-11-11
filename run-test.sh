@@ -24,5 +24,6 @@ run_tests "Grouper" "./grouper/tests"
 run_tests "Sorters" "./sorter/tests"
 run_tests "Joiner OS Support" "./aggregator/tests"
 run_tests "Filterers" "./filterer/tests"
+run_tests "Sending Strategy" "./internalCommunication/tests"
 
 
