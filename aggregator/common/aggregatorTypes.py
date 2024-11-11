@@ -32,38 +32,42 @@ class AggregatorTypes(Enum):
             case _:
                 return None
       
-    def getEnglishCountResults(self, priorResults, entries, sent):
+    def getEnglishCountResults(self, priorResults, entries):
         toSend = []
+        requiredReviews = int(os.getenv('REQUIRED_REVIEWS'))
         for entry in entries:
             id = entry.getAppID()
-            if id in sent:
-                continue
 
             priorEntry = priorResults.get(id, EntryNameReviewCount(entry.getName(), 0))
-            if priorEntry.getCount() + entry.getCount() >= int(os.getenv('REQUIRED_REVIEWS')):
+            if priorEntry.getCount() >= requiredReviews:
+                continue
+            elif priorEntry.getCount() + entry.getCount() >= requiredReviews:
+                # write
+                priorEntry.addToCount(entry.getCount())
+                priorResults[id] = priorEntry
+                # mark to be sent
                 toSend.append(EntryName(priorEntry.getName()))
-                sent.add(id)
-                priorResults.pop(id, None)
             else:
+                # write
                 priorEntry.addToCount(entry.getCount())
                 priorResults[id] = priorEntry
 
-        return toSend, priorResults, sent
+        return toSend, priorResults
 
     def getOSCountResults(self, priorResult, entry, isDone):
         priorResult.sumEntry(entry)
         if not isDone:
-            return [], priorResult, set()
-        return [priorResult], self.getInitialResults(), set()
+            return [], priorResult
+        return [priorResult], self.getInitialResults()
     
     def getIndieResults(self, entries):
-        return entries, self.getInitialResults(), set()
+        return entries, self.getInitialResults()
     
     # returns toSend, joinedEntries, sent set
-    def handleResults(self, entries, priorResult, isDone, sent):
+    def handleResults(self, entries, priorResult, isDone):
         match self:
             case AggregatorTypes.ENGLISH:
-                return self.getEnglishCountResults(priorResult, entries, sent)
+                return self.getEnglishCountResults(priorResult, entries)
             case AggregatorTypes.OS:
                 return self.getOSCountResults(priorResult, entries, isDone)
             case AggregatorTypes.INDIE:

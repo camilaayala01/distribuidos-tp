@@ -5,7 +5,6 @@ class ActiveClient:
     def __init__(self, initialResults, tracker: TrackerInterface):
         self._fragment = 1
         self._tracker = tracker
-        self._sent = set()
         self._partialRes = initialResults
 
     def isDone(self):
