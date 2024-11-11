@@ -1,9 +1,9 @@
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.utils import getShardingKey
 from entryParsing.entry import EntryInterface
+from internalCommunication.common.shardingAtribute import ShardingAttribute
 from internalCommunication.internalCommunication import InternalCommunication
-from sendingStrategy.common.shardingAtribute import ShardingAttribute
-from sendingStrategy.sendingStrategy import SendingStrategy
+from internalCommunication.sendingStrategy import SendingStrategy
 
 class DirectSend(SendingStrategy):
     def __init__(self, nextNode):

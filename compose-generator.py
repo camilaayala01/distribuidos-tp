@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 from aggregator.common.aggregatorTypes import AggregatorTypes
 from filterer.common.filtererTypes import FiltererType
 from grouper.common.grouperTypes import GrouperType
+from internalCommunication.common.shardingAtribute import ShardingAttribute
 from joiner.common.joinerTypes import JoinerType
-from sendingStrategy.common.shardingAtribute import ShardingAttribute
 from sorter.common.sorterTypes import SorterType
 load_dotenv('compose.env')
 
@@ -57,8 +57,7 @@ def add_network(compose: dict[str, Any]):
 def default_volumes():
     return [
             './internalCommunication:/internalCommunication',
-            './entryParsing:/entryParsing',
-            './sendingStrategy:/sendingStrategy'
+            './entryParsing:/entryParsing'
     ]
 
 def stateful_volumes(type, name, node_id: str = None):

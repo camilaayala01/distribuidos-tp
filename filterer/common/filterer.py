@@ -2,11 +2,11 @@ import os
 from entryParsing.common.header import Header
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
+from internalCommunication.common.utils import createStrategiesFromNextNodes
 from .filtererTypes import FiltererType
 from internalCommunication.internalCommunication import InternalCommunication
 import logging
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
-from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
 PRINT_FREQUENCY = 1000
 

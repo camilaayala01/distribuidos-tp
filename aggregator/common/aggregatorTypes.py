@@ -49,7 +49,7 @@ class AggregatorTypes(Enum):
                 priorResults[id] = priorEntry
 
         return toSend, priorResults, sent
-    
+
     def getOSCountResults(self, priorResult, entry, isDone):
         priorResult.sumEntry(entry)
         if not isDone:

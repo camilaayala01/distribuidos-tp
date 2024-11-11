@@ -2,7 +2,7 @@ import re
 from entryParsing.common.header import Header
 from entryParsing.common.utils import getEntryTypeFromString, getHeaderTypeFromString
 from entryParsing.entry import EntryInterface
-from sendingStrategy.common.shardingAtribute import ShardingAttribute
+from internalCommunication.common.shardingAtribute import ShardingAttribute
 
 class NextNode:
     def __init__(self, queueName: str, entryType: type, headerType: type, nextNodeCount: int = None, shardingAtribute: ShardingAttribute = None):

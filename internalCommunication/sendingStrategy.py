@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from entryParsing.common.header import HeaderInterface
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
-from sendingStrategy.common.nextNode import NextNode
+from internalCommunication.common.nextNode import NextNode
 
 class SendingStrategy(ABC):
     def __init__(self, nextNode: NextNode):

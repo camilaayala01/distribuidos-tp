@@ -2,8 +2,8 @@ import os
 import unittest
 from entryParsing.entryAppID import EntryAppID
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
-from sendingStrategy.common.nextNode import NextNode
-from sendingStrategy.directSend import ShardingAttribute
+from internalCommunication.common.nextNode import NextNode
+from internalCommunication.directSend import ShardingAttribute
 
 class TestNextNode(unittest.TestCase):
     def setUp(self):
@@ -61,7 +61,7 @@ class TestNextNode(unittest.TestCase):
         nextNodes = NextNode.parseNodes("GROUPER;JOINER,3,1", "EntryAppID;EntryAppIDNameReviewCount")
         self.assertEqual(len(nextNodes), 2)
         self.assertEqual(nextNodes[0]._entryType, EntryAppID)
-        self.assertEqual(nextNodes[0]._entryType, EntryAppIDNameReviewCount)
+        self.assertEqual(nextNodes[1]._entryType, EntryAppIDNameReviewCount)
 
 if __name__ == "__main__":
     unittest.main()

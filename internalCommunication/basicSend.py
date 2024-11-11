@@ -2,8 +2,8 @@ from entryParsing.common.header import Header
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
-from sendingStrategy.common.nextNode import NextNode
-from sendingStrategy.sendingStrategy import SendingStrategy
+from internalCommunication.common.nextNode import NextNode
+from internalCommunication.sendingStrategy import SendingStrategy
 from entryParsing.common.utils import maxDataBytes
 
 class BasicSend(SendingStrategy):

@@ -1,6 +1,6 @@
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
-from entryParsing.common.header import Header
+from internalCommunication.common.utils import createStrategiesFromNextNodes
 from .grouperTypes import GrouperType
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
@@ -8,7 +8,6 @@ import logging
 import os
 
 PRINT_FREQUENCY = 1000
-from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
 class Grouper:
     def __init__(self):

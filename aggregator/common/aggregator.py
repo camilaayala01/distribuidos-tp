@@ -7,7 +7,7 @@ from internalCommunication.internalCommunication import InternalCommunication
 from .activeClient import ActiveClient
 from .aggregatorTypes import AggregatorTypes
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
-from sendingStrategy.common.utils import createStrategiesFromNextNodes
+from internalCommunication.common.utils import createStrategiesFromNextNodes
 
 PRINT_FREQ = 1000
 
