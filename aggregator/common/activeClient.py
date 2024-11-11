@@ -1,4 +1,4 @@
-from entryParsing.common.header import Header
+from entryParsing.common.header import HeaderInterface
 from packetTracker.tracker import TrackerInterface
 
 class ActiveClient:
@@ -11,8 +11,8 @@ class ActiveClient:
     def isDone(self):
         return self._tracker.isDone()
     
-    def update(self, header: Header):
+    def update(self, header: HeaderInterface):
         self._tracker.update(header)
     
-    def isDuplicate(self, header: Header) -> bool:
+    def isDuplicate(self, header: HeaderInterface) -> bool:
         return self._tracker.isDuplicate(header)

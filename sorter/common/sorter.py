@@ -4,7 +4,7 @@ from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
-from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
+from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog, nextEntry
 from .sorterTypes import SorterType
 from .activeClient import ActiveClient
 
@@ -42,51 +42,62 @@ class Sorter:
             
     def mustElementGoFirst(self, first: EntrySorterTopFinder, other: EntrySorterTopFinder):
         return first.isGreaterThanOrEqual(other)
-            
-    def updatedPartialTop(self, newOrderedList: list[EntrySorterTopFinder]):
-        # replace with a function that replaces tmp file with 
-        if self._topAmount is None:
-            return newOrderedList
-        return newOrderedList[:self._topAmount]
+
+    def drainTop(self, entriesGenerator, topEntry, savedAmount):
+        while self.topHasCapacity(savedAmount) and topEntry is not None:
+            self._currentClient.storeEntry(topEntry)
+            topEntry = nextEntry(entriesGenerator)
+            savedAmount += 1
+        return savedAmount
+
+    def drainNewBatch(self, currElement, savedAmount, newBatchTop):
+        while currElement < len(newBatchTop) and self.topHasCapacity(savedAmount):
+            self._currentClient.storeEntry(newBatchTop[currElement])
+            currElement += 1
+            savedAmount += 1
+        return savedAmount
 
     def mergeKeepTop(self, batch: list[EntrySorterTopFinder]):
         if len(batch) == 0:
             return
         
         newBatchTop = self.getBatchTop(batch)
-        i, j = 0, 0
-        mergedList = []
+        j = 0
+        savedAmount = 0
 
-        while i < len(self._currentClient._partialTop) and j < len(newBatchTop) and self.topHasCapacity(len(mergedList)):
-            if self.mustElementGoFirst(self._currentClient._partialTop[i], newBatchTop[j]):
-                mergedList.append(self._currentClient._partialTop[i])
-                self._currentClient.storeEntry(self._currentClient._partialTop[i])
-                # next(partialTop)
-                i += 1
+        entriesGen = self._currentClient.loadEntries()
+        topEntry = nextEntry(entriesGen)
+
+        while topEntry is not None and j < len(newBatchTop) and self.topHasCapacity(savedAmount):
+            if self.mustElementGoFirst(topEntry, newBatchTop[j]):
+                self._currentClient.storeEntry(topEntry)
+                topEntry = nextEntry(entriesGen)
             else:
-                mergedList.append(newBatchTop[j])
                 self._currentClient.storeEntry(newBatchTop[j])
                 j += 1
+            savedAmount += 1
         
-        if self.topHasCapacity(newElementsAmount=len(mergedList)):
-            # only 1 will have elements
-            mergedList.extend(self._currentClient._partialTop[i:])
-            mergedList.extend(newBatchTop[j:])
-        self._currentClient._partialTop = self.updatedPartialTop(mergedList)
+        # it could happen that both of them still have elements, but if so its because top does not 
+        # have capacity, so it will not save anything either way
+        if topEntry is not None:
+            savedAmount = self.drainTop(entriesGen, topEntry, savedAmount)
+        elif j < len(newBatchTop):
+            savedAmount = self.drainNewBatch(j, savedAmount, newBatchTop)
         
-    def _sendToNext(self, msg: bytes):
+        self._currentClient.saveNewTop(savedAmount)
+
+    def _sendToNext(self, generator):
+        extraParamsForHeader = self._sorterType.extraParamsForHeader()
         for strategy in self._sendingStrategies:
-            strategy.sendBytes(self._internalCommunication, msg)
+            strategy.sendFragmenting(self._internalCommunication ,self._currentClient.getClientIdBytes(), 1, generator, **extraParamsForHeader)
 
     def _handleSending(self, clientId: bytes):
         if not self._currentClient.isDone():
             return
         logging.info(f'action: received all required batches | result: success')
-        packets = self._sorterType.preprocessPackets(self._currentClient._partialTop)
-        data = self._sorterType.serializeAndFragment(clientId, packets, self._headerType)
-        for pack in data:
-            self._sendToNext(pack)
-
+        topGenerator, topAmount = self._currentClient.getResults()
+        topGenerator = self._sorterType.preprocessPackets(topGenerator, topAmount)
+        self._sendToNext(topGenerator)
         self._activeClients.pop(clientId)
     
     def setCurrentClient(self, clientId: bytes):

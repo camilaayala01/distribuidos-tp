@@ -1,22 +1,12 @@
-from abc import ABC, abstractmethod
 import inspect
+from entryParsing.common.fieldLen import BOOLEAN_LEN, CLIENT_ID_LEN, COUNT_LEN
+from entryParsing.common.fieldParsing import serializeBoolean, serializeCount, getClientID
 
-class EntryInterface(ABC):
+class HeaderInterface:
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)
-    
-    @classmethod
-    def fromArgs(cls, args: list[str]):
-        params = list(inspect.signature(cls.__init__).parameters.items())[1:]
-        dataTypes = [param.annotation for _, param in params]
-        convertedArgs = [cast(arg) if arg else None for cast, arg in zip(dataTypes, args)]
-        kwargs = {param[0]: value for param, value in zip(params, convertedArgs)}
-        return cls(**kwargs)
-    
-    def csv(self):
-        return ','.join(map(str, self.__dict__.values())) + '\n'
-        
+
     @classmethod
     def fromAnother(cls, other, **additionalParams):
         if type(other).__name__ == cls.__name__:
@@ -32,14 +22,24 @@ class EntryInterface(ABC):
             raise ValueError(f"Convertion from class {type(other).__name__} to {cls.__name__} not possible: missing params {missingParams}")
         
         return cls(**validParams)
-
-    @abstractmethod
+    
     def serialize(self) -> bytes:
-        pass
+        fragmentBytes = serializeCount(self._fragment)
+        eofBytes = serializeBoolean(self._eof)
+        return self._clientId + fragmentBytes + eofBytes
+
+    def __str__(self):
+        return f"client: {self._clientId} | fragment: {self._fragment} | eof: {self._eof}"
+    
+    def getClient(self) -> int:
+        return self._clientId
+
+    def getFragmentNumber(self) -> int:
+        return self._fragment
+    
+    def isEOF(self) -> bool:
+        return self._eof
 
     @classmethod
-    @abstractmethod
-    def deserialize(cls, data: bytes): 
-        pass
-
-
+    def size(cls):
+        return COUNT_LEN + BOOLEAN_LEN + CLIENT_ID_LEN

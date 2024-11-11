@@ -1,6 +1,7 @@
 import logging
 from entryParsing.common.header import Header
 from entryParsing.reducedGameEntry import ReducedGameEntry
+from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.reviewEntry import ReviewEntry
@@ -10,8 +11,6 @@ from entryParsing.entryAppIDNameGenres import EntryAppIDNameGenres
 from entryParsing.entryAppID import EntryAppID
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, initializeLog
 import os
-
-from sendingStrategy.common.utils import createStrategiesFromNextNodes
 
 MAX_DATA_BYTES = 8000
 PRINT_FREQUENCY = 5000

@@ -1,12 +1,13 @@
 import os
 import logging
 from entryParsing.common.header import Header
+from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
 from .activeClient import ActiveClient
 from .aggregatorTypes import AggregatorTypes
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
-from sendingStrategy.common.utils import createStrategiesFromNextNodes
+from internalCommunication.common.utils import createStrategiesFromNextNodes
 
 PRINT_FREQ = 1000
 
@@ -30,7 +31,7 @@ class Aggregator:
     def setCurrentClient(self, clientId: bytes):
         self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(self._aggregatorType.getInitialResults(), self._aggregatorType.initializeTracker(clientId)))
 
-    def _sendToNext(self, header: Header, entries: list[EntryInterface]):
+    def _sendToNext(self, header: HeaderInterface, entries: list[EntryInterface]):
         for strategy in self._sendingStrategies:
             strategy.send(self._internalCommunication, header, entries)
 

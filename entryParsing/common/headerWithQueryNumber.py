@@ -1,11 +1,10 @@
-from entryParsing.common.header import Header
 from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, deserializeQueryNumber, serializeQueryNumber, getClientID
 from entryParsing.common.fieldLen import QUERY_NUMBER_LEN
+from entryParsing.common.headerInterface import HeaderInterface
 
-class HeaderWithQueryNumber(Header):
+class HeaderWithQueryNumber(HeaderInterface):
     def __init__(self, _clientId: bytes, _fragment: int, _eof: bool, _queryNumber: int):
-        super().__init__(_clientId, _fragment, _eof)
-        self._queryNumber = _queryNumber
+        super().__init__(_clientId=_clientId, _fragment=_fragment, _eof=_eof, _queryNumber=_queryNumber)
 
     def serialize(self) -> bytes:
         return  super().serialize() + serializeQueryNumber(self._queryNumber)

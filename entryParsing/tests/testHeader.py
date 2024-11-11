@@ -7,8 +7,8 @@ from entryParsing.entryOSCount import EntryOSCount
 class TestHeader(unittest.TestCase):
     def setUp(self):
         clientId = uuid.UUID('6bbe9f2a-1c58-4951-a92c-3f2b05147a29').bytes
-        self._entrySome = Header(clientId, 2, False)
-        self._entryLast = Header(clientId, 10, True)
+        self._entrySome = Header(_clientId = clientId, _fragment = 2, _eof = False)
+        self._entryLast = Header(_clientId= clientId, _fragment=10, _eof = True)
         self._headerWithSender = HeaderWithSender(clientId, 2, False, 1)
 
     def testSerializeDefault(self):
