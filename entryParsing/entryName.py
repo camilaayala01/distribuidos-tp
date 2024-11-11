@@ -15,9 +15,6 @@ class EntryName(EntryInterface):
     def header(cls):
         return "Name\n"
     
-    def csv(self):
-        return f'{self._name}\n'
-    
     @classmethod
     def deserialize(cls, data: bytes): 
         curr = 0

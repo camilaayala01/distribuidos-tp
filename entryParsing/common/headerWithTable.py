@@ -1,12 +1,12 @@
+from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.table import Table
 from entryParsing.common.fieldLen import TABLE_LEN
 from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, deserializeTable, getClientID, serializeTable
 from entryParsing.common.header import Header
 
-class HeaderWithTable(Header):
+class HeaderWithTable(HeaderInterface):
     def __init__(self, _clientId: bytes, _table: Table, _fragment: int, _eof: bool):
-        super().__init__(_clientId, _fragment, _eof)
-        self._table = _table
+        super().__init__(_clientId=_clientId, _fragment=_fragment, _eof=_eof, _table=_table)
 
     def getTable(self):
         return self._table

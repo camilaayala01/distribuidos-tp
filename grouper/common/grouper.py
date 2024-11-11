@@ -1,3 +1,4 @@
+from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
 from entryParsing.common.header import Header
 from .grouperTypes import GrouperType
@@ -24,7 +25,7 @@ class Grouper:
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
     
-    def _sendToNext(self, header: Header, batch: list[EntryInterface]):
+    def _sendToNext(self, header: HeaderInterface, batch: list[EntryInterface]):
         for strategy in self._sendingStrategies:
             strategy.send(self._internalCommunication, header, batch)
 

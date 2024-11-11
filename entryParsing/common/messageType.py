@@ -1,5 +1,6 @@
 from enum import Enum
 from .fieldLen import MESSAGE_TYPE_LEN
+
 class MessageType(Enum):
     CONNECT = 0
     DATA_TRANSFER = 1

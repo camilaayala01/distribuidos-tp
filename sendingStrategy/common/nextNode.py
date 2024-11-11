@@ -18,6 +18,9 @@ class NextNode:
     def hasCountAndShardingAttribute(self):
         return self._count is not None and self._shardingAttribute is not None
     
+    def getHeader(self):
+        return self._headerType
+    
     def entryForNextNode(self, entry: EntryInterface):
         if self._entryType is None:
             return entry

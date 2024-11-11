@@ -1,5 +1,6 @@
 import os
 from entryParsing.common.header import Header
+from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
 from .filtererTypes import FiltererType
 from internalCommunication.internalCommunication import InternalCommunication
@@ -18,7 +19,7 @@ class Filterer:
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'))
         self._sendingStrategies = createStrategiesFromNextNodes()
 
-    def _sendToNext(self, header: Header, batch: list[EntryInterface]):
+    def _sendToNext(self, header: HeaderInterface, batch: list[EntryInterface]):
         for strategy in self._sendingStrategies:
             strategy.send(self._internalCommunication, header, batch)
 

@@ -1,12 +1,13 @@
+import csv
 import os
 import math
 from enum import Enum
-from entryParsing.common.fieldParsing import getClientIDString
+from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from packetTracker.multiTracker import MultiTracker
 from packetTracker.packetTracker import PacketTracker
-from entryParsing.common.utils import maxDataBytes, serializeAndFragmentWithQueryNumber, serializeAndFragmentWithSender
+from entryParsing.common.utils import maxDataBytes, nextEntry, serializeAndFragmentWithQueryNumber, serializeAndFragmentWithSender
 
 class SorterType(Enum):
     PLAYTIME = 0
@@ -18,48 +19,53 @@ class SorterType(Enum):
     def initializeTracker(self, clientId: bytes) -> PacketTracker:
         match self:
             case SorterType.PLAYTIME | SorterType.INDIE:
-                return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')), getClientIDString(clientId))
+                return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')), getClientIdUUID(clientId))
             case _:
-                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), getClientIDString(clientId))        
+                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), getClientIdUUID(clientId))        
 
-    def filterByPercentile(self, packets: list[EntrySorterTopFinder]):
-        if not packets:
-            return packets
+    def filterByPercentile(self, topEntries, topAmount):
+        if topAmount == 0:
+            return topEntries
 
-        index = min(len(packets) - 1, math.floor((100 - int(os.getenv('PERCENTILE'))) / 100 * len(packets)))
+        index = min(topAmount - 1, math.floor((100 - int(os.getenv('PERCENTILE'))) / 100 * topAmount))
+        print(f"top amount is {topAmount}")
         if index < 0:
             index = 0
 
-        while index < len(packets) - 1 and packets[index].getCount() == packets[index+1].getCount():
-            index += 1
+        currEntry = nextEntry(topEntries)
+        filepath = os.getenv('LISTENING_QUEUE') + f'filtering.tmp'
+        entryIndex = 0
+        with open(filepath, 'a+') as file:
+            writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
+            while currEntry is not None and entryIndex < index:
+                writer.writerow(EntryAppIDName.fromAnother(currEntry).__dict__.values())
+                entryIndex +=1
+                currEntry = nextEntry(topEntries)
+    
+            writer.writerow(EntryAppIDName.fromAnother(currEntry).__dict__.values())
+            followingEntry = nextEntry(topEntries)
+
+            while currEntry is not None and followingEntry is not None and currEntry.getCount() == followingEntry.getCount():
+                writer.writerow(EntryAppIDName.fromAnother(followingEntry).__dict__.values())
+                followingEntry = nextEntry(topEntries)
         
-        return packets[:index + 1]
+        with open(filepath, 'r') as file:
+            reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
+            for row in reader:
+                yield EntryAppIDName.fromArgs(row)
     
-    def removeCountFromEntries(self, packets: list[EntrySorterTopFinder]):
-        newEntries = []
-        for entry in packets:
-            newEntries.append(EntryAppIDName.fromAnother(entry))
-        return newEntries
-    
-    def serializeAndFragment(self, clientId: bytes, packets: list[EntrySorterTopFinder], headerType: type):
+    def extraParamsForHeader(self):
         match self:
             case SorterType.PLAYTIME | SorterType.INDIE:
-                packets, _ = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(headerType), 
-                                                            data=packets, 
-                                                            clientId=clientId, 
-                                                            senderId=int(os.getenv('NODE_ID')))
-                return packets
+                return {"_sender": int(os.getenv('NODE_ID'))}
             case _:
-                return serializeAndFragmentWithQueryNumber(maxDataBytes=maxDataBytes(headerType), 
-                                                           data=packets, 
-                                                           clientId=clientId, 
-                                                           queryNumber=int(os.getenv('QUERY_NUMBER')))
-    
-    def preprocessPackets(self, packets: list[EntrySorterTopFinder]):
+                return {"_queryNumber": int(os.getenv('QUERY_NUMBER'))}
+            
+    def preprocessPackets(self, topEntries, topAmount):
         match self:
             case SorterType.CONSOLIDATOR_PERCENTILE:
-                packets = self.filterByPercentile(packets)
-                return self.removeCountFromEntries(packets)
+                topEntries = self.filterByPercentile(topEntries, topAmount)
+                return topEntries
             case _:
-                return packets
+                return topEntries
         
