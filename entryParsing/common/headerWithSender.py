@@ -1,11 +1,11 @@
 from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, deserializeSenderID, serializeSenderID, getClientID
 from entryParsing.common.fieldLen import SENDER_ID_LEN
 from entryParsing.common.header import Header
+from entryParsing.common.headerInterface import HeaderInterface
 
-class HeaderWithSender(Header):
-    def __init__(self, _clientId: bytes, _fragment: int, _eof: bool, _senderID: int):
-        super().__init__(_clientId, _fragment, _eof)
-        self._sender = _senderID
+class HeaderWithSender(HeaderInterface):
+    def __init__(self, _clientId: bytes, _fragment: int, _eof: bool, _sender: int):
+        super().__init__(_clientId=_clientId, _fragment=_fragment, _eof=_eof, _sender =_sender)
 
     def serialize(self) -> bytes:
         return super().serialize() + serializeSenderID(self._sender)

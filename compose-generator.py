@@ -25,7 +25,7 @@ def add_client_with_id(compose: dict[str, Any], client_id: int,):
             'MAX_DATA_BYTES=51200',
             'REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv',
             'GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv',
-            'AMOUNT_OF_EXECUTIONS=2'
+            'AMOUNT_OF_EXECUTIONS=1'
         ],
         'volumes':[
             './entryParsing:/entryParsing',
@@ -171,18 +171,18 @@ def add_grouper(compose: dict[str, Any], params):
     return compose, container_name
 
 
-def add_sorter(compose: dict[str, Any], name, type, queue, next_nodes, header_type, entry_type, node_id, node_count, top):
+def add_sorter(compose: dict[str, Any], name, type, queue, next_nodes, header_type, entry_type, node_id, node_count, top, next_header):
     container_name = f'sorter-{name}'
-    compose = default_config_with_tracker(compose, entrypoint='./sorter', container_name=container_name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'SORTER_TYPE={type}', f'TOP_AMOUNT={top}', f'NODE_COUNT={node_count}'], type='sorter', node_id=node_id)
+    compose = default_config_with_tracker(compose, entrypoint='./sorter', container_name=container_name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'SORTER_TYPE={type}', f'TOP_AMOUNT={top}', f'NODE_COUNT={node_count}', f'NEXT_HEADERS={next_header}'], type='sorter', node_id=node_id)
     return compose, container_name
 
 def add_sorter_consolidator_top(compose: dict[str, Any], name, type, queue, next_nodes,header_type, entry_type, prior_node_count, top, query_number):
     container_name = f'sorter-consolidator-{name}'
-    compose = default_config_with_tracker(compose, entrypoint='./sorter', container_name=container_name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'SORTER_TYPE={type}', f'PRIOR_NODE_COUNT={prior_node_count}', f'TOP_AMOUNT={top}', f'QUERY_NUMBER={query_number}'], type='sorter')
+    compose = default_config_with_tracker(compose, entrypoint='./sorter', container_name=container_name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'SORTER_TYPE={type}', f'PRIOR_NODE_COUNT={prior_node_count}', f'TOP_AMOUNT={top}', f'QUERY_NUMBER={query_number}', 'NEXT_HEADERS=HeaderWithQueryNumber'], type='sorter')
     return compose, [container_name]
 
 def add_sorter_consolidator_percentile(compose: dict[str, Any], name, type, queue, next_nodes, header_type, entry_type, prior_node_count, percentile, query_number):
-    compose = default_config_with_tracker(compose, entrypoint='./sorter', container_name=name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'SORTER_TYPE={type}', f'PRIOR_NODE_COUNT={prior_node_count}', f'PERCENTILE={percentile}', f'QUERY_NUMBER={query_number}'], type='sorter')
+    compose = default_config_with_tracker(compose, entrypoint='./sorter', container_name=name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'SORTER_TYPE={type}', f'PRIOR_NODE_COUNT={prior_node_count}', f'PERCENTILE={percentile}', f'QUERY_NUMBER={query_number}', f'NEXT_HEADERS=HeaderWithQueryNumber'], type='sorter')
     return compose, [name]
 
 def add_joiner(compose: dict[str, Any], params):
@@ -348,7 +348,8 @@ def add_sorters_avg_playtime(compose: dict[str, Any]):
     for i in range(0, int(os.getenv('SORT_AVG_PT_COUNT'))):
         compose, new_container = add_sorter(compose, name=f'playtime-{i}', type=SorterType.PLAYTIME.value,
                                              queue=f"{os.getenv('SORT_AVG_PT')}", next_nodes=f"{os.getenv('CONS_SORT_AVG_PT')}", header_type='Header', entry_type= 'EntryNameAvgPlaytime',
-                                             node_id=i,node_count=f"{os.getenv('SORT_AVG_PT_COUNT')}", top=f"{os.getenv('SORT_AVG_PT_TOP')}")
+                                             node_id=i,node_count=f"{os.getenv('SORT_AVG_PT_COUNT')}", top=f"{os.getenv('SORT_AVG_PT_TOP')}",
+                                             next_header="HeaderWithSender")
         containers.append(new_container)
     return compose, containers
 
@@ -356,7 +357,8 @@ def add_sorters_indie(compose: dict[str, Any]):
     containers = []
     for i in range(0, int(os.getenv('SORT_INDIE_COUNT'))):
         compose, new_container = add_sorter(compose, name=f'indie-{i}', type=SorterType.INDIE.value, queue=f"{os.getenv('SORT_INDIE')}", next_nodes=f"{os.getenv('CONS_SORT_INDIE')}",node_id=i,
-                                            header_type='Header', entry_type= 'EntryNameReviewCount', node_count=f"{os.getenv('SORT_INDIE_COUNT')}", top=f"{os.getenv('SORT_INDIE_TOP')}")
+                                            header_type='Header', entry_type= 'EntryNameReviewCount', node_count=f"{os.getenv('SORT_INDIE_COUNT')}", top=f"{os.getenv('SORT_INDIE_TOP')}",
+                                            next_header="HeaderWithSender")
         containers.append(new_container)
     return compose, containers
 
@@ -365,7 +367,15 @@ def add_sorter_consolidator_avg_playtime(compose: dict[str, Any]):
                                        header_type= 'HeaderWithSender', entry_type='EntryNameAvgPlaytime',prior_node_count=f"{os.getenv('SORT_AVG_PT_COUNT')}", top=f"{os.getenv('SORT_AVG_PT_TOP')}", query_number=2)
 
 def add_sorter_consolidator_indie(compose: dict[str, Any]):
-    return add_sorter_consolidator_top(compose, name=f'indie', type=SorterType.CONSOLIDATOR_INDIE.value, queue=f"{os.getenv('CONS_SORT_INDIE')}", next_nodes=f"{os.getenv('DISP')}", header_type='HeaderWithSender', entry_type='EntryNameReviewCount', prior_node_count=f"{os.getenv('SORT_INDIE_COUNT')}", top=f"{os.getenv('SORT_INDIE_TOP')}", query_number=3)
+    return add_sorter_consolidator_top(compose, name=f'indie', 
+                                       type=SorterType.CONSOLIDATOR_INDIE.value, 
+                                       queue=f"{os.getenv('CONS_SORT_INDIE')}", 
+                                       next_nodes=f"{os.getenv('DISP')}", 
+                                       header_type='HeaderWithSender', 
+                                       entry_type='EntryNameReviewCount', 
+                                       prior_node_count=f"{os.getenv('SORT_INDIE_COUNT')}", 
+                                       top=f"{os.getenv('SORT_INDIE_TOP')}", 
+                                       query_number=3)
 
 def add_sorter_consolidator_action_percentile(compose: dict[str, Any]):
     return add_sorter_consolidator_percentile(compose, name=f'sorter-consolidator-percentile', type=SorterType.CONSOLIDATOR_PERCENTILE.value, queue=f"{os.getenv('CONS_SORT_PERC')}", next_nodes=f"{os.getenv('DISP')}", header_type='HeaderWithSender', entry_type='EntryAppIDNameReviewCount', prior_node_count=f"{os.getenv('JOIN_PERC_COUNT')}", percentile=f"{os.getenv('CONS_PERC')}", query_number=5)

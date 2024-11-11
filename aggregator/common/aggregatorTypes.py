@@ -1,9 +1,8 @@
 from enum import Enum
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID
+from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
-from entryParsing.common.header import Header
-from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.entry import EntryInterface
 from entryParsing.entryName import EntryName
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
@@ -70,7 +69,7 @@ class AggregatorTypes(Enum):
             case AggregatorTypes.INDIE:
                 return self.getIndieResults(entries)
 
-    def getResultingHeader(self, header: Header) -> EntryInterface:
+    def getResultingHeader(self, header: HeaderInterface) -> EntryInterface:
         match self:
             case AggregatorTypes.OS | AggregatorTypes.ENGLISH:
                 return HeaderWithQueryNumber.fromAnother(header, _queryNumber=int(os.getenv('QUERY_NUMBER')))
