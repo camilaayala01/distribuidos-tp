@@ -1,5 +1,6 @@
 import os
 import logging
+from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.header import Header
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
@@ -29,7 +30,10 @@ class Aggregator:
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 
     def setCurrentClient(self, clientId: bytes):
-        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(self._aggregatorType.getInitialResults(), self._aggregatorType.initializeTracker(clientId)))
+        self._currentClient = self._activeClients.setdefault(clientId, 
+                                                             ActiveClient(getClientIdUUID(clientId), 
+                                                                          self._aggregatorType.getInitialResults(), 
+                                                                          self._aggregatorType.initializeTracker(clientId)))
 
     def _sendToNext(self, header: HeaderInterface, entries: list[EntryInterface]):
         for strategy in self._sendingStrategies:
@@ -50,7 +54,8 @@ class Aggregator:
         self._activeClients[clientId] = self._currentClient
 
         if self._currentClient.isDone():
-            self._activeClients.pop(clientId)
+            self._activeClients.pop(clientId).destroy()
+
 
     def handleMessage(self, ch, method, _properties, body):
         header, data = self._headerType.deserialize(body)
@@ -64,9 +69,7 @@ class Aggregator:
             return
         self._currentClient.update(header)
         entries = self._entryType.deserialize(data)
-        
-        toSend, self._currentClient._partialRes = self._aggregatorType.handleResults(entries, 
-                                                                               self._currentClient._partialRes, 
-                                                                               self._currentClient.isDone()) #partialRes es count
+        path = self._currentClient.partialResPath()
+        toSend = self._aggregatorType.handleResults(entries, self._entryType, path, self._currentClient.isDone())
         self._handleSending(toSend, clientId)
         ch.basic_ack(delivery_tag = method.delivery_tag)

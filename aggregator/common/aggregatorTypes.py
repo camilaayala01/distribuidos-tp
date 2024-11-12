@@ -1,11 +1,12 @@
+import csv
 from enum import Enum
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
+from entryParsing.common.utils import nextEntry
 from entryParsing.entry import EntryInterface
 from entryParsing.entryName import EntryName
-from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from entryParsing.entryOSCount import EntryOSCount
 from packetTracker.defaultTracker import DefaultTracker
 from packetTracker.multiTracker import MultiTracker
@@ -22,7 +23,7 @@ class AggregatorTypes(Enum):
                 return DefaultTracker(getClientIdUUID(clientId))
             case _:
                 return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), getClientIdUUID(clientId))
-
+            
     def getInitialResults(self):
         match self:
             case AggregatorTypes.ENGLISH:
@@ -31,47 +32,89 @@ class AggregatorTypes(Enum):
                 return EntryOSCount(0,0,0,0)
             case _:
                 return None
+
+    def storeEntry(self, entry: EntryInterface, priorResultsPath):
+        filepath = f'{priorResultsPath}.tmp'
+        with open(filepath, 'a+') as file:
+            writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(entry.__dict__.values())
+    
+    def loadEntries(self, entryType, priorResultsPath):
+        filepath = f'{priorResultsPath}.csv'
+        if not os.path.exists(filepath):
+            return iter([])
+        
+        with open(filepath, 'r') as file:
+            reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
+            for row in reader:
+                try:
+                    yield entryType.fromArgs(row)
+                except Exception as e:
+                    print("exception", e)
+                    print(row)
       
-    def getEnglishCountResults(self, priorResults, entries):
+    def saveNewResults(self, priorResultsPath):
+        if os.path.exists(priorResultsPath + '.tmp'):
+            os.rename(priorResultsPath + '.tmp', priorResultsPath + '.csv')
+
+    def getEnglishCountResults(self, entryType, priorResultsPath, entries: list[EntryInterface]):
         toSend = []
         requiredReviews = int(os.getenv('REQUIRED_REVIEWS'))
-        for entry in entries:
-            id = entry.getAppID()
+        if not len(entries):
+            return []
+        batch = {entry.getAppID(): entry for entry in entries} 
+        generator = self.loadEntries(entryType, priorResultsPath)
+        
+        while True:
+            priorEntry = nextEntry(generator)
+            if priorEntry is None:
+                break
 
-            priorEntry = priorResults.get(id, EntryNameReviewCount(entry.getName(), 0))
+            id = priorEntry.getAppID()
             if priorEntry.getCount() >= requiredReviews:
+                batch.pop(id, None)
                 continue
-            elif priorEntry.getCount() + entry.getCount() >= requiredReviews:
-                # write
-                priorEntry.addToCount(entry.getCount())
-                priorResults[id] = priorEntry
-                # mark to be sent
-                toSend.append(EntryName(priorEntry.getName()))
+                
+            entry = batch.get(id, None)
+            if entry is None:
+                entryToWrite = priorEntry
             else:
-                # write
                 priorEntry.addToCount(entry.getCount())
-                priorResults[id] = priorEntry
+                entryToWrite = priorEntry
+                if priorEntry.getCount() >= requiredReviews:
+                    toSend.append(EntryName(priorEntry.getName()))
+            
+            batch.pop(id, None)
+            self.storeEntry(entryToWrite, priorResultsPath)
+            
+        for remainingEntry in batch.values():
+            if remainingEntry.getCount() >= requiredReviews:
+                toSend.append(EntryName(priorEntry.getName()))
+            self.storeEntry(remainingEntry, priorResultsPath)
+        
+        self.saveNewResults(priorResultsPath)
+        return toSend
 
-        return toSend, priorResults
-
-    def getOSCountResults(self, priorResult, entry, isDone):
+    def getOSCountResults(self, entryType, priorResultsPath, entry, isDone):
+        generator = self.loadEntries(entryType, priorResultsPath)
+        priorResult = nextEntry(generator)
+        if priorResult is None:
+            priorResult = self.getInitialResults()
         priorResult.sumEntry(entry)
+        self.storeEntry(priorResult, priorResultsPath)
+        os.rename(priorResultsPath + '.tmp', priorResultsPath + '.csv')
         if not isDone:
-            return [], priorResult
-        return [priorResult], self.getInitialResults()
+            return []
+        return [priorResult]
     
-    def getIndieResults(self, entries):
-        return entries, self.getInitialResults()
-    
-    # returns toSend, joinedEntries, sent set
-    def handleResults(self, entries, priorResult, isDone):
+    def handleResults(self, entries, entryType, priorResultsPath, isDone) -> list[EntryInterface]:
         match self:
             case AggregatorTypes.ENGLISH:
-                return self.getEnglishCountResults(priorResult, entries)
+                return self.getEnglishCountResults(entryType, priorResultsPath, entries)
             case AggregatorTypes.OS:
-                return self.getOSCountResults(priorResult, entries, isDone)
+                return self.getOSCountResults(entryType, priorResultsPath, entries, isDone)
             case AggregatorTypes.INDIE:
-                return self.getIndieResults(entries)
+                return entries
 
     def getResultingHeader(self, header: HeaderInterface) -> EntryInterface:
         match self:

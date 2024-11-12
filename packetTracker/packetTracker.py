@@ -17,6 +17,10 @@ class PacketTracker(TrackerInterface):
         with open(self._storagePath, 'a+') as file:
             file.write(f"MAX={self._biggestFragment};MISSING={self._pending}\n")
 
+    def destroy(self):
+        if os.path.exists(self._storagePath):
+            os.remove(self._storagePath)     
+    
     def isDuplicate(self, header: Header):
         newFrag = header.getFragmentNumber()
         return newFrag <= self._biggestFragment and newFrag not in self._pending
