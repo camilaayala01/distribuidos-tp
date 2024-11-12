@@ -17,7 +17,7 @@ def add_to_list(list, new_list):
 def add_client(compose: dict[str, Any]):
     return add_client_with_id(compose,'')
 
-def add_client_with_id(compose: dict[str, Any], client_id: int,):
+def add_client_with_id(compose: dict[str, Any], client_id: int):
     compose['services'][f'client-{client_id}']= {
         'build': zmq_node_build('./client'),
         'environment':[
@@ -60,11 +60,11 @@ def default_volumes():
             './entryParsing:/entryParsing'
     ]
 
-def stateful_volumes(type, name, node_id: str = None):
+def stateful_volumes(node_type, queue, node_id: str=None):
     if node_id is not None:
-        return f'./{type}/{name}{node_id}:/{name}'
+        return f'./{node_type}/{queue}{node_id}:/{queue}'
     
-    return f'./{type}/{name}:/{name}'
+    return f'./{node_type}/{queue}:/{queue}'
 
 def default_network():
     return [
@@ -94,65 +94,40 @@ def zmq_node_build(context)-> dict[str, Any]:
         'dockerfile': '../zmqUser.Dockerfile'
     })
 
-def component_nodes_environment(next_nodes, header_type, entry_type, node_id: str = None):
-    if node_id is not None:
-        return ([
-            f'NEXT_NODES={next_nodes}',
-            f'HEADER_TYPE={header_type}',
-            f'ENTRY_TYPE={entry_type}',
-            f'NODE_ID={node_id}'
-        ])
-    return ([
-        f'NEXT_NODES={next_nodes}',
-        f'HEADER_TYPE={header_type}',
-        f'ENTRY_TYPE={entry_type}',
-    ])    
+def component_nodes_environment(**kwargs):
+    envs = []
+    for key, value in kwargs.items():
+        envs.append(f"{key.upper()}={value}")
 
-def joiner_nodes_environment(next_nodes, review_entry_type, game_entry_type):
-    return ([
-        f'NEXT_NODES={next_nodes}',
-        f'HEADER_TYPE=HeaderWithTable',
-        f'GAMES_ENTRY_TYPE={game_entry_type}',
-        f'REVIEWS_ENTRY_TYPE={review_entry_type}',
-    ])
+    return envs  
+
     
-def default_config(compose: dict[str, Any], entrypoint: str, container_name: str, queue: str, next_nodes: str, header_type: str, entry_type: str, extra_envs: list[str]):
+def default_config(compose: dict[str, Any], container_name, entrypoint, queue, **kwargs):
     compose['services'][container_name] ={
         'build': rabbit_node_build(entrypoint),
-        'environment': add_to_list(default_environment(queue), add_to_list(component_nodes_environment(next_nodes, header_type, entry_type), extra_envs)),
+        'environment': add_to_list(default_environment(queue), component_nodes_environment(**kwargs)),
         'env_file': default_env_file(),
         'volumes': default_volumes(),
         'networks': default_network()
     }
     return compose
     
-def default_config_with_tracker(compose: dict[str, Any], entrypoint: str, container_name: str, queue: str, next_nodes: str, header_type: str, entry_type: str, extra_envs: list[str], type: str, node_id: str = None):
-    compose['services'][container_name] = {
-        'build': rabbit_node_build(entrypoint),
-        'environment': add_to_list(default_environment(queue), add_to_list(component_nodes_environment(next_nodes, header_type, entry_type, node_id), extra_envs)),
-        'env_file': default_env_file(),
-        'volumes': add_to_list(default_volumes(), ['./packetTracker:/packetTracker', stateful_volumes(type, queue, node_id)]),
-        'networks': default_network()
-    }
+def default_config_with_tracker(compose: dict[str, Any], container_name, entrypoint, queue, node_type, **kwargs):
+    compose = default_config(compose, container_name, entrypoint, queue, **kwargs)
+    compose['services'][container_name]['volumes'].extend(['./packetTracker:/packetTracker', stateful_volumes(node_type, queue, kwargs.get('node_id'))])
     return compose
 
 def add_initializer(compose: dict[str, Any], id):
     container_name = f'initializer-{id}' 
-    compose['services'][container_name] ={
-        'build': rabbit_node_build('./initializer'),
-        'environment': add_to_list(default_environment(os.getenv('INIT')),
-                                   ['HEADER_TYPE=HeaderWithTable',
-                                    'GAMES_ENTRY_TYPE=ReducedGameEntry',
-                                    f'GAMES_NEXT_NODES={os.getenv("GROUP_OS")};{os.getenv("FILT_INDIE")};{os.getenv("FILT_ACT")}',
-                                    'GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres',
-                                    'GAMES_NEXT_HEADERS=Header;;',
-                                    'REVIEWS_ENTRY_TYPE=ReviewEntry',
-                                    f'REVIEWS_NEXT_NODES={os.getenv("GROUP_INDIE")};{os.getenv("JOIN_ACT")},{os.getenv("JOIN_ACT_COUNT")},{ShardingAttribute.APP_ID.value};{os.getenv("GROUP_PERC")}',
-                                    'REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID']),
-        'env_file': default_env_file(),
-        'volumes': default_volumes(),
-        'networks': default_network()
-    }
+    compose = default_config(compose, container_name, './initializer', os.getenv('INIT'),
+                             header_type='HeaderWithTable',
+                             games_entry_type='ReducedGameEntry',
+                             games_next_nodes=f'{os.getenv("GROUP_OS")};{os.getenv("FILT_INDIE")};{os.getenv("FILT_ACT")}',
+                             games_next_entries='EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres',
+                             games_next_headers='Header;;',
+                             reviews_entry_type='ReviewEntry',
+                             reviews_next_nodes=f'{os.getenv("GROUP_INDIE")};{os.getenv("JOIN_ACT")},{os.getenv("JOIN_ACT_COUNT")},{ShardingAttribute.APP_ID.value};{os.getenv("GROUP_PERC")}',
+                             reviews_next_entries='EntryAppID;EntryAppIDReviewText;EntryAppID')
     return compose, container_name
 
 def add_initializers(compose: dict[str, Any]):
@@ -163,81 +138,66 @@ def add_initializers(compose: dict[str, Any]):
         containers.append(new_container)
     return compose, containers
 
-def add_grouper(compose: dict[str, Any], params):
-    name, type, queue, next_nodes, header_type, entry_type = params
+def add_grouper(compose: dict[str, Any], name, queue, **kwargs):
     container_name = f'grouper-{name}'
-    compose = default_config(compose, entrypoint='./grouper', container_name=container_name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs= [f'GROUPER_TYPE={type}'])
+    compose = default_config(compose, container_name, './grouper', queue, **kwargs)
     return compose, container_name
 
 
-def add_sorter(compose: dict[str, Any], name, type, queue, next_nodes, header_type, entry_type, node_id, node_count, top, next_header):
+def add_sorter(compose: dict[str, Any], name, queue, **kwargs):
     container_name = f'sorter-{name}'
-    compose = default_config_with_tracker(compose, entrypoint='./sorter', container_name=container_name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'SORTER_TYPE={type}', f'TOP_AMOUNT={top}', f'NODE_COUNT={node_count}', f'NEXT_HEADERS={next_header}'], type='sorter', node_id=node_id)
+    compose = default_config_with_tracker(compose, container_name, './sorter', queue, 'sorter', **kwargs)
     return compose, container_name
 
-def add_sorter_consolidator_top(compose: dict[str, Any], name, type, queue, next_nodes,header_type, entry_type, prior_node_count, top, query_number):
+def add_sorter_consolidator(compose: dict[str, Any], name, queue, **kwargs):
     container_name = f'sorter-consolidator-{name}'
-    compose = default_config_with_tracker(compose, entrypoint='./sorter', container_name=container_name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'SORTER_TYPE={type}', f'PRIOR_NODE_COUNT={prior_node_count}', f'TOP_AMOUNT={top}', f'QUERY_NUMBER={query_number}', 'NEXT_HEADERS=HeaderWithQueryNumber'], type='sorter')
+    compose = default_config_with_tracker(compose, container_name, './sorter', queue, 'sorter', **kwargs)
     return compose, [container_name]
 
-def add_sorter_consolidator_percentile(compose: dict[str, Any], name, type, queue, next_nodes, header_type, entry_type, prior_node_count, percentile, query_number):
-    compose = default_config_with_tracker(compose, entrypoint='./sorter', container_name=name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'SORTER_TYPE={type}', f'PRIOR_NODE_COUNT={prior_node_count}', f'PERCENTILE={percentile}', f'QUERY_NUMBER={query_number}', f'NEXT_HEADERS=HeaderWithQueryNumber'], type='sorter')
-    return compose, [name]
+def add_sorter_consolidator_percentile(compose: dict[str, Any], **kwargs):
+    return add_sorter_consolidator(compose, 'percentile', os.getenv('CONS_SORT_PERC'), **kwargs)
 
-def add_joiner(compose: dict[str, Any], params):
-    name, type, queue, next_nodes, review_entry_type, game_entry_type, node_id = params
+def add_joiner(compose: dict[str, Any], name, queue, **kwargs):
     container_name = f'joiner-{name}'
-    compose['services'][container_name] = {
-        'build': rabbit_node_build('./joiner'),
-        'environment': add_to_list(default_environment(queue), add_to_list(joiner_nodes_environment(next_nodes, review_entry_type, game_entry_type), [f'JOINER_TYPE={type}', f'NODE_ID={node_id}'])),
-        'env_file': default_env_file(),
-        'volumes': add_to_list(default_volumes(), ['./packetTracker:/packetTracker', stateful_volumes('joiner', queue, node_id)]),
-        'networks': default_network()
-    }
+    compose = default_config_with_tracker(compose, container_name, './joiner', queue, 'joiner', **kwargs)
     return compose, container_name
     
-def add_filterer(compose: dict[str, Any], params):
-    if len(params) == 7:
-        name, type, queue, next_nodes, next_entries, header_type, entry_type = params
-        container_name = f'filterer-{name}'
-        compose = default_config(compose, entrypoint='./filterer', container_name=container_name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'FILTERER_TYPE={type}', f'NEXT_ENTRIES={next_entries}'])
-    if len(params) == 8:
-        name, type, queue, next_nodes, next_entries, next_headers, header_type, entry_type = params
-        container_name = f'filterer-{name}'
-        compose = default_config(compose, entrypoint='./filterer', container_name=container_name, queue=queue, next_nodes=next_nodes, header_type=header_type, entry_type=entry_type, extra_envs=[f'FILTERER_TYPE={type}', f'NEXT_ENTRIES={next_entries}', f'NEXT_HEADERS={next_headers}'])
+def add_filterer(compose: dict[str, Any], name, queue, **kwargs):
+    container_name = f'filterer-{name}'
+    compose = default_config(compose, container_name, queue=queue, entrypoint='./filterer', **kwargs)
     return compose, container_name
 
 def add_aggregator_os(compose: dict[str, Any]): 
     name = 'aggregator-os'
-    compose = default_config_with_tracker(compose, entrypoint='./aggregator', 
-                                          container_name=name, 
-                                          queue=f"{os.getenv('AGGR_OS')}", 
+    compose = default_config_with_tracker(compose, name, './aggregator', os.getenv('AGGR_OS'), 'aggregator',
                                           next_nodes=f"{os.getenv('DISP')}", 
                                           header_type ='Header', 
                                           entry_type='EntryOSCount', 
-                                          extra_envs=[f"AGGREGATOR_TYPE={AggregatorTypes.OS.value}", "QUERY_NUMBER=1"], type='aggregator')
+                                          aggregator_type=AggregatorTypes.OS.value,
+                                          query_number=1)
     return compose, [name]
 
 def add_aggregator_english(compose: dict[str, Any]):
     container_name = 'aggregator-english'
-    compose = default_config_with_tracker(compose, entrypoint='./aggregator', 
-                                          container_name=container_name, 
-                                          queue=os.getenv('AGGR_ENG'), 
-                                          next_nodes=os.getenv('DISP'), 
-                                          header_type = 'HeaderWithSender', 
-                                          entry_type = 'EntryAppIDNameReviewCount', 
-                                          extra_envs=[f"AGGREGATOR_TYPE={AggregatorTypes.ENGLISH.value}", f'PRIOR_NODE_COUNT={os.getenv("JOIN_ACT_COUNT")}',"REQUIRED_REVIEWS=5000", "QUERY_NUMBER=4"], type='aggregator')
+    compose = default_config_with_tracker(compose, container_name, './aggregator', os.getenv('AGGR_ENG'), 'aggregator',
+                                          next_nodes=f"{os.getenv('DISP')}", 
+                                          header_type ='HeaderWithSender', 
+                                          entry_type='EntryAppIDNameReviewCount', 
+                                          aggregator_type=AggregatorTypes.ENGLISH.value,
+                                          query_number=4,
+                                          prior_node_count=os.getenv("JOIN_ACT_COUNT"),
+                                          required_reviews=5000)
     return compose, [container_name]
 
 def add_aggregator_indie(compose: dict[str, Any]):
     container_name = 'aggregator-indie'
-    compose = default_config_with_tracker(compose, entrypoint='./aggregator', 
-                                          container_name=container_name, 
-                                          queue= f"{os.getenv('AGGR_INDIE')}", 
+    compose = default_config_with_tracker(compose, container_name, './aggregator', os.getenv('AGGR_INDIE'), 'aggregator',
                                           next_nodes=f"{os.getenv('SORT_INDIE')},{os.getenv('SORT_INDIE_COUNT')},{ShardingAttribute.FRAGMENT_NUMBER.value}", 
-                                          header_type='HeaderWithSender', 
+                                          header_type ='HeaderWithSender', 
                                           entry_type='EntryNameReviewCount', 
-                                          extra_envs=[f"AGGREGATOR_TYPE={AggregatorTypes.INDIE.value}", f'PRIOR_NODE_COUNT={os.getenv("JOIN_INDIE_COUNT")}'], type='aggregator')
+                                          aggregator_type=AggregatorTypes.INDIE.value,
+                                          prior_node_count=os.getenv("JOIN_INDIE_COUNT"))
+
     return compose, [container_name]
 
 def add_border_node(compose: dict[str, Any], cluster_nodes):
@@ -259,142 +219,180 @@ def add_border_node(compose: dict[str, Any], cluster_nodes):
     }
     return compose
 
-def add_multiple(compose: dict[str, Any], count, generator_func, params):
-    name = params[0]
-
+def add_multiple(compose: dict[str, Any], count, generator_func, name, queue, **kwargs):
     containers = []
     for i in range(0, count):
-        params[0] = f'{name}-{i}'
-        compose, new_container = generator_func(compose, params)
+        cont_name = f'{name}-{i}'
+        compose, new_container = generator_func(compose, cont_name, queue, **kwargs)
         containers.append(new_container)
     return compose, containers
 
-def add_one(compose, generator_func, params):
-    compose, new_container = generator_func(compose, params)
+def add_one(compose, generator_func, name, queue, **kwargs):
+    compose, new_container = generator_func(compose, name, queue, **kwargs)
     return compose, [new_container]
 
-def add_depending_count(compose, count, generator_func, params):
+def add_depending_count(compose, count, generator_func, name, queue, **kwargs):
     if count == 1:
-        return add_one(compose, generator_func, params)
+        return add_one(compose, generator_func, name, queue, **kwargs)
     else:
-        return add_multiple(compose, count, generator_func, params)
+        return add_multiple(compose, count, generator_func, name, queue, **kwargs)
     
 def add_filterers_indie(compose: dict[str, Any]):
-    # name, type, queue, next_nodes, next_entries, next_headers, header_type, entry_type
-    params = ['indie', FiltererType.INDIE.value, os.getenv('FILT_INDIE'),
-               f"{os.getenv('FILT_DEC')};{os.getenv('JOIN_INDIE')},{os.getenv('JOIN_INDIE_COUNT')},{ShardingAttribute.APP_ID.value}",
-               'EntryNameDateAvgPlaytime;EntryAppIDName','Header;' ,'HeaderWithTable', 'EntryAppIDNameGenresReleaseDateAvgPlaytime'] 
-    return add_depending_count(compose, int(os.getenv('FILT_INDIE_COUNT')), generator_func=add_filterer, params=params)
+    return add_depending_count(compose, int(os.getenv('FILT_INDIE_COUNT')), add_filterer, 'indie', os.getenv('FILT_INDIE'), 
+                               filterer_type=FiltererType.INDIE.value,
+                               next_nodes=f"{os.getenv('FILT_DEC')};{os.getenv('JOIN_INDIE')},{os.getenv('JOIN_INDIE_COUNT')},{ShardingAttribute.APP_ID.value}",
+                               next_entries='EntryNameDateAvgPlaytime;EntryAppIDName',next_headers='Header;', header_type='HeaderWithTable', 
+                               entry_type='EntryAppIDNameGenresReleaseDateAvgPlaytime')
     
 def add_filterers_date(compose: dict[str, Any]):
-    # name, type, queue, next_nodes, next_entries, header_type, entry_type
-    params = ['date',FiltererType.DECADE.value, f"{os.getenv('FILT_DEC')}",
-               f"{os.getenv('SORT_AVG_PT')},{os.getenv('SORT_AVG_PT_COUNT')},{ShardingAttribute.FRAGMENT_NUMBER.value}",
-               'EntryNameAvgPlaytime', 'Header', 'EntryNameDateAvgPlaytime']
-    return add_depending_count(compose, int(os.getenv('FILT_DEC_COUNT')), generator_func=add_filterer, params=params)
+    return add_depending_count(compose, int(os.getenv('FILT_DEC_COUNT')), add_filterer, 'date', os.getenv('FILT_DEC'),
+                               filterer_type=FiltererType.DECADE.value, 
+                               next_nodes=f"{os.getenv('SORT_AVG_PT')},{os.getenv('SORT_AVG_PT_COUNT')},{ShardingAttribute.FRAGMENT_NUMBER.value}",
+                               next_entries='EntryNameAvgPlaytime', 
+                               header_type='Header', 
+                               entry_type='EntryNameDateAvgPlaytime')
    
 def add_filterers_action(compose: dict[str, Any]):
-    # name, type, queue, next_nodes, next_entries, header_type, entry_type
-    params = ['action', FiltererType.ACTION.value, f"{os.getenv('FILT_ACT')}",
-              f"{os.getenv('JOIN_ACT')},{os.getenv('JOIN_ACT_COUNT')},{ShardingAttribute.APP_ID.value};{os.getenv('JOIN_PERC')},{os.getenv('JOIN_PERC_COUNT')},{ShardingAttribute.APP_ID.value}", 
-              'EntryAppIDName;EntryAppIDName', 'HeaderWithTable','EntryAppIDNameGenres']
-    return add_depending_count(compose, int(os.getenv('FILT_ACT_COUNT')), generator_func=add_filterer, params=params)
+    return add_depending_count(compose, int(os.getenv('FILT_ACT_COUNT')), add_filterer, 'action', os.getenv('FILT_ACT'),
+                               filterer_type=FiltererType.ACTION.value,
+                               next_nodes=f"{os.getenv('JOIN_ACT')},{os.getenv('JOIN_ACT_COUNT')},{ShardingAttribute.APP_ID.value};{os.getenv('JOIN_PERC')},{os.getenv('JOIN_PERC_COUNT')},{ShardingAttribute.APP_ID.value}", 
+                               next_entries='EntryAppIDName;EntryAppIDName', 
+                               header_type='HeaderWithTable',
+                               entry_type='EntryAppIDNameGenres')
     
 def add_filterers_english(compose: dict[str, Any]):
-    #  name, type, queue, next_nodes, next_entries, header_type, entry_type
-    params = ['english', FiltererType.ENGLISH.value, 
-              f"{os.getenv('FILT_ENG')}", f"{os.getenv('GROUP_ENG')}",
-              'EntryAppIDName', 'HeaderWithSender','EntryAppIDNameReviewText']
-    return add_depending_count(compose, int(os.getenv('FILT_ENG_COUNT')), generator_func=add_filterer, params=params)
+    return add_depending_count(compose, int(os.getenv('FILT_ENG_COUNT')), add_filterer, 'english', os.getenv('FILT_ENG'),
+                               filterer_type=FiltererType.ENGLISH.value, 
+                               next_nodes=f"{os.getenv('GROUP_ENG')}",
+                               next_entries='EntryAppIDName', 
+                               header_type='HeaderWithSender',
+                               entry_type='EntryAppIDNameReviewText')
     
 def add_groupers_action_english(compose: dict[str, Any]):
-    # name, listening queue, next nodes, next entries, header type, entry type
-    params = ['english', GrouperType.APP_ID_NAME_COUNT.value, f"{os.getenv('GROUP_ENG')}", f"{os.getenv('AGGR_ENG')}", 
-              'HeaderWithSender', 'EntryAppIDName']
-    return add_depending_count(compose, int(os.getenv('GROUP_ENG_COUNT')), generator_func=add_grouper,params=params)
+    return add_depending_count(compose, int(os.getenv('GROUP_ENG_COUNT')), add_grouper, 'english', os.getenv('GROUP_ENG'),
+                               grouper_type=GrouperType.APP_ID_NAME_COUNT.value, 
+                               next_nodes=f"{os.getenv('AGGR_ENG')}", 
+                               header_type='HeaderWithSender', 
+                               entry_type='EntryAppIDName')
 
 def add_groupers_indie(compose: dict[str, Any]):
-    # name, type, queue, next_nodes, header_type, entry_type 
-    params = ['indie', GrouperType.APP_ID_COUNT.value,
-              f"{os.getenv('GROUP_INDIE')}",f"{os.getenv('JOIN_INDIE')},{os.getenv('JOIN_INDIE_COUNT')},{ShardingAttribute.APP_ID.value}", 
-              'HeaderWithTable', 'EntryAppID']
-    return add_depending_count(compose, int(os.getenv('GROUP_INDIE_COUNT')), generator_func=add_grouper,params=params)
+    return add_depending_count(compose, int(os.getenv('GROUP_INDIE_COUNT')), add_grouper, 'indie', os.getenv('GROUP_INDIE'), 
+                               grouper_type=GrouperType.APP_ID_COUNT.value, next_nodes=f"{os.getenv('JOIN_INDIE')},{os.getenv('JOIN_INDIE_COUNT')},{ShardingAttribute.APP_ID.value}", 
+                               header_type='HeaderWithTable', 
+                               entry_type='EntryAppID')
 
 def add_groupers_os_count(compose: dict[str, Any]):
-    # name, type, queue, next_nodes, header_type, entry_type 
-    params = ['os-counts', GrouperType.OS_COUNT.value, f"{os.getenv('GROUP_OS')}", 
-                               f"{os.getenv('AGGR_OS')}", 'Header', 'EntryOSSupport']
-    return add_depending_count(compose, int(os.getenv('GROUP_OS_COUNT')), add_grouper, params=params)
+    return add_depending_count(compose, int(os.getenv('GROUP_OS_COUNT')), add_grouper, 'os-counts', os.getenv('GROUP_OS'), 
+                               grouper_type=GrouperType.OS_COUNT.value,
+                               next_nodes=f"{os.getenv('AGGR_OS')}", 
+                               header_type='Header', 
+                               entry_type='EntryOSSupport')
 
 def add_groupers_action_percentile(compose: dict[str, Any]):
-    # name, type, queue, next_nodes, header_type, entry_type 
-    params = ['percentile', GrouperType.APP_ID_COUNT.value, f"{os.getenv('GROUP_PERC')}", f"{os.getenv('JOIN_PERC')},{os.getenv('JOIN_PERC_COUNT')},{ShardingAttribute.APP_ID.value}",
-              'HeaderWithTable', 'EntryAppID']
-    return add_depending_count(compose, int(os.getenv('GROUP_PERC_COUNT')), add_grouper, params=params)
+    return add_depending_count(compose, int(os.getenv('GROUP_PERC_COUNT')), add_grouper, 'percentile', os.getenv('GROUP_PERC'), 
+                                grouper_type=GrouperType.APP_ID_COUNT.value,
+                                next_nodes=f"{os.getenv('JOIN_PERC')},{os.getenv('JOIN_PERC_COUNT')},{ShardingAttribute.APP_ID.value}", 
+                                header_type='HeaderWithTable', entry_type ='EntryAppID')
 
 def add_joiners_action_percentile(compose: dict[str, Any]):
-    # name, type, queue, next_nodes, review_entry_type, game_entry_type, node_id 
     containers = []
     for i in range(0, int(os.getenv('JOIN_PERC_COUNT'))):
-        params = [f"percentile-{i}", JoinerType.PERCENTILE.value, f"{os.getenv('JOIN_PERC')}", f"{os.getenv('CONS_SORT_PERC')}", 'EntryAppIDReviewCount', 
-                  'EntryAppIDName',i]
-        compose, new_container = add_joiner(compose, params)
+        compose, new_container = add_joiner(compose, f"percentile-{i}", f"{os.getenv('JOIN_PERC')}",
+                                            joiner_type=JoinerType.PERCENTILE.value, 
+                                            next_nodes=f'{os.getenv("CONS_SORT_PERC")}', 
+                                            reviews_entry_type='EntryAppIDReviewCount', 
+                                            games_entry_type='EntryAppIDName', 
+                                            header_type='HeaderWithTable',
+                                            node_id=i)
         containers.append(new_container)
     return compose, containers
 
 def add_sorters_avg_playtime(compose: dict[str, Any]):
     containers = []
     for i in range(0, int(os.getenv('SORT_AVG_PT_COUNT'))):
-        compose, new_container = add_sorter(compose, name=f'playtime-{i}', type=SorterType.PLAYTIME.value,
-                                             queue=f"{os.getenv('SORT_AVG_PT')}", next_nodes=f"{os.getenv('CONS_SORT_AVG_PT')}", header_type='Header', entry_type= 'EntryNameAvgPlaytime',
-                                             node_id=i,node_count=f"{os.getenv('SORT_AVG_PT_COUNT')}", top=f"{os.getenv('SORT_AVG_PT_TOP')}",
-                                             next_header="HeaderWithSender")
+        compose, new_container = add_sorter(compose, f'playtime-{i}', os.getenv("SORT_AVG_PT"), 
+                                            next_nodes=f"{os.getenv('CONS_SORT_AVG_PT')}", 
+                                            header_type='Header', 
+                                            entry_type= 'EntryNameAvgPlaytime',
+                                            node_id=i,
+                                            sorter_type=SorterType.PLAYTIME.value, 
+                                            top_amount=os.getenv("SORT_AVG_PT_TOP"),
+                                            node_count=os.getenv("SORT_AVG_PT_COUNT"),
+                                            next_headers="HeaderWithSender")
         containers.append(new_container)
     return compose, containers
 
 def add_sorters_indie(compose: dict[str, Any]):
-    containers = []
+    containers = [] 
     for i in range(0, int(os.getenv('SORT_INDIE_COUNT'))):
-        compose, new_container = add_sorter(compose, name=f'indie-{i}', type=SorterType.INDIE.value, queue=f"{os.getenv('SORT_INDIE')}", next_nodes=f"{os.getenv('CONS_SORT_INDIE')}",node_id=i,
-                                            header_type='Header', entry_type= 'EntryNameReviewCount', node_count=f"{os.getenv('SORT_INDIE_COUNT')}", top=f"{os.getenv('SORT_INDIE_TOP')}",
-                                            next_header="HeaderWithSender")
+        compose, new_container = add_sorter(compose, f'indie-{i}', os.getenv('SORT_INDIE'), 
+                                            next_nodes=f"{os.getenv('CONS_SORT_INDIE')}",
+                                            node_id=i,
+                                            header_type='Header', 
+                                            entry_type= 'EntryNameReviewCount', 
+                                            sorter_type=f'{SorterType.INDIE.value}',
+                                            top_amount=f'{os.getenv("SORT_INDIE_TOP")}',
+                                            node_count=f'{os.getenv("SORT_INDIE_COUNT")}', 
+                                            next_headers="HeaderWithSender")
         containers.append(new_container)
     return compose, containers
 
 def add_sorter_consolidator_avg_playtime(compose: dict[str, Any]):
-    return add_sorter_consolidator_top(compose, name=f'playtime', type=SorterType.CONSOLIDATOR_PLAYTIME.value, queue=f"{os.getenv('CONS_SORT_AVG_PT')}", next_nodes=f"{os.getenv('DISP')}", 
-                                       header_type= 'HeaderWithSender', entry_type='EntryNameAvgPlaytime',prior_node_count=f"{os.getenv('SORT_AVG_PT_COUNT')}", top=f"{os.getenv('SORT_AVG_PT_TOP')}", query_number=2)
+    return add_sorter_consolidator(compose, 'playtime', os.getenv('CONS_SORT_AVG_PT'), 
+                                   next_nodes=f"{os.getenv('DISP')}", 
+                                   next_headers='HeaderWithQueryNumber',
+                                   header_type= 'HeaderWithSender', 
+                                   entry_type='EntryNameAvgPlaytime',
+                                   sorter_type=f'{SorterType.CONSOLIDATOR_PLAYTIME.value}',
+                                   prior_node_count=f'{os.getenv("SORT_AVG_PT_COUNT")}',
+                                   top_amount=f'{os.getenv("SORT_AVG_PT_TOP")}',
+                                   query_number=2)
 
 def add_sorter_consolidator_indie(compose: dict[str, Any]):
-    return add_sorter_consolidator_top(compose, name=f'indie', 
-                                       type=SorterType.CONSOLIDATOR_INDIE.value, 
-                                       queue=f"{os.getenv('CONS_SORT_INDIE')}", 
-                                       next_nodes=f"{os.getenv('DISP')}", 
-                                       header_type='HeaderWithSender', 
-                                       entry_type='EntryNameReviewCount', 
-                                       prior_node_count=f"{os.getenv('SORT_INDIE_COUNT')}", 
-                                       top=f"{os.getenv('SORT_INDIE_TOP')}", 
-                                       query_number=3)
+    return add_sorter_consolidator(compose, 'indie', os.getenv('CONS_SORT_INDIE'),
+                                   next_nodes=f"{os.getenv('DISP')}", 
+                                   next_headers='HeaderWithQueryNumber',
+                                   header_type='HeaderWithSender',
+                                   entry_type='EntryNameReviewCount', 
+                                   sorter_type=f'{SorterType.CONSOLIDATOR_INDIE.value}', 
+                                   prior_node_count=f'{os.getenv("SORT_INDIE_COUNT")}',
+                                   top_amount=f'{os.getenv("SORT_INDIE_TOP")}', 
+                                   query_number=3)
 
 def add_sorter_consolidator_action_percentile(compose: dict[str, Any]):
-    return add_sorter_consolidator_percentile(compose, name=f'sorter-consolidator-percentile', type=SorterType.CONSOLIDATOR_PERCENTILE.value, queue=f"{os.getenv('CONS_SORT_PERC')}", next_nodes=f"{os.getenv('DISP')}", header_type='HeaderWithSender', entry_type='EntryAppIDNameReviewCount', prior_node_count=f"{os.getenv('JOIN_PERC_COUNT')}", percentile=f"{os.getenv('CONS_PERC')}", query_number=5)
+    return add_sorter_consolidator_percentile(compose, 
+                                              next_nodes=f"{os.getenv('DISP')}", 
+                                              header_type='HeaderWithSender', entry_type='EntryAppIDNameReviewCount', 
+                                              sorter_type=f'{SorterType.CONSOLIDATOR_PERCENTILE.value}', 
+                                              prior_node_count=f'{os.getenv("JOIN_PERC_COUNT")}', 
+                                              percentile=f'{os.getenv("CONS_PERC")}', 
+                                              query_number=5, 
+                                              next_headers='HeaderWithQueryNumber')
 
 def add_joiners_indie(compose: dict[str, Any]):
-    # name, type, queue, next_nodes, review_entry_type, game_entry_type, node_id 
     containers = []
     for i in range(0, int(os.getenv('JOIN_INDIE_COUNT'))):
-        params = [f'indie-{i}', JoinerType.INDIE.value, f"{os.getenv('JOIN_INDIE')}", f"{os.getenv('AGGR_INDIE')}", 'EntryAppIDReviewCount', 'EntryAppIDName', i]
-        compose, new_container = add_joiner(compose, params)
+        compose, new_container = add_joiner(compose, f'indie-{i}', os.getenv('JOIN_INDIE'),
+                                            joiner_type=JoinerType.INDIE.value,
+                                            next_nodes=f"{os.getenv('AGGR_INDIE')}", 
+                                            reviews_entry_type='EntryAppIDReviewCount',
+                                            games_entry_type='EntryAppIDName', 
+                                            header_type='HeaderWithTable',
+                                            node_id=i)
         containers.append(new_container)
     return compose, containers
 
 
 def add_joiner_action_english(compose: dict[str, Any]):
-    # name, type, queue, next_nodes, review_entry_type, game_entry_type, node_id 
     containers = []
     for i in range(0, int(os.getenv('JOIN_ACT_COUNT'))):
-        params = [f'english-{i}', JoinerType.ENGLISH.value, f"{os.getenv('JOIN_ACT')}", f"{os.getenv('FILT_ENG')}", 'EntryAppIDReviewText', 'EntryAppIDName', i]
-        compose, new_container = add_joiner(compose, params)
+        compose, new_container = add_joiner(compose, f'english-{i}', os.getenv('JOIN_ACT'),
+                                            joiner_type=JoinerType.ENGLISH.value, 
+                                            next_nodes=f"{os.getenv('FILT_ENG')}", 
+                                            reviews_entry_type='EntryAppIDReviewText',
+                                            header_type='HeaderWithTable',
+                                            games_entry_type='EntryAppIDName', 
+                                            node_id=i)
         containers.append(new_container)
     return compose, containers
 
@@ -434,6 +432,7 @@ def generate_compose(output_file: str, client_number: int):
     compose, containers = add_container(compose, containers, generation=add_sorter_consolidator_avg_playtime)
 
     # Query 3
+    #filter indie
     compose, containers = add_container(compose, containers, generation=add_groupers_indie)
     compose, containers = add_container(compose, containers, generation=add_joiners_indie) 
     compose, containers = add_container(compose, containers, generation=add_aggregator_indie)
@@ -448,7 +447,7 @@ def generate_compose(output_file: str, client_number: int):
     compose, containers = add_container(compose, containers, generation=add_aggregator_english)
 
     # Query 5
-
+    #filter action
     compose, containers = add_container(compose, containers, generation=add_groupers_action_percentile)
     compose, containers = add_container(compose, containers, generation=add_joiners_action_percentile)
     compose, containers = add_container(compose, containers, generation=add_sorter_consolidator_action_percentile)
