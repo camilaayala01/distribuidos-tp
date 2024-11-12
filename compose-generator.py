@@ -151,7 +151,7 @@ def add_sorter(compose: dict[str, Any], name, queue, **kwargs):
 
 def add_sorter_consolidator(compose: dict[str, Any], name, queue, **kwargs):
     container_name = f'sorter-consolidator-{name}'
-    compose = default_config_with_tracker(compose, container_name, './sorter', queue, 'sorter-consolidator', **kwargs)
+    compose = default_config_with_tracker(compose, container_name, './sorter', queue, 'sorter', **kwargs)
     return compose, [container_name]
 
 def add_sorter_consolidator_percentile(compose: dict[str, Any], **kwargs):
@@ -223,7 +223,7 @@ def add_multiple(compose: dict[str, Any], count, generator_func, name, queue, **
     containers = []
     for i in range(0, count):
         cont_name = f'{name}-{i}'
-        compose, new_container = generator_func(compose, name, queue, **kwargs)
+        compose, new_container = generator_func(compose, cont_name, queue, **kwargs)
         containers.append(new_container)
     return compose, containers
 
@@ -299,9 +299,10 @@ def add_joiners_action_percentile(compose: dict[str, Any]):
     for i in range(0, int(os.getenv('JOIN_PERC_COUNT'))):
         compose, new_container = add_joiner(compose, f"percentile-{i}", f"{os.getenv('JOIN_PERC')}",
                                             joiner_type=JoinerType.PERCENTILE.value, 
-                                            next_nodes=f"{os.getenv('CONS_SORT_PERC')}", 
+                                            next_nodes=f'{os.getenv("CONS_SORT_PERC")}', 
                                             reviews_entry_type='EntryAppIDReviewCount', 
                                             games_entry_type='EntryAppIDName', 
+                                            header_type='HeaderWithTable',
                                             node_id=i)
         containers.append(new_container)
     return compose, containers
@@ -309,14 +310,14 @@ def add_joiners_action_percentile(compose: dict[str, Any]):
 def add_sorters_avg_playtime(compose: dict[str, Any]):
     containers = []
     for i in range(0, int(os.getenv('SORT_AVG_PT_COUNT'))):
-        compose, new_container = add_sorter(compose, f'playtime-{i}', os.getenv('SORT_AVG_PT'), 
+        compose, new_container = add_sorter(compose, f'playtime-{i}', os.getenv("SORT_AVG_PT"), 
                                             next_nodes=f"{os.getenv('CONS_SORT_AVG_PT')}", 
                                             header_type='Header', 
                                             entry_type= 'EntryNameAvgPlaytime',
                                             node_id=i,
-                                            sorter_type={SorterType.PLAYTIME.value}, 
-                                            top_amount={os.getenv("SORT_AVG_PT_TOP")},
-                                            node_count={os.getenv("SORT_AVG_PT_COUNT")},
+                                            sorter_type=SorterType.PLAYTIME.value, 
+                                            top_amount=os.getenv("SORT_AVG_PT_TOP"),
+                                            node_count=os.getenv("SORT_AVG_PT_COUNT"),
                                             next_headers="HeaderWithSender")
         containers.append(new_container)
     return compose, containers
@@ -329,9 +330,9 @@ def add_sorters_indie(compose: dict[str, Any]):
                                             node_id=i,
                                             header_type='Header', 
                                             entry_type= 'EntryNameReviewCount', 
-                                            sorter_type={SorterType.INDIE.value},
-                                            top_amount={os.getenv("SORT_INDIE_TOP")},
-                                            node_count={os.getenv("SORT_INDIE_COUNT")}, 
+                                            sorter_type=f'{SorterType.INDIE.value}',
+                                            top_amount=f'{os.getenv("SORT_INDIE_TOP")}',
+                                            node_count=f'{os.getenv("SORT_INDIE_COUNT")}', 
                                             next_headers="HeaderWithSender")
         containers.append(new_container)
     return compose, containers
@@ -342,9 +343,9 @@ def add_sorter_consolidator_avg_playtime(compose: dict[str, Any]):
                                    next_headers='HeaderWithQueryNumber',
                                    header_type= 'HeaderWithSender', 
                                    entry_type='EntryNameAvgPlaytime',
-                                   sorter_type={SorterType.CONSOLIDATOR_PLAYTIME.value},
-                                   prior_node_count={os.getenv("SORT_AVG_PT_COUNT")},
-                                   top_amount={os.getenv("SORT_AVG_PT_TOP")},
+                                   sorter_type=f'{SorterType.CONSOLIDATOR_PLAYTIME.value}',
+                                   prior_node_count=f'{os.getenv("SORT_AVG_PT_COUNT")}',
+                                   top_amount=f'{os.getenv("SORT_AVG_PT_TOP")}',
                                    query_number=2)
 
 def add_sorter_consolidator_indie(compose: dict[str, Any]):
@@ -353,18 +354,18 @@ def add_sorter_consolidator_indie(compose: dict[str, Any]):
                                    next_headers='HeaderWithQueryNumber',
                                    header_type='HeaderWithSender',
                                    entry_type='EntryNameReviewCount', 
-                                   sorter_type={SorterType.CONSOLIDATOR_INDIE.value}, 
-                                   prior_node_count={os.getenv("SORT_INDIE_COUNT")},
-                                   top_amount={os.getenv("SORT_INDIE_TOP")}, 
+                                   sorter_type=f'{SorterType.CONSOLIDATOR_INDIE.value}', 
+                                   prior_node_count=f'{os.getenv("SORT_INDIE_COUNT")}',
+                                   top_amount=f'{os.getenv("SORT_INDIE_TOP")}', 
                                    query_number=3)
 
 def add_sorter_consolidator_action_percentile(compose: dict[str, Any]):
     return add_sorter_consolidator_percentile(compose, 
                                               next_nodes=f"{os.getenv('DISP')}", 
                                               header_type='HeaderWithSender', entry_type='EntryAppIDNameReviewCount', 
-                                              sorter_type={SorterType.CONSOLIDATOR_PERCENTILE.value}, 
-                                              prior_node_count={os.getenv("JOIN_PERC_COUNT")}, 
-                                              percentile={os.getenv("CONS_PERC")}, 
+                                              sorter_type=f'{SorterType.CONSOLIDATOR_PERCENTILE.value}', 
+                                              prior_node_count=f'{os.getenv("JOIN_PERC_COUNT")}', 
+                                              percentile=f'{os.getenv("CONS_PERC")}', 
                                               query_number=5, 
                                               next_headers='HeaderWithQueryNumber')
 
@@ -376,6 +377,7 @@ def add_joiners_indie(compose: dict[str, Any]):
                                             next_nodes=f"{os.getenv('AGGR_INDIE')}", 
                                             reviews_entry_type='EntryAppIDReviewCount',
                                             games_entry_type='EntryAppIDName', 
+                                            header_type='HeaderWithTable',
                                             node_id=i)
         containers.append(new_container)
     return compose, containers
@@ -387,7 +389,8 @@ def add_joiner_action_english(compose: dict[str, Any]):
         compose, new_container = add_joiner(compose, f'english-{i}', os.getenv('JOIN_ACT'),
                                             joiner_type=JoinerType.ENGLISH.value, 
                                             next_nodes=f"{os.getenv('FILT_ENG')}", 
-                                            reviews_entry_type='EntryAppIDReviewText', 
+                                            reviews_entry_type='EntryAppIDReviewText',
+                                            header_type='HeaderWithTable',
                                             games_entry_type='EntryAppIDName', 
                                             node_id=i)
         containers.append(new_container)
