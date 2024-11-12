@@ -26,18 +26,17 @@ services:
     - LISTENING_QUEUE=Initializer
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=ReducedGameEntry
-    - GAMES_NEXT_NODES=FilterIndie
-    - GAMES_NEXT_ENTRIES=EntryAppIDNameGenresReleaseDateAvgPlaytime
-    - GAMES_NEXT_HEADERS=
+    - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
+    - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
+    - GAMES_NEXT_HEADERS=Header;;
     - REVIEWS_ENTRY_TYPE=ReviewEntry
-    - REVIEWS_NEXT_NODES=GrouperIndiePositiveReviews
-    - REVIEWS_NEXT_ENTRIES=EntryAppID
+    - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,2,0;GrouperActionPercentile
+    - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
-    - ./sendingStrategy:/sendingStrategy
     networks:
     - sa_net
   initializer-1:
@@ -49,18 +48,17 @@ services:
     - LISTENING_QUEUE=Initializer
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=ReducedGameEntry
-    - GAMES_NEXT_NODES=FilterIndie
-    - GAMES_NEXT_ENTRIES=EntryAppIDNameGenresReleaseDateAvgPlaytime
-    - GAMES_NEXT_HEADERS=
+    - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
+    - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
+    - GAMES_NEXT_HEADERS=Header;;
     - REVIEWS_ENTRY_TYPE=ReviewEntry
-    - REVIEWS_NEXT_NODES=GrouperIndiePositiveReviews
-    - REVIEWS_NEXT_ENTRIES=EntryAppID
+    - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,2,0;GrouperActionPercentile
+    - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
-    - ./sendingStrategy:/sendingStrategy
     networks:
     - sa_net
   initializer-2:
@@ -72,18 +70,185 @@ services:
     - LISTENING_QUEUE=Initializer
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=ReducedGameEntry
-    - GAMES_NEXT_NODES=FilterIndie
-    - GAMES_NEXT_ENTRIES=EntryAppIDNameGenresReleaseDateAvgPlaytime
-    - GAMES_NEXT_HEADERS=
+    - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
+    - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
+    - GAMES_NEXT_HEADERS=Header;;
     - REVIEWS_ENTRY_TYPE=ReviewEntry
-    - REVIEWS_NEXT_NODES=GrouperIndiePositiveReviews
-    - REVIEWS_NEXT_ENTRIES=EntryAppID
+    - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,2,0;GrouperActionPercentile
+    - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
-    - ./sendingStrategy:/sendingStrategy
+    networks:
+    - sa_net
+  grouper-os-counts-0:
+    build:
+      context: ./grouper
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=GrouperOSCounts
+    - NEXT_NODES=AggregatorOs
+    - HEADER_TYPE=Header
+    - ENTRY_TYPE=EntryOSSupport
+    - GROUPER_TYPE=0
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  grouper-os-counts-1:
+    build:
+      context: ./grouper
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=GrouperOSCounts
+    - NEXT_NODES=AggregatorOs
+    - HEADER_TYPE=Header
+    - ENTRY_TYPE=EntryOSSupport
+    - GROUPER_TYPE=0
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  aggregator-os:
+    build:
+      context: ./aggregator
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=AggregatorOs
+    - NEXT_NODES=Dispatcher
+    - HEADER_TYPE=Header
+    - ENTRY_TYPE=EntryOSCount
+    - AGGREGATOR_TYPE=0
+    - QUERY_NUMBER=1
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    - ./packetTracker:/packetTracker
+    - ./aggregator/aggregator-os:/aggregator-os
+    networks:
+    - sa_net
+  filterer-indie:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=FilterIndie
+    - NEXT_NODES=FilterDecade;JoinerIndie,2,0
+    - HEADER_TYPE=HeaderWithTable
+    - ENTRY_TYPE=EntryAppIDNameGenresReleaseDateAvgPlaytime
+    - FILTERER_TYPE=1
+    - NEXT_ENTRIES=EntryNameDateAvgPlaytime;EntryAppIDName
+    - NEXT_HEADERS=Header;
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  filterer-date:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=FilterDecade
+    - NEXT_NODES=SorterAvgPlaytime,2,1
+    - HEADER_TYPE=Header
+    - ENTRY_TYPE=EntryNameDateAvgPlaytime
+    - FILTERER_TYPE=0
+    - NEXT_ENTRIES=EntryNameAvgPlaytime
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  sorter-playtime-0:
+    build:
+      context: ./sorter
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=SorterAvgPlaytime
+    - NEXT_NODES=ConsolidatorSorterPlaytime
+    - HEADER_TYPE=Header
+    - ENTRY_TYPE=EntryNameAvgPlaytime
+    - NODE_ID=0
+    - SORTER_TYPE=0
+    - TOP_AMOUNT=10
+    - NODE_COUNT=2
+    - NEXT_HEADERS=HeaderWithSender
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    - ./packetTracker:/packetTracker
+    - ./sorter/sorter-playtime-0:/sorter-playtime-0
+    networks:
+    - sa_net
+  sorter-playtime-1:
+    build:
+      context: ./sorter
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=SorterAvgPlaytime
+    - NEXT_NODES=ConsolidatorSorterPlaytime
+    - HEADER_TYPE=Header
+    - ENTRY_TYPE=EntryNameAvgPlaytime
+    - NODE_ID=1
+    - SORTER_TYPE=0
+    - TOP_AMOUNT=10
+    - NODE_COUNT=2
+    - NEXT_HEADERS=HeaderWithSender
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    - ./packetTracker:/packetTracker
+    - ./sorter/sorter-playtime-1:/sorter-playtime-1
+    networks:
+    - sa_net
+  sorter-consolidator-playtime:
+    build:
+      context: ./sorter
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=ConsolidatorSorterPlaytime
+    - NEXT_NODES=Dispatcher
+    - HEADER_TYPE=HeaderWithSender
+    - ENTRY_TYPE=EntryNameAvgPlaytime
+    - SORTER_TYPE=2
+    - PRIOR_NODE_COUNT=2
+    - TOP_AMOUNT=10
+    - QUERY_NUMBER=2
+    - NEXT_HEADERS=HeaderWithQueryNumber
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    - ./packetTracker:/packetTracker
+    - ./sorter-consolidator/sorter-consolidator-playtime:/sorter-consolidator-playtime
     networks:
     - sa_net
   grouper-indie:
@@ -92,8 +257,8 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - LISTENING_QUEUE=GrouperIndiePositiveReviews
-    - NEXT_NODES=JoinerIndiePositiveReviews,2,0
+    - LISTENING_QUEUE=GrouperIndie
+    - NEXT_NODES=JoinerIndie,2,0
     - HEADER_TYPE=HeaderWithTable
     - ENTRY_TYPE=EntryAppID
     - GROUPER_TYPE=1
@@ -102,7 +267,6 @@ services:
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
-    - ./sendingStrategy:/sendingStrategy
     networks:
     - sa_net
   joiner-indie-0:
@@ -111,7 +275,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - LISTENING_QUEUE=JoinerIndiePositiveReviews
+    - LISTENING_QUEUE=JoinerIndie
     - NEXT_NODES=AggregatorIndie
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=EntryAppIDName
@@ -123,9 +287,8 @@ services:
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
-    - ./sendingStrategy:/sendingStrategy
     - ./packetTracker:/packetTracker
-    - ./joiner/joiner-indie-0:/state
+    - ./joiner/indie-0:/indie-0
     networks:
     - sa_net
   joiner-indie-1:
@@ -134,7 +297,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - LISTENING_QUEUE=JoinerIndiePositiveReviews
+    - LISTENING_QUEUE=JoinerIndie
     - NEXT_NODES=AggregatorIndie
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=EntryAppIDName
@@ -146,9 +309,8 @@ services:
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
-    - ./sendingStrategy:/sendingStrategy
     - ./packetTracker:/packetTracker
-    - ./joiner/joiner-indie-1:/state
+    - ./joiner/indie-1:/indie-1
     networks:
     - sa_net
   aggregator-indie:
@@ -158,7 +320,7 @@ services:
     environment:
     - PYTHONUNBUFFERED=1
     - LISTENING_QUEUE=AggregatorIndie
-    - NEXT_NODES=SorterIndiePositiveReviews,2,1
+    - NEXT_NODES=SorterIndie,2,1
     - HEADER_TYPE=HeaderWithSender
     - ENTRY_TYPE=EntryNameReviewCount
     - AGGREGATOR_TYPE=2
@@ -168,9 +330,8 @@ services:
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
-    - ./sendingStrategy:/sendingStrategy
     - ./packetTracker:/packetTracker
-    - ./aggregator/aggregator-indie:/state
+    - ./aggregator/aggregator-indie:/aggregator-indie
     networks:
     - sa_net
   sorter-indie-0:
@@ -179,22 +340,22 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - LISTENING_QUEUE=SorterIndiePositiveReviews
-    - NEXT_NODES=ConsolidatorSorterIndiePositiveReviews
+    - LISTENING_QUEUE=SorterIndie
+    - NEXT_NODES=ConsolidatorSorterIndie
     - HEADER_TYPE=Header
     - ENTRY_TYPE=EntryNameReviewCount
-    - SORTER_TYPE=1
     - NODE_ID=0
+    - SORTER_TYPE=1
     - TOP_AMOUNT=5
     - NODE_COUNT=2
+    - NEXT_HEADERS=HeaderWithSender
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
-    - ./sendingStrategy:/sendingStrategy
     - ./packetTracker:/packetTracker
-    - ./sorter/sorter-indie-0:/state
+    - ./sorter/sorter-indie-0:/sorter-indie-0
     networks:
     - sa_net
   sorter-indie-1:
@@ -203,22 +364,22 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - LISTENING_QUEUE=SorterIndiePositiveReviews
-    - NEXT_NODES=ConsolidatorSorterIndiePositiveReviews
+    - LISTENING_QUEUE=SorterIndie
+    - NEXT_NODES=ConsolidatorSorterIndie
     - HEADER_TYPE=Header
     - ENTRY_TYPE=EntryNameReviewCount
-    - SORTER_TYPE=1
     - NODE_ID=1
+    - SORTER_TYPE=1
     - TOP_AMOUNT=5
     - NODE_COUNT=2
+    - NEXT_HEADERS=HeaderWithSender
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
-    - ./sendingStrategy:/sendingStrategy
     - ./packetTracker:/packetTracker
-    - ./sorter/sorter-indie-1:/state
+    - ./sorter/sorter-indie-1:/sorter-indie-1
     networks:
     - sa_net
   sorter-consolidator-indie:
@@ -227,7 +388,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - LISTENING_QUEUE=ConsolidatorSorterIndiePositiveReviews
+    - LISTENING_QUEUE=ConsolidatorSorterIndie
     - NEXT_NODES=Dispatcher
     - HEADER_TYPE=HeaderWithSender
     - ENTRY_TYPE=EntryNameReviewCount
@@ -235,14 +396,356 @@ services:
     - PRIOR_NODE_COUNT=2
     - TOP_AMOUNT=5
     - QUERY_NUMBER=3
+    - NEXT_HEADERS=HeaderWithQueryNumber
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
-    - ./sendingStrategy:/sendingStrategy
     - ./packetTracker:/packetTracker
-    - ./sorter/sorter-consolidator-indie:/state
+    - ./sorter-consolidator/sorter-consolidator-indie:/sorter-consolidator-indie
+    networks:
+    - sa_net
+  filterer-action:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=FilterAction
+    - NEXT_NODES=JoinerActionEnglish,2,0;JoinerActionPercentile,2,0
+    - HEADER_TYPE=HeaderWithTable
+    - ENTRY_TYPE=EntryAppIDNameGenres
+    - FILTERER_TYPE=2
+    - NEXT_ENTRIES=EntryAppIDName;EntryAppIDName
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  joiner-english-0:
+    build:
+      context: ./joiner
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=JoinerActionEnglish
+    - NEXT_NODES=FilterEnglish
+    - HEADER_TYPE=HeaderWithTable
+    - GAMES_ENTRY_TYPE=EntryAppIDName
+    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
+    - JOINER_TYPE=2
+    - NODE_ID=0
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    - ./packetTracker:/packetTracker
+    - ./joiner/english-0:/english-0
+    networks:
+    - sa_net
+  joiner-english-1:
+    build:
+      context: ./joiner
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=JoinerActionEnglish
+    - NEXT_NODES=FilterEnglish
+    - HEADER_TYPE=HeaderWithTable
+    - GAMES_ENTRY_TYPE=EntryAppIDName
+    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
+    - JOINER_TYPE=2
+    - NODE_ID=1
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    - ./packetTracker:/packetTracker
+    - ./joiner/english-1:/english-1
+    networks:
+    - sa_net
+  filterer-english-0:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=FilterEnglish
+    - NEXT_NODES=GrouperActionEnglish
+    - HEADER_TYPE=HeaderWithSender
+    - ENTRY_TYPE=EntryAppIDNameReviewText
+    - FILTERER_TYPE=3
+    - NEXT_ENTRIES=EntryAppIDName
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  filterer-english-1:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=FilterEnglish
+    - NEXT_NODES=GrouperActionEnglish
+    - HEADER_TYPE=HeaderWithSender
+    - ENTRY_TYPE=EntryAppIDNameReviewText
+    - FILTERER_TYPE=3
+    - NEXT_ENTRIES=EntryAppIDName
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  filterer-english-2:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=FilterEnglish
+    - NEXT_NODES=GrouperActionEnglish
+    - HEADER_TYPE=HeaderWithSender
+    - ENTRY_TYPE=EntryAppIDNameReviewText
+    - FILTERER_TYPE=3
+    - NEXT_ENTRIES=EntryAppIDName
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  filterer-english-3:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=FilterEnglish
+    - NEXT_NODES=GrouperActionEnglish
+    - HEADER_TYPE=HeaderWithSender
+    - ENTRY_TYPE=EntryAppIDNameReviewText
+    - FILTERER_TYPE=3
+    - NEXT_ENTRIES=EntryAppIDName
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  filterer-english-4:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=FilterEnglish
+    - NEXT_NODES=GrouperActionEnglish
+    - HEADER_TYPE=HeaderWithSender
+    - ENTRY_TYPE=EntryAppIDNameReviewText
+    - FILTERER_TYPE=3
+    - NEXT_ENTRIES=EntryAppIDName
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  filterer-english-5:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=FilterEnglish
+    - NEXT_NODES=GrouperActionEnglish
+    - HEADER_TYPE=HeaderWithSender
+    - ENTRY_TYPE=EntryAppIDNameReviewText
+    - FILTERER_TYPE=3
+    - NEXT_ENTRIES=EntryAppIDName
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  filterer-english-6:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=FilterEnglish
+    - NEXT_NODES=GrouperActionEnglish
+    - HEADER_TYPE=HeaderWithSender
+    - ENTRY_TYPE=EntryAppIDNameReviewText
+    - FILTERER_TYPE=3
+    - NEXT_ENTRIES=EntryAppIDName
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  filterer-english-7:
+    build:
+      context: ./filterer
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=FilterEnglish
+    - NEXT_NODES=GrouperActionEnglish
+    - HEADER_TYPE=HeaderWithSender
+    - ENTRY_TYPE=EntryAppIDNameReviewText
+    - FILTERER_TYPE=3
+    - NEXT_ENTRIES=EntryAppIDName
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  grouper-english:
+    build:
+      context: ./grouper
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=GrouperActionEnglish
+    - NEXT_NODES=AggregatorEnglish
+    - HEADER_TYPE=HeaderWithSender
+    - ENTRY_TYPE=EntryAppIDName
+    - GROUPER_TYPE=2
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  aggregator-english:
+    build:
+      context: ./aggregator
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=AggregatorEnglish
+    - NEXT_NODES=Dispatcher
+    - HEADER_TYPE=HeaderWithSender
+    - ENTRY_TYPE=EntryAppIDNameReviewCount
+    - AGGREGATOR_TYPE=1
+    - PRIOR_NODE_COUNT=2
+    - REQUIRED_REVIEWS=5000
+    - QUERY_NUMBER=4
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    - ./packetTracker:/packetTracker
+    - ./aggregator/aggregator-english:/aggregator-english
+    networks:
+    - sa_net
+  grouper-percentile:
+    build:
+      context: ./grouper
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=GrouperActionPercentile
+    - NEXT_NODES=JoinerActionPercentile,2,0
+    - HEADER_TYPE=HeaderWithTable
+    - ENTRY_TYPE=EntryAppID
+    - GROUPER_TYPE=1
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    networks:
+    - sa_net
+  joiner-percentile-0:
+    build:
+      context: ./joiner
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=JoinerActionPercentile
+    - NEXT_NODES=ConsolidatorSorterPercentile
+    - HEADER_TYPE=HeaderWithTable
+    - GAMES_ENTRY_TYPE=EntryAppIDName
+    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+    - JOINER_TYPE=0
+    - NODE_ID=0
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    - ./packetTracker:/packetTracker
+    - ./joiner/percentile-0:/percentile-0
+    networks:
+    - sa_net
+  joiner-percentile-1:
+    build:
+      context: ./joiner
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=JoinerActionPercentile
+    - NEXT_NODES=ConsolidatorSorterPercentile
+    - HEADER_TYPE=HeaderWithTable
+    - GAMES_ENTRY_TYPE=EntryAppIDName
+    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+    - JOINER_TYPE=0
+    - NODE_ID=1
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    - ./packetTracker:/packetTracker
+    - ./joiner/percentile-1:/percentile-1
+    networks:
+    - sa_net
+  sorter-consolidator-percentile:
+    build:
+      context: ./sorter
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - LISTENING_QUEUE=ConsolidatorSorterPercentile
+    - NEXT_NODES=Dispatcher
+    - HEADER_TYPE=HeaderWithSender
+    - ENTRY_TYPE=EntryAppIDNameReviewCount
+    - SORTER_TYPE=4
+    - PRIOR_NODE_COUNT=2
+    - PERCENTILE=90
+    - QUERY_NUMBER=5
+    - NEXT_HEADERS=HeaderWithQueryNumber
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    - ./packetTracker:/packetTracker
+    - ./sorter/sorter-consolidator-percentile:/sorter-consolidator-percentile
     networks:
     - sa_net
   border-node:
@@ -262,6 +765,14 @@ services:
     - initializer-0
     - initializer-1
     - initializer-2
+    - grouper-os-counts-0
+    - grouper-os-counts-1
+    - aggregator-os
+    - filterer-indie
+    - filterer-date
+    - sorter-playtime-0
+    - sorter-playtime-1
+    - sorter-consolidator-playtime
     - grouper-indie
     - joiner-indie-0
     - joiner-indie-1
@@ -269,6 +780,23 @@ services:
     - sorter-indie-0
     - sorter-indie-1
     - sorter-consolidator-indie
+    - filterer-action
+    - joiner-english-0
+    - joiner-english-1
+    - filterer-english-0
+    - filterer-english-1
+    - filterer-english-2
+    - filterer-english-3
+    - filterer-english-4
+    - filterer-english-5
+    - filterer-english-6
+    - filterer-english-7
+    - grouper-english
+    - aggregator-english
+    - grouper-percentile
+    - joiner-percentile-0
+    - joiner-percentile-1
+    - sorter-consolidator-percentile
 networks:
   sa_net:
     ipam:
