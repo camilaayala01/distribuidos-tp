@@ -120,24 +120,3 @@ def serializeAndFragmentWithSender(maxDataBytes: int, data: list[EntryInterface]
     fragment += 1
     return packets, fragment
 
-
-# same as fragmenting with sender, but couldnt modularize
-def serializeAndFragmentWithQueryNumber(maxDataBytes: int, data: list[EntryInterface], clientId: bytes, queryNumber: int) ->  list[bytes]:
-    from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
-    fragment = 1
-    packets = []
-    currPacket = bytes()
-
-    for entry in data:
-        entryBytes = entry.serialize()
-        if len(currPacket) + len(entryBytes) <= maxDataBytes:
-            currPacket += entryBytes
-        else:
-            headerBytes = HeaderWithQueryNumber(clientId, fragment, False, queryNumber).serialize()
-            fragment += 1
-            packets.append(headerBytes + currPacket)
-            currPacket = entryBytes
-
-    # will have to yield once we have memory restrictions
-    packets.append(HeaderWithQueryNumber(clientId, fragment, True, queryNumber).serialize() + currPacket)
-    return packets
