@@ -1,6 +1,5 @@
 from entryParsing.entry import EntryInterface
 from .common.fieldParsing import  deserializeAppID, deserializeGameName, serializeAppID, serializeGameName
-from entryParsing.common.utils import getShardingKey
 
 class EntryAppIDName(EntryInterface):
     def __init__(self, _appID: str, _name: str):

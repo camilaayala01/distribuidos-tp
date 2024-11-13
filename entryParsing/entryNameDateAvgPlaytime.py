@@ -1,6 +1,5 @@
 # amount of bytes dedicated to stating the length of the name
 from entryParsing.common import fieldParsing
-from entryParsing.common.fieldParsing import *
 from entryParsing.entry import EntryInterface
 
 class EntryNameDateAvgPlaytime(EntryInterface):

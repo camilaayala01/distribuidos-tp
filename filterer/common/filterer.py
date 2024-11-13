@@ -1,5 +1,4 @@
 import os
-from entryParsing.common.header import Header
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
 from internalCommunication.common.utils import createStrategiesFromNextNodes

@@ -1,6 +1,4 @@
 from entryParsing.common.fieldParsing import deserializeAppID, deserializeGameName, deserializeGenres, serializeAppID, serializeGameName, serializeGenres
-from entryParsing.common.utils import getShardingKey
-from entryParsing.entryAppIDName import EntryAppIDName
 from .entry import EntryInterface
 
 class EntryAppIDNameGenres(EntryInterface):

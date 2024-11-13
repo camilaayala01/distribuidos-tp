@@ -1,5 +1,4 @@
 import struct
-import logging
 import uuid
 from entryParsing.common.table import Table
 from entryParsing.common.utils import boolToInt, intToBool

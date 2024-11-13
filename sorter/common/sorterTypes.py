@@ -6,7 +6,7 @@ from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.entryAppIDName import EntryAppIDName
 from packetTracker.multiTracker import MultiTracker
 from packetTracker.packetTracker import PacketTracker
-from entryParsing.common.utils import maxDataBytes, nextEntry
+from entryParsing.common.utils import nextEntry
 
 class SorterType(Enum):
     PLAYTIME = 0
