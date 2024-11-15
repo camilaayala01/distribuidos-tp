@@ -5,6 +5,7 @@ services:
       dockerfile: ../zmqUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - MAX_DATA_BYTES=51200
     - REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv
     - GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv
@@ -23,6 +24,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=Initializer
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=ReducedGameEntry
@@ -45,6 +47,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=Initializer
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=ReducedGameEntry
@@ -67,6 +70,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=Initializer
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=ReducedGameEntry
@@ -89,6 +93,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=GrouperOSCounts
     - GROUPER_TYPE=0
     - NEXT_NODES=AggregatorOs
@@ -107,6 +112,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=GrouperOSCounts
     - GROUPER_TYPE=0
     - NEXT_NODES=AggregatorOs
@@ -125,6 +131,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=AggregatorOs
     - NEXT_NODES=Dispatcher
     - HEADER_TYPE=Header
@@ -146,6 +153,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterIndie
     - FILTERER_TYPE=1
     - NEXT_NODES=FilterDecade;JoinerIndie,2,0
@@ -166,6 +174,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterDecade
     - FILTERER_TYPE=0
     - NEXT_NODES=SorterAvgPlaytime,2,1
@@ -185,6 +194,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=SorterAvgPlaytime
     - NEXT_NODES=ConsolidatorSorterPlaytime
     - HEADER_TYPE=Header
@@ -209,6 +219,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=SorterAvgPlaytime
     - NEXT_NODES=ConsolidatorSorterPlaytime
     - HEADER_TYPE=Header
@@ -233,6 +244,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=ConsolidatorSorterPlaytime
     - NEXT_NODES=Dispatcher
     - NEXT_HEADERS=HeaderWithQueryNumber
@@ -257,6 +269,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=GrouperIndie
     - GROUPER_TYPE=1
     - NEXT_NODES=JoinerIndie,2,0
@@ -275,6 +288,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=3
     - LISTENING_QUEUE=JoinerIndie
     - JOINER_TYPE=1
     - NEXT_NODES=AggregatorIndie
@@ -297,6 +311,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=3
     - LISTENING_QUEUE=JoinerIndie
     - JOINER_TYPE=1
     - NEXT_NODES=AggregatorIndie
@@ -319,6 +334,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=AggregatorIndie
     - NEXT_NODES=SorterIndie,2,1
     - HEADER_TYPE=HeaderWithSender
@@ -340,6 +356,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=SorterIndie
     - NEXT_NODES=ConsolidatorSorterIndie
     - NODE_ID=0
@@ -364,6 +381,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=SorterIndie
     - NEXT_NODES=ConsolidatorSorterIndie
     - NODE_ID=1
@@ -388,6 +406,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=ConsolidatorSorterIndie
     - NEXT_NODES=Dispatcher
     - NEXT_HEADERS=HeaderWithQueryNumber
@@ -412,6 +431,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterAction
     - FILTERER_TYPE=2
     - NEXT_NODES=JoinerActionEnglish,2,0;JoinerActionPercentile,2,0
@@ -431,6 +451,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=3
     - LISTENING_QUEUE=JoinerActionEnglish
     - JOINER_TYPE=2
     - NEXT_NODES=FilterEnglish
@@ -453,6 +474,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=3
     - LISTENING_QUEUE=JoinerActionEnglish
     - JOINER_TYPE=2
     - NEXT_NODES=FilterEnglish
@@ -475,6 +497,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -494,6 +517,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -513,6 +537,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -532,6 +557,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -551,6 +577,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -570,6 +597,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -589,6 +617,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -608,6 +637,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -627,6 +657,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=GrouperActionEnglish
     - GROUPER_TYPE=2
     - NEXT_NODES=AggregatorEnglish
@@ -645,6 +676,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=AggregatorEnglish
     - NEXT_NODES=Dispatcher
     - HEADER_TYPE=HeaderWithSender
@@ -668,6 +700,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=GrouperActionPercentile
     - GROUPER_TYPE=1
     - NEXT_NODES=JoinerActionPercentile,2,0
@@ -686,6 +719,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=3
     - LISTENING_QUEUE=JoinerActionPercentile
     - JOINER_TYPE=0
     - NEXT_NODES=ConsolidatorSorterPercentile
@@ -708,6 +742,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=3
     - LISTENING_QUEUE=JoinerActionPercentile
     - JOINER_TYPE=0
     - NEXT_NODES=ConsolidatorSorterPercentile
@@ -730,6 +765,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=ConsolidatorSorterPercentile
     - NEXT_NODES=Dispatcher
     - HEADER_TYPE=HeaderWithSender
@@ -754,6 +790,7 @@ services:
       dockerfile: ../zmqUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     env_file:
     - .env
     volumes:

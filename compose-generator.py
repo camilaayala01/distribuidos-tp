@@ -209,7 +209,8 @@ def add_border_node(compose: dict[str, Any], cluster_nodes):
             'dockerfile': '../zmqUser.Dockerfile'
         },
         'environment':[
-            'PYTHONUNBUFFERED=1'
+            'PYTHONUNBUFFERED=1',
+            'PREFETCH_COUNT=1'
         ],
         'env_file': default_env_file(),
         'volumes':[
