@@ -16,7 +16,7 @@ def initializeLog():
     """
     logging.basicConfig(
         format='%(asctime)s %(levelname)-8s %(message)s',
-        level=logging.INFO,
+        level=logging.ERROR,
         datefmt='%Y-%m-%d %H:%M:%S',
     )
     logging.getLogger("pika").setLevel(logging.WARNING)

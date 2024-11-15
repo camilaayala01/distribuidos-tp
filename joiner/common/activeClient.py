@@ -1,4 +1,6 @@
 from entryParsing.common.header import Header
+from entryParsing.common.headerInterface import HeaderInterface
+from entryParsing.common.table import Table
 from entryParsing.entry import EntryInterface
 from packetTracker.defaultTracker import DefaultTracker
 import os
@@ -35,20 +37,19 @@ class ActiveClient:
     def finishedReceiving(self):
         return self._gamesTracker.isDone() and self._reviewsTracker.isDone()
     
-    def isGameDuplicate(self, header: Header):
-        self._gamesTracker.isDuplicate(header)
+    def isDuplicate(self, header: HeaderInterface):
+        match header.getTable():
+            case Table.GAMES:
+                return self._gamesTracker.isDuplicate(header)
+            case Table.REVIEWS:
+               return self._reviewsTracker.isDuplicate(header) 
 
-    def isReviewDuplicate(self, header: Header):
-        self._reviewsTracker.isDuplicate(header)
-
-    def updateGamesTracker(self, header: Header):
-        self._gamesTracker.update(header)
-
-    def updateReviewsTracker(self, header: Header):
-        self._reviewsTracker.update(header)
-
-    def isReviewDuplicate(self, header: Header):
-        self._reviewsTracker.isDuplicate(header)
+    def updateTracker(self, header: HeaderInterface):
+        match header.getTable():
+            case Table.GAMES:
+                self._games.update(header)
+            case Table.REVIEWS:
+                self._reviewsTracker.update(header)
 
     def isGamesDone(self):
         return self._gamesTracker.isDone()

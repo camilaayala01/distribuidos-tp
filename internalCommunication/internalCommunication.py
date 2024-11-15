@@ -7,10 +7,9 @@ DELIVERY_MODE = 2
 
 class InternalCommunication:
     def __init__(self, name: str = None, nodeID: str = None):
-        self._executerName = name
+        self._executerName = name + nodeID if nodeID is not None else ''
         self._connection = self.startConnection()
         self._channel = self.createChannel()
-        self._nodeID = nodeID if nodeID is not None else ''
         if name != None:
             logging.info(f'action: initialized an entity | result: success | msg: binded to queue {name}')
 
@@ -24,7 +23,7 @@ class InternalCommunication:
         return channel
 
     def defineMessageHandler(self, callback):
-        queueName = self._executerName + self._nodeID
+        queueName = self._executerName
         self._channel.queue_declare(queue=queueName, durable=True)
         self._channel.basic_consume(queue=queueName, on_message_callback=callback)
 
@@ -54,3 +53,7 @@ class InternalCommunication:
 
     def sendToInitializer(self, message: bytes):
         self.basicSend(os.getenv('INIT'), message)
+
+    def isQueueEmpty(self, ch):
+        result = ch.queue_declare(queue=self._executerName, passive=True)
+        return result.method.message_count == 0
