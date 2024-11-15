@@ -19,7 +19,6 @@ class BorderNodeCommunication:
         socket.bind("tcp://*:5556") #TODO: SACAR HARDCODEO
         self._clientSocket = socket
         self._clientSocket.setsockopt(zmq.RCVTIMEO, 10000) #TODO: PENSARLO
-        self._currentClientID = 1
         # dispatcher
         self._internalCommunication = InternalCommunication(os.getenv('DISP'))
         self._accepterCommunication = InternalCommunication()

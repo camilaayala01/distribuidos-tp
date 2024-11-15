@@ -1,14 +1,11 @@
 import os
-import random
 import unittest
 from unittest.mock import MagicMock, patch
 import uuid
-from sorter.common.activeClient import ActiveClient
 from entryParsing.entryNameReviewCount import EntryNameReviewCount
 from sorter.common.sorter import Sorter
 
 SMALL_TEST_TOP_AMOUNT = 3
-BIG_TEST_TOP_AMOUNT = 20
 
 # sorter by average playtime is not included, since it acts the same way as sorter by positive reviews
 class TestSorterGeneral(unittest.TestCase):
@@ -46,22 +43,13 @@ class TestSorterGeneral(unittest.TestCase):
         # indie
         os.environ['ENTRY_TYPE']='EntryNameReviewCount'
         self.sorterIndieFew = Sorter()
-        os.environ['TOP_AMOUNT'] = '20'
-        self.sorterBig = Sorter()
         
         # action consolidator
         os.environ['ENTRY_TYPE']='EntryAppIDNameReviewCount'
         os.environ['SORTER_TYPE'] = '4'
+        os.environ['TOP_AMOUNT'] = '100000000000000'
         self.sorterAction = Sorter()
         self.sorterAction._topAmount=None
-        
-
-    def generateEntries(self):
-        entries = []
-        for i in range(500):
-            entries.append(EntryNameReviewCount(f"Game {i}", random.randint(1, 1000)))
-
-        return entries
 
     def testGetBatchTopInAscendingOrder(self):
         result = self.sorterAction.getBatchTop(self.entriesMore)

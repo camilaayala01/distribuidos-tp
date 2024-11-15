@@ -1,7 +1,5 @@
 from entryParsing.common import fieldParsing
 from entryParsing.entry import EntryInterface
-from entryParsing.common.utils import getShardingKey
-from entryParsing.entryAppIDReviewText import EntryAppIDReviewText
 
 VOTE_LEN = 1
 MAX_REVIEW_TEXT = 150

@@ -9,7 +9,6 @@ from .sorterTypes import SorterType
 from .activeClient import ActiveClient
 
 PRINT_FREQUENCY=500
-PATH="/client-"
 
 class Sorter:
     def __init__(self):

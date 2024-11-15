@@ -1,5 +1,4 @@
 from enum import Enum
-from entryParsing.common.header import Header
 from entryParsing.entry import EntryInterface
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
 from entryParsing.entryAppIDReviewCount import EntryAppIDReviewCount
