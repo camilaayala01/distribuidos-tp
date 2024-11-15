@@ -77,9 +77,10 @@ def default_env_file():
             '.env'
     ]
 
-def default_environment(queue)-> list[str]:
+def default_environment(queue, prefetch_count: int = 1)-> list[str]:
     return ([
             'PYTHONUNBUFFERED=1',
+            f'PREFETCH_COUNT={prefetch_count}',
             f'LISTENING_QUEUE={queue}',
     ])
 
@@ -103,18 +104,18 @@ def component_nodes_environment(**kwargs):
     return envs  
 
     
-def default_config(compose: dict[str, Any], container_name, entrypoint, queue, **kwargs):
+def default_config(compose: dict[str, Any], container_name, entrypoint, queue, prefetch_count: int=1, **kwargs):
     compose['services'][container_name] ={
         'build': rabbit_node_build(entrypoint),
-        'environment': add_to_list(default_environment(queue), component_nodes_environment(**kwargs)),
+        'environment': add_to_list(default_environment(queue, prefetch_count), component_nodes_environment(**kwargs)),
         'env_file': default_env_file(),
         'volumes': default_volumes(),
         'networks': default_network()
     }
     return compose
     
-def default_config_with_tracker(compose: dict[str, Any], container_name, entrypoint, queue, node_type, **kwargs):
-    compose = default_config(compose, container_name, entrypoint, queue, **kwargs)
+def default_config_with_tracker(compose: dict[str, Any], container_name, entrypoint, queue, node_type, prefetch_count: int=1, **kwargs):
+    compose = default_config(compose, container_name, entrypoint, queue, prefetch_count, **kwargs)
     compose['services'][container_name]['volumes'].extend(['./packetTracker:/packetTracker', stateful_volumes(node_type, queue, kwargs.get('node_id'))])
     return compose
 
@@ -160,7 +161,7 @@ def add_sorter_consolidator_percentile(compose: dict[str, Any], **kwargs):
 
 def add_joiner(compose: dict[str, Any], name, queue, **kwargs):
     container_name = f'joiner-{name}'
-    compose = default_config_with_tracker(compose, container_name, './joiner', queue, 'joiner', **kwargs)
+    compose = default_config_with_tracker(compose, container_name, './joiner', queue, 'joiner', 3, **kwargs)
     return compose, container_name
     
 def add_filterer(compose: dict[str, Any], name, queue, **kwargs):

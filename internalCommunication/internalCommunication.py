@@ -2,7 +2,7 @@ import pika
 import os
 import logging
 
-PREFETCH_COUNT = os.getenv('PREFETCH_COUNT') # break round robin
+PREFETCH_COUNT = os.getenv('PREFETCH_COUNT')  # break round robin
 DELIVERY_MODE = 1 # make message transient, TODO: CHANGE
 
 class InternalCommunication:
