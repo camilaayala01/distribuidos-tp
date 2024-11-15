@@ -22,6 +22,7 @@ def add_client_with_id(compose: dict[str, Any], client_id: int):
         'build': zmq_node_build('./client'),
         'environment':[
             'PYTHONUNBUFFERED=1',
+            'PREFETCH_COUNT=1',
             'MAX_DATA_BYTES=51200',
             'REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv',
             'GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv',

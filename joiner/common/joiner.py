@@ -1,8 +1,9 @@
+from collections import defaultdict
 import logging
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.headerWithTable import HeaderWithTable
-from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, maxDataBytes, serializeAndFragmentWithSender, initializeLog
+from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, maxDataBytes, nextEntry, serializeAndFragmentWithSender, initializeLog
 from entryParsing.entry import EntryInterface
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
@@ -26,34 +27,48 @@ class Joiner:
         self._currentClient = None
 
     def stop(self, _signum, _frame):
+        for client in self._activeClients.values():
+            client.destroy()
         self._internalCommunication.stop()
         
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 
     def joinReviews(self, reviews: list[EntryInterface]):
-        for review in reviews:
-            id = review.getAppID()
-            name = self._currentClient._games.get(id)
-            if name is None:
-                continue
-            priorJoined =  self._currentClient._joinedEntries.get(id, self._joinerType.defaultEntry(name))
-            self._currentClient._joinedEntries[id] = self._joinerType.applyJoining(id, name, priorJoined, review)
-    
+        if not len(reviews):
+            return
+        
+        batch = defaultdict(list)
+        for entry in reviews:
+            batch[entry._appID].append(entry)
+ 
+        generator = self._currentClient.loadGamesEntries(self._gamesEntry)
+        while True:
+            if not len(batch):
+                break
+            game = nextEntry(generator)
+            if game is None:
+                break
+            id = game._appID
+            if id in batch:
+                reviewsWithID = batch.pop(id)
+                for review in reviewsWithID:
+                    name = game._name
+                    priorJoined = self._currentClient._joinedEntries.get(id, self._joinerType.defaultEntry(name)) #leer
+                    self._currentClient._joinedEntries[id] = self._joinerType.applyJoining(id, name, priorJoined, review) #escribe
+                    
     def handleReviewsMessage(self, header: HeaderWithTable, data: bytes):
         self._currentClient.updateReviewsTracker(header)
         reviews = self._reviewsEntry.deserialize(data)
         if not self._currentClient._gamesTracker.isDone():
-            self._currentClient._unjoinedReviews.extend(reviews)
-            return 
-        else:
-            self.joinReviews(reviews)
+            self._currentClient.storeUnjoinedReviews(reviews) #write
+            return
+        self.joinReviews(reviews) #write
 
     def handleGamesMessage(self, header: HeaderWithTable, data: bytes):
         self._currentClient.updateGamesTracker(header)
         entries = self._gamesEntry.deserialize(data)
-        for entry in entries:
-            self._currentClient.storeGamesEntry(entry)
+        self._currentClient.storeGamesEntries(entries)
 
     def shouldSendPackets(self, toSend: list[EntryInterface]):
         return (self._currentClient.finishedReceiving() or 
@@ -89,6 +104,7 @@ class Joiner:
 
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
             logging.info(f'action: received batch from table {header.getTable()} | {header} | result: success')
+        
         if header.isGamesTable():
             if self._currentClient.isGameDuplicate(header):
                 ch.basic_ack(delivery_tag = method.delivery_tag)
@@ -110,6 +126,7 @@ class Joiner:
 
         if self._currentClient.finishedReceiving():
             logging.info(f'action: finished receiving data from client {clientId}| result: success')
+            self._currentClient.destroy()
             self._activeClients.pop(clientId)
 
         ch.basic_ack(delivery_tag = method.delivery_tag)
