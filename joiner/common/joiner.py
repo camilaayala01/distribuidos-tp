@@ -1,6 +1,8 @@
 from collections import defaultdict
 import logging
 import os
+
+import pika
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.common.table import Table
@@ -108,16 +110,26 @@ class Joiner:
 
     def processPendingBatches(self):
         table = self._accumulatedBatches.getTable()
-        if table == Table.Games:
-            self.handleGamesMessage(self._accumulatedBatches)
-        if table  == Table.Reviews:
-            self.handleReviewsMessage(self._accumulatedBatches)
+        if table == Table.GAMES:
+            self.handleGamesMessage(self._accumulatedBatches.getBatches())
+        if table  == Table.REVIEWS:
+            self.handleReviewsMessage(self._accumulatedBatches.getBatches())
+
+        if self._currentClient.isGamesDone():
+            self.joinReviews(self._currentClient._unjoinedReviews)
+            self._currentClient._unjoinedReviews = []
+
+        self._handleSending(self._accumulatedBatches._clientId)
+        
+        toAck = self._accumulatedBatches._pendingTags
         self._accumulatedBatches = None
+        return toAck
     
     def shouldProcessAccumulated(self):
         return self._accumulatedBatches.accumulatedLen() == PREFETCH_COUNT or self._internalCommunication.isQueueEmpty()
     
     def handleMessage(self, ch, method, _properties, body):
+        print("Channel ID:", id(ch))
         header, batch = self._headerType.deserialize(body)
         clientId = header.getClient()
         self.setCurrentClient(clientId)
@@ -126,33 +138,31 @@ class Joiner:
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
             
+        print("delivery tag", method.delivery_tag)
         self.setAccumulatedBatches(method.delivery_tag, header, batch)
-        
-        if self._accumulatedBatches.accumulate(header, method.delivery_tag, batch):
-            self.processPendingBatches()
+        if not self._accumulatedBatches.accumulate(header=header, tag=method.delivery_tag, batch=batch):
+            print(f"couldnt accumulate: had {self._accumulatedBatches._table} but got {header.getTable()}")
+            toAck = self.processPendingBatches()
             self.setAccumulatedBatches(method.delivery_tag, header, batch)
-        self._currentClient.updateTracker(header)
+            self._currentClient.updateTracker(header)
+            return
 
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
             logging.info(f'action: received batch from table {header.getTable()} | {header} | result: success')
-        
+
         if not self.shouldProcessAccumulated():
             return
         
-        self.processPendingBatches()
-        if self._currentClient.isGamesDone():
-            self.joinReviews(self._currentClient._unjoinedReviews)
-            self._currentClient._unjoinedReviews = []
+        toAck = self.processPendingBatches()
+        for tag in toAck:
+            try:
+                ch.basic_ack(delivery_tag=tag)
+            except pika.exceptions.AMQPError as e:
+                logging.error(f"Error confirming message: {e}")
 
-        self._handleSending(clientId)
-        for tag in self._accumulatedBatches._pendingTags:
-            ch.basic_ack(delivery_tag = tag)
-        
         self._activeClients[clientId] = self._currentClient
 
         if self._currentClient.finishedReceiving():
             logging.info(f'action: finished receiving data from client {clientId}| result: success')
             self._currentClient.destroy()
             self._activeClients.pop(clientId)
-
-        ch.basic_ack(delivery_tag = method.delivery_tag) #cambiarlo

@@ -7,8 +7,10 @@ DELIVERY_MODE = 2
 
 class InternalCommunication:
     def __init__(self, name: str = None, nodeID: str = None):
-        self._executerName = name + nodeID if nodeID is not None else ''
+        self._executerName = name
+        self._nodeID = nodeID or ''
         self._connection = self.startConnection()
+        self._queue = None
         self._channel = self.createChannel()
         if name != None:
             logging.info(f'action: initialized an entity | result: success | msg: binded to queue {name}')
@@ -23,9 +25,9 @@ class InternalCommunication:
         return channel
 
     def defineMessageHandler(self, callback):
-        queueName = self._executerName
-        self._channel.queue_declare(queue=queueName, durable=True)
-        self._channel.basic_consume(queue=queueName, on_message_callback=callback)
+        queueName = self._executerName + self._nodeID
+        self._queue = self._channel.queue_declare(queue=queueName, durable=True)
+        self._channel.basic_consume(queue=queueName, on_message_callback=callback, auto_ack=False)
 
         try:
             self._channel.start_consuming()
@@ -48,12 +50,16 @@ class InternalCommunication:
                 delivery_mode=DELIVERY_MODE, 
             ))
         
-    def directSend(self, exchangeName: str, routingKey: str, message: bytes):
-        self.basicSend(queueName=exchangeName+routingKey, message=message)
+    def directSend(self, queueName: str, routingKey: str, message: bytes):
+        self.basicSend(queueName=queueName+routingKey, message=message)
 
     def sendToInitializer(self, message: bytes):
         self.basicSend(os.getenv('INIT'), message)
-
-    def isQueueEmpty(self, ch):
-        result = ch.queue_declare(queue=self._executerName, passive=True)
-        return result.method.message_count == 0
+    
+    def isQueueEmpty(self):
+        print("count", self._queue.method.message_count)
+        return self._queue.method.message_count == 0
+    
+    def ackAll(self, deliveryTags):
+        for tag in deliveryTags:
+            self._channel.basic_ack(delivery_tag=tag)
