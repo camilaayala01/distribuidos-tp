@@ -1,10 +1,7 @@
 from collections import defaultdict
 import logging
 import os
-
-import pika
 from entryParsing.common.fieldParsing import getClientIdUUID
-from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.common.table import Table
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, maxDataBytes, nextEntry, serializeAndFragmentWithSender, initializeLog
 from entryParsing.entry import EntryInterface
@@ -78,7 +75,7 @@ class Joiner:
         return (self._currentClient.finishedReceiving() or 
                 (not self._currentClient.finishedReceiving() and len(toSend) != 0))
 
-    def _handleSending(self, clientId: bytes):
+    def _handleSending(self):
         currClient = self._currentClient
         toSend, self._currentClient._joinedEntries, self._currentClient._sent = self._joinerType.entriesToSend(joinedEntries=currClient._joinedEntries, 
                                                                                                                 isDone=currClient.finishedReceiving(),
@@ -87,15 +84,12 @@ class Joiner:
             return
         packets, self._currentClient._fragment = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(self._headerType), 
                                                  data=toSend,
-                                                 clientId=clientId, 
+                                                 clientId=self._currentClient.getId(), 
                                                  senderId=self._id,
                                                  fragment=currClient._fragment,
                                                  hasEOF=currClient.finishedReceiving())
         for packet in packets:
             self._sendToNext(packet)
-        
-    def setCurrentClient(self, clientId: bytes):
-        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(getClientIdUUID(clientId)))
 
     def _sendToNext(self, msg: bytes):
         for strategy in self._sendingStrategies:
@@ -105,10 +99,9 @@ class Joiner:
         return self._accumulatedBatches
     
     def setAccumulatedBatches(self, tag, header, batch):
-        if self._accumulatedBatches is None:
-            self._accumulatedBatches = AccumulatedBatches(tag, header.getTable(), header.getClient(), batch)
+        self._accumulatedBatches = AccumulatedBatches(tag, header.getTable(), header.getClient(), batch)
 
-    def processPendingBatches(self):
+    def processPendingBatches(self, header):
         table = self._accumulatedBatches.getTable()
         if table == Table.GAMES:
             self.handleGamesMessage(self._accumulatedBatches.getBatches())
@@ -119,17 +112,28 @@ class Joiner:
             self.joinReviews(self._currentClient._unjoinedReviews)
             self._currentClient._unjoinedReviews = []
 
-        self._handleSending(self._accumulatedBatches._clientId)
+        self._handleSending()
         
         toAck = self._accumulatedBatches._pendingTags
+        self._activeClients[self._accumulatedBatches.getClient()] = self._currentClient
         self._accumulatedBatches = None
         return toAck
     
     def shouldProcessAccumulated(self):
         return self._accumulatedBatches.accumulatedLen() == PREFETCH_COUNT or self._internalCommunication.isQueueEmpty()
-    
+
+    """keeps the client if there is one, set a new one if there's not"""
+    def setCurrentClient(self, clientId: bytes):
+        if self._currentClient:
+            return
+        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(getClientIdUUID(clientId)))
+
+    """replaces the old client with a new one"""
+    def setNewClient(self, clientId: bytes):
+        self._currentClient = None
+        self.setCurrentClient(clientId)
+
     def handleMessage(self, ch, method, _properties, body):
-        print("Channel ID:", id(ch))
         header, batch = self._headerType.deserialize(body)
         clientId = header.getClient()
         self.setCurrentClient(clientId)
@@ -137,14 +141,15 @@ class Joiner:
         if self._currentClient.isDuplicate(header):
             ch.basic_ack(delivery_tag = method.delivery_tag)
             return
-            
-        print("delivery tag", method.delivery_tag)
-        self.setAccumulatedBatches(method.delivery_tag, header, batch)
-        if not self._accumulatedBatches.accumulate(header=header, tag=method.delivery_tag, batch=batch):
-            print(f"couldnt accumulate: had {self._accumulatedBatches._table} but got {header.getTable()}")
-            toAck = self.processPendingBatches()
+
+        if self._accumulatedBatches is None:
             self.setAccumulatedBatches(method.delivery_tag, header, batch)
+        elif not self._accumulatedBatches.accumulate(header=header, tag=method.delivery_tag, batch=batch):
+            self._internalCommunication.ackAll(self.processPendingBatches(header))
             self._currentClient.updateTracker(header)
+            # reset accumulated and set client to correspond to the most recent packet
+            self.setAccumulatedBatches(method.delivery_tag, header, batch)
+            self.setNewClient(clientId)
             return
 
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
@@ -153,14 +158,8 @@ class Joiner:
         if not self.shouldProcessAccumulated():
             return
         
-        toAck = self.processPendingBatches()
-        for tag in toAck:
-            try:
-                ch.basic_ack(delivery_tag=tag)
-            except pika.exceptions.AMQPError as e:
-                logging.error(f"Error confirming message: {e}")
-
-        self._activeClients[clientId] = self._currentClient
+        self._currentClient.updateTracker(header)
+        self._internalCommunication.ackAll(self.processPendingBatches(header))
 
         if self._currentClient.finishedReceiving():
             logging.info(f'action: finished receiving data from client {clientId}| result: success')

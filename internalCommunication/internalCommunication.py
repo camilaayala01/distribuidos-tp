@@ -57,7 +57,6 @@ class InternalCommunication:
         self.basicSend(os.getenv('INIT'), message)
     
     def isQueueEmpty(self):
-        print("count", self._queue.method.message_count)
         return self._queue.method.message_count == 0
     
     def ackAll(self, deliveryTags):

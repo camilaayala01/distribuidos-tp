@@ -26,6 +26,9 @@ class AccumulatedBatches:
         self._pendingTags.append(tag)
         return True
     
+    def __str__(self):
+        return f"tags: {self._pendingTags} client: {self._clientId}"
+
     def getBatches(self):
         return self._batches
     
