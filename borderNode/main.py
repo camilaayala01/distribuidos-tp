@@ -1,21 +1,13 @@
 from threading import Thread
-from common.borderCommunication import BorderNodeCommunication
+from common.borderNode import BorderNode
 import signal
 
-def listenForClient(communication: BorderNodeCommunication):
-    while communication.isRunning():
-        msg = communication.receiveFromClient()
-        if msg == None:
-            continue
-        communication.sendInitializer(msg)
-    communication.closeClientSocket()
-
 def main():
-    communication = BorderNodeCommunication()
-    signal.signal(signal.SIGTERM, communication.stop)
-    thread = Thread(target=listenForClient, args=(communication,))
+    border = BorderNode()
+    signal.signal(signal.SIGTERM, border.stop)
+    thread = Thread(target=border.listenForClient, args=())
     thread.start()
-    communication.execute()
+    border.dispatchResponses()
     thread.join()
     
 
