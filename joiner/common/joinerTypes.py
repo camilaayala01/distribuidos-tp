@@ -1,11 +1,6 @@
 from enum import Enum
-from entryParsing.common.header import Header
-from entryParsing.entry import EntryInterface
 from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
 from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
-from entryParsing.entryNameReviewCount import EntryNameReviewCount
-
-REQUIRED_ENTRIES = 5000
 
 class JoinerType(Enum):
     PERCENTILE = 0

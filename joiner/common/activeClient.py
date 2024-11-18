@@ -11,7 +11,6 @@ class ActiveClient:
     def __init__(self, clientId: UUID):
         self._clientId = clientId
         self._fragment = 1
-        self._games = {} #appid, name
         self._joinedEntries = {} #appid, entry[]
         self._gamesTracker = DefaultTracker(clientId)
         self._reviewsTracker = DefaultTracker(clientId)
@@ -132,7 +131,3 @@ class ActiveClient:
                         
         newResults.close()
         os.rename(self.joinedPath() + '.tmp', self.joinedPath() + '.csv')
-            
-
-    def storeJoinedReviews(self, joinedEntries: list[EntryInterface]):
-        self.storeEntries(self.joinedPath(), joinedEntries)

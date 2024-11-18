@@ -65,7 +65,7 @@ class Joiner:
         if len(data) == 0 and not self._currentClient.unjoinedReviews():
             return
         reviews = self._reviewsEntry.deserialize(data)
-        if not self._currentClient._gamesTracker.isDone():
+        if not self._currentClient.isGamesDone():
             self._currentClient.storeUnjoinedReviews(reviews)
             return 
         self.joinReviews(reviews) 
@@ -111,7 +111,7 @@ class Joiner:
 
         self._handleSending()
         
-        if self._currentClient._gamesTracker.isDone():
+        if self._currentClient.isGamesDone():
             self._currentClient.removeUnjoinedReviews()
         toAck = self._accumulatedBatches.toAck()
         self._activeClients[self._accumulatedBatches.getClient()] = self._currentClient
