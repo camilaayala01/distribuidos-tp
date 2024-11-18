@@ -2,22 +2,24 @@ from collections import defaultdict
 import logging
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID
-from entryParsing.common.headerWithTable import HeaderWithTable
+from entryParsing.common.table import Table
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, maxDataBytes, nextEntry, serializeAndFragmentWithSender, initializeLog
 from entryParsing.entry import EntryInterface
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
+from .accumulatedBatches import AccumulatedBatches
 from .activeClient import ActiveClient
 from .joinerTypes import JoinerType
 
 PRINT_FREQUENCY = 1000
+PREFETCH_COUNT = int(os.getenv('PREFETCH_COUNT'))
 
 class Joiner:
     def __init__(self):
         initializeLog()
         self._joinerType = JoinerType(int(os.getenv('JOINER_TYPE')))
-        nodeID=os.getenv('NODE_ID')
-        self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), nodeID)
+        nodeID = os.getenv('NODE_ID')
+        self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), os.getenv('NODE_ID'))
         self._sendingStrategies = createStrategiesFromNextNodes()
         self._id = int(nodeID)
         self._gamesEntry = getGamesEntryTypeFromEnv()
@@ -25,6 +27,7 @@ class Joiner:
         self._headerType = getHeaderTypeFromEnv()
         self._activeClients = {}
         self._currentClient = None
+        self._accumulatedBatches = None
 
     def stop(self, _signum, _frame):
         for client in self._activeClients.values():
@@ -41,7 +44,7 @@ class Joiner:
         batch = defaultdict(list)
         for entry in reviews:
             batch[entry._appID].append(entry)
- 
+
         generator = self._currentClient.loadGamesEntries(self._gamesEntry)
         while True:
             if not len(batch):
@@ -57,16 +60,14 @@ class Joiner:
                     priorJoined = self._currentClient._joinedEntries.get(id, self._joinerType.defaultEntry(name)) #leer
                     self._currentClient._joinedEntries[id] = self._joinerType.applyJoining(id, name, priorJoined, review) #escribe
                     
-    def handleReviewsMessage(self, header: HeaderWithTable, data: bytes):
-        self._currentClient.updateReviewsTracker(header)
+    def handleReviewsMessage(self, data: bytes):
         reviews = self._reviewsEntry.deserialize(data)
         if not self._currentClient._gamesTracker.isDone():
             self._currentClient.storeUnjoinedReviews(reviews) #write
             return
         self.joinReviews(reviews) #write
 
-    def handleGamesMessage(self, header: HeaderWithTable, data: bytes):
-        self._currentClient.updateGamesTracker(header)
+    def handleGamesMessage(self, data: bytes):
         entries = self._gamesEntry.deserialize(data)
         self._currentClient.storeGamesEntries(entries)
 
@@ -74,7 +75,7 @@ class Joiner:
         return (self._currentClient.finishedReceiving() or 
                 (not self._currentClient.finishedReceiving() and len(toSend) != 0))
 
-    def _handleSending(self, clientId: bytes):
+    def _handleSending(self):
         currClient = self._currentClient
         toSend, self._currentClient._joinedEntries, self._currentClient._sent = self._joinerType.entriesToSend(joinedEntries=currClient._joinedEntries, 
                                                                                                                 isDone=currClient.finishedReceiving(),
@@ -83,50 +84,84 @@ class Joiner:
             return
         packets, self._currentClient._fragment = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(self._headerType), 
                                                  data=toSend,
-                                                 clientId=clientId, 
+                                                 clientId=self._currentClient.getId(), 
                                                  senderId=self._id,
                                                  fragment=currClient._fragment,
                                                  hasEOF=currClient.finishedReceiving())
         for packet in packets:
             self._sendToNext(packet)
-        
-    def setCurrentClient(self, clientId: bytes):
-        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(getClientIdUUID(clientId)))
 
     def _sendToNext(self, msg: bytes):
         for strategy in self._sendingStrategies:
             strategy.sendBytes(self._internalCommunication, msg)
+    
+    def shouldProcessPending(self):
+        return self._accumulatedBatches
+    
+    def setAccumulatedBatches(self, tag, header, batch):
+        self._accumulatedBatches = AccumulatedBatches(tag, header.getTable(), header.getClient(), batch)
+
+    def processPendingBatches(self, header):
+        table = self._accumulatedBatches.getTable()
+        if table == Table.GAMES:
+            self.handleGamesMessage(self._accumulatedBatches.getBatches())
+        if table  == Table.REVIEWS:
+            self.handleReviewsMessage(self._accumulatedBatches.getBatches())
+
+        if self._currentClient.isGamesDone():
+            self.joinReviews(self._currentClient._unjoinedReviews)
+            self._currentClient._unjoinedReviews = []
+
+        self._handleSending()
+        
+        toAck = self._accumulatedBatches._pendingTags
+        self._activeClients[self._accumulatedBatches.getClient()] = self._currentClient
+        self._accumulatedBatches = None
+        return toAck
+    
+    def shouldProcessAccumulated(self):
+        return self._accumulatedBatches.accumulatedLen() == PREFETCH_COUNT or self._internalCommunication.isQueueEmpty()
+
+    """keeps the client if there is one, set a new one if there's not"""
+    def setCurrentClient(self, clientId: bytes):
+        if self._currentClient:
+            return
+        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(getClientIdUUID(clientId)))
+
+    """replaces the old client with a new one"""
+    def setNewClient(self, clientId: bytes):
+        self._currentClient = None
+        self.setCurrentClient(clientId)
 
     def handleMessage(self, ch, method, _properties, body):
         header, batch = self._headerType.deserialize(body)
         clientId = header.getClient()
         self.setCurrentClient(clientId)
 
+        if self._currentClient.isDuplicate(header):
+            ch.basic_ack(delivery_tag = method.delivery_tag)
+            return
+
+        if self._accumulatedBatches is None:
+            self.setAccumulatedBatches(method.delivery_tag, header, batch)
+        elif not self._accumulatedBatches.accumulate(header=header, tag=method.delivery_tag, batch=batch):
+            self._internalCommunication.ackAll(self.processPendingBatches(header))
+            self._currentClient.updateTracker(header)
+            # reset accumulated and set client to correspond to the most recent packet
+            self.setAccumulatedBatches(method.delivery_tag, header, batch)
+            self.setNewClient(clientId)
+            return
+
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
             logging.info(f'action: received batch from table {header.getTable()} | {header} | result: success')
-        
-        if header.isGamesTable():
-            if self._currentClient.isGameDuplicate(header):
-                ch.basic_ack(delivery_tag = method.delivery_tag)
-                return
-            self.handleGamesMessage(header, batch)
 
-        if header.isReviewsTable():
-            if self._currentClient.isReviewDuplicate(header):
-                ch.basic_ack(delivery_tag = method.delivery_tag)
-                return
-            self.handleReviewsMessage(header, batch)
+        if not self.shouldProcessAccumulated():
+            return
         
-        if self._currentClient.isGamesDone():
-            self.joinReviews(self._currentClient._unjoinedReviews)
-            self._currentClient._unjoinedReviews = []
-
-        self._handleSending(clientId)
-        self._activeClients[clientId] = self._currentClient
+        self._currentClient.updateTracker(header)
+        self._internalCommunication.ackAll(self.processPendingBatches(header))
 
         if self._currentClient.finishedReceiving():
             logging.info(f'action: finished receiving data from client {clientId}| result: success')
             self._currentClient.destroy()
             self._activeClients.pop(clientId)
-
-        ch.basic_ack(delivery_tag = method.delivery_tag)

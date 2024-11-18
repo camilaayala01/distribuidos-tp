@@ -1,11 +1,13 @@
-from entryParsing.common.header import Header
+from uuid import UUID
+from entryParsing.common.headerInterface import HeaderInterface
+from entryParsing.common.table import Table
 from entryParsing.entry import EntryInterface
 from packetTracker.defaultTracker import DefaultTracker
 import os
 import csv
 
 class ActiveClient:
-    def __init__(self, clientId: str):
+    def __init__(self, clientId: UUID):
         self._clientId = clientId
         self._fragment = 1
         self._games = {} #appid, name
@@ -17,6 +19,9 @@ class ActiveClient:
         self._folderPath = f"/{os.getenv('LISTENING_QUEUE')}/{clientId}/"
         os.makedirs(self._folderPath, exist_ok=True)
 
+    def getId(self):
+        return self._clientId.bytes
+    
     def destroy(self):
         self._gamesTracker.destroy()
         self._reviewsTracker.destroy()
@@ -35,20 +40,19 @@ class ActiveClient:
     def finishedReceiving(self):
         return self._gamesTracker.isDone() and self._reviewsTracker.isDone()
     
-    def isGameDuplicate(self, header: Header):
-        self._gamesTracker.isDuplicate(header)
+    def isDuplicate(self, header: HeaderInterface):
+        match header.getTable():
+            case Table.GAMES:
+                return self._gamesTracker.isDuplicate(header)
+            case Table.REVIEWS:
+               return self._reviewsTracker.isDuplicate(header) 
 
-    def isReviewDuplicate(self, header: Header):
-        self._reviewsTracker.isDuplicate(header)
-
-    def updateGamesTracker(self, header: Header):
-        self._gamesTracker.update(header)
-
-    def updateReviewsTracker(self, header: Header):
-        self._reviewsTracker.update(header)
-
-    def isReviewDuplicate(self, header: Header):
-        self._reviewsTracker.isDuplicate(header)
+    def updateTracker(self, header: HeaderInterface):
+        match header.getTable():
+            case Table.GAMES:
+                self._gamesTracker.update(header)
+            case Table.REVIEWS:
+                self._reviewsTracker.update(header)
 
     def isGamesDone(self):
         return self._gamesTracker.isDone()

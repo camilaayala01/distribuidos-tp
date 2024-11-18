@@ -1,5 +1,6 @@
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, getClientID
+
 class Header(HeaderInterface):
     def __init__(self, _clientId: bytes, _fragment: int, _eof: bool):
         super().__init__(_clientId=_clientId, _fragment=_fragment, _eof=_eof)
