@@ -19,7 +19,7 @@ class Joiner:
         initializeLog()
         self._joinerType = JoinerType(int(os.getenv('JOINER_TYPE')))
         nodeID = os.getenv('NODE_ID')
-        self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), os.getenv('NODE_ID'))
+        self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), nodeID)
         self._sendingStrategies = createStrategiesFromNextNodes()
         self._id = int(nodeID)
         self._gamesEntry = getGamesEntryTypeFromEnv()
@@ -95,9 +95,6 @@ class Joiner:
         for strategy in self._sendingStrategies:
             strategy.sendBytes(self._internalCommunication, msg)
     
-    def shouldProcessPending(self):
-        return self._accumulatedBatches
-    
     def setAccumulatedBatches(self, tag, header, batch):
         self._accumulatedBatches = AccumulatedBatches(tag, header.getTable(), header.getClient(), batch)
 
@@ -120,7 +117,7 @@ class Joiner:
         return toAck
     
     def shouldProcessAccumulated(self):
-        return self._accumulatedBatches.accumulatedLen() == PREFETCH_COUNT or self._internalCommunication.isQueueEmpty()
+        return self._accumulatedBatches.accumulatedLen() == PREFETCH_COUNT or self._internalCommunication.isQueueEmpty() or self._currentClient.finishedReceiving()
 
     """keeps the client if there is one, set a new one if there's not"""
     def setCurrentClient(self, clientId: bytes):
@@ -146,19 +143,19 @@ class Joiner:
             self.setAccumulatedBatches(method.delivery_tag, header, batch)
         elif not self._accumulatedBatches.accumulate(header=header, tag=method.delivery_tag, batch=batch):
             self._internalCommunication.ackAll(self.processPendingBatches(header))
-            self._currentClient.updateTracker(header)
             # reset accumulated and set client to correspond to the most recent packet
             self.setAccumulatedBatches(method.delivery_tag, header, batch)
             self.setNewClient(clientId)
+            self._currentClient.updateTracker(header)
             return
 
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
             logging.info(f'action: received batch from table {header.getTable()} | {header} | result: success')
 
+        self._currentClient.updateTracker(header)
         if not self.shouldProcessAccumulated():
             return
-        
-        self._currentClient.updateTracker(header)
+    
         self._internalCommunication.ackAll(self.processPendingBatches(header))
 
         if self._currentClient.finishedReceiving():
