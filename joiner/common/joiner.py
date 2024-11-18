@@ -2,7 +2,6 @@ from collections import defaultdict
 import logging
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID
-from entryParsing.common.table import Table
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, maxDataBytes, nextEntry, serializeAndFragmentWithSender, initializeLog
 from entryParsing.entry import EntryInterface
 from internalCommunication.common.utils import createStrategiesFromNextNodes
@@ -49,19 +48,19 @@ class Joiner:
 
         generator = self._currentClient.loadGamesEntries(self._gamesEntry)
         while True:
-            if not len(batch):
-                break
             game = nextEntry(generator)
-            if game is None:
+            if game is None or not len(batch):
                 break
             id = game._appID
+            name = game._name
             if id in batch:
                 reviewsWithID = batch.pop(id)
                 for review in reviewsWithID:
-                    name = game._name
-                    priorJoined = self._currentClient._joinedEntries.get(id, self._joinerType.defaultEntry(name)) #leer
-                    self._currentClient._joinedEntries[id] = self._joinerType.applyJoining(id, name, priorJoined, review) #escribe
-                    
+                    priorJoined =  self._currentClient._joinedEntries.get(id, self._joinerType.defaultEntry(name, id))
+                    self._currentClient._joinedEntries[id] = self._joinerType.applyJoining(id, name, priorJoined, review)
+        
+        self._joinerType.storeJoinedEntries(self._currentClient._joinedEntries, self._currentClient)
+
     def handleReviewsMessage(self, data: bytes):
         if len(data) == 0 and not self._currentClient.unjoinedReviews():
             return
@@ -77,28 +76,29 @@ class Joiner:
         entries = self._gamesEntry.deserialize(data)
         self._currentClient.storeGamesEntries(entries)
 
-    def shouldSendPackets(self, toSend: list[EntryInterface]):
+    def shouldSendPackets(self, toSend):
         return (self._currentClient.finishedReceiving() or 
-                (not self._currentClient.finishedReceiving() and len(toSend) != 0))
+                (not self._currentClient.finishedReceiving() and toSend is not None))
 
     def _handleSending(self):
         currClient = self._currentClient
-        toSend, self._currentClient._joinedEntries= self._joinerType.entriesToSend(joinedEntries=currClient._joinedEntries, 
-                                                                                   isDone=currClient.finishedReceiving())
+        toSend = self._joinerType.entriesToSend(joinedEntries=currClient._joinedEntries, 
+                                                isDone=currClient.finishedReceiving(),
+                                                activeClient=currClient)
+        self._currentClient._joinedEntries = {}
         if not self.shouldSendPackets(toSend):
             return
-        packets, self._currentClient._fragment = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(self._headerType), 
-                                                 data=toSend,
-                                                 clientId=self._currentClient.getId(), 
-                                                 senderId=self._id,
-                                                 fragment=currClient._fragment,
-                                                 hasEOF=currClient.finishedReceiving())
-        for packet in packets:
-            self._sendToNext(packet)
+        self._sendToNext(toSend)
 
-    def _sendToNext(self, msg: bytes):
+    def _sendToNext(self, generator):
         for strategy in self._sendingStrategies:
-            strategy.sendBytes(self._internalCommunication, msg)
+            newFragment = strategy.sendFragmenting(self._internalCommunication, 
+                                                   self._currentClient.getClientIdBytes(), 
+                                                   self._currentClient._fragment, 
+                                                   generator, 
+                                                   self._currentClient.finishedReceiving(),
+                                                   _sender = self._id)
+        self._currentClient._fragment = newFragment
     
     def setAccumulatedBatches(self, tag, header, batch):
         accumulator = AccumulatedBatches(header.getClient())
@@ -110,6 +110,7 @@ class Joiner:
         self.handleReviewsMessage(self._accumulatedBatches.getReviewsBatches())
 
         self._handleSending()
+        
         if self._currentClient._gamesTracker.isDone():
             self._currentClient.removeUnjoinedReviews()
         toAck = self._accumulatedBatches.toAck()

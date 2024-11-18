@@ -12,47 +12,50 @@ class JoinerType(Enum):
     INDIE = 1
     ENGLISH = 2
                 
-    def defaultEntry(self, name: str):
+    def joinedEntryType(self):
+        match self:
+            case JoinerType.ENGLISH:
+                return EntryAppIDNameReviewText
+            case _:
+                return EntryAppIDNameReviewCount
+
+    def defaultEntry(self, name: str, appID: str):
         match self:
             case JoinerType.ENGLISH:
                 return []
             case _:
-                return EntryNameReviewCount(name, 0)
-                
+                return EntryAppIDNameReviewCount(_appID=appID, _name=name, _reviewCount=0)
+            
     def applyJoining(self, id, name, priorJoined, review):
-        #abrir archivo joinedEntries
         match self:
             case JoinerType.ENGLISH:
                 priorJoined.append(EntryAppIDNameReviewText(id, name, review.getReviewText()))
             case _:
                 priorJoined.addToCount(review.getCount()) 
         return priorJoined
-
-    def entriesForEnglish(self, joinedEntries):
-        # manda todas a la capa siguiente y vacia las joined
-        joinedEntries = [item for sublist in joinedEntries.values() for item in sublist]
-        return joinedEntries, {}
     
-    def entriesForIndie(self, joinedEntries, isDone):
+    def entriesForEnglish(self, joinedEntries):
+        joinedEntries = [entry for sublist in joinedEntries.values() for entry in sublist]
+        if len(joinedEntries) == 0:
+            return None
+        return iter(joinedEntries)
+    
+    def entriesForIndieAndPercentile(self, isDone, activeClient):
         if not isDone:
-            return [], joinedEntries
-        return joinedEntries.values(), {}
+            return None
+        return activeClient.loadJoinedEntries(self.joinedEntryType())
 
-    def entriesForPercentile(self, joinedEntries, isDone):
-        entries = []
-        if isDone:
-            for id, entry in joinedEntries.items():
-                entries.append(EntryAppIDNameReviewCount.fromAnother(entry, _appID=id))
-            joinedEntries = {}
-        return entries, joinedEntries
+    def storeJoinedEntries(self, joinedEntries, activeClient):
+        match self:
+            case JoinerType.ENGLISH:
+                return 
+            case _:
+                activeClient.storeJoinedEntries(joinedEntries, self.joinedEntryType())
 
-    # returns a tuple of entries to send, joined entries, sent ids that will be ignored from now on
-    def entriesToSend(self, joinedEntries, isDone): 
+    def entriesToSend(self, joinedEntries, isDone, activeClient): 
         match self:
             case JoinerType.ENGLISH:
                 return self.entriesForEnglish(joinedEntries)
-            case JoinerType.INDIE:
-                return self.entriesForIndie(joinedEntries, isDone)
-            case JoinerType.PERCENTILE:
-                return self.entriesForPercentile(joinedEntries, isDone)
+            case _:
+                return self.entriesForIndieAndPercentile(isDone, activeClient)
     
