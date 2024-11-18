@@ -1,39 +1,43 @@
 from entryParsing.common.headerInterface import HeaderInterface
-
+from entryParsing.common.table import Table
 
 class AccumulatedBatches:
-    def __init__(self, tag, table, clientId, batch):
-        self._pendingTags = [tag]
-        self._table = table
-        self._batches = batch
+    def __init__(self, clientId):
+        self._pendingTags = []
+        self._gamesBatches = bytes()
+        self._reviewsBatches = bytes()
         self._clientId = clientId
 
     def accumulatedLen(self):
         return len(self._pendingTags)
+
+    def toAck(self):
+        return self._pendingTags
     
-    def ackAll(self, channel):
-        for tag in self._pendingTags:
-            channel.basic_ack(delivery_tag=tag)
     """
     returns true if could accumulate (same client same table),
     false if it should already process this entries and begin a new
     accumulator
     """
-    def accumulate(self, header: HeaderInterface, tag, batch) -> bool:
-        if header.getClient() != self._clientId or header.getTable() != self._table:
+    def accumulate(self, tag, header: HeaderInterface, batch) -> bool:
+        if header.getClient() != self._clientId:
             return False
-        self._batches += batch
         self._pendingTags.append(tag)
+        match header.getTable():
+            case Table.GAMES:
+                self._gamesBatches += batch
+            case Table.REVIEWS:
+                self._reviewsBatches += batch
         return True
     
     def __str__(self):
         return f"tags: {self._pendingTags} client: {self._clientId}"
 
-    def getBatches(self):
-        return self._batches
+    def getGamesBatches(self):
+        return self._gamesBatches
     
-    def getTable(self):
-        return self._table
+    def getReviewsBatches(self):
+        return self._reviewsBatches
     
     def getClient(self):
         return self._clientId

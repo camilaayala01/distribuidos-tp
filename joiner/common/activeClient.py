@@ -11,9 +11,7 @@ class ActiveClient:
         self._clientId = clientId
         self._fragment = 1
         self._games = {} #appid, name
-        self._unjoinedReviews = []
         self._joinedEntries = {} #appid, entryType
-        self._sent = set() 
         self._gamesTracker = DefaultTracker(clientId)
         self._reviewsTracker = DefaultTracker(clientId)
         self._folderPath = f"/{os.getenv('LISTENING_QUEUE')}/{clientId}/"
@@ -57,9 +55,13 @@ class ActiveClient:
     def isGamesDone(self):
         return self._gamesTracker.isDone()
     
-    def storeUnjoinedReviews(self, reviews):
-        self._unjoinedReviews.extend(reviews)
+    def removeUnjoinedReviews(self):
+        if self.unjoinedReviews():
+            os.remove(self.reviewsPath() + '.csv')
     
+    def unjoinedReviews(self):
+        return os.path.exists(self.reviewsPath() + '.csv')
+
     def loadEntries(self, filepath, entryType):
         if not os.path.exists(filepath):
             return iter([])
@@ -75,19 +77,19 @@ class ActiveClient:
     def loadReviewsEntries(self, entryType):
         return self.loadEntries(self.reviewsPath() + '.csv', entryType)
 
-    def copyFile(self, newResultsFile):
-        filepath = self.gamesPath() + '.csv'
+    def copyFile(self, newResultsFile, oldFilePath):
+        filepath = oldFilePath + '.csv'
         if not os.path.exists(filepath):
             return
         fileLen = os.stat(filepath).st_size
-        with open(self.gamesPath() + '.csv', 'r+') as currentResults:
+        with open(filepath, 'r+') as currentResults:
             copied = 0
             while copied < fileLen:
                 copied += os.copy_file_range(currentResults.fileno(), newResultsFile.fileno(), fileLen)
-        
-    def storeGamesEntries(self, entries: list[EntryInterface]):
-        newResults = open(self.gamesPath() + '.tmp', 'w+')
-        self.copyFile(newResults)
+    
+    def storeEntries(self, filepath, entries):
+        newResults = open(filepath + '.tmp', 'w+')
+        self.copyFile(newResults, filepath)
 
         writer = csv.writer(newResults, quoting=csv.QUOTE_MINIMAL)
         for entry in entries:
@@ -96,4 +98,10 @@ class ActiveClient:
                 raise Exception('File could not be written propperly')
         
         newResults.close()
-        os.rename(self.gamesPath() + '.tmp', self.gamesPath() + '.csv')
+        os.rename(filepath + '.tmp', filepath + '.csv')
+        
+    def storeUnjoinedReviews(self, reviews: list[EntryInterface]):
+        self.storeEntries(self.reviewsPath(), reviews)
+
+    def storeGamesEntries(self, entries: list[EntryInterface]):
+        self.storeEntries(self.gamesPath(), entries)
