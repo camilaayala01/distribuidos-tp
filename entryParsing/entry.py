@@ -6,6 +6,10 @@ class EntryInterface(ABC):
         for key, value in kwargs.items():
             setattr(self, key, value)
     
+    def expectedCsvLen(self):
+        fieldsLen = sum(len(str(value)) for value in self.__dict__.values())
+        return max(0, len(self.__dict__.values()) - 1) + fieldsLen + len('\n')
+    
     @classmethod
     def fromArgs(cls, args: list[str]):
         params = list(inspect.signature(cls.__init__).parameters.items())[1:]

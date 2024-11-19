@@ -88,7 +88,7 @@ class Sorter:
     def _sendToNext(self, generator):
         extraParamsForHeader = self._sorterType.extraParamsForHeader()
         for strategy in self._sendingStrategies:
-            strategy.sendFragmenting(self._internalCommunication ,self._currentClient.getClientIdBytes(), 1, generator, **extraParamsForHeader)
+            strategy.sendFragmenting(self._internalCommunication, self._currentClient.getClientIdBytes(), 1, generator, **extraParamsForHeader)
 
     def _handleSending(self, clientId: bytes):
         if not self._currentClient.isDone():
