@@ -28,7 +28,6 @@ class Joiner:
         self._currentClient = None
         self._eofController = EofController(int(nodeID), os.getenv('LISTENING_QUEUE'), int(os.getenv('NODE_COUNT')), self._sendingStrategies)
         self._eofController.execute()
-        print("holis")
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
