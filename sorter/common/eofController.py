@@ -70,7 +70,7 @@ class EofController:
             self._internalCommunication.basicSend(self._nextQueue, body)
         ch.basic_ack(delivery_tag = method.delivery_tag)
 
-    def stop(self, _signum, _frame):
+    def stop(self):
         self._internalCommunication.stop()
 
     def execute(self):

@@ -28,7 +28,8 @@ class Sorter:
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
-        self._eofController.stop()
+        if self._sorterType.requireController():
+            self._eofController.stop()
 
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
