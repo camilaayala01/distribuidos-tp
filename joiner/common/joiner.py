@@ -4,6 +4,7 @@ from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, maxDataBytes, serializeAndFragmentWithSender, initializeLog
 from entryParsing.entry import EntryInterface
+from eofController.eofController import EofController
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
 from .activeClient import ActiveClient
@@ -15,7 +16,7 @@ class Joiner:
     def __init__(self):
         initializeLog()
         self._joinerType = JoinerType(int(os.getenv('JOINER_TYPE')))
-        nodeID=os.getenv('NODE_ID')
+        nodeID = os.getenv('NODE_ID')
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), nodeID)
         self._sendingStrategies = createStrategiesFromNextNodes()
         self._id = int(nodeID)
@@ -24,6 +25,7 @@ class Joiner:
         self._headerType = getHeaderTypeFromEnv()
         self._activeClients = {}
         self._currentClient = None
+        self._eofController = EofController(nodeID, 'Joiner', nodeAmount, self._sendingStrategies)
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()

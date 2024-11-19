@@ -282,6 +282,7 @@ services:
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=0
+    - NODE_COUNT=2
     env_file:
     - .env
     volumes:
@@ -304,6 +305,7 @@ services:
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=1
+    - NODE_COUNT=2
     env_file:
     - .env
     volumes:
@@ -438,6 +440,7 @@ services:
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - NODE_ID=0
+    - NODE_COUNT=JOIN_ACT_COUNT
     env_file:
     - .env
     volumes:
@@ -460,6 +463,7 @@ services:
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - NODE_ID=1
+    - NODE_COUNT=JOIN_ACT_COUNT
     env_file:
     - .env
     volumes:
@@ -693,6 +697,7 @@ services:
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=0
+    - NODE_COUNT=2
     env_file:
     - .env
     volumes:
@@ -715,6 +720,7 @@ services:
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=1
+    - NODE_COUNT=2
     env_file:
     - .env
     volumes:

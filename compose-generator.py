@@ -303,7 +303,8 @@ def add_joiners_action_percentile(compose: dict[str, Any]):
                                             reviews_entry_type='EntryAppIDReviewCount', 
                                             games_entry_type='EntryAppIDName', 
                                             header_type='HeaderWithTable',
-                                            node_id=i)
+                                            node_id=i,
+                                            node_count=int(os.getenv('JOIN_PERC_COUNT')))
         containers.append(new_container)
     return compose, containers
 
@@ -378,7 +379,8 @@ def add_joiners_indie(compose: dict[str, Any]):
                                             reviews_entry_type='EntryAppIDReviewCount',
                                             games_entry_type='EntryAppIDName', 
                                             header_type='HeaderWithTable',
-                                            node_id=i)
+                                            node_id=i,
+                                            node_count=int(os.getenv('JOIN_INDIE_COUNT')))
         containers.append(new_container)
     return compose, containers
 
@@ -392,7 +394,8 @@ def add_joiner_action_english(compose: dict[str, Any]):
                                             reviews_entry_type='EntryAppIDReviewText',
                                             header_type='HeaderWithTable',
                                             games_entry_type='EntryAppIDName', 
-                                            node_id=i)
+                                            node_id=i,
+                                            node_count='JOIN_ACT_COUNT')
         containers.append(new_container)
     return compose, containers
 
