@@ -2,7 +2,7 @@ from entryParsing.common.fieldParsing import deserializeAppID, deserializeReview
 from entryParsing.entry import EntryInterface
 
 class EntryAppIDReviewText(EntryInterface):
-    def __init__(self, _appID: str, _reviewText: int):
+    def __init__(self, _appID: str, _reviewText: str):
         super().__init__(_appID=_appID, _reviewText=_reviewText)
 
     def getAppID(self):
