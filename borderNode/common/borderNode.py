@@ -1,38 +1,72 @@
+import os
+import shutil
 from typing import Any, Dict
 import uuid
 
 import zmq
 from zmq.utils.monitor import recv_monitor_message
+from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.messageType import MessageType
+from entryParsing.common.utils import copyFile
 from .borderCommunication import BorderNodeCommunication
 
 # do heartbeat when receiving a disconnect event and also when booting (or rebooting)
+# what happens if border node fails after receiving a zmq message, before sending it to initializer?
+# option 1: implement stop and wait mechanism
+# option 2: change queues to rabbit, using subscriptions (exchange) for acks and responses, 
+# and queue for data transfer
 class BorderNode: 
     def __init__(self):
         self._communication = BorderNodeCommunication()
+        self._storagePath = os.getenv('STORAGE_PATH')
+        os.makedirs(self._storagePath, exist_ok=True)
         self._activeClients = set() # some in memory lock
         # some file lock for writing clients in log
 
+    def activeClientsFile(self):
+        return self._storagePath + 'activeClients'
+    
     def stop(self, _signum, _):
         self._communication.stop()
-        # delete active clients data
+        datafile = self.activeClientsFile() + self.storageFileExtension()
+        if os.path.exists(datafile):
+            os.remove(datafile)
+
+    def storeNewClient(self, clientId: bytes):
+        # managable in-memory size. for 100.000 concurrent clients, uses 1.5MB
+        self._activeClients.add(clientId)
+        self.storeInDisk(clientId)
+
+    def storageFileExtension(self):
+        return '.txt'
+    
+    def storeInDisk(self, clientId: bytes):
+        storageFilePath = self.activeClientsFile()
+        with open(storageFilePath + '.tmp', 'w+') as newResults:
+            copyFile(newResults, storageFilePath + self.storageFileExtension())
+            newResults.write(f"{getClientIdUUID(clientId)}")
+        os.rename(storageFilePath + '.tmp', storageFilePath + self.storageFileExtension())
 
     def handleClientMessage(self, clientId: bytes, data: bytes):
-        type, msg = MessageType.deserialize(data)
+        try:
+            type, msg = MessageType.deserialize(data)
+        except:
+            # wont happen unless client is corrupt
+            self._communication.sendToClient(clientId=clientId, data=MessageType.FORMAT_ERROR.serialize())
+            return
+        
         match type:
             case MessageType.CONNECT:
                 assignedId = uuid.uuid4().bytes
-                # write in file
-                # in case of failure at this point, client should re-try handshake
-                self._activeClients.add(assignedId)
+                self.storeNewClient(assignedId)
+                # if fails exactly here, even tho client will be registered, it will be discarted 
+                # within the first heartbeat cycle
                 self._communication.sendToClient(clientId, assignedId)
-                
                 return None
             case MessageType.DATA_TRANSFER:
-                # avoid ddos receiving messages from non registered clients
                 if clientId not in self._activeClients:
-                    # por las dudas, deberia mandar un mensaje al initializer para q flushee
-                    # y uno al cliente para q se registre
+                    # wont happen unless client is an attacker
+                    self._communication.sendToClient(clientId=clientId, data=MessageType.CONNECT_RETRY.serialize())
                     return None
                 return clientId + msg
 

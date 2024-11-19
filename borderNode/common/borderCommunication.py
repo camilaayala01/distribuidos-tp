@@ -57,7 +57,7 @@ class BorderNodeCommunication:
         if not self.isRunning():
             return
         header, _ = HeaderWithQueryNumber.deserialize(body)
-        self.sendToClient(clientId=header.getClient(), data=body)
+        self.sendToClient(clientId=header.getClient(), data=MessageType.QUERY_RESPONSE.serialize() + body)
         logging.info(f'action: sending query info to client | result: success')
         ch.basic_ack(delivery_tag = method.delivery_tag)
 

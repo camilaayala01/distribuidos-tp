@@ -210,12 +210,14 @@ def add_border_node(compose: dict[str, Any], cluster_nodes):
         },
         'environment':[
             'PYTHONUNBUFFERED=1',
-            'PREFETCH_COUNT=1'
+            'PREFETCH_COUNT=1',
+            'STORAGE_PATH=/data/'
         ],
         'env_file': default_env_file(),
         'volumes':[
         './internalCommunication:/internalCommunication',
-        './entryParsing:/entryParsing'
+        './entryParsing:/entryParsing',
+        './borderNode/data:/data'
         ],
         'networks': default_network(),
         'depends_on': cluster_nodes

@@ -101,22 +101,12 @@ def getShardingKey(id: str, nodeCount: int) -> int:
 def maxDataBytes(headerType: type) -> int:
     return MAX_PACKET_SIZE - headerType.size()
 
-def serializeAndFragmentWithSender(maxDataBytes: int, data: list[EntryInterface], clientId: bytes, senderId: int, fragment: int = 1, hasEOF: bool = True)-> tuple[list[bytes], int]: # recv max data bytes for testing purposes
-    from entryParsing.common.headerWithSender import HeaderWithSender
-    packets = []
-    currPacket = bytes()
-
-    for entry in data:
-        entryBytes = entry.serialize()
-        if len(currPacket) + len(entryBytes) <= maxDataBytes:
-            currPacket += entryBytes
-        else:
-            headerBytes = HeaderWithSender(clientId, fragment, False, senderId).serialize()
-            fragment += 1
-            packets.append(headerBytes + currPacket)
-            currPacket = entryBytes
-
-    packets.append(HeaderWithSender(clientId, fragment, hasEOF, senderId).serialize() + currPacket)
-    fragment += 1
-    return packets, fragment
-
+def copyFile(newResultsFile, oldFilePath):
+    filepath = oldFilePath
+    if not os.path.exists(filepath):
+        return
+    fileLen = os.stat(filepath).st_size
+    with open(filepath, 'r+') as currentResults:
+        copied = 0
+        while copied < fileLen:
+            copied += os.copy_file_range(currentResults.fileno(), newResultsFile.fileno(), fileLen)

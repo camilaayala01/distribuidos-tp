@@ -872,11 +872,13 @@ services:
     environment:
     - PYTHONUNBUFFERED=1
     - PREFETCH_COUNT=1
+    - STORAGE_PATH=/data/
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./borderNode/data:/data
     networks:
     - sa_net
     depends_on:

@@ -3,7 +3,7 @@ from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.table import Table
 from entryParsing.entry import EntryInterface
 from packetTracker.defaultTracker import DefaultTracker
-from entryParsing.common.utils import nextEntry
+from entryParsing.common.utils import copyFile, nextEntry
 import os
 import csv
 
@@ -79,20 +79,10 @@ class ActiveClient:
 
     def loadJoinedEntries(self, entryType):
         return self.loadEntries(self.joinedPath() + '.csv', entryType)
-
-    def copyFile(self, newResultsFile, oldFilePath):
-        filepath = oldFilePath + '.csv'
-        if not os.path.exists(filepath):
-            return
-        fileLen = os.stat(filepath).st_size
-        with open(filepath, 'r+') as currentResults:
-            copied = 0
-            while copied < fileLen:
-                copied += os.copy_file_range(currentResults.fileno(), newResultsFile.fileno(), fileLen)
     
     def storeEntries(self, filepath, entries):
         newResults = open(filepath + '.tmp', 'w+')
-        self.copyFile(newResults, filepath)
+        copyFile(newResults, filepath + '.csv')
 
         writer = csv.writer(newResults, quoting=csv.QUOTE_MINIMAL)
         for entry in entries:

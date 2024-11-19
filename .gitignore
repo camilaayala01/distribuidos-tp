@@ -8,3 +8,4 @@ sorter/ConsolidatorSorter*
 sorter/Sorter*
 aggregator/Aggregator*
 joiner/Joiner*
+borderNode/data*

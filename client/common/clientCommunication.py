@@ -36,6 +36,7 @@ class ClientCommunication:
         self._socket.send(msg)
 
     def sendTable(self, client, maxDataBytes, generatorFunction, table):
+        # add stop and wait logic, but change function so it sends one message at a time
         if not client.isRunning():
             return
         fragment = 1

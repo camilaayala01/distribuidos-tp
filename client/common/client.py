@@ -3,6 +3,7 @@ import os
 from common.utils import receiveCSVAnswer, storeResultsQuery1
 from common.clientCommunication import ClientCommunication
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
+from entryParsing.common.messageType import MessageType
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryName import EntryName
 from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
@@ -71,12 +72,17 @@ class Client:
     def hasReceivedQueryBefore(self, header: HeaderWithQueryNumber):
         return header._queryNumber in self._queriesReceived
 
+    # change function so that it hears for data errors and acks while data sending is going on
     def waitForResponses(self):
         os.makedirs(f"/responses/exec-{self._currentExecution}", exist_ok=True)
         while not self.isDoneReceiving() and self.isRunning():
             msg = self._communication.receiveFromServer()
             if msg == None:
                 continue
+            type, msg = MessageType.deserialize(msg)
+            if type != MessageType.QUERY_RESPONSE:
+                print("uia")
+
             header, data = HeaderWithQueryNumber.deserialize(msg)
             if self.hasReceivedQueryBefore(header):
                 continue
