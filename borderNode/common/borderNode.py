@@ -6,10 +6,12 @@ from zmq.utils.monitor import recv_monitor_message
 from entryParsing.common.messageType import MessageType
 from .borderCommunication import BorderNodeCommunication
 
+# do heartbeat when receiving a disconnect event and also when booting (or rebooting)
 class BorderNode: 
     def __init__(self):
         self._communication = BorderNodeCommunication()
-        self._activeClients = set()
+        self._activeClients = set() # some in memory lock
+        # some file lock for writing clients in log
 
     def stop(self, _signum, _):
         self._communication.stop()
@@ -20,13 +22,17 @@ class BorderNode:
         match type:
             case MessageType.CONNECT:
                 assignedId = uuid.uuid4().bytes
-                self._communication.sendToClient(clientId, assignedId)
                 # write in file
+                # in case of failure at this point, client should re-try handshake
                 self._activeClients.add(assignedId)
+                self._communication.sendToClient(clientId, assignedId)
+                
                 return None
             case MessageType.DATA_TRANSFER:
                 # avoid ddos receiving messages from non registered clients
                 if clientId not in self._activeClients:
+                    # por las dudas, deberia mandar un mensaje al initializer para q flushee
+                    # y uno al cliente para q se registre
                     return None
                 return clientId + msg
 

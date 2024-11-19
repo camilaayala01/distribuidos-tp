@@ -8,7 +8,6 @@ import time
 import os
 
 QUERY_COUNT = 5
-MAX_DATA_BYTES = 51200   
 
 def main():
     initializeLog()
