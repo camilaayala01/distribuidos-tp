@@ -4,9 +4,10 @@ from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.headerWithTable import HeaderWithTable
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, maxDataBytes, serializeAndFragmentWithSender, initializeLog
 from entryParsing.entry import EntryInterface
-from eofController.eofController import EofController
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
+from .eofController import EofController
+import threading
 from .activeClient import ActiveClient
 from .joinerTypes import JoinerType
 
@@ -25,7 +26,9 @@ class Joiner:
         self._headerType = getHeaderTypeFromEnv()
         self._activeClients = {}
         self._currentClient = None
-        self._eofController = EofController(nodeID, 'Joiner', nodeAmount, self._sendingStrategies)
+        self._eofController = EofController(int(nodeID), os.getenv('LISTENING_QUEUE'), int(os.getenv('NODE_COUNT')), self._sendingStrategies)
+        self._eofController.execute()
+        print("holis")
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
@@ -73,7 +76,7 @@ class Joiner:
                                                  clientId=clientId, 
                                                  senderId=self._id,
                                                  fragment=currClient._fragment,
-                                                 hasEOF=currClient.finishedReceiving())
+                                                 hasEOF=False)
         for packet in packets:
             self._sendToNext(packet)
         
@@ -112,6 +115,14 @@ class Joiner:
 
         if self._currentClient.finishedReceiving():
             logging.info(f'action: finished receiving data from client {clientId}| result: success')
+            packets, self._currentClient._fragment = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(self._headerType), 
+                                                 data=bytes(),
+                                                 clientId=clientId, 
+                                                 senderId=self._id,
+                                                 fragment=self._currentClient._fragment,
+                                                 hasEOF=True)
+            self._eofController.finishedProcessing(packets[0], clientId, self._internalCommunication)
             self._activeClients.pop(clientId)
+
 
         ch.basic_ack(delivery_tag = method.delivery_tag)

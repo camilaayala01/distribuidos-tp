@@ -395,7 +395,7 @@ def add_joiner_action_english(compose: dict[str, Any]):
                                             header_type='HeaderWithTable',
                                             games_entry_type='EntryAppIDName', 
                                             node_id=i,
-                                            node_count='JOIN_ACT_COUNT')
+                                            node_count=int(os.getenv('JOIN_ACT_COUNT')))
         containers.append(new_container)
     return compose, containers
 

@@ -4,10 +4,11 @@ from packetTracker.tracker import TrackerInterface
 
 class MultiTracker(TrackerInterface):
     def __init__(self, priorNodeCount: int, storagePath: str):
-        self._trackers = [DefaultTracker(storagePath) for _ in range(priorNodeCount)]
+        self._storagePath = storagePath
+        self._trackers = {}
 
     def getProcessingTracker(self, header: HeaderWithSender):
-        return self._trackers[header.getSenderID()]
+        return self._trackers.get(header.getSenderID(), DefaultTracker(self._storagePath))
     
     def isDuplicate(self, header: HeaderWithSender):
         return self.getProcessingTracker(header).isDuplicate(header)
@@ -21,10 +22,9 @@ class MultiTracker(TrackerInterface):
     
     def isDone(self) -> bool:
         for tracker in self._trackers:
-            if not tracker.isDone():
-                return False
-        
-        return True
+            if tracker.isDone():
+                return True
+        return False
     
     def reset(self):
         for tracker in self._trackers:

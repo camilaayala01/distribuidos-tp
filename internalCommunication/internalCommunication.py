@@ -37,7 +37,7 @@ class InternalCommunication:
             queueName = self.declareExchange(self._executerName, self._nodeID)
         else:
             queueName = self._executerName
-            self._channel.queue_declare(queue=self._executerName, durable=False) # TODO: CHANGE
+            self._channel.queue_declare(queue=self._executerName) #durable=True) # TODO: CHANGE
         self._channel.basic_consume(queue=queueName, on_message_callback=callback)
 
         try:
