@@ -81,6 +81,10 @@ class BorderNode:
                 self._communication.sendInitializer(toSend)
         self._communication.closeClientSocket()
 
+    def runHeartbeat(self):
+        # TODO
+        print("heartbeat not implemented!")
+
     def monitor_events(self):
         monitor = self._communication.getMonitorSocket()
         EVENT_MAP = {}
@@ -95,7 +99,7 @@ class BorderNode:
             evt.update(mon_evt)
             evt['description'] = EVENT_MAP[evt['event']]
             if evt['event'] == zmq.EVENT_DISCONNECTED:
-                print(evt)
+                self.runHeartbeat()
             if evt['event'] == zmq.EVENT_MONITOR_STOPPED:
                 break
         monitor.close()

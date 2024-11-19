@@ -1,5 +1,6 @@
 import csv
 import os
+import shutil
 from uuid import UUID
 from entryParsing.common.header import Header
 from entryParsing.entry import EntryInterface
@@ -13,6 +14,11 @@ class ActiveClient:
         self._savedEntries = 0
         self._folderPath = f"/{os.getenv('LISTENING_QUEUE')}/clientData/"
         os.makedirs(self._folderPath, exist_ok=True)
+
+    def destroy(self):
+        self._tracker.destroy()
+        if os.path.exists(self._folderPath):
+            shutil.rmtree(self._folderPath)
 
     def getClientIdBytes(self):
         return self._clientId.bytes

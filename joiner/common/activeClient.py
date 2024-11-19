@@ -1,3 +1,4 @@
+import shutil
 from uuid import UUID
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.table import Table
@@ -23,8 +24,8 @@ class ActiveClient:
     def destroy(self):
         self._gamesTracker.destroy()
         self._reviewsTracker.destroy()
-        if os.path.exists(self.gamesPath() + '.csv'):
-            os.remove(self.gamesPath() + '.csv')
+        if os.path.exists(self._folderPath):
+            shutil.rmtree(self._folderPath)
 
     def gamesPath(self):
         return self._folderPath + f'games'

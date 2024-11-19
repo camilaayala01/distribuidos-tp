@@ -24,6 +24,8 @@ class Sorter:
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
+        for client in self._activeClients.values():
+            client.destroy()
 
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
@@ -97,7 +99,8 @@ class Sorter:
         topGenerator, topAmount = self._currentClient.getResults()
         topGenerator = self._sorterType.preprocessPackets(topGenerator, topAmount)
         self._sendToNext(topGenerator)
-        self._activeClients.pop(clientId)
+        client = self._activeClients.pop(clientId)
+        client.destroy()
     
     def setCurrentClient(self, clientId: bytes):
         self._currentClient = self._activeClients.setdefault(clientId, 

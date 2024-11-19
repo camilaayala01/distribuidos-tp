@@ -31,8 +31,7 @@ class InternalCommunication:
 
         try:
             self._channel.start_consuming()
-        except OSError as e:
-            print(e)
+        except:
             logging.info(f'action: gracefully shutting down | result: success')
             self._channel.close()
             self._connection.close()

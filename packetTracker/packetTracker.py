@@ -1,4 +1,5 @@
 import os
+import shutil
 from entryParsing.common.header import Header
 from packetTracker.tracker import TrackerInterface
 
@@ -9,17 +10,17 @@ class PacketTracker(TrackerInterface):
         self._biggestFragment = 0
         self._pending = set()
         self._receivedEnd = False
-        folderPath = f"/{os.getenv('LISTENING_QUEUE')}/packetTracker/"
-        self._storagePath = folderPath + f"{storagePath}.txt"
-        os.makedirs(folderPath, exist_ok=True)
+        self._folderPath = f"/{os.getenv('LISTENING_QUEUE')}/packetTracker/"
+        self._storagePath = self._folderPath + f"{storagePath}.txt"
+        os.makedirs(self._folderPath, exist_ok=True)
 
     def store(self):
         with open(self._storagePath, 'a+') as file:
             file.write(f"MAX={self._biggestFragment};MISSING={self._pending}\n")
 
     def destroy(self):
-        if os.path.exists(self._storagePath):
-            os.remove(self._storagePath)     
+        if os.path.exists(self._folderPath):
+            shutil.rmtree(self._folderPath)     
     
     def isDuplicate(self, header: Header):
         newFrag = header.getFragmentNumber()

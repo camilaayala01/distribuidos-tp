@@ -49,7 +49,6 @@ class BorderNodeCommunication:
             return None
         # any other exception must be thrown
 
-    # added
     def sendToClient(self, clientId, data):
         self._clientSocket.send_multipart([clientId, data])
     
