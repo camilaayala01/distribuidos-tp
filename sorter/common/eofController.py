@@ -45,8 +45,10 @@ class EofController:
         nodeInternalCommunication.basicSend(self._nextQueue, messageToSend)
 
     def manageEOF(self, clientID):
+        curr = 0
         for strategy in self._sendingStrategies:
-            strategy.sendBytes(self._internalCommunication, self._eofMessage[clientID])
+            strategy.sendBytes(self._internalCommunication, self._eofMessage[clientID][curr])
+            curr += 1
         print('EOF WAS SENT')
         messageToSend = EOFControlMessage(1, clientID, self._nodeID).serialize()
         self._internalCommunication.basicSend(self._nextQueue, messageToSend)

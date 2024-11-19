@@ -7,7 +7,6 @@ from entryParsing.entry import EntryInterface
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
 from .eofController import EofController
-import threading
 from .activeClient import ActiveClient
 from .joinerTypes import JoinerType
 
@@ -31,6 +30,7 @@ class Joiner:
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
+        self._eofController.stop()
         
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)

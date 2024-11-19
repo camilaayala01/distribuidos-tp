@@ -2,6 +2,7 @@ import logging
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
+from .eofController import EofController
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog, nextEntry
@@ -21,9 +22,13 @@ class Sorter:
         self._sendingStrategies = createStrategiesFromNextNodes()
         self._activeClients = {}
         self._currentClient = None
+        if self._sorterType.requireController():
+            self._eofController = EofController(int(os.getenv('NODE_ID')), os.getenv('LISTENING_QUEUE'), int(os.getenv('NODE_COUNT')), self._sendingStrategies)
+            self._eofController.execute()
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
+        self._eofController.stop()
 
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
@@ -87,8 +92,10 @@ class Sorter:
 
     def _sendToNext(self, generator):
         extraParamsForHeader = self._sorterType.extraParamsForHeader()
+        eofs = []
         for strategy in self._sendingStrategies:
-            strategy.sendFragmenting(self._internalCommunication ,self._currentClient.getClientIdBytes(), 1, generator, **extraParamsForHeader)
+            eofs.append(strategy.sendFragmenting(self._internalCommunication ,self._currentClient.getClientIdBytes(), 1, generator, not self._sorterType.requireController(), **extraParamsForHeader))
+        return eofs
 
     def _handleSending(self, clientId: bytes):
         if not self._currentClient.isDone():
@@ -96,7 +103,9 @@ class Sorter:
         logging.info(f'action: received all required batches | result: success')
         topGenerator, topAmount = self._currentClient.getResults()
         topGenerator = self._sorterType.preprocessPackets(topGenerator, topAmount)
-        self._sendToNext(topGenerator)
+        eofs = self._sendToNext(topGenerator)
+        if self._sorterType.requireController():
+            self._eofController.finishedProcessing(eofs, clientId, self._internalCommunication)
         self._activeClients.pop(clientId)
     
     def setCurrentClient(self, clientId: bytes):
