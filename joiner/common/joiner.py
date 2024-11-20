@@ -6,6 +6,7 @@ from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFro
 from entryParsing.entry import EntryInterface
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
+from internalCommunication.internalMessageType import InternalMessageType
 from .accumulatedBatches import AccumulatedBatches
 from .activeClient import ActiveClient
 from .joinerTypes import JoinerType
@@ -132,24 +133,35 @@ class Joiner:
         self._currentClient = None
         self.setCurrentClient(clientId)
 
-    def handleMessage(self, ch, method, _properties, body):
+    def handleClientFlush(self, clientToRemove):
+        if self._accumulatedBatches and clientToRemove == self._accumulatedBatches.getClient():
+            # discard all in memory information and ensure it wont come back if it reboots
+            self._internalCommunication.ackAll(self._accumulatedBatches.toAck())
+
+        if clientToRemove in self._activeClients:
+            client = self._activeClients.pop(clientToRemove)
+            client.destroy()
+
+        for strategy in self._sendingStrategies:
+            strategy.sendFlush(middleware=self._internalCommunication, clientId=clientToRemove)
+
+    def handleDataMessage(self, ch, tag, body):
         header, batch = self._headerType.deserialize(body)
         clientId = header.getClient()
         self.setCurrentClient(clientId)
 
         if self._currentClient.isDuplicate(header):
-            ch.basic_ack(delivery_tag = method.delivery_tag)
+            ch.basic_ack(delivery_tag=tag)
             return
 
         if self._accumulatedBatches is None:
-            self.setAccumulatedBatches(method.delivery_tag, header, batch)
-        elif not self._accumulatedBatches.accumulate(header=header, tag=method.delivery_tag, batch=batch):
+            self.setAccumulatedBatches(tag, header, batch)
+        elif not self._accumulatedBatches.accumulate(header=header, tag=tag, batch=batch):
             self._internalCommunication.ackAll(self.processPendingBatches())
             # reset accumulated and set client to correspond to the most recent packet
-            self.setAccumulatedBatches(method.delivery_tag, header, batch)
+            self.setAccumulatedBatches(tag, header, batch)
             self.setNewClient(clientId)
             self._currentClient.updateTracker(header)
-
             return
 
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
@@ -165,3 +177,12 @@ class Joiner:
             logging.info(f'action: finished receiving data from client {clientId}| result: success')
             self._currentClient.destroy()
             self._activeClients.pop(clientId)
+
+    def handleMessage(self, ch, method, _properties, body):
+        msgType, msg = InternalMessageType.deserialize(body)
+        match msgType:
+            case InternalMessageType.DATA_TRANSFER:
+                self.handleDataMessage(ch, method.delivery_tag, msg)
+            case InternalMessageType.CLIENT_FLUSH:
+                self.handleClientFlush(msg)
+                ch.basic_ack(delivery_tag = method.delivery_tag)

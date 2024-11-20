@@ -5,6 +5,7 @@ from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog, nextEntry
+from internalCommunication.internalMessageType import InternalMessageType
 from .sorterTypes import SorterType
 from .activeClient import ActiveClient
 
@@ -108,14 +109,13 @@ class Sorter:
                                                                           getClientIdUUID(clientId),
                                                                           self._entryType))
         
-    def handleMessage(self, ch, method, _properties, body):
+    def handleDataMessage(self, body):
         header, batch = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
             logging.info(f'action: receive batch | {header} | result: success')
         clientId = header.getClient()
         self.setCurrentClient(clientId)
         if self._currentClient.isDuplicate(header):
-            ch.basic_ack(delivery_tag = method.delivery_tag)
             return
         
         self._currentClient.update(header)
@@ -123,5 +123,13 @@ class Sorter:
         self.mergeKeepTop(entries)
         self._activeClients[clientId] = self._currentClient
         self._handleSending(clientId)
-        ch.basic_ack(delivery_tag = method.delivery_tag)
 
+    def handleMessage(self, ch, method, _properties, body):
+        msgType, msg = InternalMessageType.deserialize(body)
+        match msgType:
+            case InternalMessageType.DATA_TRANSFER:
+                self.handleDataMessage(msg)
+            case InternalMessageType.CLIENT_FLUSH:
+                for strategy in self._sendingStrategies:
+                    strategy.sendFlush(middleware=self._internalCommunication, clientId=msg)
+        ch.basic_ack(delivery_tag = method.delivery_tag)

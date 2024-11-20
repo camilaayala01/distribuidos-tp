@@ -5,6 +5,7 @@ from entryParsing.common.header import Header
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
+from internalCommunication.internalMessageType import InternalMessageType
 from .activeClient import ActiveClient
 from .aggregatorTypes import AggregatorTypes
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
@@ -37,7 +38,7 @@ class Aggregator:
 
     def _sendToNext(self, header: HeaderInterface, entries: list[EntryInterface]):
         for strategy in self._sendingStrategies:
-            strategy.send(self._internalCommunication, header, entries)
+            strategy.sendData(self._internalCommunication, header, entries)
 
     def shouldSendPackets(self, toSend: list[EntryInterface]):
         return self._currentClient.isDone() or (not self._currentClient.isDone() and len(toSend) != 0)
@@ -49,15 +50,15 @@ class Aggregator:
         header = self._aggregatorType.getResultingHeader(self.getHeader(clientId))
         if self.shouldSendPackets(ready):
             self._sendToNext(header, ready)
-            self._currentClient._fragment += 1 #write
+            # TODO write fragment in file
+            self._currentClient._fragment += 1
             
         self._activeClients[clientId] = self._currentClient
 
         if self._currentClient.isDone():
             self._activeClients.pop(clientId).destroy()
 
-
-    def handleMessage(self, ch, method, _properties, body):
+    def handleDataMessage(self, body):
         header, data = self._headerType.deserialize(body)
         clientId = header.getClient()
         self.setCurrentClient(header.getClient())
@@ -65,11 +66,19 @@ class Aggregator:
             logging.info(f'action: received batch | {header} | result: success')
         
         if self._currentClient.isDuplicate(header):
-            ch.basic_ack(delivery_tag = method.delivery_tag)
             return
         self._currentClient.update(header)
         entries = self._entryType.deserialize(data)
         path = self._currentClient.partialResPath()
         toSend = self._aggregatorType.handleResults(entries, self._entryType, path, self._currentClient.isDone())
         self._handleSending(toSend, clientId)
+
+    def handleMessage(self, ch, method, _properties, body):
+        msgType, msg = InternalMessageType.deserialize(body)
+        match msgType:
+            case InternalMessageType.DATA_TRANSFER:
+                self.handleDataMessage(msg)
+            case InternalMessageType.CLIENT_FLUSH:
+                for strategy in self._sendingStrategies:
+                    strategy.sendFlush(middleware=self._internalCommunication, clientId=msg)
         ch.basic_ack(delivery_tag = method.delivery_tag)

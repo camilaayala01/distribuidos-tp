@@ -49,11 +49,7 @@ class ActiveClient:
         with open(filepath, 'r') as file:
             reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
             for row in reader:
-                try:
-                    yield self._entryType.fromArgs(row)
-                except Exception as e:
-                    print("exception", e)
-                    print(row)
+                yield self._entryType.fromArgs(row)
 
     def saveNewTop(self, savedAmount: int):
         self._savedEntries = savedAmount

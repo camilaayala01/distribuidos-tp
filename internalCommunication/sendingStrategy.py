@@ -3,6 +3,7 @@ from entryParsing.common.header import HeaderInterface
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
 from internalCommunication.common.nextNode import NextNode
+from internalCommunication.internalMessageType import InternalMessageType
 
 class SendingStrategy(ABC):
     def __init__(self, nextNode: NextNode):
@@ -12,7 +13,11 @@ class SendingStrategy(ABC):
         return f"Strategy: {type(self).__name__}, Next node: {self._nextNode}"
     
     @abstractmethod
-    def send(self, middleware: InternalCommunication, header: HeaderInterface, batch: list[EntryInterface]):
+    def sendData(self, middleware: InternalCommunication, header: HeaderInterface, batch: list[EntryInterface]):
+        pass
+
+    @abstractmethod
+    def sendFlush(self, clientId: bytes):
         pass
 
     

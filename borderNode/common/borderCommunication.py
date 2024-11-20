@@ -6,6 +6,7 @@ from internalCommunication.internalCommunication import InternalCommunication
 import zmq
 import logging
 from entryParsing.common.utils import initializeLog
+from internalCommunication.internalMessageType import InternalMessageType
 
 PRINT_FREQUENCY = 1000
 
@@ -23,12 +24,9 @@ class BorderNodeCommunication:
         self._internalCommunication = InternalCommunication(os.getenv('DISP'))
         self._accepterCommunication = InternalCommunication()
         self._running = True
-
-    def getMonitor(self):
-        return self._monitor
     
     def executeDispatcher(self):
-        self._internalCommunication.defineMessageHandler(self.sendQueryToClient)
+        self._internalCommunication.defineMessageHandler(self.handleMessage)
 
     def stop(self):
         self._running = False
@@ -52,12 +50,22 @@ class BorderNodeCommunication:
     def sendToClient(self, clientId, data):
         self._clientSocket.send_multipart([clientId, data])
     
-    def sendQueryToClient(self, ch, method, _properties, body):
+    def sendQueryToClient(self, body):
         if not self.isRunning():
             return
         header, _ = HeaderWithQueryNumber.deserialize(body)
         self.sendToClient(clientId=header.getClient(), data=MessageType.QUERY_RESPONSE.serialize() + body)
         logging.info(f'action: sending query info to client | result: success')
+
+    def handleMessage(self, ch, method, _properties, body):
+        if not self.isRunning():
+            return
+        msgType, msg = InternalMessageType.deserialize(body)
+        match msgType:
+            case InternalMessageType.DATA_TRANSFER:
+                self.sendQueryToClient(msg)
+            case InternalMessageType.CLIENT_FLUSH:
+                logging.info(f'action: receive client flush | client id: {msg}')
         ch.basic_ack(delivery_tag = method.delivery_tag)
 
     def sendInitializer(self, message: bytes):

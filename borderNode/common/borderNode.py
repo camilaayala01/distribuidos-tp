@@ -8,6 +8,7 @@ from zmq.utils.monitor import recv_monitor_message
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.messageType import MessageType
 from entryParsing.common.utils import copyFile
+from internalCommunication.internalMessageType import InternalMessageType
 from .borderCommunication import BorderNodeCommunication
 
 # do heartbeat when receiving a disconnect event and also when booting (or rebooting)
@@ -78,9 +79,22 @@ class BorderNode:
             id, data = received
             toSend = self.handleClientMessage(id, data)
             if toSend is not None:
-                self._communication.sendInitializer(toSend)
+                self._communication.sendInitializer(InternalMessageType.DATA_TRANSFER.serialize() + toSend)
         self._communication.closeClientSocket()
 
+    # establecer timer que salte cada equis cantidad de tiempo y revise los ultimos timestamps
+    # me olvido de toda esta parte del monitor, y cuando ese timer salta, desconecto a todos
+    # los q no me mandaron nada: quizas puedo avisarles pero meh. 
+    # Para los clientes a los que le acabo d asignar un ID, guardo el timestamp del heartbeat 
+    # (posterior al store en disco, o incluso al envio del cliente). 
+    # los active clients dejan de ser active clients, deberian ser tipo sender clients o alguna
+    # re pelotudez asi, tipo los clients q están mandando información. cuando les tengo q mandar 
+    # yo, ya no es mi problema guardar que estaba activo.
+    # 
+    # lo unico persistente en disco son los ids d clientes: los borro de active cuando me llega
+    # el eof de reviews
+    # vamos a seguir teniendo q hacer stop and wait, primero x esto del eof y segundo x si se 
+    # cae el border
     def runHeartbeat(self):
         # TODO
         print("heartbeat not implemented!")

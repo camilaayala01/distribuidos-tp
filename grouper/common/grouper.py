@@ -1,6 +1,7 @@
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
 from internalCommunication.common.utils import createStrategiesFromNextNodes
+from internalCommunication.internalMessageType import InternalMessageType
 from .grouperTypes import GrouperType
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
@@ -26,13 +27,22 @@ class Grouper:
     
     def _sendToNext(self, header: HeaderInterface, batch: list[EntryInterface]):
         for strategy in self._sendingStrategies:
-            strategy.send(self._internalCommunication, header, batch)
+            strategy.sendData(self._internalCommunication, header, batch)
 
-    def handleMessage(self, ch, method, _properties, body):
+    def handleDataMessage(self, body):
         header, data = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0 | header.isEOF():
             logging.info(f'action: received batch | {header} | result: success')
         entries = self._entryType.deserialize(data)
         result = self._grouperType.getResults(entries)
         self._sendToNext(header, result)
+
+    def handleMessage(self, ch, method, _properties, body):
+        msgType, msg = InternalMessageType.deserialize(body)
+        match msgType:
+            case InternalMessageType.DATA_TRANSFER:
+                self.handleDataMessage(msg)
+            case InternalMessageType.CLIENT_FLUSH:
+                for strategy in self._sendingStrategies:
+                    strategy.sendFlush(middleware=self._internalCommunication, clientId=msg)
         ch.basic_ack(delivery_tag = method.delivery_tag)

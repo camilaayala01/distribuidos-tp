@@ -82,6 +82,7 @@ class AggregatorTypes(Enum):
                 priorEntry.addToCount(entry.getCount())
                 entryToWrite = priorEntry
                 if priorEntry.getCount() >= requiredReviews:
+                    # TODO append the entry and add it to sending strategy
                     toSend.append(EntryName(priorEntry.getName()))
             
             batch.pop(id, None)
@@ -122,5 +123,3 @@ class AggregatorTypes(Enum):
                 return HeaderWithQueryNumber.fromAnother(header, _queryNumber=int(os.getenv('QUERY_NUMBER')))
             case _:
                 return header
-                
-               
