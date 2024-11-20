@@ -1,3 +1,4 @@
+import logging
 import threading
 from entryParsing.common.fieldParsing import deserializeNumber, getClientID, serializeNumber
 from internalCommunication.internalCommunication import InternalCommunication
@@ -10,14 +11,19 @@ class EOFControlMessage:
 
     def serialize(self) -> bytes:
         typeBytes = serializeNumber(self._type, 1)
-        nodeIDBytes = serializeNumber(self._nodeID, 2)
+        if self._type == 2:
+            return typeBytes
+        nodeIDBytes = serializeNumber(self._nodeID, 1)
         return typeBytes + self._clientID + nodeIDBytes
     
     def getClientID(self) -> bytes:
         return self._clientID
     
+    def isEndProcessing(self) -> bool:
+        return True if self._type == 2 else False
+
     def isACK(self) -> bool:
-        return True if self._type else False
+        return True if self._type == 1 else False
     
     def getNodeID(self) -> int:
         return self._nodeID
@@ -25,8 +31,10 @@ class EOFControlMessage:
     @classmethod
     def deserialize(self, body) -> 'EOFControlMessage':
         type, curr = deserializeNumber(0, body, 1)
+        if type == 2:
+            return EOFControlMessage(type, bytes(1), 0)
         clientID, curr = getClientID(curr, body)
-        nodeID, curr = deserializeNumber(curr, body, 2)
+        nodeID, curr = deserializeNumber(curr, body, 1)
         return EOFControlMessage(type, clientID, nodeID)
 
 class EofController:
@@ -44,17 +52,24 @@ class EofController:
         messageToSend = EOFControlMessage(0, clientID, self._nodeID).serialize()
         nodeInternalCommunication.basicSend(self._nextQueue, messageToSend)
 
+    def terminateProcess(self, nodeInternalCommunication):
+        messageToSend = EOFControlMessage(2, 0, 0).serialize()
+        nodeInternalCommunication.basicSend(self._nextQueue, messageToSend)
+
     def manageEOF(self, clientID):
         curr = 0
         for strategy in self._sendingStrategies:
             strategy.sendBytes(self._internalCommunication, self._eofMessage[clientID][curr])
             curr += 1
-        print('EOF WAS SENT')
+        logging.info(f'action: sending EOF for client {clientID}| result: success')
         messageToSend = EOFControlMessage(1, clientID, self._nodeID).serialize()
         self._internalCommunication.basicSend(self._nextQueue, messageToSend)
 
     def handleMessage(self, ch, method, _properties, body):
         msg = EOFControlMessage.deserialize(body)
+        if msg.isEndProcessing():
+            self.stop()
+            return
         if msg.isACK():
             del self._eofMessage[msg.getClientID()]
             ch.basic_ack(delivery_tag = method.delivery_tag)

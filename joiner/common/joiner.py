@@ -34,9 +34,9 @@ class Joiner:
     def stop(self, _signum, _frame):
         for client in self._activeClients.values():
             client.destroy()
+        self._eofController.terminateProcess(self._internalCommunication)
         self._internalCommunication.stop()
-        self._eofController.stop()
-        print("me voy gorda")
+        
         
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
@@ -173,7 +173,7 @@ class Joiner:
                                                  senderId=self._id,
                                                  fragment=self._currentClient._fragment,
                                                  hasEOF=True)
-            self._eofController.finishedProcessing(packets[0], clientId, self._internalCommunication)
+            self._eofController.finishedProcessing(packets, clientId, self._internalCommunication)
             self._currentClient.destroy()
             self._activeClients.pop(clientId)
 

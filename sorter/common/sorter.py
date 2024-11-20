@@ -27,9 +27,9 @@ class Sorter:
             self._eofController.execute()
 
     def stop(self, _signum, _frame):
-        self._internalCommunication.stop()
         if self._sorterType.requireController():
-            self._eofController.stop()
+            self._eofController.terminateProcess(self._internalCommunication)
+        self._internalCommunication.stop()
 
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
@@ -107,8 +107,6 @@ class Sorter:
         eofs = self._sendToNext(topGenerator)
         if self._sorterType.requireController():
             self._eofController.finishedProcessing(eofs, clientId, self._internalCommunication)
-        else:
-            print("termine gorda reputa")
         self._activeClients.pop(clientId)
     
     def setCurrentClient(self, clientId: bytes):
