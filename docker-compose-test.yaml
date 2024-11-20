@@ -5,6 +5,7 @@ services:
       dockerfile: ../zmqUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - MAX_DATA_BYTES=51200
     - REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv
     - GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv
@@ -23,6 +24,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=Initializer
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=ReducedGameEntry
@@ -30,7 +32,7 @@ services:
     - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
     - GAMES_NEXT_HEADERS=Header;;
     - REVIEWS_ENTRY_TYPE=ReviewEntry
-    - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,2,0;GrouperActionPercentile
+    - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
     - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
     env_file:
     - .env
@@ -45,6 +47,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=Initializer
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=ReducedGameEntry
@@ -52,7 +55,7 @@ services:
     - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
     - GAMES_NEXT_HEADERS=Header;;
     - REVIEWS_ENTRY_TYPE=ReviewEntry
-    - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,2,0;GrouperActionPercentile
+    - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
     - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
     env_file:
     - .env
@@ -67,6 +70,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=Initializer
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=ReducedGameEntry
@@ -74,7 +78,7 @@ services:
     - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
     - GAMES_NEXT_HEADERS=Header;;
     - REVIEWS_ENTRY_TYPE=ReviewEntry
-    - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,2,0;GrouperActionPercentile
+    - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
     - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
     env_file:
     - .env
@@ -89,6 +93,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=GrouperOSCounts
     - GROUPER_TYPE=0
     - NEXT_NODES=AggregatorOs
@@ -107,6 +112,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=GrouperOSCounts
     - GROUPER_TYPE=0
     - NEXT_NODES=AggregatorOs
@@ -125,6 +131,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=AggregatorOs
     - NEXT_NODES=Dispatcher
     - HEADER_TYPE=Header
@@ -146,9 +153,10 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterIndie
     - FILTERER_TYPE=1
-    - NEXT_NODES=FilterDecade;JoinerIndie,2,0
+    - NEXT_NODES=FilterDecade;JoinerIndie,3,0
     - NEXT_ENTRIES=EntryNameDateAvgPlaytime;EntryAppIDName
     - NEXT_HEADERS=Header;
     - HEADER_TYPE=HeaderWithTable
@@ -166,6 +174,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterDecade
     - FILTERER_TYPE=0
     - NEXT_NODES=SorterAvgPlaytime,2,1
@@ -185,6 +194,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=SorterAvgPlaytime
     - NEXT_NODES=ConsolidatorSorterPlaytime
     - HEADER_TYPE=Header
@@ -209,6 +219,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=SorterAvgPlaytime
     - NEXT_NODES=ConsolidatorSorterPlaytime
     - HEADER_TYPE=Header
@@ -233,6 +244,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=ConsolidatorSorterPlaytime
     - NEXT_NODES=Dispatcher
     - NEXT_HEADERS=HeaderWithQueryNumber
@@ -257,9 +269,10 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=GrouperIndie
     - GROUPER_TYPE=1
-    - NEXT_NODES=JoinerIndie,2,0
+    - NEXT_NODES=JoinerIndie,3,0
     - HEADER_TYPE=HeaderWithTable
     - ENTRY_TYPE=EntryAppID
     env_file:
@@ -275,14 +288,17 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerIndie
     - JOINER_TYPE=1
     - NEXT_NODES=AggregatorIndie
+    - NEXT_HEADERS=HeaderWithSender
+    - NEXT_ENTRIES=EntryNameReviewCount
     - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=0
-    - NODE_COUNT=2
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -298,14 +314,17 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerIndie
     - JOINER_TYPE=1
     - NEXT_NODES=AggregatorIndie
+    - NEXT_HEADERS=HeaderWithSender
+    - NEXT_ENTRIES=EntryNameReviewCount
     - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=1
-    - NODE_COUNT=2
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -315,18 +334,45 @@ services:
     - ./joiner/JoinerIndie1:/JoinerIndie
     networks:
     - sa_net
+  joiner-indie-2:
+    build:
+      context: ./joiner
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=50
+    - LISTENING_QUEUE=JoinerIndie
+    - JOINER_TYPE=1
+    - NEXT_NODES=AggregatorIndie
+    - NEXT_HEADERS=HeaderWithSender
+    - NEXT_ENTRIES=EntryNameReviewCount
+    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+    - GAMES_ENTRY_TYPE=EntryAppIDName
+    - HEADER_TYPE=HeaderWithTable
+    - NODE_ID=2
+    - NODE_COUNT=3
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    - ./packetTracker:/packetTracker
+    - ./joiner/JoinerIndie2:/JoinerIndie
+    networks:
+    - sa_net
   aggregator-indie:
     build:
       context: ./aggregator
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=AggregatorIndie
     - NEXT_NODES=SorterIndie,2,1
     - HEADER_TYPE=HeaderWithSender
     - ENTRY_TYPE=EntryNameReviewCount
     - AGGREGATOR_TYPE=2
-    - PRIOR_NODE_COUNT=2
+    - PRIOR_NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -342,6 +388,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=SorterIndie
     - NEXT_NODES=ConsolidatorSorterIndie
     - NODE_ID=0
@@ -366,6 +413,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=SorterIndie
     - NEXT_NODES=ConsolidatorSorterIndie
     - NODE_ID=1
@@ -390,6 +438,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=ConsolidatorSorterIndie
     - NEXT_NODES=Dispatcher
     - NEXT_HEADERS=HeaderWithQueryNumber
@@ -414,9 +463,10 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterAction
     - FILTERER_TYPE=2
-    - NEXT_NODES=JoinerActionEnglish,2,0;JoinerActionPercentile,2,0
+    - NEXT_NODES=JoinerActionEnglish,3,0;JoinerActionPercentile,3,0
     - NEXT_ENTRIES=EntryAppIDName;EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - ENTRY_TYPE=EntryAppIDNameGenres
@@ -433,14 +483,16 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerActionEnglish
     - JOINER_TYPE=2
     - NEXT_NODES=FilterEnglish
+    - NEXT_HEADERS=HeaderWithSender
     - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - NODE_ID=0
-    - NODE_COUNT=2
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -456,14 +508,16 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerActionEnglish
     - JOINER_TYPE=2
     - NEXT_NODES=FilterEnglish
+    - NEXT_HEADERS=HeaderWithSender
     - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - NODE_ID=1
-    - NODE_COUNT=2
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -473,12 +527,38 @@ services:
     - ./joiner/JoinerActionEnglish1:/JoinerActionEnglish
     networks:
     - sa_net
+  joiner-english-2:
+    build:
+      context: ./joiner
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=50
+    - LISTENING_QUEUE=JoinerActionEnglish
+    - JOINER_TYPE=2
+    - NEXT_NODES=FilterEnglish
+    - NEXT_HEADERS=HeaderWithSender
+    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
+    - HEADER_TYPE=HeaderWithTable
+    - GAMES_ENTRY_TYPE=EntryAppIDName
+    - NODE_ID=2
+    - NODE_COUNT=3
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    - ./packetTracker:/packetTracker
+    - ./joiner/JoinerActionEnglish2:/JoinerActionEnglish
+    networks:
+    - sa_net
   filterer-english-0:
     build:
       context: ./filterer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -498,6 +578,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -517,6 +598,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -536,6 +618,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -555,6 +638,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -574,6 +658,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -593,6 +678,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -612,6 +698,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=FilterEnglish
     - FILTERER_TYPE=3
     - NEXT_NODES=GrouperActionEnglish
@@ -631,6 +718,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=GrouperActionEnglish
     - GROUPER_TYPE=2
     - NEXT_NODES=AggregatorEnglish
@@ -649,13 +737,14 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=AggregatorEnglish
     - NEXT_NODES=Dispatcher
     - HEADER_TYPE=HeaderWithSender
     - ENTRY_TYPE=EntryAppIDNameReviewCount
     - AGGREGATOR_TYPE=1
     - QUERY_NUMBER=4
-    - PRIOR_NODE_COUNT=2
+    - PRIOR_NODE_COUNT=3
     - REQUIRED_REVIEWS=5000
     env_file:
     - .env
@@ -672,9 +761,10 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=GrouperActionPercentile
     - GROUPER_TYPE=1
-    - NEXT_NODES=JoinerActionPercentile,2,0
+    - NEXT_NODES=JoinerActionPercentile,3,0
     - HEADER_TYPE=HeaderWithTable
     - ENTRY_TYPE=EntryAppID
     env_file:
@@ -690,14 +780,16 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerActionPercentile
     - JOINER_TYPE=0
     - NEXT_NODES=ConsolidatorSorterPercentile
+    - NEXT_HEADERS=HeaderWithSender
     - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=0
-    - NODE_COUNT=2
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -713,14 +805,16 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerActionPercentile
     - JOINER_TYPE=0
     - NEXT_NODES=ConsolidatorSorterPercentile
+    - NEXT_HEADERS=HeaderWithSender
     - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=1
-    - NODE_COUNT=2
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -730,18 +824,44 @@ services:
     - ./joiner/JoinerActionPercentile1:/JoinerActionPercentile
     networks:
     - sa_net
+  joiner-percentile-2:
+    build:
+      context: ./joiner
+      dockerfile: ../rabbitUser.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=50
+    - LISTENING_QUEUE=JoinerActionPercentile
+    - JOINER_TYPE=0
+    - NEXT_NODES=ConsolidatorSorterPercentile
+    - NEXT_HEADERS=HeaderWithSender
+    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+    - GAMES_ENTRY_TYPE=EntryAppIDName
+    - HEADER_TYPE=HeaderWithTable
+    - NODE_ID=2
+    - NODE_COUNT=3
+    env_file:
+    - .env
+    volumes:
+    - ./internalCommunication:/internalCommunication
+    - ./entryParsing:/entryParsing
+    - ./packetTracker:/packetTracker
+    - ./joiner/JoinerActionPercentile2:/JoinerActionPercentile
+    networks:
+    - sa_net
   sorter-consolidator-percentile:
     build:
       context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     - LISTENING_QUEUE=ConsolidatorSorterPercentile
     - NEXT_NODES=Dispatcher
     - HEADER_TYPE=HeaderWithSender
     - ENTRY_TYPE=EntryAppIDNameReviewCount
     - SORTER_TYPE=4
-    - PRIOR_NODE_COUNT=2
+    - PRIOR_NODE_COUNT=3
     - PERCENTILE=90
     - QUERY_NUMBER=5
     - NEXT_HEADERS=HeaderWithQueryNumber
@@ -760,6 +880,7 @@ services:
       dockerfile: ../zmqUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
     env_file:
     - .env
     volumes:
@@ -782,6 +903,7 @@ services:
     - grouper-indie
     - joiner-indie-0
     - joiner-indie-1
+    - joiner-indie-2
     - aggregator-indie
     - sorter-indie-0
     - sorter-indie-1
@@ -789,6 +911,7 @@ services:
     - filterer-action
     - joiner-english-0
     - joiner-english-1
+    - joiner-english-2
     - filterer-english-0
     - filterer-english-1
     - filterer-english-2
@@ -802,6 +925,7 @@ services:
     - grouper-percentile
     - joiner-percentile-0
     - joiner-percentile-1
+    - joiner-percentile-2
     - sorter-consolidator-percentile
 networks:
   sa_net:

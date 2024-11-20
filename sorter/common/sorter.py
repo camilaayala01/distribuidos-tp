@@ -95,7 +95,7 @@ class Sorter:
         extraParamsForHeader = self._sorterType.extraParamsForHeader()
         eofs = []
         for strategy in self._sendingStrategies:
-            eofs.append(strategy.sendFragmenting(self._internalCommunication ,self._currentClient.getClientIdBytes(), 1, generator, not self._sorterType.requireController(), **extraParamsForHeader))
+            eofs.append(strategy.sendFragmenting(self._internalCommunication, self._currentClient.getClientIdBytes(), 1, generator, not self._sorterType.requireController(), **extraParamsForHeader).serialize())
         return eofs
 
     def _handleSending(self, clientId: bytes):
@@ -107,6 +107,8 @@ class Sorter:
         eofs = self._sendToNext(topGenerator)
         if self._sorterType.requireController():
             self._eofController.finishedProcessing(eofs, clientId, self._internalCommunication)
+        else:
+            print("termine gorda reputa")
         self._activeClients.pop(clientId)
     
     def setCurrentClient(self, clientId: bytes):

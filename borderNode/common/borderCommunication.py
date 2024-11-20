@@ -7,8 +7,6 @@ import zmq
 import logging
 from entryParsing.common.utils import initializeLog
 
-PREFETCH_COUNT = 1 # break round robin
-DELIVERY_MODE = 1 # make message transient, es lo mismo por ahora
 PRINT_FREQUENCY = 1000
 
 class BorderNodeCommunication:

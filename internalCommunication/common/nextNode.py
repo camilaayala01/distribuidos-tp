@@ -1,5 +1,6 @@
 import re
 from entryParsing.common.header import Header
+from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.utils import getEntryTypeFromString, getHeaderTypeFromString
 from entryParsing.entry import EntryInterface
 from internalCommunication.common.shardingAtribute import ShardingAttribute
@@ -18,18 +19,18 @@ class NextNode:
     def hasCountAndShardingAttribute(self):
         return self._count is not None and self._shardingAttribute is not None
     
-    def getHeader(self):
+    def getHeader(self) -> type:
         return self._headerType
     
-    def entryForNextNode(self, entry: EntryInterface):
+    def entryForNextNode(self, entry: EntryInterface, **kwargs) -> EntryInterface:
         if self._entryType is None:
             return entry
-        return self._entryType.fromAnother(entry)
+        return self._entryType.fromAnother(entry, **kwargs)
     
-    def headerForNextNode(self, header: Header):
+    def headerForNextNode(self, header: Header, **kwargs) -> HeaderInterface:
         if self._headerType is None:
             return header
-        return self._headerType.fromAnother(header)
+        return self._headerType.fromAnother(header, **kwargs)
     
     @staticmethod
     def getEntryType(entryType: str) -> type:

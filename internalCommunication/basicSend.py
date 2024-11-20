@@ -18,14 +18,15 @@ class BasicSend(SendingStrategy):
             msg += self._nextNode.entryForNextNode(entry).serialize()
         self.sendBytes(middleware, msg)
 
-    def sendFragmenting(self, middleware, clientId, fragment, generator, sendEof, **headerExtraArgs):
+    def sendFragmenting(self, middleware, clientId, fragment, generator, hasEOF: bool = True, **headerExtraArgs):
         headerType = self._nextNode.getHeader()
+        entryConverter = self._nextNode.entryForNextNode
         maxBytes = maxDataBytes(headerType)
         currPacket = bytes()
         try: 
             while True:
                 entry = next(generator)
-                entryBytes = entry.serialize()
+                entryBytes = entryConverter(entry).serialize()
                 if len(currPacket) + len(entryBytes) <= maxBytes:
                     currPacket += entryBytes
                 else:
@@ -34,6 +35,6 @@ class BasicSend(SendingStrategy):
                     self.sendBytes(middleware, headerBytes + currPacket)
                     currPacket = entryBytes
         except StopIteration:
-            packet = headerType(_clientId=clientId, _fragment=fragment, _eof=sendEof, **headerExtraArgs).serialize() + currPacket
+            packet = headerType(_clientId=clientId, _fragment=fragment, _eof=hasEOF, **headerExtraArgs).serialize() + currPacket
             self.sendBytes(middleware, packet)
-            return headerType(_clientId=clientId, _fragment=fragment + 1, _eof=True, **headerExtraArgs).serialize()
+            return headerType(_clientId=clientId, _fragment=fragment + 1, _eof=True, **headerExtraArgs)
