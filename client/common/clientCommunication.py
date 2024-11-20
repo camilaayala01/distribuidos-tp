@@ -32,8 +32,8 @@ class ClientCommunication:
         except zmq.error.Again:
             return None
     
-    def sendToServer(self, msg):
-        self._socket.send(msg)
+    def sendDataToServer(self, msg):
+        self._socket.send(MessageType.DATA_TRANSFER.serialize() + msg)
 
     def sendTable(self, client, maxDataBytes, generatorFunction, table):
         # add stop and wait logic, but change function so it sends one message at a time
@@ -50,11 +50,11 @@ class ClientCommunication:
                 if len(currPacket) + len(entryBytes) <= maxDataBytes:
                     currPacket += entryBytes
                 else:
-                    headerBytes = ClientHeader(MessageType.DATA_TRANSFER, fragment, False, table).serialize()
+                    headerBytes = ClientHeader(fragment, False, table).serialize()
                     fragment += 1
-                    self.sendToServer(headerBytes + currPacket)
+                    self.sendDataToServer(headerBytes + currPacket)
                     currPacket = entryBytes
         except StopIteration:
-            packet = ClientHeader(MessageType.DATA_TRANSFER, fragment, True, table).serialize() + currPacket
-            self.sendToServer(packet)
+            packet = ClientHeader(fragment, True, table).serialize() + currPacket
+            self.sendDataToServer(packet)
             logging.info(f'action: send table {table} end of file | result: success')

@@ -5,6 +5,8 @@ import signal
 def main():
     border = BorderNode()
     signal.signal(signal.SIGTERM, border.stop)
+    signal.signal(signal.SIGALRM, border.handleTimeoutSignal)
+    signal.setitimer(signal.ITIMER_REAL, 2, 2)
     thread = Thread(target=border.listenForClient, args=())
     thread.start()
     border.dispatchResponses()

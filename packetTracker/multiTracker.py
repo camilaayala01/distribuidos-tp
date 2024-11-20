@@ -12,10 +12,6 @@ class MultiTracker(TrackerInterface):
     def isDuplicate(self, header: HeaderWithSender):
         return self.getProcessingTracker(header).isDuplicate(header)
 
-    def destroy(self):
-        # this tracker will cease to exist
-        return
-    
     def update(self, header: HeaderWithSender):
         self.getProcessingTracker(header).update(header)
     

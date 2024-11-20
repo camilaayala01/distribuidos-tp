@@ -16,7 +16,6 @@ class ActiveClient:
         os.makedirs(self._folderPath, exist_ok=True)
 
     def destroy(self):
-        self._tracker.destroy()
         if os.path.exists(self._folderPath):
             shutil.rmtree(self._folderPath)
 

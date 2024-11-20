@@ -15,7 +15,6 @@ class ActiveClient:
         return self._tracker.isDone()
     
     def destroy(self):
-        self._tracker.destroy()
         if os.path.exists(self.partialResPath() + '.csv'):
             os.remove(self.partialResPath() + '.csv')
 

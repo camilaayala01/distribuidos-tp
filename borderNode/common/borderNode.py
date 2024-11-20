@@ -1,13 +1,10 @@
 import os
-import shutil
-from typing import Any, Dict
+import threading
+import time
 import uuid
-
-import zmq
-from zmq.utils.monitor import recv_monitor_message
-from entryParsing.common.fieldParsing import getClientIdUUID
+from .activeClients import ActiveClients
+from entryParsing.common.clientHeader import ClientHeader
 from entryParsing.common.messageType import MessageType
-from entryParsing.common.utils import copyFile
 from internalCommunication.internalMessageType import InternalMessageType
 from .borderCommunication import BorderNodeCommunication
 
@@ -19,35 +16,34 @@ from .borderCommunication import BorderNodeCommunication
 class BorderNode: 
     def __init__(self):
         self._communication = BorderNodeCommunication()
-        self._storagePath = os.getenv('STORAGE_PATH')
-        os.makedirs(self._storagePath, exist_ok=True)
-        self._activeClients = set() # some in memory lock
-        # some file lock for writing clients in log
-
-    def activeClientsFile(self):
-        return self._storagePath + 'activeClients'
+        self._activeClients = ActiveClients()
+        # only one thread will actually change it, but just in case
+        self._timeLock = threading.Lock()
+        self._currentTimer = time.perf_counter()
     
     def stop(self, _signum, _):
         self._communication.stop()
-        datafile = self.activeClientsFile() + self.storageFileExtension()
-        if os.path.exists(datafile):
-            os.remove(datafile)
+        self._activeClients.removeClientFiles()
 
-    def storeNewClient(self, clientId: bytes):
-        # managable in-memory size. for 100.000 concurrent clients, uses 1.5MB
-        self._activeClients.add(clientId)
-        self.storeInDisk(clientId)
-
-    def storageFileExtension(self):
-        return '.txt'
+    def handleHandshake(self, clientId: bytes):
+        assignedId = uuid.uuid4().bytes
+        self._activeClients.storeNewClient(assignedId)
+        self._communication.sendToClient(clientId, assignedId)
+        return None
     
-    def storeInDisk(self, clientId: bytes):
-        storageFilePath = self.activeClientsFile()
-        with open(storageFilePath + '.tmp', 'w+') as newResults:
-            copyFile(newResults, storageFilePath + self.storageFileExtension())
-            newResults.write(f"{getClientIdUUID(clientId)}")
-        os.rename(storageFilePath + '.tmp', storageFilePath + self.storageFileExtension())
-
+    def handleDataMessage(self, clientId: bytes, msg: bytes):
+        if self._activeClients.isActiveClient(clientId):
+            self._activeClients.setTimestampForClient(clientId)
+        else: 
+            self._communication.sendToClient(clientId=clientId, data=MessageType.CONNECT_RETRY.serialize())
+            return None
+        
+        header, _ = ClientHeader.deserialize(msg)
+        if header.isLastClientPacket():
+            self._activeClients.removeClientsFromActive({clientId})
+        # ack before deleting. if server dies, as every node will have finished, there would be no problem
+        return clientId + msg
+    
     def handleClientMessage(self, clientId: bytes, data: bytes):
         try:
             type, msg = MessageType.deserialize(data)
@@ -58,18 +54,16 @@ class BorderNode:
         
         match type:
             case MessageType.CONNECT:
-                assignedId = uuid.uuid4().bytes
-                self.storeNewClient(assignedId)
-                # if fails exactly here, even tho client will be registered, it will be discarted 
-                # within the first heartbeat cycle
-                self._communication.sendToClient(clientId, assignedId)
-                return None
+                return self.handleHandshake(clientId)
             case MessageType.DATA_TRANSFER:
-                if clientId not in self._activeClients:
-                    # wont happen unless client is an attacker
-                    self._communication.sendToClient(clientId=clientId, data=MessageType.CONNECT_RETRY.serialize())
-                    return None
-                return clientId + msg
+                return self.handleDataMessage(clientId=clientId, msg=msg)
+
+    def handleTimeoutSignal(self, _signum, _):
+        self._currentTimer, expired = self._activeClients.getExpiredTimers(lastTimer=self._currentTimer)
+        for clientId in expired:
+            print(f"oops, client {clientId} expired :( so sad for him")
+            self._communication.sendInitializer(InternalMessageType.CLIENT_FLUSH.serialize() + clientId)
+        self._activeClients.removeClientsFromActive(expired)
 
     def listenForClient(self):
         while self._communication.isRunning():
@@ -95,28 +89,6 @@ class BorderNode:
     # el eof de reviews
     # vamos a seguir teniendo q hacer stop and wait, primero x esto del eof y segundo x si se 
     # cae el border
-    def runHeartbeat(self):
-        # TODO
-        print("heartbeat not implemented!")
-
-    def monitor_events(self):
-        monitor = self._communication.getMonitorSocket()
-        EVENT_MAP = {}
-        for name in dir(zmq):
-            if name.startswith('EVENT_'):
-                value = getattr(zmq, name)
-                EVENT_MAP[value] = name
-
-        while monitor.poll():
-            evt: Dict[str, Any] = {}
-            mon_evt = recv_monitor_message(monitor)
-            evt.update(mon_evt)
-            evt['description'] = EVENT_MAP[evt['event']]
-            if evt['event'] == zmq.EVENT_DISCONNECTED:
-                self.runHeartbeat()
-            if evt['event'] == zmq.EVENT_MONITOR_STOPPED:
-                break
-        monitor.close()
 
     def dispatchResponses(self):
         self._communication.executeDispatcher()

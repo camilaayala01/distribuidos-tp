@@ -137,7 +137,7 @@ class Joiner:
         if self._accumulatedBatches and clientToRemove == self._accumulatedBatches.getClient():
             # discard all in memory information and ensure it wont come back if it reboots
             self._internalCommunication.ackAll(self._accumulatedBatches.toAck())
-
+        self._accumulatedBatches = None
         if clientToRemove in self._activeClients:
             client = self._activeClients.pop(clientToRemove)
             client.destroy()

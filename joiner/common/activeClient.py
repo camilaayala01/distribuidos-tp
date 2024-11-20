@@ -22,8 +22,6 @@ class ActiveClient:
         return self._clientId.bytes
     
     def destroy(self):
-        self._gamesTracker.destroy()
-        self._reviewsTracker.destroy()
         if os.path.exists(self._folderPath):
             shutil.rmtree(self._folderPath)
 

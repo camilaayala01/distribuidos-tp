@@ -57,6 +57,7 @@ class BorderNodeCommunication:
         self.sendToClient(clientId=header.getClient(), data=MessageType.QUERY_RESPONSE.serialize() + body)
         logging.info(f'action: sending query info to client | result: success')
 
+    # TODO modularize this handle message
     def handleMessage(self, ch, method, _properties, body):
         if not self.isRunning():
             return
