@@ -30,22 +30,19 @@ class BorderNode:
     def handleHandshake(self, clientId: bytes):
         assignedId = uuid.uuid4().bytes
         self._activeClients.storeNewClient(assignedId)
-        self._communication.sendToClient(clientId, assignedId)
-        return None
+        self._communication.sendToClient(clientId, MessageType.CONNECT_ACCEPT.serialize() + assignedId)
     
     def handleDataMessage(self, clientId: bytes, msg: bytes):
-        if self._activeClients.isActiveClient(clientId):
-            self._activeClients.setTimestampForClient(clientId)
-        else: 
+        if not self._activeClients.isActiveClient(clientId):
             self._communication.sendToClient(clientId=clientId, data=MessageType.CONNECT_RETRY.serialize())
-            return None
-        
+            return
+        self._activeClients.setTimestampForClient(clientId)        
         header, _ = ClientHeader.deserialize(msg)
         if header.isLastClientPacket():
             print("received last packet!")
             self._activeClients.removeClientsFromActive({clientId})
-        # ack before deleting. if server dies, as every node will have finished, there would be no problem
-        return clientId + msg
+            # ack after deleting, and in deletion confirmation packet, ack after checking
+        self._communication.sendInitializer(InternalMessageType.DATA_TRANSFER.serialize() + clientId + msg)
     
     def handleClientMessage(self, clientId: bytes, data: bytes):
         try:
@@ -74,9 +71,7 @@ class BorderNode:
             if received is None:
                 continue
             id, data = received
-            toSend = self.handleClientMessage(id, data)
-            if toSend is not None:
-                self._communication.sendInitializer(InternalMessageType.DATA_TRANSFER.serialize() + toSend)
+            self.handleClientMessage(id, data)
         self._communication.closeClientSocket()
 
     # establecer timer que salte cada equis cantidad de tiempo y revise los ultimos timestamps

@@ -22,7 +22,10 @@ class ClientCommunication:
         socket = context.socket(zmq.DEALER)
         socket.connect(socketaddr)
         socket.send(MessageType.CONNECT.serialize())
-        idBytes = socket.recv()
+        handshakeResponse = socket.recv()
+        msgType, idBytes = MessageType.deserialize(handshakeResponse)
+        if msgType != MessageType.CONNECT_ACCEPT:
+            raise Exception(f"Handshake failed: received {msgType}")
         socket.disconnect(socketaddr)
         return idBytes, socket
     
