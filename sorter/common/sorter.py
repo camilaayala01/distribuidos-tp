@@ -2,7 +2,7 @@ import logging
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
-from .eofController import EofController
+from eofController.eofController import EofController
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog, nextEntry

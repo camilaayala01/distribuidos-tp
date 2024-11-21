@@ -6,7 +6,7 @@ from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFro
 from entryParsing.entry import EntryInterface
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
-from .eofController import EofController
+from eofController.eofController import EofController
 from .accumulatedBatches import AccumulatedBatches
 from .activeClient import ActiveClient
 from .joinerTypes import JoinerType
