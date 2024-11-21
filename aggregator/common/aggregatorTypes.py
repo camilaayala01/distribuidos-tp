@@ -82,7 +82,7 @@ class AggregatorTypes(Enum):
                 priorEntry.addToCount(entry.getCount())
                 entryToWrite = priorEntry
                 if priorEntry.getCount() >= requiredReviews:
-                    # TODO append the entry and add it to sending strategy
+                    # TODO append the entry as-is and add casting to sending strategy
                     toSend.append(EntryName(priorEntry.getName()))
             
             batch.pop(id, None)

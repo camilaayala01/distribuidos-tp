@@ -33,8 +33,8 @@ class Client:
     def shutdown(self):
         self._communication.stop()
 
-    def sendTable(self, tableGenerator, tableType):
-        self._communication.sendTable(self, self._maxData, tableGenerator, tableType)
+    def sendTables(self, gamesGenerator, reviewsGenerator):
+        self._communication.sendAllData(self, self._maxData, gamesGenerator, reviewsGenerator)
 
     def isDoneReceiving(self):
         return len(self._queriesReceived) == QUERY_COUNT
@@ -70,9 +70,8 @@ class Client:
         return header.isEOF()
 
     def hasReceivedQueryBefore(self, header: HeaderWithQueryNumber):
-        return header._queryNumber in self._queriesReceived
-
-    # change function so that it hears for data errors and acks while data sending is going on
+        return header.getQueryNumber() in self._queriesReceived
+    
     def waitForResponses(self):
         os.makedirs(f"/responses/exec-{self._currentExecution}", exist_ok=True)
         while not self.isDoneReceiving() and self.isRunning():

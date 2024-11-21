@@ -3,6 +3,7 @@ from entryParsing.common.clientHeader import ClientHeader
 import zmq
 
 from entryParsing.common.messageType import MessageType
+from entryParsing.common.table import Table
 
 class ClientCommunication:
     def __init__(self):
@@ -38,6 +39,20 @@ class ClientCommunication:
     def sendDataToServer(self, msg):
         self._socket.send(MessageType.DATA_TRANSFER.serialize() + msg)
 
+    def sendEndOfDataTransfer(self):
+        self._socket.send(MessageType.FINISH_DATA_TRANSFER.serialize())
+        # wait for ack
+    
+    def sendAllData(self, client, maxDataBytes, gamesGeneratorFunc, reviewsGeneratorFunc):
+        self.sendTable(client, maxDataBytes, gamesGeneratorFunc, Table.GAMES)
+        self.sendTable(client, maxDataBytes, reviewsGeneratorFunc, Table.REVIEWS)
+        self.sendEndOfDataTransfer()
+
+    def sendDataAndWaitForAck(self, fragment, eof, table, data):
+        headerBytes = ClientHeader(fragment, eof, table).serialize()
+        self.sendDataToServer(headerBytes + data)
+        # wait for ack
+
     def sendTable(self, client, maxDataBytes, generatorFunction, table):
         # add stop and wait logic, but change function so it sends one message at a time
         if not client.isRunning():
@@ -53,11 +68,10 @@ class ClientCommunication:
                 if len(currPacket) + len(entryBytes) <= maxDataBytes:
                     currPacket += entryBytes
                 else:
-                    headerBytes = ClientHeader(fragment, False, table).serialize()
+                    self.sendDataAndWaitForAck(fragment, False, table, currPacket)
                     fragment += 1
-                    self.sendDataToServer(headerBytes + currPacket)
                     currPacket = entryBytes
+                    # revise for ack
         except StopIteration:
-            packet = ClientHeader(fragment, True, table).serialize() + currPacket
-            self.sendDataToServer(packet)
+            self.sendDataAndWaitForAck(fragment, True, table, currPacket)
             logging.info(f'action: send table {table} end of file | result: success')

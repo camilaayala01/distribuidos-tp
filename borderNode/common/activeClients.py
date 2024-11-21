@@ -32,16 +32,28 @@ class ActiveClients:
             if os.path.exists(tmpfile):
                 os.remove(tmpfile)
 
+    """ 
+    Removes clients from file and monitor if they existed in those.
+    Used for when a client hits timeout, or when it finished sending
+    data.
+    """
     def removeClientsFromActive(self, clientsToRemove: set[bytes]):
         if not clientsToRemove:
             return
+        # for when client sends a deletion confirmation; avoid going to disk if everything went well
+        removed = set()
         with self._clientsMonitorLock:
             for client in clientsToRemove:
-                print(f"removing {client} from active")
-                self._clientMonitor.pop(client, None)
-        self.removeClientsFromFile(clientsToRemove)
+                if client in self._clientMonitor:
+                    self._clientMonitor.pop(client)
+                    removed.add(client)
+        # monitor is consistent to file. when there is a failure, at reboot 
+        # monitor will take its information from file
+        self.removeClientsFromFile(removed)
 
     def removeClientsFromFile(self, clientsToRemove: set[bytes]):
+        if not clientsToRemove:
+            return
         sourcePath = self._storagePath + self.storageFileExtension()
         tempPath =  self._storagePath + '.tmp'
         with self._clientsFileLock:
@@ -59,13 +71,10 @@ class ActiveClients:
         self.setTimestampForClient(clientId)
         with self._clientsFileLock:
             self.storeInDisk(clientId)
-        print("done storing!")
     
     def storeInDisk(self, clientId: bytes):
         storageFilePath = self._storagePath
-        print(f"storage path {storageFilePath}, client {clientId}")
         with open(storageFilePath + '.tmp', 'wb') as newResults:
-            print("storing!")
             copyFile(newResults, storageFilePath + self.storageFileExtension())
             newResults.write(clientId)
         os.rename(storageFilePath + '.tmp', storageFilePath + self.storageFileExtension())

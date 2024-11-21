@@ -30,6 +30,7 @@ class InternalCommunication:
         self._channel.basic_consume(queue=queueName, on_message_callback=callback, auto_ack=False)
 
         self._channel.start_consuming()
+        # TODO remove commented code
         # try:
         #     self._channel.start_consuming()
         # except Exception as e:

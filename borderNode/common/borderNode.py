@@ -38,11 +38,17 @@ class BorderNode:
             return
         self._activeClients.setTimestampForClient(clientId)        
         header, _ = ClientHeader.deserialize(msg)
+        self._communication.sendInitializer(InternalMessageType.DATA_TRANSFER.serialize() + clientId + msg)
+        # send ack
         if header.isLastClientPacket():
             print("received last packet!")
             self._activeClients.removeClientsFromActive({clientId})
-            # ack after deleting, and in deletion confirmation packet, ack after checking
-        self._communication.sendInitializer(InternalMessageType.DATA_TRANSFER.serialize() + clientId + msg)
+            # ack before deleting, after sending to initializer.
+            # in deletion confirmation packet, ack after checking
+    
+    def handleEndOfDataTransfer(self, clientId: bytes):
+        self._activeClients.removeClientsFromActive({clientId})
+        # send ack
     
     def handleClientMessage(self, clientId: bytes, data: bytes):
         try:
@@ -54,9 +60,11 @@ class BorderNode:
         
         match type:
             case MessageType.CONNECT:
-                return self.handleHandshake(clientId)
+                return self.handleHandshake(clientId=clientId)
             case MessageType.DATA_TRANSFER:
                 return self.handleDataMessage(clientId=clientId, msg=msg)
+            case MessageType.FINISH_DATA_TRANSFER:
+                return self.handleEndOfDataTransfer(clientId=clientId)
 
     def handleTimeoutSignal(self, _signum, _):
         self._currentTimer, expired = self._activeClients.getExpiredTimers(lastTimer=self._currentTimer)
