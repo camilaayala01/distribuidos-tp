@@ -7,8 +7,9 @@ from entryParsing.common.utils import copyFile
 
 class ActiveClients:
     def __init__(self):
-        self._storagePath = os.getenv('STORAGE_PATH')
-        os.makedirs(self._storagePath, exist_ok=True)
+        folderPath = os.getenv('STORAGE_PATH')
+        os.makedirs(folderPath, exist_ok=True)
+        self._storagePath = folderPath + 'activeClients'
         self._clientsFileLock = threading.Lock()
 
         self._clientsMonitorLock = threading.Lock()
@@ -56,9 +57,11 @@ class ActiveClients:
         self.setTimestampForClient(clientId)
         with self._clientsFileLock:
             self.storeInDisk(clientId)
+        print("done storing!")
     
     def storeInDisk(self, clientId: bytes):
         storageFilePath = self._storagePath
+        print(f"storage path {storageFilePath}, client {clientId}")
         with open(storageFilePath + '.tmp', 'wb') as newResults:
             print("storing!")
             copyFile(newResults, storageFilePath + self.storageFileExtension())

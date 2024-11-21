@@ -211,7 +211,7 @@ def add_border_node(compose: dict[str, Any], cluster_nodes):
         'environment':[
             'PYTHONUNBUFFERED=1',
             'PREFETCH_COUNT=1',
-            'STORAGE_PATH=/data/activeClients',
+            'STORAGE_PATH=/data/',
             f'LISTENING_QUEUE={os.getenv("DISP")}'
         ],
         'env_file': default_env_file(),

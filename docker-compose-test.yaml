@@ -872,7 +872,7 @@ services:
     environment:
     - PYTHONUNBUFFERED=1
     - PREFETCH_COUNT=1
-    - STORAGE_PATH=/data/activeClients
+    - STORAGE_PATH=/data/
     - LISTENING_QUEUE=Dispatcher
     env_file:
     - .env

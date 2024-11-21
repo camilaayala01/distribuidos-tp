@@ -40,7 +40,7 @@ class ClientHeader:
         except (IndexError, UnicodeDecodeError):
             raise Exception("There was an error parsing data in header")
 
-        return ClientHeader(table, fragment, eof), data[curr:]
+        return ClientHeader(fragment, eof, table), data[curr:]
 
     def __str__(self):
         return f"fragment: {self._fragment} | eof: {self._eof}"

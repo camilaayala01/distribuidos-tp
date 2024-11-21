@@ -2,6 +2,8 @@ import os
 import threading
 import time
 import uuid
+
+from entryParsing.common.table import Table
 from .activeClients import ActiveClients
 from entryParsing.common.clientHeader import ClientHeader
 from entryParsing.common.messageType import MessageType
@@ -40,6 +42,7 @@ class BorderNode:
         
         header, _ = ClientHeader.deserialize(msg)
         if header.isLastClientPacket():
+            print("received last packet!")
             self._activeClients.removeClientsFromActive({clientId})
         # ack before deleting. if server dies, as every node will have finished, there would be no problem
         return clientId + msg
