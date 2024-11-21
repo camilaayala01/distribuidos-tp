@@ -116,7 +116,7 @@ def default_config(compose: dict[str, Any], container_name, entrypoint, queue, p
     
 def default_config_with_tracker(compose: dict[str, Any], container_name, entrypoint, queue, node_type, prefetch_count: int=1, **kwargs):
     compose = default_config(compose, container_name, entrypoint, queue, prefetch_count, **kwargs)
-    compose['services'][container_name]['volumes'].extend(['./packetTracker:/packetTracker', stateful_volumes(node_type, queue, kwargs.get('node_id'))])
+    compose['services'][container_name]['volumes'].extend(['./packetTracker:/packetTracker', stateful_volumes(node_type, queue, kwargs.get('node_id')), './eofController:/eofController'])
     return compose
 
 def add_initializer(compose: dict[str, Any], id):
@@ -307,7 +307,8 @@ def add_joiners_action_percentile(compose: dict[str, Any]):
                                             reviews_entry_type='EntryAppIDReviewCount', 
                                             games_entry_type='EntryAppIDName', 
                                             header_type='HeaderWithTable',
-                                            node_id=i)
+                                            node_id=i,
+                                            node_count=int(os.getenv('JOIN_PERC_COUNT')))
         containers.append(new_container)
     return compose, containers
 
@@ -384,7 +385,8 @@ def add_joiners_indie(compose: dict[str, Any]):
                                             reviews_entry_type='EntryAppIDReviewCount',
                                             games_entry_type='EntryAppIDName', 
                                             header_type='HeaderWithTable',
-                                            node_id=i)
+                                            node_id=i,
+                                            node_count=int(os.getenv('JOIN_INDIE_COUNT')))
         containers.append(new_container)
     return compose, containers
 
@@ -399,7 +401,8 @@ def add_joiner_action_english(compose: dict[str, Any]):
                                             reviews_entry_type='EntryAppIDReviewText',
                                             header_type='HeaderWithTable',
                                             games_entry_type='EntryAppIDName', 
-                                            node_id=i)
+                                            node_id=i,
+                                            node_count=int(os.getenv('JOIN_ACT_COUNT')))
         containers.append(new_container)
     return compose, containers
 

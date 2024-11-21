@@ -22,6 +22,13 @@ class SorterType(Enum):
             case _:
                 return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), getClientIdUUID(clientId))        
 
+    def requireController(self) -> PacketTracker:
+        match self:
+            case SorterType.PLAYTIME | SorterType.INDIE:
+                return True
+            case _:
+                return False 
+
     def filterByPercentile(self, topEntries, topAmount):
         if topAmount == 0:
             return topEntries

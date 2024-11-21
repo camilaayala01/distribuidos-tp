@@ -145,6 +145,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./aggregator/AggregatorOs:/AggregatorOs
+    - ./eofController:/eofController
     networks:
     - sa_net
   filterer-indie:
@@ -211,6 +212,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./sorter/SorterAvgPlaytime0:/SorterAvgPlaytime
+    - ./eofController:/eofController
     networks:
     - sa_net
   sorter-playtime-1:
@@ -236,6 +238,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./sorter/SorterAvgPlaytime1:/SorterAvgPlaytime
+    - ./eofController:/eofController
     networks:
     - sa_net
   sorter-consolidator-playtime:
@@ -261,6 +264,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./sorter/ConsolidatorSorterPlaytime:/ConsolidatorSorterPlaytime
+    - ./eofController:/eofController
     networks:
     - sa_net
   grouper-indie:
@@ -298,6 +302,7 @@ services:
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=0
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -305,6 +310,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./joiner/JoinerIndie0:/JoinerIndie
+    - ./eofController:/eofController
     networks:
     - sa_net
   joiner-indie-1:
@@ -323,6 +329,7 @@ services:
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=1
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -330,6 +337,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./joiner/JoinerIndie1:/JoinerIndie
+    - ./eofController:/eofController
     networks:
     - sa_net
   joiner-indie-2:
@@ -348,6 +356,7 @@ services:
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=2
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -355,6 +364,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./joiner/JoinerIndie2:/JoinerIndie
+    - ./eofController:/eofController
     networks:
     - sa_net
   aggregator-indie:
@@ -377,6 +387,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./aggregator/AggregatorIndie:/AggregatorIndie
+    - ./eofController:/eofController
     networks:
     - sa_net
   sorter-indie-0:
@@ -402,6 +413,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./sorter/SorterIndie0:/SorterIndie
+    - ./eofController:/eofController
     networks:
     - sa_net
   sorter-indie-1:
@@ -427,6 +439,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./sorter/SorterIndie1:/SorterIndie
+    - ./eofController:/eofController
     networks:
     - sa_net
   sorter-consolidator-indie:
@@ -452,6 +465,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./sorter/ConsolidatorSorterIndie:/ConsolidatorSorterIndie
+    - ./eofController:/eofController
     networks:
     - sa_net
   filterer-action:
@@ -489,6 +503,7 @@ services:
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - NODE_ID=0
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -496,6 +511,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./joiner/JoinerActionEnglish0:/JoinerActionEnglish
+    - ./eofController:/eofController
     networks:
     - sa_net
   joiner-english-1:
@@ -513,6 +529,7 @@ services:
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - NODE_ID=1
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -520,6 +537,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./joiner/JoinerActionEnglish1:/JoinerActionEnglish
+    - ./eofController:/eofController
     networks:
     - sa_net
   joiner-english-2:
@@ -537,6 +555,7 @@ services:
     - HEADER_TYPE=HeaderWithTable
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - NODE_ID=2
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -544,6 +563,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./joiner/JoinerActionEnglish2:/JoinerActionEnglish
+    - ./eofController:/eofController
     networks:
     - sa_net
   filterer-english-0:
@@ -747,6 +767,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./aggregator/AggregatorEnglish:/AggregatorEnglish
+    - ./eofController:/eofController
     networks:
     - sa_net
   grouper-percentile:
@@ -783,6 +804,7 @@ services:
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=0
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -790,6 +812,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./joiner/JoinerActionPercentile0:/JoinerActionPercentile
+    - ./eofController:/eofController
     networks:
     - sa_net
   joiner-percentile-1:
@@ -807,6 +830,7 @@ services:
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=1
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -814,6 +838,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./joiner/JoinerActionPercentile1:/JoinerActionPercentile
+    - ./eofController:/eofController
     networks:
     - sa_net
   joiner-percentile-2:
@@ -831,6 +856,7 @@ services:
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=2
+    - NODE_COUNT=3
     env_file:
     - .env
     volumes:
@@ -838,6 +864,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./joiner/JoinerActionPercentile2:/JoinerActionPercentile
+    - ./eofController:/eofController
     networks:
     - sa_net
   sorter-consolidator-percentile:
@@ -863,6 +890,7 @@ services:
     - ./entryParsing:/entryParsing
     - ./packetTracker:/packetTracker
     - ./sorter/ConsolidatorSorterPercentile:/ConsolidatorSorterPercentile
+    - ./eofController:/eofController
     networks:
     - sa_net
   border-node:

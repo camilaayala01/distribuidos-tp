@@ -6,6 +6,7 @@ from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFro
 from entryParsing.entry import EntryInterface
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
+from eofController.eofController import EofController
 from .accumulatedBatches import AccumulatedBatches
 from .activeClient import ActiveClient
 from .joinerTypes import JoinerType
@@ -26,12 +27,16 @@ class Joiner:
         self._headerType = getHeaderTypeFromEnv()
         self._activeClients = {}
         self._currentClient = None
+        self._eofController = EofController(int(nodeID), os.getenv('LISTENING_QUEUE'), int(os.getenv('NODE_COUNT')), self._sendingStrategies)
+        self._eofController.execute()
         self._accumulatedBatches = None
 
     def stop(self, _signum, _frame):
         for client in self._activeClients.values():
             client.destroy()
+        self._eofController.terminateProcess(self._internalCommunication)
         self._internalCommunication.stop()
+        
         
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
@@ -96,8 +101,8 @@ class Joiner:
                                                    self._currentClient.getClientIdBytes(), 
                                                    self._currentClient._fragment, 
                                                    generator, 
-                                                   self._currentClient.finishedReceiving(),
-                                                   _sender = self._id)
+                                                   False,
+                                                   _sender = self._id)._fragment
         self._currentClient._fragment = newFragment
     
     def setAccumulatedBatches(self, tag, header, batch):
@@ -149,7 +154,6 @@ class Joiner:
             self.setAccumulatedBatches(method.delivery_tag, header, batch)
             self.setNewClient(clientId)
             self._currentClient.updateTracker(header)
-
             return
 
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
@@ -163,5 +167,13 @@ class Joiner:
 
         if self._currentClient.finishedReceiving():
             logging.info(f'action: finished receiving data from client {clientId}| result: success')
+            packets, self._currentClient._fragment = serializeAndFragmentWithSender(maxDataBytes=maxDataBytes(self._headerType), 
+                                                 data=bytes(),
+                                                 clientId=clientId, 
+                                                 senderId=self._id,
+                                                 fragment=self._currentClient._fragment,
+                                                 hasEOF=True)
+            self._eofController.finishedProcessing(packets, clientId, self._internalCommunication)
             self._currentClient.destroy()
             self._activeClients.pop(clientId)
+

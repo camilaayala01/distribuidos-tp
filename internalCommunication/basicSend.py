@@ -37,5 +37,4 @@ class BasicSend(SendingStrategy):
         except StopIteration:
             packet = headerType(_clientId=clientId, _fragment=fragment, _eof=hasEOF, **headerExtraArgs).serialize() + currPacket
             self.sendBytes(middleware, packet)
-
-        return fragment
+            return headerType(_clientId=clientId, _fragment=fragment + 1, _eof=True, **headerExtraArgs)
