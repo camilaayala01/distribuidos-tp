@@ -32,6 +32,9 @@ class BorderNode:
         self._activeClients.storeNewClient(assignedId)
         self._communication.sendToClient(clientId, MessageType.CONNECT_ACCEPT.serialize() + assignedId)
     
+    def sendAck(self, clientId: bytes, clientHeader: ClientHeader):
+        self._communication.sendToClient(clientId=clientId, data=MessageType.MESSAGE_ACK.serialize() + clientHeader.serialize())
+
     def handleDataMessage(self, clientId: bytes, msg: bytes):
         if not self._activeClients.isActiveClient(clientId):
             self._communication.sendToClient(clientId=clientId, data=MessageType.CONNECT_RETRY.serialize())
@@ -39,7 +42,7 @@ class BorderNode:
         self._activeClients.setTimestampForClient(clientId)        
         header, _ = ClientHeader.deserialize(msg)
         self._communication.sendInitializer(InternalMessageType.DATA_TRANSFER.serialize() + clientId + msg)
-        # send ack
+        self.sendAck(clientId, header)
         if header.isLastClientPacket():
             print("received last packet!")
             self._activeClients.removeClientsFromActive({clientId})
@@ -48,7 +51,7 @@ class BorderNode:
     
     def handleEndOfDataTransfer(self, clientId: bytes):
         self._activeClients.removeClientsFromActive({clientId})
-        # send ack
+        # TODO send ack
     
     def handleClientMessage(self, clientId: bytes, data: bytes):
         try:

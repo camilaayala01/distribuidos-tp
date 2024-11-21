@@ -78,10 +78,6 @@ class Client:
             msg = self._communication.receiveFromServer()
             if msg == None:
                 continue
-            type, msg = MessageType.deserialize(msg)
-            if type != MessageType.QUERY_RESPONSE:
-                print("uia")
-
             header, data = HeaderWithQueryNumber.deserialize(msg)
             if self.hasReceivedQueryBefore(header):
                 continue

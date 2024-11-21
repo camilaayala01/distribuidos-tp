@@ -5,15 +5,17 @@ import zmq
 from entryParsing.common.messageType import MessageType
 from entryParsing.common.table import Table
 
+MAX_TIMEOUTS = 3
 class ClientCommunication:
     def __init__(self):
         self._context = zmq.Context()
         socketaddr = "tcp://border-node:%s" % "5556" # TODO: SACAR HARDCODEO
         id, socket  = ClientCommunication.manageHandshake(self._context, socketaddr)
         socket.setsockopt(zmq.IDENTITY, id)
-        socket.setsockopt(zmq.RCVTIMEO, 100) # TODO: SACAR HARDCODEO
+        socket.setsockopt(zmq.RCVTIMEO, 500) # TODO: SACAR HARDCODEO
         socket.connect(socketaddr) 
         self._socket = socket
+        self._responsesObtained = []
 
     def stop(self):
         self._socket.close()
@@ -31,8 +33,15 @@ class ClientCommunication:
         return idBytes, socket
     
     def receiveFromServer(self):
+        if self._responsesObtained:
+            return self._responsesObtained.pop(0)
         try:
-            return self._socket.recv()
+            msg = self._socket.recv()
+            type, msg = MessageType.deserialize(msg)
+            if not type == MessageType.QUERY_RESPONSE:
+                raise Exception(f"Received message of type {type} when waiting for responses")
+            return msg
+            
         except zmq.error.Again:
             return None
     
@@ -49,12 +58,32 @@ class ClientCommunication:
         self.sendEndOfDataTransfer()
 
     def sendDataAndWaitForAck(self, fragment, eof, table, data):
-        headerBytes = ClientHeader(fragment, eof, table).serialize()
-        self.sendDataToServer(headerBytes + data)
-        # wait for ack
+        header = ClientHeader(fragment, eof, table)
+        self.sendDataToServer(header.serialize() + data)
+        return self.waitForServerAck(header)
+
+    def waitForServerAck(self, sentHeader: ClientHeader):
+        timeoutCycles = 0
+        while timeoutCycles < MAX_TIMEOUTS:
+            try:
+                msg = self._socket.recv()
+                type, msg = MessageType.deserialize(msg)
+                match type:
+                    case MessageType.MESSAGE_ACK:
+                        header, _ = ClientHeader.deserialize(msg)
+                        if header.isEqual(sentHeader):
+                            return
+                    case MessageType.QUERY_RESPONSE:
+                        self._responsesObtained.append(msg)
+                    case _:
+                        raise Exception(f"Received a message of type {type} from server")
+            except zmq.error.Again:
+                timeoutCycles += 1
+        
+        raise Exception("Couldn't send data correctly, server failed to ack message")
 
     def sendTable(self, client, maxDataBytes, generatorFunction, table):
-        # add stop and wait logic, but change function so it sends one message at a time
+        # stop and wait logic, it sends one message at a time
         if not client.isRunning():
             return
         fragment = 1
@@ -71,7 +100,6 @@ class ClientCommunication:
                     self.sendDataAndWaitForAck(fragment, False, table, currPacket)
                     fragment += 1
                     currPacket = entryBytes
-                    # revise for ack
         except StopIteration:
             self.sendDataAndWaitForAck(fragment, True, table, currPacket)
             logging.info(f'action: send table {table} end of file | result: success')

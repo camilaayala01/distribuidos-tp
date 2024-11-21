@@ -21,6 +21,11 @@ class ClientHeader:
     def size(self):
         return MESSAGE_TYPE_LEN + COUNT_LEN + BOOLEAN_LEN + TABLE_LEN
     
+    def isEqual(self, other: 'ClientHeader') -> bool:
+        return self._fragment == other._fragment \
+        and self._eof == other._eof \
+        and self._table == other._table
+    
     def isLastClientPacket(self) -> bool:
         return self._table == Table.REVIEWS and self._eof
     
