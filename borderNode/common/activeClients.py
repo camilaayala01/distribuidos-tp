@@ -33,6 +33,8 @@ class ActiveClients:
                 os.remove(tmpfile)
 
     def removeClientsFromActive(self, clientsToRemove: set[bytes]):
+        if not clientsToRemove:
+            return
         with self._clientsMonitorLock:
             for client in clientsToRemove:
                 print(f"removing {client} from active")
