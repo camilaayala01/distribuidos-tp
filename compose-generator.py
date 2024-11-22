@@ -116,7 +116,11 @@ def default_config(compose: dict[str, Any], container_name, entrypoint, queue, p
     
 def default_config_with_tracker(compose: dict[str, Any], container_name, entrypoint, queue, node_type, prefetch_count: int=1, **kwargs):
     compose = default_config(compose, container_name, entrypoint, queue, prefetch_count, **kwargs)
-    compose['services'][container_name]['volumes'].extend(['./packetTracker:/packetTracker', stateful_volumes(node_type, queue, kwargs.get('node_id'))])
+    compose['services'][container_name]['volumes'].extend([
+        './packetTracker:/packetTracker', 
+        './statefulNode:/statefulNode',
+        stateful_volumes(node_type, queue, kwargs.get('node_id'))
+    ])
     return compose
 
 def add_initializer(compose: dict[str, Any], id):

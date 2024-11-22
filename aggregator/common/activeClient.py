@@ -14,7 +14,7 @@ class ActiveClient:
     def getClientIdBytes(self):
         return self._clientId.bytes
         
-    def isDone(self):
+    def finishedReceiving(self):
         return self._tracker.isDone()
     
     def destroy(self):

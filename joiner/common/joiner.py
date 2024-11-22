@@ -8,37 +8,35 @@ from entryParsing.entry import EntryInterface
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
 from internalCommunication.internalMessageType import InternalMessageType
+from statefulNode.statefulNode import StatefulNode
 from .accumulatedBatches import AccumulatedBatches
 from .activeClient import ActiveClient
 from .joinerTypes import JoinerType
-
+from statefulNode.statefulNode import StatefulNode
 PRINT_FREQUENCY = 1000
 PREFETCH_COUNT = int(os.getenv('PREFETCH_COUNT'))
-DELETE_TIMEOUT = 5
 
-class Joiner:
+
+class Joiner(StatefulNode):
     def __init__(self):
-        initializeLog()
+        super().__init__()
         self._joinerType = JoinerType(int(os.getenv('JOINER_TYPE')))
-        nodeID = os.getenv('NODE_ID')
-        self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), nodeID)
-        self._sendingStrategies = createStrategiesFromNextNodes()
-        self._id = int(nodeID)
         self._gamesEntry = getGamesEntryTypeFromEnv()
         self._reviewsEntry = getReviewsEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
-        self._deletedClients = {} # client id: timestamp of the first time flush was seen
-        self._activeClients = {}
-        self._currentClient = None
         self._accumulatedBatches = None
-
-    def stop(self, _signum, _frame):
-        for client in self._activeClients.values():
-            client.destroy()
-        self._internalCommunication.stop()
-        
-    def execute(self):
-        self._internalCommunication.defineMessageHandler(self.handleMessage)
+        self._id = int(os.getenv('NODE_ID'))
+    
+    """keeps the client if there is one, set a new one if there's not"""
+    def setCurrentClient(self, clientId: bytes):
+        if self._currentClient:
+            return
+        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(getClientIdUUID(clientId)))
+    
+    """replaces the old client with a new one"""
+    def setNewClient(self, clientId: bytes):
+        self._currentClient = None
+        self.setCurrentClient(clientId)
 
     def joinReviews(self, reviews: list[EntryInterface]):
         unjoined = list(self._currentClient.loadReviewsEntries(self._reviewsEntry))
@@ -83,8 +81,8 @@ class Joiner:
     def shouldSendPackets(self, toSend):
         return (self._currentClient.finishedReceiving() or 
                 (not self._currentClient.finishedReceiving() and toSend is not None))
-
-    def _handleSending(self):
+    
+    def handleSending(self):
         currClient = self._currentClient
         toSend = self._joinerType.entriesToSend(joinedEntries=currClient._joinedEntries, 
                                                 isDone=currClient.finishedReceiving(),
@@ -92,9 +90,9 @@ class Joiner:
         self._currentClient._joinedEntries = {}
         if not self.shouldSendPackets(toSend):
             return
-        self._sendToNext(toSend)
+        self.sendToNext(toSend)
 
-    def _sendToNext(self, generator):
+    def sendToNext(self, generator):
         for strategy in self._sendingStrategies:
             newFragment = strategy.sendFragmenting(self._internalCommunication, 
                                                    self._currentClient.getClientIdBytes(), 
@@ -113,7 +111,7 @@ class Joiner:
         self.handleGamesMessage(self._accumulatedBatches.getGamesBatches())
         self.handleReviewsMessage(self._accumulatedBatches.getReviewsBatches())
 
-        self._handleSending()
+        self.handleSending()
         
         if self._currentClient.isGamesDone():
             self._currentClient.removeUnjoinedReviews()
@@ -124,65 +122,15 @@ class Joiner:
     
     def shouldProcessAccumulated(self):
         return self._accumulatedBatches.accumulatedLen() == PREFETCH_COUNT or self._currentClient.finishedReceiving()
-
-    """keeps the client if there is one, set a new one if there's not"""
-    def setCurrentClient(self, clientId: bytes):
-        if self._currentClient:
-            return
-        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(getClientIdUUID(clientId)))
-
-    """replaces the old client with a new one"""
-    def setNewClient(self, clientId: bytes):
-        self._currentClient = None
-        self.setCurrentClient(clientId)
-   
-    def handleFlushQueuingAndPropagation(self, clientToRemove, tag, channel):
-        if clientToRemove in self._deletedClients:
-            if time.perf_counter() - self._deletedClients[clientToRemove] > DELETE_TIMEOUT:
-                channel.basic_ack(delivery_tag = tag)
-                self._deletedClients.pop(clientToRemove, None)
-                print("finished flush")
-            else: 
-                self._internalCommunication.requeuePacket(tag)
-        else:
-            print(f"registering deleted client {clientToRemove}")
-            self._deletedClients[clientToRemove] = time.perf_counter()
-            self._internalCommunication.requeuePacket(tag)
-            for strategy in self._sendingStrategies:
-                strategy.sendFlush(middleware=self._internalCommunication, clientId=clientToRemove)
     
-    """
-    returns true if it ended flush forever and packet can be safely acked
-    returns false if it should requeue it cause timeout is not done
-    """
-    # TODO stop copy pasting this flush
-    def handleClientFlush(self, clientToRemove, tag, channel):
-        if self._currentClient and clientToRemove == self._currentClient.getClientIdBytes():
-            self._currentClient = None
-        
+    
+    def deleteAccumulated(self, clientToRemove):        
         if self._accumulatedBatches and clientToRemove == self._accumulatedBatches.getClient():
             self._internalCommunication.ackAll(self._accumulatedBatches.toAck())
         self._accumulatedBatches = None
-
-        if clientToRemove in self._activeClients:
-            client = self._activeClients.pop(clientToRemove)
-            client.destroy()
-            
-        self.handleFlushQueuingAndPropagation(clientToRemove, tag, channel)
            
-    def handleDataMessage(self, channel, tag, body):
-        header, batch = self._headerType.deserialize(body)
+    def processDataPacket(self, header, batch, tag, channel):
         clientId = header.getClient()
-        if clientId in self._deletedClients:
-            print("received packet from deleted client lol")
-            channel.basic_ack(delivery_tag=tag)
-            return
-        self.setCurrentClient(clientId)
-        
-        if self._currentClient.isDuplicate(header):
-            channel.basic_ack(delivery_tag=tag)
-            return
-
         if self._accumulatedBatches is None:
             self.setAccumulatedBatches(tag, header, batch)
         elif not self._accumulatedBatches.accumulate(header=header, tag=tag, batch=batch):
@@ -206,11 +154,3 @@ class Joiner:
             logging.info(f'action: finished receiving data from client {clientId}| result: success')
             self._currentClient.destroy()
             self._activeClients.pop(clientId)
-
-    def handleMessage(self, ch, method, _properties, body):
-        msgType, msg = InternalMessageType.deserialize(body)
-        match msgType:
-            case InternalMessageType.DATA_TRANSFER:
-                self.handleDataMessage(channel=ch, tag=method.delivery_tag, body=msg)
-            case InternalMessageType.CLIENT_FLUSH:
-                self.handleClientFlush(clientToRemove=msg, tag=method.delivery_tag, channel=ch)
