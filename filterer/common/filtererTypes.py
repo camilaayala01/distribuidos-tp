@@ -20,13 +20,3 @@ class FiltererType(Enum):
                 return "indie" in entry.getGenres().lower()
             case FiltererType.ACTION:
                 return "action" in entry.getGenres().lower()
-
-    def getResultingHeader(self, header: HeaderInterface, nextNodeName: str) -> EntryInterface:
-        match self:
-            case FiltererType.ENGLISH | FiltererType.ACTION | FiltererType.DECADE:
-                return header
-            case FiltererType.INDIE:
-                if nextNodeName == "FilterDecade":
-                    return Header(_clientId = header.getClient(), _fragment = header.getFragmentNumber(), _eof = header.isEOF())
-                if nextNodeName == "JoinerIndiePositiveReviews":
-                    return header

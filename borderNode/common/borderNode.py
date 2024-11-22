@@ -44,9 +44,7 @@ class BorderNode:
         self._communication.sendInitializer(InternalMessageType.DATA_TRANSFER.serialize() + clientId + msg)
         self.sendAck(clientId, header)
         if header.isLastClientPacket():
-            print("received last packet!")
             self._activeClients.removeClientsFromActive({clientId})
-            # ack before deleting, after sending to initializer.
             # in deletion confirmation packet, ack after checking
     
     def handleEndOfDataTransfer(self, clientId: bytes):

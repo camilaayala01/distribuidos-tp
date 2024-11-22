@@ -251,7 +251,9 @@ def add_filterers_indie(compose: dict[str, Any]):
     return add_depending_count(compose, int(os.getenv('FILT_INDIE_COUNT')), add_filterer, 'indie', os.getenv('FILT_INDIE'), 
                                filterer_type=FiltererType.INDIE.value,
                                next_nodes=f"{os.getenv('FILT_DEC')};{os.getenv('JOIN_INDIE')},{os.getenv('JOIN_INDIE_COUNT')},{ShardingAttribute.APP_ID.value}",
-                               next_entries='EntryNameDateAvgPlaytime;EntryAppIDName',next_headers='Header;', header_type='HeaderWithTable', 
+                               next_entries='EntryNameDateAvgPlaytime;EntryAppIDName',
+                               next_headers='Header;', 
+                               header_type='HeaderWithTable', 
                                entry_type='EntryAppIDNameGenresReleaseDateAvgPlaytime')
     
 def add_filterers_date(compose: dict[str, Any]):

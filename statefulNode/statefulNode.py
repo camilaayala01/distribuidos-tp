@@ -36,7 +36,7 @@ class StatefulNode(ABC):
             if time.perf_counter() - self._deletedClients[clientToRemove] > DELETE_TIMEOUT:
                 channel.basic_ack(delivery_tag = tag)
                 self._deletedClients.pop(clientToRemove, None)
-            else: 
+            else:
                 self._internalCommunication.requeuePacket(tag)
         else:
             self._deletedClients[clientToRemove] = time.perf_counter()
@@ -65,7 +65,6 @@ class StatefulNode(ABC):
         header, batch = self._headerType.deserialize(body)
         clientId = header.getClient()
         if clientId in self._deletedClients:
-            print("received packet from deleted client lol")
             channel.basic_ack(delivery_tag=tag)
             return
         self.setCurrentClient(clientId)
