@@ -60,7 +60,7 @@ class ClientCommunication:
     def sendDataAndWaitForAck(self, fragment, eof, table, data):
         header = ClientHeader(fragment, eof, table)
         self.sendDataToServer(header.serialize() + data)
-        return self.waitForServerAck(header)
+        self.waitForServerAck(header)
 
     def waitForServerAck(self, sentHeader: ClientHeader):
         timeoutCycles = 0

@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from internalCommunication.common.utils import createStrategiesFromNextNodes
@@ -10,7 +11,7 @@ from .sorterTypes import SorterType
 from .activeClient import ActiveClient
 
 PRINT_FREQUENCY=500
-
+DELETE_TIMEOUT = 5
 class Sorter:
     def __init__(self):
         initializeLog()
@@ -21,6 +22,7 @@ class Sorter:
         self._topAmount = int(os.getenv('TOP_AMOUNT')) if os.getenv('TOP_AMOUNT') is not None else None
         self._sendingStrategies = createStrategiesFromNextNodes()
         self._activeClients = {}
+        self._deletedClients = {} # client id: timestamp of the first time flush was seen
         self._currentClient = None
 
     def stop(self, _signum, _frame):
@@ -109,13 +111,19 @@ class Sorter:
                                                                           getClientIdUUID(clientId),
                                                                           self._entryType))
         
-    def handleDataMessage(self, body):
+    def handleDataMessage(self, channel, tag, body):
         header, batch = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
             logging.info(f'action: receive batch | {header} | result: success')
         clientId = header.getClient()
+        if clientId in self._deletedClients:
+            print("received packet from deleted client lol")
+            channel.basic_ack(delivery_tag = tag)
+            return
+        
         self.setCurrentClient(clientId)
         if self._currentClient.isDuplicate(header):
+            channel.basic_ack(delivery_tag = tag)
             return
         
         self._currentClient.update(header)
@@ -123,13 +131,40 @@ class Sorter:
         self.mergeKeepTop(entries)
         self._activeClients[clientId] = self._currentClient
         self._handleSending(clientId)
+        channel.basic_ack(delivery_tag = tag)
+
+    def handleFlushQueuingAndPropagation(self, clientToRemove, tag, channel):
+        if clientToRemove in self._deletedClients:
+            if time.perf_counter() - self._deletedClients[clientToRemove] > DELETE_TIMEOUT:
+                channel.basic_ack(delivery_tag = tag)
+                self._deletedClients.pop(clientToRemove, None)
+            else: 
+                self._internalCommunication.requeuePacket(tag)
+        else:
+            self._deletedClients[clientToRemove] = time.perf_counter()
+            self._internalCommunication.requeuePacket(tag)
+            for strategy in self._sendingStrategies:
+                strategy.sendFlush(middleware=self._internalCommunication, clientId=clientToRemove)
+    
+    """
+    returns true if it ended flush forever and packet can be safely acked
+    returns false if it should requeue it cause timeout is not done
+    """
+    def handleClientFlush(self, clientToRemove, tag, channel):
+        if self._currentClient and clientToRemove == self._currentClient.getClientIdBytes():
+            self._currentClient = None
+
+        if clientToRemove in self._activeClients:
+            client = self._activeClients.pop(clientToRemove)
+            client.destroy()
+            
+        self.handleFlushQueuingAndPropagation(clientToRemove, tag, channel)
 
     def handleMessage(self, ch, method, _properties, body):
         msgType, msg = InternalMessageType.deserialize(body)
         match msgType:
             case InternalMessageType.DATA_TRANSFER:
-                self.handleDataMessage(msg)
+                self.handleDataMessage(channel=ch, tag=method.delivery_tag, body=msg)
             case InternalMessageType.CLIENT_FLUSH:
-                for strategy in self._sendingStrategies:
-                    strategy.sendFlush(middleware=self._internalCommunication, clientId=msg)
-        ch.basic_ack(delivery_tag = method.delivery_tag)
+                self.handleClientFlush(clientToRemove=msg, tag=method.delivery_tag, channel=ch)
+       

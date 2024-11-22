@@ -61,3 +61,6 @@ class InternalCommunication:
     def ackAll(self, deliveryTags):
         for tag in deliveryTags:
             self._channel.basic_ack(delivery_tag=tag)
+
+    def requeuePacket(self, tag):
+        self._channel.basic_nack(delivery_tag=tag, requeue=True)

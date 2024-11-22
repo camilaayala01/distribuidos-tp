@@ -1,6 +1,7 @@
 from collections import defaultdict
 import logging
 import os
+import time
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextEntry, initializeLog
 from entryParsing.entry import EntryInterface
@@ -13,6 +14,7 @@ from .joinerTypes import JoinerType
 
 PRINT_FREQUENCY = 1000
 PREFETCH_COUNT = int(os.getenv('PREFETCH_COUNT'))
+DELETE_TIMEOUT = 5
 
 class Joiner:
     def __init__(self):
@@ -25,6 +27,7 @@ class Joiner:
         self._gamesEntry = getGamesEntryTypeFromEnv()
         self._reviewsEntry = getReviewsEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
+        self._deletedClients = {} # client id: timestamp of the first time flush was seen
         self._activeClients = {}
         self._currentClient = None
         self._accumulatedBatches = None
@@ -132,26 +135,52 @@ class Joiner:
     def setNewClient(self, clientId: bytes):
         self._currentClient = None
         self.setCurrentClient(clientId)
-
-    def handleClientFlush(self, clientToRemove):
+   
+    def handleFlushQueuingAndPropagation(self, clientToRemove, tag, channel):
+        if clientToRemove in self._deletedClients:
+            if time.perf_counter() - self._deletedClients[clientToRemove] > DELETE_TIMEOUT:
+                channel.basic_ack(delivery_tag = tag)
+                self._deletedClients.pop(clientToRemove, None)
+                print("finished flush")
+            else: 
+                self._internalCommunication.requeuePacket(tag)
+        else:
+            print(f"registering deleted client {clientToRemove}")
+            self._deletedClients[clientToRemove] = time.perf_counter()
+            self._internalCommunication.requeuePacket(tag)
+            for strategy in self._sendingStrategies:
+                strategy.sendFlush(middleware=self._internalCommunication, clientId=clientToRemove)
+    
+    """
+    returns true if it ended flush forever and packet can be safely acked
+    returns false if it should requeue it cause timeout is not done
+    """
+    # TODO stop copy pasting this flush
+    def handleClientFlush(self, clientToRemove, tag, channel):
+        if self._currentClient and clientToRemove == self._currentClient.getClientIdBytes():
+            self._currentClient = None
+        
         if self._accumulatedBatches and clientToRemove == self._accumulatedBatches.getClient():
-            # discard all in memory information and ensure it wont come back if it reboots
             self._internalCommunication.ackAll(self._accumulatedBatches.toAck())
         self._accumulatedBatches = None
+
         if clientToRemove in self._activeClients:
             client = self._activeClients.pop(clientToRemove)
             client.destroy()
-
-        for strategy in self._sendingStrategies:
-            strategy.sendFlush(middleware=self._internalCommunication, clientId=clientToRemove)
-
-    def handleDataMessage(self, ch, tag, body):
+            
+        self.handleFlushQueuingAndPropagation(clientToRemove, tag, channel)
+           
+    def handleDataMessage(self, channel, tag, body):
         header, batch = self._headerType.deserialize(body)
         clientId = header.getClient()
+        if clientId in self._deletedClients:
+            print("received packet from deleted client lol")
+            channel.basic_ack(delivery_tag=tag)
+            return
         self.setCurrentClient(clientId)
-
+        
         if self._currentClient.isDuplicate(header):
-            ch.basic_ack(delivery_tag=tag)
+            channel.basic_ack(delivery_tag=tag)
             return
 
         if self._accumulatedBatches is None:
@@ -182,7 +211,6 @@ class Joiner:
         msgType, msg = InternalMessageType.deserialize(body)
         match msgType:
             case InternalMessageType.DATA_TRANSFER:
-                self.handleDataMessage(ch, method.delivery_tag, msg)
+                self.handleDataMessage(channel=ch, tag=method.delivery_tag, body=msg)
             case InternalMessageType.CLIENT_FLUSH:
-                self.handleClientFlush(msg)
-                ch.basic_ack(delivery_tag = method.delivery_tag)
+                self.handleClientFlush(clientToRemove=msg, tag=method.delivery_tag, channel=ch)
