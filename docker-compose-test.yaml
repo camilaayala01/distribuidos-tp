@@ -87,7 +87,7 @@ services:
     - ./entryParsing:/entryParsing
     networks:
     - sa_net
-  grouper-os-counts-0:
+  grouper-os-0:
     build:
       context: ./grouper
       dockerfile: ../rabbitUser.Dockerfile
@@ -106,7 +106,7 @@ services:
     - ./entryParsing:/entryParsing
     networks:
     - sa_net
-  grouper-os-counts-1:
+  grouper-os-1:
     build:
       context: ./grouper
       dockerfile: ../rabbitUser.Dockerfile
@@ -906,8 +906,8 @@ services:
     - initializer-0
     - initializer-1
     - initializer-2
-    - grouper-os-counts-0
-    - grouper-os-counts-1
+    - grouper-os-0
+    - grouper-os-1
     - aggregator-os
     - filterer-indie
     - filterer-date

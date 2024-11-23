@@ -295,7 +295,7 @@ def add_groupers_indie(compose: dict[str, Any]):
                                entry_type='EntryAppID')
 
 def add_groupers_os_count(compose: dict[str, Any]):
-    return add_depending_count(compose, int(os.getenv('GROUP_OS_COUNT')), add_grouper, 'os-counts', os.getenv('GROUP_OS'), 
+    return add_depending_count(compose, int(os.getenv('GROUP_OS_COUNT')), add_grouper, 'os', os.getenv('GROUP_OS'), 
                                grouper_type=GrouperType.OS_COUNT.value,
                                next_nodes=f"{os.getenv('AGGR_OS')}", 
                                header_type='Header', 
