@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 import os
 import time
-from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.utils import initializeLog
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication

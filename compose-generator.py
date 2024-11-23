@@ -187,6 +187,7 @@ def add_aggregator_english(compose: dict[str, Any]):
     container_name = 'aggregator-english'
     compose = default_config_with_tracker(compose, container_name, './aggregator', os.getenv('AGGR_ENG'), 'aggregator',
                                           next_nodes=f"{os.getenv('DISP')}", 
+                                          next_entries="EntryName",
                                           header_type ='HeaderWithSender', 
                                           entry_type='EntryAppIDNameReviewCount', 
                                           aggregator_type=AggregatorTypes.ENGLISH.value,

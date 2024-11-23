@@ -29,15 +29,12 @@ class InternalCommunication:
         self._queue = self._channel.queue_declare(queue=queueName, durable=True)
         self._channel.basic_consume(queue=queueName, on_message_callback=callback, auto_ack=False)
 
-        self._channel.start_consuming()
-        # TODO remove commented code
-        # try:
-        #     self._channel.start_consuming()
-        # except Exception as e:
-        #     print(e)
-        #     logging.info(f'action: gracefully shutting down | result: success')
-        #     self._channel.close()
-        #     self._connection.close()
+        try:
+            self._channel.start_consuming()
+        except OSError:
+            logging.info(f'action: gracefully shutting down | result: success')
+            self._channel.close()
+            self._connection.close()
 
     def stop(self):
         self._channel.stop_consuming()
