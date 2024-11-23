@@ -1,6 +1,6 @@
 import inspect
 from entryParsing.common.fieldLen import BOOLEAN_LEN, CLIENT_ID_LEN, COUNT_LEN
-from entryParsing.common.fieldParsing import serializeBoolean, serializeCount, getClientID
+from entryParsing.common.fieldParsing import serializeBoolean, serializeCount
 
 class HeaderInterface:
     def __init__(self, **kwargs):

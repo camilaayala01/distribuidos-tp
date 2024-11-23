@@ -5,7 +5,7 @@ from packetTracker.tracker import TrackerInterface
 class ActiveClient:
     def __init__(self, clientId, initialResults, tracker: TrackerInterface):
         self._clientId = clientId
-        self._fragment = 1 # persistir :(
+        self._fragment = 1 # TODO persistir :(
         self._tracker = tracker
         self._partialRes = initialResults
         self._folderPath = f"/{os.getenv('LISTENING_QUEUE')}/clientData/"

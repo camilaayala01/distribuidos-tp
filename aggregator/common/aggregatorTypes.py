@@ -6,7 +6,6 @@ from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from entryParsing.common.utils import nextEntry
 from entryParsing.entry import EntryInterface
-from entryParsing.entryName import EntryName
 from entryParsing.entryOSCount import EntryOSCount
 from packetTracker.defaultTracker import DefaultTracker
 from packetTracker.multiTracker import MultiTracker

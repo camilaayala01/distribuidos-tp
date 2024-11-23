@@ -1,13 +1,11 @@
 from collections import defaultdict
 import logging
 import os
-import time
 from entryParsing.common.fieldParsing import getClientIdUUID
-from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextEntry, initializeLog
+from entryParsing.common.headerWithSender import HeaderWithSender
+from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextEntry
 from entryParsing.entry import EntryInterface
-from internalCommunication.common.utils import createStrategiesFromNextNodes
-from internalCommunication.internalCommunication import InternalCommunication
-from internalCommunication.internalMessageType import InternalMessageType
+from eofController.eofController import EofController
 from statefulNode.statefulNode import StatefulNode
 from .accumulatedBatches import AccumulatedBatches
 from .activeClient import ActiveClient
@@ -24,9 +22,18 @@ class Joiner(StatefulNode):
         self._gamesEntry = getGamesEntryTypeFromEnv()
         self._reviewsEntry = getReviewsEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
+        nodeID = os.getenv('NODE_ID')
+        self._id = int(nodeID)
+        self._eofController = EofController(self._id, os.getenv('LISTENING_QUEUE'), int(os.getenv('NODE_COUNT')), self._sendingStrategies)
+        self._eofController.execute()
         self._accumulatedBatches = None
-        self._id = int(os.getenv('NODE_ID'))
-    
+
+    def stop(self, _signum, _frame):
+        for client in self._activeClients.values():
+            client.destroy()
+        self._eofController.terminateProcess(self._internalCommunication)
+        self._internalCommunication.stop()
+        
     """keeps the client if there is one, set a new one if there's not"""
     def setCurrentClient(self, clientId: bytes):
         if self._currentClient:
@@ -98,8 +105,8 @@ class Joiner(StatefulNode):
                                                    self._currentClient.getClientIdBytes(), 
                                                    self._currentClient._fragment, 
                                                    generator, 
-                                                   self._currentClient.finishedReceiving(),
-                                                   _sender = self._id)
+                                                   False,
+                                                   _sender = self._id)._fragment
         self._currentClient._fragment = newFragment
     
     def setAccumulatedBatches(self, tag, header, batch):
@@ -152,5 +159,7 @@ class Joiner(StatefulNode):
 
         if self._currentClient.finishedReceiving():
             logging.info(f'action: finished receiving data from client {clientId}| result: success')
+            self._eofController.finishedProcessing(self._currentClient._fragment, clientId, self._internalCommunication)
             self._currentClient.destroy()
             self._activeClients.pop(clientId)
+

@@ -41,7 +41,6 @@ class BasicSend(SendingStrategy):
         except StopIteration:
             packet = headerType(_clientId=clientId, _fragment=fragment, _eof=hasEOF, **headerExtraArgs).serialize() + currPacket
             self.sendDataBytes(middleware, packet)
-
         return fragment
     
     def sendFlush(self, middleware, clientId):

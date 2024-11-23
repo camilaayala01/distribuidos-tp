@@ -3,7 +3,6 @@ import os
 from common.utils import receiveCSVAnswer, storeResultsQuery1
 from common.clientCommunication import ClientCommunication
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
-from entryParsing.common.messageType import MessageType
 from entryParsing.entryAppIDName import EntryAppIDName
 from entryParsing.entryName import EntryName
 from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime

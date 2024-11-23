@@ -1,6 +1,5 @@
 from entryParsing.common.fieldLen import BOOLEAN_LEN, COUNT_LEN, TABLE_LEN, MESSAGE_TYPE_LEN
 from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, deserializeTable, serializeBoolean, serializeCount, serializeTable
-from entryParsing.common.messageType import MessageType
 from entryParsing.common.table import Table
 
 class ClientHeader:

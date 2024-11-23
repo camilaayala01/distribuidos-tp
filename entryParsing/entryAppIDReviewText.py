@@ -17,7 +17,7 @@ class EntryAppIDReviewText(EntryInterface):
         return appIDBytes + reviewTextBytes
 
     def __str__(self):
-        return f"EntryAppIDReviewText(appID={self._appID}, reviewText={self._reviewText})"
+        return f"appID={self._appID}, reviewText={self._reviewText})"
     
     @classmethod
     def deserialize(cls, data: bytes) -> list['EntryAppIDReviewText']: 
