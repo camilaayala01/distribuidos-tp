@@ -58,17 +58,25 @@ class NextNode:
         else: 
             raise Exception("Next node attributes must be 1 if no sharding, 3 if sharding is desired")
 
-    # NEXTNODE,NEXTNODECOUNT,SHARDINGATTR;NEXTNODE,NEXTNODECOUNT,SHARDINGATTR etc. 
-    # next node count and sharding attributes are optional
+    """
+    nextNodeStr format: NEXTNODE,NEXTNODECOUNT,SHARDINGATTR;...;NEXTNODE,NEXTNODECOUNT,SHARDINGATTR
+    next node count and sharding attributes are optional, only needed if the sending
+    to next layer requires sharding.
+    nextEntries format: ENTRYTYPE_1;....;ENTRYTYPE_N
+    nextHeader format: HEADERTYPE_1;....;HEADERTYPE_N
+    entry types and header types are only required if the type the layer receives differs with the one 
+    they will send to next layer. If there are multiple next nodes, but only one changes the type, you
+    can only specify the one that changes, and leave empty ;'s.
+    """
     @staticmethod
     def parseNodes(nextNodeStr: str, nextEntries: str = '', nextHeaders: str = '') -> list['NextNode']:
-        # manually implement to avoid calling split repeatedly
         tokensNextEntries = re.split(r';', nextEntries)
         tokensNextHeaders = re.split(r';', nextHeaders)
         nextNodes = []
         currNode = 0 # it is equal to len but prettier to use
         currTokens = []
         currTokensIndex = 0
+        # manually implement to avoid calling split repeatedly
         for i in nextNodeStr:
             if i == ',':
                 currTokensIndex += 1

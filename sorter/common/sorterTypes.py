@@ -34,7 +34,6 @@ class SorterType(Enum):
             return topEntries
 
         index = min(topAmount - 1, math.floor((100 - int(os.getenv('PERCENTILE'))) / 100 * topAmount))
-        print(f"top amount is {topAmount}")
         if index < 0:
             index = 0
 
@@ -74,4 +73,3 @@ class SorterType(Enum):
                 return topEntries
             case _:
                 return topEntries
-        

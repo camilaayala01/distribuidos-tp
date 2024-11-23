@@ -53,4 +53,3 @@ class JoinerType(Enum):
                 return self.entriesForEnglish(joinedEntries)
             case _:
                 return self.entriesForIndieAndPercentile(isDone, activeClient)
-    

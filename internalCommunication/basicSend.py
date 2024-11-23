@@ -2,6 +2,7 @@ from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
 from internalCommunication.common.nextNode import NextNode
+from internalCommunication.internalMessageType import InternalMessageType
 from internalCommunication.sendingStrategy import SendingStrategy
 from entryParsing.common.utils import maxDataBytes
 
@@ -12,11 +13,14 @@ class BasicSend(SendingStrategy):
     def sendBytes(self, middleware: InternalCommunication, msg: bytes):
         middleware.basicSend(self._nextNode._queueName, msg)
 
-    def send(self, middleware: InternalCommunication, header: HeaderInterface, batch: list[EntryInterface]):
+    def sendDataBytes(self, middleware: InternalCommunication, msg: bytes):
+        self.sendBytes(middleware, InternalMessageType.DATA_TRANSFER.serialize() + msg)
+
+    def sendData(self, middleware: InternalCommunication, header: HeaderInterface, batch: list[EntryInterface]):
         msg = self._nextNode.headerForNextNode(header).serialize()
         for entry in batch:
             msg += self._nextNode.entryForNextNode(entry).serialize()
-        self.sendBytes(middleware, msg)
+        self.sendDataBytes(middleware, msg)
 
     def sendFragmenting(self, middleware, clientId, fragment, generator, hasEOF: bool = True, **headerExtraArgs):
         headerType = self._nextNode.getHeader()
@@ -32,9 +36,12 @@ class BasicSend(SendingStrategy):
                 else:
                     headerBytes = headerType(_clientId=clientId, _fragment=fragment, _eof=False, **headerExtraArgs).serialize()
                     fragment += 1
-                    self.sendBytes(middleware, headerBytes + currPacket)
+                    self.sendDataBytes(middleware, headerBytes + currPacket)
                     currPacket = entryBytes
         except StopIteration:
             packet = headerType(_clientId=clientId, _fragment=fragment, _eof=hasEOF, **headerExtraArgs).serialize() + currPacket
-            self.sendBytes(middleware, packet)
-            return headerType(_clientId=clientId, _fragment=fragment + 1, _eof=True, **headerExtraArgs)
+            self.sendDataBytes(middleware, packet)
+        return fragment
+    
+    def sendFlush(self, middleware, clientId):
+        self.sendBytes(middleware, InternalMessageType.CLIENT_FLUSH.serialize() + clientId)

@@ -5,17 +5,19 @@ from packetTracker.tracker import TrackerInterface
 class ActiveClient:
     def __init__(self, clientId, initialResults, tracker: TrackerInterface):
         self._clientId = clientId
-        self._fragment = 1 # persistir :(
+        self._fragment = 1 # TODO persistir :(
         self._tracker = tracker
         self._partialRes = initialResults
         self._folderPath = f"/{os.getenv('LISTENING_QUEUE')}/clientData/"
         os.makedirs(self._folderPath, exist_ok=True)
 
-    def isDone(self):
+    def getClientIdBytes(self):
+        return self._clientId.bytes
+        
+    def finishedReceiving(self):
         return self._tracker.isDone()
     
     def destroy(self):
-        self._tracker.destroy()
         if os.path.exists(self.partialResPath() + '.csv'):
             os.remove(self.partialResPath() + '.csv')
 

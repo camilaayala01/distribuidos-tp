@@ -6,7 +6,6 @@ from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from entryParsing.common.utils import nextEntry
 from entryParsing.entry import EntryInterface
-from entryParsing.entryName import EntryName
 from entryParsing.entryOSCount import EntryOSCount
 from packetTracker.defaultTracker import DefaultTracker
 from packetTracker.multiTracker import MultiTracker
@@ -82,14 +81,14 @@ class AggregatorTypes(Enum):
                 priorEntry.addToCount(entry.getCount())
                 entryToWrite = priorEntry
                 if priorEntry.getCount() >= requiredReviews:
-                    toSend.append(EntryName(priorEntry.getName()))
+                    toSend.append(priorEntry)
             
             batch.pop(id, None)
             self.storeEntry(entryToWrite, priorResultsPath)
             
         for remainingEntry in batch.values():
             if remainingEntry.getCount() >= requiredReviews:
-                toSend.append(EntryName(priorEntry.getName()))
+                toSend.append(priorEntry)
             self.storeEntry(remainingEntry, priorResultsPath)
         
         self.saveNewResults(priorResultsPath)
@@ -122,5 +121,3 @@ class AggregatorTypes(Enum):
                 return HeaderWithQueryNumber.fromAnother(header, _queryNumber=int(os.getenv('QUERY_NUMBER')))
             case _:
                 return header
-                
-               

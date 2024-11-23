@@ -1,35 +1,27 @@
 import logging
 import os
+import time
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from eofController.eofController import EofController
-from internalCommunication.common.utils import createStrategiesFromNextNodes
-from internalCommunication.internalCommunication import InternalCommunication
-from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog, nextEntry
+from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, nextEntry
+from statefulNode.statefulNode import StatefulNode
 from .sorterTypes import SorterType
 from .activeClient import ActiveClient
 
 PRINT_FREQUENCY=500
+DELETE_TIMEOUT = 5
 
-class Sorter:
+class Sorter(StatefulNode):
     def __init__(self):
-        initializeLog()
-        self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'), os.getenv('NODE_ID'))
+        super().__init__()
         self._sorterType = SorterType(int(os.getenv('SORTER_TYPE')))
         self._entryType = getEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
         self._topAmount = int(os.getenv('TOP_AMOUNT')) if os.getenv('TOP_AMOUNT') is not None else None
-        self._sendingStrategies = createStrategiesFromNextNodes()
-        self._activeClients = {}
-        self._currentClient = None
         if self._sorterType.requireController():
             self._eofController = EofController(int(os.getenv('NODE_ID')), os.getenv('LISTENING_QUEUE'), int(os.getenv('NODE_COUNT')), self._sendingStrategies)
             self._eofController.execute()
-
-    def stop(self, _signum, _frame):
-        if self._sorterType.requireController():
-            self._eofController.terminateProcess(self._internalCommunication)
-        self._internalCommunication.stop()
 
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
@@ -91,22 +83,22 @@ class Sorter:
         
         self._currentClient.saveNewTop(savedAmount)
 
-    def _sendToNext(self, generator):
+    def sendToNext(self, generator):
         extraParamsForHeader = self._sorterType.extraParamsForHeader()
-        eofs = []
+        fragment = 1
         for strategy in self._sendingStrategies:
-            eofs.append(strategy.sendFragmenting(self._internalCommunication, self._currentClient.getClientIdBytes(), 1, generator, not self._sorterType.requireController(), **extraParamsForHeader).serialize())
-        return eofs
+            fragment = strategy.sendFragmenting(self._internalCommunication, self._currentClient.getClientIdBytes(), 1, generator, not self._sorterType.requireController(), **extraParamsForHeader)
+        return fragment
 
-    def _handleSending(self, clientId: bytes):
+    def handleSending(self, clientId: bytes):
         if not self._currentClient.isDone():
             return
         logging.info(f'action: received all required batches | result: success')
         topGenerator, topAmount = self._currentClient.getResults()
         topGenerator = self._sorterType.preprocessPackets(topGenerator, topAmount)
-        eofs = self._sendToNext(topGenerator)
+        fragment = self.sendToNext(topGenerator)
         if self._sorterType.requireController():
-            self._eofController.finishedProcessing(eofs, clientId, self._internalCommunication)
+            self._eofController.finishedProcessing(fragment, clientId, self._internalCommunication)
         self._activeClients.pop(clientId)
     
     def setCurrentClient(self, clientId: bytes):
@@ -115,20 +107,11 @@ class Sorter:
                                                                           getClientIdUUID(clientId),
                                                                           self._entryType))
         
-    def handleMessage(self, ch, method, _properties, body):
-        header, batch = self._headerType.deserialize(body)
-        if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
-            logging.info(f'action: receive batch | {header} | result: success')
-        clientId = header.getClient()
-        self.setCurrentClient(clientId)
-        if self._currentClient.isDuplicate(header):
-            ch.basic_ack(delivery_tag = method.delivery_tag)
-            return
-        
+    def processDataPacket(self, header, batch, tag, channel):
+        clientId = header.getClient() 
         self._currentClient.update(header)
         entries = self._entryType.deserialize(batch)
         self.mergeKeepTop(entries)
         self._activeClients[clientId] = self._currentClient
-        self._handleSending(clientId)
-        ch.basic_ack(delivery_tag = method.delivery_tag)
-
+        self.handleSending(clientId)
+        channel.basic_ack(delivery_tag = tag)

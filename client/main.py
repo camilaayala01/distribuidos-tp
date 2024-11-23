@@ -17,9 +17,7 @@ def main():
     for i in range(int(os.getenv("AMOUNT_OF_EXECUTIONS"))):
         logging.info(f'action: starting execution number {i + 1} | result: success')
         
-        client.sendTable(loadGames, Table.GAMES)
-        client.sendTable(loadReviews, Table.REVIEWS)
-
+        client.sendTables(loadGames, loadReviews)
         if client.isRunning():
             logging.info(f'action: wait for responses | result: success | msg: finalized data sending')
             client.waitForResponses()

@@ -5,7 +5,9 @@ from entryParsing.reviewEntry import ReviewEntry
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, initializeLog
 import os
 
-PRINT_FREQUENCY = 5000
+from internalCommunication.internalMessageType import InternalMessageType
+
+PRINT_FREQUENCY = 300
 
 class Initializer:
     def __init__(self): 
@@ -30,7 +32,7 @@ class Initializer:
                 negativeReviewEntries.append(entry)
         return positiveReviewEntries, negativeReviewEntries
 
-    def handleMessage(self, ch, method, _properties, body):
+    def handleDataMessage(self, body):
         header, data = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
             logging.info(f'action: received msg corresponding to table {header.getTable()} | {header}')
@@ -38,20 +40,26 @@ class Initializer:
         if header.isGamesTable():
             gameEntries = self._gamesEntry.deserialize(data)
             for index, strategy in enumerate(self._gamesSendingStrategies):
-                strategy.send(self._internalCommunication, header, gameEntries)
-
-            ch.basic_ack(delivery_tag = method.delivery_tag)
-
+                strategy.sendData(self._internalCommunication, header, gameEntries)
         elif header.isReviewsTable():
             reviewEntries = self._reviewsEntry.deserialize(data)
             positiveReviewEntries, negativeReviewEntries = self.separatePositiveAndNegative(reviewEntries)
             toSend = [positiveReviewEntries, negativeReviewEntries, negativeReviewEntries]
             for index, strategy in enumerate(self._reviewsSendingStrategies):
-                strategy.send(self._internalCommunication, header, toSend[index])
-            ch.basic_ack(delivery_tag = method.delivery_tag)
-
+                strategy.sendData(self._internalCommunication, header, toSend[index])
         else:
-            raise ValueError()
+            raise ValueError("Table is not one of the two allowed tables")
+        
+    def handleMessage(self, ch, method, _properties, body):
+        msgType, msg = InternalMessageType.deserialize(body)
+        match msgType:
+            case InternalMessageType.DATA_TRANSFER:
+                self.handleDataMessage(msg)
+            case InternalMessageType.CLIENT_FLUSH:
+                # only to games receivers, as they all end up in the same place -> a joiner
+                for strategy in self._gamesSendingStrategies:
+                    strategy.sendFlush(middleware=self._internalCommunication, clientId=msg)
+        ch.basic_ack(delivery_tag = method.delivery_tag)
 
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)

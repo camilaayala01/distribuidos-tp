@@ -1,7 +1,5 @@
 from enum import Enum
-
 from entryParsing.common.fieldParsing import deserializeNumber, getClientID, serializeNumber
-
 
 class EOFControlMessageType(Enum):
     EOF = 0

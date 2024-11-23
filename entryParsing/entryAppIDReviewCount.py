@@ -22,7 +22,7 @@ class EntryAppIDReviewCount(EntryInterface):
         return appIDBytes + countBytes
 
     def __str__(self):
-        return f"EntryAppIDReviewCount(appID={self._appID}, count={self._reviewCount})"
+        return f"appID={self._appID}, count={self._reviewCount})"
 
     @classmethod
     def deserialize(cls, data: bytes): 

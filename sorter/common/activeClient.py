@@ -1,5 +1,6 @@
 import csv
 import os
+import shutil
 from uuid import UUID
 from entryParsing.common.header import Header
 from entryParsing.entry import EntryInterface
@@ -13,6 +14,10 @@ class ActiveClient:
         self._savedEntries = 0
         self._folderPath = f"/{os.getenv('LISTENING_QUEUE')}/clientData/"
         os.makedirs(self._folderPath, exist_ok=True)
+
+    def destroy(self):
+        if os.path.exists(self._folderPath):
+            shutil.rmtree(self._folderPath)
 
     def getClientIdBytes(self):
         return self._clientId.bytes
@@ -43,11 +48,7 @@ class ActiveClient:
         with open(filepath, 'r') as file:
             reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
             for row in reader:
-                try:
-                    yield self._entryType.fromArgs(row)
-                except Exception as e:
-                    print("exception", e)
-                    print(row)
+                yield self._entryType.fromArgs(row)
 
     def saveNewTop(self, savedAmount: int):
         self._savedEntries = savedAmount

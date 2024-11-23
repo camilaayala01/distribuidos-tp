@@ -31,8 +31,7 @@ class InternalCommunication:
 
         try:
             self._channel.start_consuming()
-        except OSError as e:
-            print(e)
+        except OSError:
             logging.info(f'action: gracefully shutting down | result: success')
             self._channel.close()
             self._connection.close()
@@ -56,9 +55,9 @@ class InternalCommunication:
     def sendToInitializer(self, message: bytes):
         self.basicSend(os.getenv('INIT'), message)
     
-    def isQueueEmpty(self):
-        return self._queue.method.message_count == 0
-    
     def ackAll(self, deliveryTags):
         for tag in deliveryTags:
             self._channel.basic_ack(delivery_tag=tag)
+
+    def requeuePacket(self, tag):
+        self._channel.basic_nack(delivery_tag=tag, requeue=True)

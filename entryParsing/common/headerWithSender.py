@@ -1,6 +1,5 @@
 from entryParsing.common.fieldParsing import deserializeBoolean, deserializeCount, deserializeSenderID, serializeSenderID, getClientID
 from entryParsing.common.fieldLen import SENDER_ID_LEN
-from entryParsing.common.header import Header
 from entryParsing.common.headerInterface import HeaderInterface
 
 class HeaderWithSender(HeaderInterface):

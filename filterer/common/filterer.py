@@ -2,6 +2,7 @@ import os
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
 from internalCommunication.common.utils import createStrategiesFromNextNodes
+from internalCommunication.internalMessageType import InternalMessageType
 from .filtererTypes import FiltererType
 from internalCommunication.internalCommunication import InternalCommunication
 import logging
@@ -20,20 +21,29 @@ class Filterer:
 
     def _sendToNext(self, header: HeaderInterface, batch: list[EntryInterface]):
         for strategy in self._sendingStrategies:
-            strategy.send(self._internalCommunication, header, batch)
+            strategy.sendData(self._internalCommunication, header, batch)
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
 
-    def handleMessage(self, ch, method, _properties, body):
+    def handleDataMessage(self, body):
         header, data = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0 | header.isEOF():
             logging.info(f'action: received batch | {header} | result: success')
         entries = self._entryType.deserialize(data)
         filteredEntries = self.filterBatch(entries)
         self._sendToNext(header, filteredEntries)
-        ch.basic_ack(delivery_tag = method.delivery_tag)
     
+    def handleMessage(self, ch, method, _properties, body):
+        msgType, msg = InternalMessageType.deserialize(body)
+        match msgType:
+            case InternalMessageType.DATA_TRANSFER:
+                self.handleDataMessage(msg)
+            case InternalMessageType.CLIENT_FLUSH:
+                for strategy in self._sendingStrategies:
+                    strategy.sendFlush(middleware=self._internalCommunication, clientId=msg)
+        ch.basic_ack(delivery_tag = method.delivery_tag)
+
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 

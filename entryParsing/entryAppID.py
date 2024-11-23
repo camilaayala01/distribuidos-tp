@@ -9,7 +9,7 @@ class EntryAppID(EntryInterface):
         return serializeAppID(self._appID)
 
     def __str__(self):
-        return f"EntryAppID(appID={self._appID})"
+        return f"AppID:{self._appID})"
     
     @classmethod
     def deserialize(cls, data: bytes): 

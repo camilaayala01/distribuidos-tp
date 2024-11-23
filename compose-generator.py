@@ -116,7 +116,12 @@ def default_config(compose: dict[str, Any], container_name, entrypoint, queue, p
     
 def default_config_with_tracker(compose: dict[str, Any], container_name, entrypoint, queue, node_type, prefetch_count: int=1, **kwargs):
     compose = default_config(compose, container_name, entrypoint, queue, prefetch_count, **kwargs)
-    compose['services'][container_name]['volumes'].extend(['./packetTracker:/packetTracker', stateful_volumes(node_type, queue, kwargs.get('node_id')), './eofController:/eofController'])
+    compose['services'][container_name]['volumes'].extend([
+        './packetTracker:/packetTracker', 
+        './statefulNode:/statefulNode',
+        './eofController:/eofController',
+        stateful_volumes(node_type, queue, kwargs.get('node_id'))
+    ])
     return compose
 
 def add_initializer(compose: dict[str, Any], id):
@@ -183,6 +188,7 @@ def add_aggregator_english(compose: dict[str, Any]):
     container_name = 'aggregator-english'
     compose = default_config_with_tracker(compose, container_name, './aggregator', os.getenv('AGGR_ENG'), 'aggregator',
                                           next_nodes=f"{os.getenv('DISP')}", 
+                                          next_entries="EntryName",
                                           header_type ='HeaderWithSender', 
                                           entry_type='EntryAppIDNameReviewCount', 
                                           aggregator_type=AggregatorTypes.ENGLISH.value,
@@ -210,12 +216,15 @@ def add_border_node(compose: dict[str, Any], cluster_nodes):
         },
         'environment':[
             'PYTHONUNBUFFERED=1',
-            'PREFETCH_COUNT=1'
+            'PREFETCH_COUNT=1',
+            'STORAGE_PATH=/data/',
+            f'LISTENING_QUEUE={os.getenv("DISP")}'
         ],
         'env_file': default_env_file(),
         'volumes':[
         './internalCommunication:/internalCommunication',
-        './entryParsing:/entryParsing'
+        './entryParsing:/entryParsing',
+        './borderNode/data:/data'
         ],
         'networks': default_network(),
         'depends_on': cluster_nodes
@@ -244,7 +253,9 @@ def add_filterers_indie(compose: dict[str, Any]):
     return add_depending_count(compose, int(os.getenv('FILT_INDIE_COUNT')), add_filterer, 'indie', os.getenv('FILT_INDIE'), 
                                filterer_type=FiltererType.INDIE.value,
                                next_nodes=f"{os.getenv('FILT_DEC')};{os.getenv('JOIN_INDIE')},{os.getenv('JOIN_INDIE_COUNT')},{ShardingAttribute.APP_ID.value}",
-                               next_entries='EntryNameDateAvgPlaytime;EntryAppIDName',next_headers='Header;', header_type='HeaderWithTable', 
+                               next_entries='EntryNameDateAvgPlaytime;EntryAppIDName',
+                               next_headers='Header;', 
+                               header_type='HeaderWithTable', 
                                entry_type='EntryAppIDNameGenresReleaseDateAvgPlaytime')
     
 def add_filterers_date(compose: dict[str, Any]):
@@ -285,7 +296,7 @@ def add_groupers_indie(compose: dict[str, Any]):
                                entry_type='EntryAppID')
 
 def add_groupers_os_count(compose: dict[str, Any]):
-    return add_depending_count(compose, int(os.getenv('GROUP_OS_COUNT')), add_grouper, 'os-counts', os.getenv('GROUP_OS'), 
+    return add_depending_count(compose, int(os.getenv('GROUP_OS_COUNT')), add_grouper, 'os', os.getenv('GROUP_OS'), 
                                grouper_type=GrouperType.OS_COUNT.value,
                                next_nodes=f"{os.getenv('AGGR_OS')}", 
                                header_type='Header', 
