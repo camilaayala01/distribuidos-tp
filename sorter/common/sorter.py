@@ -87,7 +87,7 @@ class Sorter(StatefulNode):
         extraParamsForHeader = self._sorterType.extraParamsForHeader()
         fragment = 1
         for strategy in self._sendingStrategies:
-            fragment = strategy.sendFragmenting(self._internalCommunication, self._currentClient.getClientIdBytes(), 1, generator, not self._sorterType.requireController(), **extraParamsForHeader).serialize()
+            fragment = strategy.sendFragmenting(self._internalCommunication, self._currentClient.getClientIdBytes(), 1, generator, not self._sorterType.requireController(), **extraParamsForHeader)
         return fragment
 
     def handleSending(self, clientId: bytes):

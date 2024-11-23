@@ -106,7 +106,7 @@ class Joiner(StatefulNode):
                                                    self._currentClient._fragment, 
                                                    generator, 
                                                    False,
-                                                   _sender = self._id)._fragment
+                                                   _sender = self._id)
         self._currentClient._fragment = newFragment
     
     def setAccumulatedBatches(self, tag, header, batch):
