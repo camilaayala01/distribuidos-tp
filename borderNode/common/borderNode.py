@@ -39,11 +39,10 @@ class BorderNode:
         self.sendAck(clientId, header)
         if header.isLastClientPacket():
             self._activeClients.removeClientsFromActive({clientId})
-            # in deletion confirmation packet, ack after checking
     
     def handleEndOfDataTransfer(self, clientId: bytes):
         self._activeClients.removeClientsFromActive({clientId})
-        # TODO send ack
+        # TODO send ack exactly here
     
     def handleClientMessage(self, clientId: bytes, data: bytes):
         try:
@@ -76,20 +75,6 @@ class BorderNode:
             id, data = received
             self.handleClientMessage(id, data)
         self._communication.closeClientSocket()
-
-    # establecer timer que salte cada equis cantidad de tiempo y revise los ultimos timestamps
-    # me olvido de toda esta parte del monitor, y cuando ese timer salta, desconecto a todos
-    # los q no me mandaron nada: quizas puedo avisarles pero meh. 
-    # Para los clientes a los que le acabo d asignar un ID, guardo el timestamp del heartbeat 
-    # (posterior al store en disco, o incluso al envio del cliente). 
-    # los active clients dejan de ser active clients, deberian ser tipo sender clients o alguna
-    # re pelotudez asi, tipo los clients q están mandando información. cuando les tengo q mandar 
-    # yo, ya no es mi problema guardar que estaba activo.
-    # 
-    # lo unico persistente en disco son los ids d clientes: los borro de active cuando me llega
-    # el eof de reviews
-    # vamos a seguir teniendo q hacer stop and wait, primero x esto del eof y segundo x si se 
-    # cae el border
 
     def dispatchResponses(self):
         self._communication.executeDispatcher()
