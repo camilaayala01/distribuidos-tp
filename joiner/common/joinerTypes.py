@@ -3,29 +3,28 @@ from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
 from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
 
 class JoinerType(Enum):
-    PERCENTILE = 0
-    INDIE = 1
-    ENGLISH = 2
+    REGULAR = 0
+    ENGLISH = 1
                 
     def joinedEntryType(self):
         match self:
             case JoinerType.ENGLISH:
                 return EntryAppIDNameReviewText
-            case _:
+            case JoinerType.REGULAR:
                 return EntryAppIDNameReviewCount
 
     def defaultEntry(self, name: str, appID: str):
         match self:
             case JoinerType.ENGLISH:
                 return []
-            case _:
+            case JoinerType.REGULAR:
                 return EntryAppIDNameReviewCount(_appID=appID, _name=name, _reviewCount=0)
             
     def applyJoining(self, id, name, priorJoined, review):
         match self:
             case JoinerType.ENGLISH:
                 priorJoined.append(EntryAppIDNameReviewText(id, name, review.getReviewText()))
-            case _:
+            case JoinerType.REGULAR:
                 priorJoined.addToCount(review.getCount()) 
         return priorJoined
     
@@ -35,7 +34,7 @@ class JoinerType(Enum):
             return None
         return iter(joinedEntries)
     
-    def entriesForIndieAndPercentile(self, isDone, activeClient):
+    def entriesForRegularJoiner(self, isDone, activeClient):
         if not isDone:
             return None
         return activeClient.loadJoinedEntries(self.joinedEntryType())
@@ -44,12 +43,12 @@ class JoinerType(Enum):
         match self:
             case JoinerType.ENGLISH:
                 return 
-            case _:
+            case JoinerType.REGULAR:
                 activeClient.storeJoinedEntries(joinedEntries, self.joinedEntryType())
 
     def entriesToSend(self, joinedEntries, isDone, activeClient): 
         match self:
             case JoinerType.ENGLISH:
                 return self.entriesForEnglish(joinedEntries)
-            case _:
-                return self.entriesForIndieAndPercentile(isDone, activeClient)
+            case JoinerType.REGULAR:
+                return self.entriesForRegularJoiner(isDone, activeClient)
