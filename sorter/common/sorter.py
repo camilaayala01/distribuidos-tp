@@ -1,6 +1,5 @@
 import logging
 import os
-import time
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from eofController.eofController import EofController

@@ -1,7 +1,5 @@
 from enum import Enum
 from py3langid.langid import classify
-from entryParsing.common.header import Header
-from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
 
 class FiltererType(Enum):

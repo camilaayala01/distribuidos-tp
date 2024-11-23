@@ -1,5 +1,3 @@
-import os
-import shutil
 from entryParsing.common.header import Header
 from packetTracker.tracker import TrackerInterface
 

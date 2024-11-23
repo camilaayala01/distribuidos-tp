@@ -1,8 +1,6 @@
 import os
 import threading
 import time
-
-from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.utils import copyFile
 
 class ActiveClients:
