@@ -58,7 +58,8 @@ def add_network(compose: dict[str, Any]):
 def default_volumes():
     return [
             './internalCommunication:/internalCommunication',
-            './entryParsing:/entryParsing'
+            './entryParsing:/entryParsing',
+            './healthcheckAnswerController:/healthcheckAnswerController'
     ]
 
 def stateful_volumes(node_type, queue, node_id: str=None):
@@ -224,6 +225,7 @@ def add_border_node(compose: dict[str, Any], cluster_nodes):
         'volumes':[
         './internalCommunication:/internalCommunication',
         './entryParsing:/entryParsing',
+        './healthcheckAnswerController:/healthcheckAnswerController',
         './borderNode/data:/data'
         ],
         'networks': default_network(),
@@ -417,6 +419,33 @@ def add_joiner_action_english(compose: dict[str, Any]):
         containers.append(new_container)
     return compose, containers
 
+def add_monitor(compose: dict[str, Any], cluster_nodes, id):
+    compose['services'][f'monitor-{id}']= {
+        'build': {
+            'context': './monitor',
+            'dockerfile': '../zmqUser.Dockerfile'
+        },
+        'environment':[
+            'PYTHONUNBUFFERED=1',
+            'PREFETCH_COUNT=1',
+            f'TO_CHECK={';'.join(cluster_nodes)}'
+        ],
+        'env_file': default_env_file(),
+        'volumes':[
+        './internalCommunication:/internalCommunication',
+        './entryParsing:/entryParsing'
+        ],
+        'networks': default_network(),
+        'depends_on': cluster_nodes
+    }
+    return compose
+
+def add_all_monitors(compose: dict[str, Any], cluster_nodes):
+    monitors_amount = 4
+    for id in range(1, monitors_amount + 1):
+        compose = add_monitor(compose, cluster_nodes, id)
+    return compose
+
 def add_container(compose, containers, generation):
     compose, new_containers = generation(compose)
     containers.extend(new_containers)
@@ -476,6 +505,9 @@ def generate_compose(output_file: str, client_number: int):
 
     # Border Node
     compose = add_border_node(compose, cluster_nodes=containers)
+
+    # Monitors
+    compose = add_all_monitors(compose, cluster_nodes=containers)
 
     with open(output_file, 'w') as file:
         yaml.dump(compose, file,sort_keys=False, default_flow_style=False)
