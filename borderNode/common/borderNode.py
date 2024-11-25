@@ -3,6 +3,8 @@ import threading
 import time
 import uuid
 
+from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
+
 from .activeClients import ActiveClients
 from entryParsing.common.clientHeader import ClientHeader
 from entryParsing.common.messageType import MessageType
@@ -16,10 +18,13 @@ class BorderNode:
         # only one thread will actually change it, but just in case
         self._timeLock = threading.Lock()
         self._currentTimer = time.perf_counter()
+        self._healthcheckAnswerController = HealthcheckAnswerController()
+        self._healthcheckAnswerController.execute()      
     
     def stop(self, _signum, _):
         self._communication.stop()
         self._activeClients.removeClientFiles()
+        self._healthcheckAnswerController.stop()
 
     def handleHandshake(self, clientId: bytes):
         assignedId = uuid.uuid4().bytes

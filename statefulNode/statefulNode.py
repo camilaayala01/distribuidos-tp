@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import os
 import time
 from entryParsing.common.utils import initializeLog
+from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
 from internalCommunication.internalMessageType import InternalMessageType
@@ -17,11 +18,14 @@ class StatefulNode(ABC):
         self._deletedClients = {} # client id: timestamp of the first time flush was seen
         self._activeClients = {}
         self._currentClient = None
+        self._healthcheckAnswerController = HealthcheckAnswerController()
+        self._healthcheckAnswerController.execute()      
         
     def stop(self, _signum, _frame):
         for client in self._activeClients.values():
             client.destroy()
         self._internalCommunication.stop()
+        self._healthcheckAnswerController.stop()
         
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
