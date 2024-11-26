@@ -132,7 +132,7 @@ class Joiner(StatefulNode):
     def deleteAccumulated(self, clientToRemove):        
         if self._accumulatedBatches and clientToRemove == self._accumulatedBatches.getClient():
             self._internalCommunication.ackAll(self._accumulatedBatches.toAck())
-        self._accumulatedBatches = None
+            self._accumulatedBatches = None
            
     def processDataPacket(self, header, batch, tag, channel):
         clientId = header.getClient()

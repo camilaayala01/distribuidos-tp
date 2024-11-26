@@ -51,6 +51,7 @@ class StatefulNode(ABC):
             self._currentClient = None
         self.deleteAccumulated(clientToRemove)
         if clientToRemove in self._activeClients:
+            print("removed client", clientToRemove)
             client = self._activeClients.pop(clientToRemove)
             client.destroy()
             

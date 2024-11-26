@@ -5,14 +5,14 @@ import zmq
 from entryParsing.common.messageType import MessageType
 from entryParsing.common.table import Table
 
-MAX_TIMEOUTS = 3
+MAX_TIMEOUTS = 5
 class ClientCommunication:
     def __init__(self):
         self._context = zmq.Context()
         socketaddr = "tcp://border-node:%s" % "5556" # TODO: SACAR HARDCODEO
         id, socket  = ClientCommunication.manageHandshake(self._context, socketaddr)
         socket.setsockopt(zmq.IDENTITY, id)
-        socket.setsockopt(zmq.RCVTIMEO, 500) # TODO: SACAR HARDCODEO
+        socket.setsockopt(zmq.RCVTIMEO, 1000) # TODO: SACAR HARDCODEO
         socket.connect(socketaddr) 
         self._socket = socket
         self._responsesObtained = []
