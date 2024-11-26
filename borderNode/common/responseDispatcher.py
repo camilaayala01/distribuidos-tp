@@ -28,13 +28,14 @@ class ResponseDispatcher:
 
     def handleMessage(self, ch, method, _properties, body):
         if self._stopEvent.is_set():
+            print("stopped")
             self.stop()
         msgType, msg = InternalMessageType.deserialize(body)
         match msgType:
             case InternalMessageType.DATA_TRANSFER:
                 self.sendQueryToClient(msg)
             case InternalMessageType.CLIENT_FLUSH:
-                return
+                pass
             case InternalMessageType.SHUTDOWN:
                 self.stop()
         ch.basic_ack(delivery_tag = method.delivery_tag)
