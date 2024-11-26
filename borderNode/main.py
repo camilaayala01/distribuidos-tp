@@ -10,12 +10,12 @@ def main():
     borderCommunication = BorderNodeCommunication()
     accepter = ClientAccepter(borderCommunication, stopEvent)
     dispatcher = ResponseDispatcher(borderCommunication, stopEvent)
-    signal.signal(signal.SIGTERM, dispatcher.stop)
+    signal.signal(signal.SIGTERM, accepter.stop)
     signal.signal(signal.SIGALRM, accepter.handleTimeoutSignal)
     signal.setitimer(signal.ITIMER_REAL, 2, 2)
-    thread = Thread(target=accepter.listenForClient, args=())
+    thread = Thread(target=dispatcher.execute, args=())
     thread.start()
-    dispatcher.execute()
+    accepter.listenForClient()
     thread.join()
     
 if __name__ == "__main__":

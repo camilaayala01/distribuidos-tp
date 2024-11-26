@@ -54,6 +54,9 @@ class InternalCommunication:
 
     def sendToInitializer(self, message: bytes):
         self.basicSend(os.getenv('INIT'), message)
+
+    def sendToDispatcher(self, message: bytes):
+        self.basicSend(os.getenv('DISP'), message)
     
     def ackAll(self, deliveryTags):
         for tag in deliveryTags:

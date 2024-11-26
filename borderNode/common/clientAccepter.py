@@ -2,6 +2,8 @@ import threading
 import time
 import uuid
 
+import zmq
+
 from internalCommunication.internalCommunication import InternalCommunication
 
 from .activeClients import ActiveClients
@@ -21,7 +23,10 @@ class ClientAccepter:
         self._stopEvent = stopEvent
 
     def stop(self, _signum, _):
+        self._stopEvent.set()
+        self._internalCommunication.sendToDispatcher(InternalMessageType.SHUTDOWN.serialize())
         self._activeClients.removeClientFiles()
+        self._clientCommunication.stop()
         self._internalCommunication.stop()
 
     def handleHandshake(self, clientId: bytes):
@@ -72,9 +77,14 @@ class ClientAccepter:
 
     def listenForClient(self):
         while not self._stopEvent.is_set():
-            received = self._clientCommunication.receiveFromClient()
-            if received is None:
-                continue
-            id, data = received
-            self.handleClientMessage(id, data)
+            try:
+                received = self._clientCommunication.receiveFromClient()
+                if received is None:
+                    continue
+                id, data = received
+                self.handleClientMessage(id, data)
+            except zmq.error.ZMQError:
+                if self._stopEvent.is_set():
+                    return
+                break
         self.stop()

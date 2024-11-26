@@ -18,23 +18,23 @@ class ResponseDispatcher:
     
     def stop(self):
         self._internalCommunication.stop()
-        self._stopEvent.set()
-        self._communication.stop()
 
     def sendQueryToClient(self, body):
         if self._stopEvent.is_set():
-            return
+            self.stop()
         header, _ = HeaderWithQueryNumber.deserialize(body)
         self._communication.sendToClient(clientId=header.getClient(), data=MessageType.QUERY_RESPONSE.serialize() + body)
         logging.info(f'action: sending query info to client | result: success')
 
     def handleMessage(self, ch, method, _properties, body):
         if self._stopEvent.is_set():
-            return
+            self.stop()
         msgType, msg = InternalMessageType.deserialize(body)
         match msgType:
             case InternalMessageType.DATA_TRANSFER:
                 self.sendQueryToClient(msg)
             case InternalMessageType.CLIENT_FLUSH:
                 logging.info(f'action: receive client flush | client id: {msg}')
+            case InternalMessageType.SHUTDOWN:
+                self.stop()
         ch.basic_ack(delivery_tag = method.delivery_tag)
