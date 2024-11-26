@@ -7,15 +7,16 @@ from election.election import ElectionHandler
 from utils import container, getSocket, monitorName, sendall
 from status import Status
 from messages import HeartbeatMessage
+import time
 
 class Monitor:
     def __init__(self):
         self._running = True
         self._id = int(os.getenv('ID'))
         self._electionHandler = ElectionHandler()
-        self._nodesToCheck = set(re.split(r';', os.getenv('TO_CHECK')) if os.getenv('TO_CHECK') else [])
-        self._monitorsToCheck = set([id for id in range(1, int(os.getenv('MONITOR_COUNT')) + 1) if id != self._id])
-        self._toCheck = set(map(lambda m: monitorName(m) ,self._monitorsToCheck)).union(self._nodesToCheck)
+        nodesToCheck = set(re.split(r';', os.getenv('TO_CHECK')) if os.getenv('TO_CHECK') else [])
+        monitorsToCheck = set([id for id in range(1, int(os.getenv('MONITOR_COUNT')) + 1) if id != self._id])
+        self._toCheck = set(map(lambda m: monitorName(m), monitorsToCheck)).union(nodesToCheck)
         self._timeout = int(os.getenv('TIMEOUT'))
         self._healthcheckPort = int(os.getenv('HEALTHCHECK_PORT'))
         self._pendingLock = Lock()
@@ -61,8 +62,8 @@ class Monitor:
             return
         match self._electionHandler.iAmLeader():
             case True:
-                self.sendHealthcheck()
                 self.checkForDeadNodes()
+                self.sendHealthcheck()
             case False:
                 self.checkLeader()
     
@@ -71,10 +72,7 @@ class Monitor:
         for id in self._toCheck:
             if not self._electionHandler.iAmLeader():
                 break
-            try:
-                sendall(HeartbeatMessage.CHECK.serialize(monitorName(self._id)), (id, self._healthcheckPort), sock)  
-            except socket.gaierror:
-                pass
+            sendall(HeartbeatMessage.CHECK.serialize(monitorName(self._id)), (id, self._healthcheckPort), sock)   
             with self._pendingLock:
                 self._pending[id].update()
 

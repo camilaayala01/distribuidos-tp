@@ -1,8 +1,7 @@
 import os
 import socket
 from threading import Lock, Semaphore
-import threading
-from election.messages import ElectionMessage
+from .messages import ElectionMessage
 from utils import monitorName
 
 PORT = int(os.getenv('ELECTION_PORT'))
@@ -44,6 +43,7 @@ class ElectionHandler:
     def waitForNewLeader(self): 
         try:
             self._leaderSemaphore.acquire(timeout=self._timeout)
+            print("leaving semaphore")
         except TimeoutError:
             self.startElection()
 
@@ -63,8 +63,9 @@ class ElectionHandler:
                 s.close()
             
     def declareAsLeader(self):
+        print("i am leader")
         self._leader = self._id
-        self.resolveElection() 
+        self.resolveElection()
     
     def listenForElection(self): 
         print("escuchando por election")
@@ -74,7 +75,7 @@ class ElectionHandler:
         listeningSock.listen(5)
         while self.isRunning():
             try:
-                (sock, _) = listeningSock.accept()
+                (sock, addr) = listeningSock.accept()
                 data = sock.recv(1024)
                 msg, sender = ElectionMessage.deserialize(data)
                 match msg:

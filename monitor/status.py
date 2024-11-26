@@ -4,6 +4,7 @@ class Status:
     def __init__(self):
         self._retries = 0
         self._maxRetries = int(os.getenv('RETRIES'))
+        
     def __repr__(self):
         return f'retries:{self._retries} / {self._maxRetries}'
         
