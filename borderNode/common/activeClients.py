@@ -1,18 +1,40 @@
 import os
 import threading
 import time
+from uuid import UUID
+from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.utils import copyFile
+
+UUID_LEN = 36
 
 class ActiveClients:
     def __init__(self):
         folderPath = os.getenv('STORAGE_PATH')
         os.makedirs(folderPath, exist_ok=True)
         self._storagePath = folderPath + 'activeClients'
-        self._clientsFileLock = threading.Lock()
-
+        # key=clientID bytes, value=time of the last message client sent
+        self._clientMonitor = self.loadState()
         self._clientsMonitorLock = threading.Lock()
-        # key=clientID, value=time of the last message client sent
-        self._clientMonitor = {}
+        self._clientsFileLock = threading.Lock()
+        
+    def loadState(self):
+        clients = {}
+        file_path = self._storagePath + self.storageFileExtension()
+
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                buffer = ""
+                while chunk := file.read(1024):
+                    buffer += chunk
+                    while len(buffer) >= UUID_LEN:
+                        uuid_str = buffer[:UUID_LEN]
+                        buffer = buffer[UUID_LEN:]
+                        try:
+                            print("loading client", uuid_str)
+                            clients[UUID(uuid_str).bytes] = time.perf_counter()
+                        except ValueError as e:
+                            raise Exception(f"Error in clients file: file is corrupted")
+        return clients
     
     def isActiveClient(self, clientId):
         with self._clientsMonitorLock:
@@ -30,7 +52,7 @@ class ActiveClients:
             if os.path.exists(tmpfile):
                 os.remove(tmpfile)
 
-    """ 
+    """
     Removes clients from file and monitor if they existed in those.
     Used for when a client hits timeout, or when it finished sending
     data.
@@ -44,21 +66,26 @@ class ActiveClients:
             for client in clientsToRemove:
                 if client in self._clientMonitor:
                     self._clientMonitor.pop(client)
-                    removed.add(client)
+                    removed.add(getClientIdUUID(client))
         # monitor is consistent to file. when there is a failure, at reboot 
         # monitor will take its information from file
         self.removeClientsFromFile(removed)
 
-    def removeClientsFromFile(self, clientsToRemove: set[bytes]):
+    def removeClientsFromFile(self, clientsToRemove: set[UUID]):
         if not clientsToRemove:
             return
         sourcePath = self._storagePath + self.storageFileExtension()
         tempPath =  self._storagePath + '.tmp'
+        buffer = ""
         with self._clientsFileLock:
-            with open(sourcePath, 'rb') as source, open(tempPath, 'wb') as destination:
-                for line in source:
-                    if line not in clientsToRemove:
-                        destination.write(line)
+            with open(sourcePath, 'r') as source, open(tempPath, 'w') as destination:
+                while chunk := source.read(1024):
+                    buffer += chunk
+                    while len(buffer) >= UUID_LEN:
+                        uuid_str = buffer[:UUID_LEN]
+                        buffer = buffer[UUID_LEN:]
+                        if UUID(uuid_str) not in clientsToRemove:
+                            destination.write(f"{uuid_str}")
             os.rename(tempPath, sourcePath)
 
     def setTimestampForClient(self, clientId: bytes):
@@ -68,13 +95,13 @@ class ActiveClients:
     def storeNewClient(self, clientId: bytes):
         self.setTimestampForClient(clientId)
         with self._clientsFileLock:
-            self.storeInDisk(clientId)
+            self.storeInDisk(getClientIdUUID(clientId))
     
-    def storeInDisk(self, clientId: bytes):
+    def storeInDisk(self, clientId: UUID):
         storageFilePath = self._storagePath
-        with open(storageFilePath + '.tmp', 'wb') as newResults:
+        with open(storageFilePath + '.tmp', 'w') as newResults:
             copyFile(newResults, storageFilePath + self.storageFileExtension())
-            newResults.write(clientId)
+            newResults.write(f"{clientId}")
         os.rename(storageFilePath + '.tmp', storageFilePath + self.storageFileExtension())
 
     def getExpiredTimers(self, lastTimer: float) -> tuple[float, set[bytes]]:

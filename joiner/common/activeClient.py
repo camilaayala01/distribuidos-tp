@@ -22,7 +22,9 @@ class ActiveClient:
         return self._clientId.bytes
     
     def destroy(self):
+        print("Path", self._folderPath)
         if os.path.exists(self._folderPath):
+            print("it exists, removing tree")
             shutil.rmtree(self._folderPath)
 
     def gamesPath(self):

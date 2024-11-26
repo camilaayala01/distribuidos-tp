@@ -16,8 +16,8 @@ class ActiveClient:
         os.makedirs(self._folderPath, exist_ok=True)
 
     def destroy(self):
-        if os.path.exists(self._folderPath):
-            shutil.rmtree(self._folderPath)
+        if os.path.exists(self._folderPath + f'{self._clientId}.csv'):
+            os.remove(self._folderPath + f'{self._clientId}.csv')
 
     def getClientIdBytes(self):
         return self._clientId.bytes
