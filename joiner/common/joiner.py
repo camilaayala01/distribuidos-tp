@@ -32,6 +32,7 @@ class Joiner(StatefulNode):
         for client in self._activeClients.values():
             client.destroy()
         self._eofController.terminateProcess(self._internalCommunication)
+        self._healthcheckAnswerController.stop()
         self._internalCommunication.stop()
         
     """keeps the client if there is one, set a new one if there's not"""

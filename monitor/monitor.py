@@ -73,7 +73,6 @@ class Monitor:
                 break
             try:
                 sendall(HeartbeatMessage.CHECK.serialize(monitorName(self._id)), (id, self._healthcheckPort), sock)  
-                print(f"sent {(id, self._healthcheckPort)}")
             except socket.gaierror:
                 pass
             with self._pendingLock:
@@ -146,4 +145,3 @@ class Monitor:
         while self.isRunning():
             self.runMonitor()
         electionThread.join()
-        print("exited gracefully")

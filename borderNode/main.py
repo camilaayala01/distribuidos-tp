@@ -4,6 +4,7 @@ import signal
 
 def main():
     border = BorderNode()
+    print('llegamos acá')
     signal.signal(signal.SIGTERM, border.stop)
     signal.signal(signal.SIGALRM, border.handleTimeoutSignal)
     signal.setitimer(signal.ITIMER_REAL, 2, 2)

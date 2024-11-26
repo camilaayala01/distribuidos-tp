@@ -15,6 +15,7 @@ class HealthcheckAnswerController:
     
     def setUpHealthcheck(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        print(f'escucho en {self._nodeName}')
         sock.bind((f'{self._nodeName}', self._healthcheckPort))
         sock.settimeout(2)
         while self._running:
@@ -27,9 +28,11 @@ class HealthcheckAnswerController:
                 continue
         sock.close()
         
-    def stop(self, _signum, _frame):
+    def stop(self):
+        print("dejo de correr")
         self._running = False
 
     def execute(self):
         threading.Thread(target=self.setUpHealthcheck).start()
+        print("levanto el healthcheck y eso gordi")
 

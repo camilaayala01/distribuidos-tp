@@ -108,7 +108,7 @@ def component_nodes_environment(**kwargs):
 def default_config(compose: dict[str, Any], container_name, entrypoint, queue, prefetch_count: int=1, **kwargs):
     compose['services'][container_name] ={
         'build': rabbit_node_build(entrypoint),
-        'environment': add_to_list(default_environment(queue, prefetch_count), component_nodes_environment(**kwargs)),
+        'environment': add_to_list(default_environment(queue, prefetch_count), component_nodes_environment(**kwargs)) + [f'NODE_NAME={container_name}'],
         'env_file': default_env_file(),
         'volumes': default_volumes(),
         'networks': default_network()
@@ -218,6 +218,7 @@ def add_border_node(compose: dict[str, Any], cluster_nodes):
         'environment':[
             'PYTHONUNBUFFERED=1',
             'PREFETCH_COUNT=1',
+            'NODE_NAME=border-node',
             'STORAGE_PATH=/data/',
             f'LISTENING_QUEUE={os.getenv("DISP")}'
         ],
@@ -423,17 +424,17 @@ def add_monitor(compose: dict[str, Any], cluster_nodes, id):
     compose['services'][f'monitor-{id}']= {
         'build': {
             'context': './monitor',
-            'dockerfile': '../zmqUser.Dockerfile'
+            'dockerfile': '../monitor.Dockerfile'
         },
         'environment':[
             'PYTHONUNBUFFERED=1',
             'PREFETCH_COUNT=1',
-            f'TO_CHECK={';'.join(cluster_nodes)}'
+            f'ID={id}',
+            f'TO_CHECK={";".join(cluster_nodes)}'
         ],
         'env_file': default_env_file(),
         'volumes':[
-        './internalCommunication:/internalCommunication',
-        './entryParsing:/entryParsing'
+            '/var/run/docker.sock:/var/run/docker.sock'
         ],
         'networks': default_network(),
         'depends_on': cluster_nodes
