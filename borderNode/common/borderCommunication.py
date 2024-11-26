@@ -1,5 +1,4 @@
 import os
-import uuid
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from entryParsing.common.messageType import MessageType
 from internalCommunication.internalCommunication import InternalCommunication

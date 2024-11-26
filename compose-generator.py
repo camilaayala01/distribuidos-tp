@@ -312,7 +312,7 @@ def add_joiners_action_percentile(compose: dict[str, Any]):
     containers = []
     for i in range(0, int(os.getenv('JOIN_PERC_COUNT'))):
         compose, new_container = add_joiner(compose, f"percentile-{i}", f"{os.getenv('JOIN_PERC')}",
-                                            joiner_type=JoinerType.PERCENTILE.value, 
+                                            joiner_type=JoinerType.REGULAR.value, 
                                             next_nodes=f'{os.getenv("CONS_SORT_PERC")}', 
                                             next_headers="HeaderWithSender",
                                             reviews_entry_type='EntryAppIDReviewCount', 
@@ -389,7 +389,7 @@ def add_joiners_indie(compose: dict[str, Any]):
     containers = []
     for i in range(0, int(os.getenv('JOIN_INDIE_COUNT'))):
         compose, new_container = add_joiner(compose, f'indie-{i}', os.getenv('JOIN_INDIE'),
-                                            joiner_type=JoinerType.INDIE.value,
+                                            joiner_type=JoinerType.REGULAR.value,
                                             next_nodes=f"{os.getenv('AGGR_INDIE')}", 
                                             next_headers="HeaderWithSender",
                                             next_entries="EntryNameReviewCount",

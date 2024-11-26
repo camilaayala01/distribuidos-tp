@@ -298,7 +298,7 @@ services:
     - PYTHONUNBUFFERED=1
     - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerIndie
-    - JOINER_TYPE=1
+    - JOINER_TYPE=0
     - NEXT_NODES=AggregatorIndie
     - NEXT_HEADERS=HeaderWithSender
     - NEXT_ENTRIES=EntryNameReviewCount
@@ -326,7 +326,7 @@ services:
     - PYTHONUNBUFFERED=1
     - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerIndie
-    - JOINER_TYPE=1
+    - JOINER_TYPE=0
     - NEXT_NODES=AggregatorIndie
     - NEXT_HEADERS=HeaderWithSender
     - NEXT_ENTRIES=EntryNameReviewCount
@@ -354,7 +354,7 @@ services:
     - PYTHONUNBUFFERED=1
     - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerIndie
-    - JOINER_TYPE=1
+    - JOINER_TYPE=0
     - NEXT_NODES=AggregatorIndie
     - NEXT_HEADERS=HeaderWithSender
     - NEXT_ENTRIES=EntryNameReviewCount
@@ -507,7 +507,7 @@ services:
     - PYTHONUNBUFFERED=1
     - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerActionEnglish
-    - JOINER_TYPE=2
+    - JOINER_TYPE=1
     - NEXT_NODES=FilterEnglish
     - NEXT_HEADERS=HeaderWithSender
     - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
@@ -534,7 +534,7 @@ services:
     - PYTHONUNBUFFERED=1
     - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerActionEnglish
-    - JOINER_TYPE=2
+    - JOINER_TYPE=1
     - NEXT_NODES=FilterEnglish
     - NEXT_HEADERS=HeaderWithSender
     - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
@@ -561,7 +561,7 @@ services:
     - PYTHONUNBUFFERED=1
     - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerActionEnglish
-    - JOINER_TYPE=2
+    - JOINER_TYPE=1
     - NEXT_NODES=FilterEnglish
     - NEXT_HEADERS=HeaderWithSender
     - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText

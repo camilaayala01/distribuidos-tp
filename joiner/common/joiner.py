@@ -2,7 +2,6 @@ from collections import defaultdict
 import logging
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID
-from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextEntry
 from entryParsing.entry import EntryInterface
 from eofController.eofController import EofController

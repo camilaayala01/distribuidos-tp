@@ -3,7 +3,6 @@ from entryParsing.common.header import HeaderInterface
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
 from internalCommunication.common.nextNode import NextNode
-from internalCommunication.internalMessageType import InternalMessageType
 
 class SendingStrategy(ABC):
     def __init__(self, nextNode: NextNode):
