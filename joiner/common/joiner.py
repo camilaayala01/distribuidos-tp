@@ -127,9 +127,7 @@ class Joiner(StatefulNode):
         return toAck
     
     def shouldProcessAccumulated(self):
-        print(self._accumulatedBatches.accumulatedLen())
         return self._accumulatedBatches.accumulatedLen() == PREFETCH_COUNT or self._currentClient.finishedReceiving()
-    
     
     def deleteAccumulated(self, clientToRemove):        
         if self._accumulatedBatches and clientToRemove == self._accumulatedBatches.getClient():

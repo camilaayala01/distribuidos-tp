@@ -62,8 +62,9 @@ class ActiveClients:
             return
         # for when client sends a deletion confirmation; avoid going to disk if everything went well
         removed = set()
-        with self._clientsMonitorLock:
-            for client in clientsToRemove:
+        
+        for client in clientsToRemove:
+            with self._clientsMonitorLock:
                 if client in self._clientMonitor:
                     self._clientMonitor.pop(client)
                     removed.add(getClientIdUUID(client))

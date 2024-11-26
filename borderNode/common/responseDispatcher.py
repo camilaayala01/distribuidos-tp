@@ -34,7 +34,7 @@ class ResponseDispatcher:
             case InternalMessageType.DATA_TRANSFER:
                 self.sendQueryToClient(msg)
             case InternalMessageType.CLIENT_FLUSH:
-                logging.info(f'action: receive client flush | client id: {msg}')
+                return
             case InternalMessageType.SHUTDOWN:
                 self.stop()
         ch.basic_ack(delivery_tag = method.delivery_tag)
