@@ -52,7 +52,6 @@ class ElectionHandler:
 
     def sendCoordinator(self): 
         for id in range(1, self._leader):
-            print(f'enviando coordinator a {id}')
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
                 s.connect((monitorName(id), PORT))
@@ -63,12 +62,10 @@ class ElectionHandler:
                 s.close()
             
     def declareAsLeader(self):
-        print("i am leader")
         self._leader = self._id
         self.resolveElection()
     
     def listenForElection(self): 
-        print("escuchando por election")
         listeningSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         listeningSock.bind((monitorName(self._id), PORT)) 
         listeningSock.settimeout(5)      
@@ -81,13 +78,11 @@ class ElectionHandler:
                 match msg:
                     case ElectionMessage.ELECTION:
                         sock.sendall(ElectionMessage.ANSWER.serialize(self._id))
-                        print(f"le mando answer a {sender}")
                         with self.getLeaderIsRunningLock(): #yo pienso que esta corriendo pero mi companiero se dio cuenta que no
                             if self.isLeaderRunning():
                                 self.startElection()
                     case ElectionMessage.COORDINATOR:
                         self._leader = sender
-                        print(f"winner is {sender}")
                         with self.getLeaderIsRunningLock():
                             if not self.isLeaderRunning():
                                 self.resolveElection()
@@ -105,7 +100,6 @@ class ElectionHandler:
             try:
                 s.connect((monitorName(id), PORT))
                 s.sendall(ElectionMessage.ELECTION.serialize(self._id))
-                print(f"envio election a {id}")
                 try:
                     data = s.recv(1024)
                     msg, sender = ElectionMessage.deserialize(data)
