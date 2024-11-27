@@ -4,7 +4,7 @@ import time
 from uuid import UUID
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.utils import copyFile
-
+import logging
 UUID_LEN = 36
 
 class ActiveClients:
@@ -30,7 +30,7 @@ class ActiveClients:
                         uuid_str = buffer[:UUID_LEN]
                         buffer = buffer[UUID_LEN:]
                         try:
-                            print("loading client", uuid_str)
+                            logging.info("loading client", uuid_str)
                             clients[UUID(uuid_str).bytes] = time.perf_counter()
                         except ValueError as e:
                             raise Exception(f"Error in clients file: file is corrupted")

@@ -68,6 +68,7 @@ class Monitor:
                 self.checkLeader()
     
     def sendHealthcheck(self):
+        print("mando healthchecks gorda puta")
         sock = self._healthcheckSock
         for id in self._toCheck:
             if not self._electionHandler.iAmLeader():
@@ -92,6 +93,9 @@ class Monitor:
     def listenForLeader(self):
         sock = self._healthcheckSock
         while self.isRunning() and self._electionHandler.isLeaderRunning(): 
+            # with self._electionHandler.getLeaderIsRunningLock:
+            #     if not self._electionHandler.isLeaderRunning():
+            #         break
             try:
                 data, addr = sock.recvfrom(1024)
                 msg, node = HeartbeatMessage.deserialize(data)    

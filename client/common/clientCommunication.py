@@ -1,18 +1,20 @@
 import logging
+import time
 from entryParsing.common.clientHeader import ClientHeader
 import zmq
 
 from entryParsing.common.messageType import MessageType
 from entryParsing.common.table import Table
 
-MAX_TIMEOUTS = 5
+MAX_TIMEOUTS = 10
+TIMEOUT = 2000
 class ClientCommunication:
     def __init__(self):
         self._context = zmq.Context()
         socketaddr = "tcp://border-node:%s" % "5556" # TODO: SACAR HARDCODEO
         id, socket  = ClientCommunication.manageHandshake(self._context, socketaddr)
         socket.setsockopt(zmq.IDENTITY, id)
-        socket.setsockopt(zmq.RCVTIMEO, 1000) # TODO: SACAR HARDCODEO
+        socket.setsockopt(zmq.RCVTIMEO, TIMEOUT) # TODO: SACAR HARDCODEO
         socket.connect(socketaddr) 
         self._socket = socket
         self._responsesObtained = []
@@ -78,10 +80,15 @@ class ClientCommunication:
                         self._responsesObtained.append(msg)
                     case _:
                         raise Exception(f"Received a message of type {type} from server")
-            except zmq.error.Again:
+            except zmq.Again:
+                timeoutCycles += 1
+                print("salto timeout")
+            except:
+                print("socket cerrado")
+                time.sleep(1)
                 timeoutCycles += 1
         
-        raise Exception("Couldn't send data correctly, server failed to ack message")
+        raise Exception(f"Couldn't send data correctly, server failed to ack message. tried:{timeoutCycles} times")
 
     def sendTable(self, client, maxDataBytes, generatorFunction, table):
         # stop and wait logic, it sends one message at a time

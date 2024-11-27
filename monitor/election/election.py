@@ -23,7 +23,8 @@ class ElectionHandler:
         self._leaderSemaphore.release()
         
     def setLeaderIsRunning(self, running):
-        self._leaderIsRunning = running
+        with self._leaderIsRunningLock:
+            self._leaderIsRunning = running
 
     def isRunning(self):
         return self._running
@@ -45,6 +46,7 @@ class ElectionHandler:
             self._leaderSemaphore.acquire(timeout=self._timeout)
             print("leaving semaphore")
         except TimeoutError:
+            print("estoy empezando eleccion porque hubo timeout en semaforo")
             self.startElection()
 
     def resolveElection(self):
@@ -82,9 +84,12 @@ class ElectionHandler:
                     case ElectionMessage.ELECTION:
                         sock.sendall(ElectionMessage.ANSWER.serialize(self._id))
                         print(f"le mando answer a {sender}")
-                        with self.getLeaderIsRunningLock():
+                        with self.getLeaderIsRunningLock(): #yo pienso que esta corriendo pero mi companiero se dio cuenta que no
                             if self.isLeaderRunning():
-                                self.startElection()
+                                if self._id == self._leader:
+                                    print(f"el bolido de {sender} me envio election pero estoy vivo")
+                                else:
+                                    self.startElection()
                     case ElectionMessage.COORDINATOR:
                         self._leader = sender
                         print(f"winner is {sender}")

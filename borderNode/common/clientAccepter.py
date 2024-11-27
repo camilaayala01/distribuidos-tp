@@ -6,21 +6,26 @@ from internalCommunication.internalCommunication import InternalCommunication
 from .activeClients import ActiveClients
 from entryParsing.common.clientHeader import ClientHeader
 from entryParsing.common.messageType import MessageType
+from entryParsing.common.fieldParsing import getClientIdUUID
 from internalCommunication.internalMessageType import InternalMessageType
 from .borderCommunication import BorderNodeCommunication
+from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 
 class ClientAccepter: 
     def __init__(self, communication: BorderNodeCommunication, stopEvent: threading.Event):
         self._clientCommunication = communication
+        self._currentTimer = time.perf_counter()
         self._activeClients = ActiveClients()
         # only one thread will actually change it, but just in case
         self._timeLock = threading.Lock()
-        self._currentTimer = time.perf_counter()
         self._internalCommunication = InternalCommunication()
+        self._healthcheckAnswerController = HealthcheckAnswerController()
+        self._healthcheckAnswerController.execute()
         self._stopEvent = stopEvent
 
     def stop(self, _signum, _):
         self._stopEvent.set()
+        self._healthcheckAnswerController.stop()
         self._internalCommunication.sendToDispatcher(InternalMessageType.SHUTDOWN.serialize())
         self._activeClients.removeClientFiles()
         self._clientCommunication.stop()
@@ -68,7 +73,7 @@ class ClientAccepter:
     def handleTimeoutSignal(self, _signum, _):
         self._currentTimer, expired = self._activeClients.getExpiredTimers(lastTimer=self._currentTimer)
         for clientId in expired:
-            print(f"oops, client {clientId} expired :( so sad for him")
+            print(f"oops, client {getClientIdUUID(clientId)} expired :( so sad for him")
             self._internalCommunication.sendToInitializer(InternalMessageType.CLIENT_FLUSH.serialize() + clientId)
         self._activeClients.removeClientsFromActive(expired)
 

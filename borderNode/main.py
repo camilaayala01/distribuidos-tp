@@ -6,7 +6,6 @@ from common.responseDispatcher import ResponseDispatcher
 
 
 def main():
-
     stopEvent = Event()
     borderCommunication = BorderNodeCommunication()
     accepter = ClientAccepter(borderCommunication, stopEvent)
@@ -15,7 +14,6 @@ def main():
     signal.signal(signal.SIGALRM, accepter.handleTimeoutSignal)
     signal.setitimer(signal.ITIMER_REAL, 5, 5)
     thread = Thread(target=dispatcher.execute, args=())
-
     thread.start()
     accepter.listenForClient()
     thread.join()
