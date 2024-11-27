@@ -33,11 +33,13 @@ services:
     - REVIEWS_ENTRY_TYPE=ReviewEntry
     - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
     - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
+    - NODE_NAME=initializer-0
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   initializer-1:
@@ -56,11 +58,13 @@ services:
     - REVIEWS_ENTRY_TYPE=ReviewEntry
     - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
     - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
+    - NODE_NAME=initializer-1
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   initializer-2:
@@ -79,11 +83,13 @@ services:
     - REVIEWS_ENTRY_TYPE=ReviewEntry
     - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
     - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
+    - NODE_NAME=initializer-2
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   grouper-os-0:
@@ -98,11 +104,13 @@ services:
     - NEXT_NODES=AggregatorOs
     - HEADER_TYPE=Header
     - ENTRY_TYPE=EntryOSSupport
+    - NODE_NAME=grouper-os-0
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   grouper-os-1:
@@ -117,11 +125,13 @@ services:
     - NEXT_NODES=AggregatorOs
     - HEADER_TYPE=Header
     - ENTRY_TYPE=EntryOSSupport
+    - NODE_NAME=grouper-os-1
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   aggregator-os:
@@ -137,11 +147,13 @@ services:
     - ENTRY_TYPE=EntryOSCount
     - AGGREGATOR_TYPE=0
     - QUERY_NUMBER=1
+    - NODE_NAME=aggregator-os
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -162,11 +174,13 @@ services:
     - NEXT_HEADERS=Header;
     - HEADER_TYPE=HeaderWithTable
     - ENTRY_TYPE=EntryAppIDNameGenresReleaseDateAvgPlaytime
+    - NODE_NAME=filterer-indie
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   filterer-date:
@@ -182,11 +196,13 @@ services:
     - NEXT_ENTRIES=EntryNameAvgPlaytime
     - HEADER_TYPE=Header
     - ENTRY_TYPE=EntryNameDateAvgPlaytime
+    - NODE_NAME=filterer-date
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   sorter-playtime-0:
@@ -205,11 +221,13 @@ services:
     - TOP_AMOUNT=10
     - NODE_COUNT=2
     - NEXT_HEADERS=HeaderWithSender
+    - NODE_NAME=sorter-playtime-0
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -232,11 +250,13 @@ services:
     - TOP_AMOUNT=10
     - NODE_COUNT=2
     - NEXT_HEADERS=HeaderWithSender
+    - NODE_NAME=sorter-playtime-1
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -259,11 +279,13 @@ services:
     - PRIOR_NODE_COUNT=2
     - TOP_AMOUNT=10
     - QUERY_NUMBER=2
+    - NODE_NAME=sorter-consolidator-playtime
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -282,11 +304,13 @@ services:
     - NEXT_NODES=JoinerIndie,3,0
     - HEADER_TYPE=HeaderWithTable
     - ENTRY_TYPE=EntryAppID
+    - NODE_NAME=grouper-indie
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   joiner-indie-0:
@@ -306,11 +330,13 @@ services:
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=0
     - NODE_COUNT=3
+    - NODE_NAME=joiner-indie-0
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -334,11 +360,13 @@ services:
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=1
     - NODE_COUNT=3
+    - NODE_NAME=joiner-indie-1
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -362,11 +390,13 @@ services:
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=2
     - NODE_COUNT=3
+    - NODE_NAME=joiner-indie-2
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -386,11 +416,13 @@ services:
     - ENTRY_TYPE=EntryNameReviewCount
     - AGGREGATOR_TYPE=2
     - PRIOR_NODE_COUNT=3
+    - NODE_NAME=aggregator-indie
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -413,11 +445,13 @@ services:
     - TOP_AMOUNT=5
     - NODE_COUNT=2
     - NEXT_HEADERS=HeaderWithSender
+    - NODE_NAME=sorter-indie-0
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -440,11 +474,13 @@ services:
     - TOP_AMOUNT=5
     - NODE_COUNT=2
     - NEXT_HEADERS=HeaderWithSender
+    - NODE_NAME=sorter-indie-1
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -467,11 +503,13 @@ services:
     - PRIOR_NODE_COUNT=2
     - TOP_AMOUNT=5
     - QUERY_NUMBER=3
+    - NODE_NAME=sorter-consolidator-indie
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -491,11 +529,13 @@ services:
     - NEXT_ENTRIES=EntryAppIDName;EntryAppIDName
     - HEADER_TYPE=HeaderWithTable
     - ENTRY_TYPE=EntryAppIDNameGenres
+    - NODE_NAME=filterer-action
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   joiner-english-0:
@@ -514,11 +554,13 @@ services:
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - NODE_ID=0
     - NODE_COUNT=3
+    - NODE_NAME=joiner-english-0
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -541,11 +583,13 @@ services:
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - NODE_ID=1
     - NODE_COUNT=3
+    - NODE_NAME=joiner-english-1
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -568,11 +612,13 @@ services:
     - GAMES_ENTRY_TYPE=EntryAppIDName
     - NODE_ID=2
     - NODE_COUNT=3
+    - NODE_NAME=joiner-english-2
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -592,11 +638,13 @@ services:
     - NEXT_ENTRIES=EntryAppIDName
     - HEADER_TYPE=HeaderWithSender
     - ENTRY_TYPE=EntryAppIDNameReviewText
+    - NODE_NAME=filterer-english-0
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   filterer-english-1:
@@ -612,11 +660,13 @@ services:
     - NEXT_ENTRIES=EntryAppIDName
     - HEADER_TYPE=HeaderWithSender
     - ENTRY_TYPE=EntryAppIDNameReviewText
+    - NODE_NAME=filterer-english-1
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   filterer-english-2:
@@ -632,11 +682,13 @@ services:
     - NEXT_ENTRIES=EntryAppIDName
     - HEADER_TYPE=HeaderWithSender
     - ENTRY_TYPE=EntryAppIDNameReviewText
+    - NODE_NAME=filterer-english-2
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   filterer-english-3:
@@ -652,11 +704,13 @@ services:
     - NEXT_ENTRIES=EntryAppIDName
     - HEADER_TYPE=HeaderWithSender
     - ENTRY_TYPE=EntryAppIDNameReviewText
+    - NODE_NAME=filterer-english-3
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   filterer-english-4:
@@ -672,11 +726,13 @@ services:
     - NEXT_ENTRIES=EntryAppIDName
     - HEADER_TYPE=HeaderWithSender
     - ENTRY_TYPE=EntryAppIDNameReviewText
+    - NODE_NAME=filterer-english-4
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   filterer-english-5:
@@ -692,11 +748,13 @@ services:
     - NEXT_ENTRIES=EntryAppIDName
     - HEADER_TYPE=HeaderWithSender
     - ENTRY_TYPE=EntryAppIDNameReviewText
+    - NODE_NAME=filterer-english-5
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   filterer-english-6:
@@ -712,11 +770,13 @@ services:
     - NEXT_ENTRIES=EntryAppIDName
     - HEADER_TYPE=HeaderWithSender
     - ENTRY_TYPE=EntryAppIDNameReviewText
+    - NODE_NAME=filterer-english-6
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   filterer-english-7:
@@ -732,11 +792,13 @@ services:
     - NEXT_ENTRIES=EntryAppIDName
     - HEADER_TYPE=HeaderWithSender
     - ENTRY_TYPE=EntryAppIDNameReviewText
+    - NODE_NAME=filterer-english-7
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   grouper-english:
@@ -751,11 +813,13 @@ services:
     - NEXT_NODES=AggregatorEnglish
     - HEADER_TYPE=HeaderWithSender
     - ENTRY_TYPE=EntryAppIDName
+    - NODE_NAME=grouper-english
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   aggregator-english:
@@ -774,11 +838,13 @@ services:
     - QUERY_NUMBER=4
     - PRIOR_NODE_COUNT=3
     - REQUIRED_REVIEWS=5000
+    - NODE_NAME=aggregator-english
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -797,11 +863,13 @@ services:
     - NEXT_NODES=JoinerActionPercentile,3,0
     - HEADER_TYPE=HeaderWithTable
     - ENTRY_TYPE=EntryAppID
+    - NODE_NAME=grouper-percentile
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
     - sa_net
   joiner-percentile-0:
@@ -820,11 +888,13 @@ services:
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=0
     - NODE_COUNT=3
+    - NODE_NAME=joiner-percentile-0
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -847,11 +917,13 @@ services:
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=1
     - NODE_COUNT=3
+    - NODE_NAME=joiner-percentile-1
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -874,11 +946,13 @@ services:
     - HEADER_TYPE=HeaderWithTable
     - NODE_ID=2
     - NODE_COUNT=3
+    - NODE_NAME=joiner-percentile-2
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -901,11 +975,13 @@ services:
     - PERCENTILE=90
     - QUERY_NUMBER=5
     - NEXT_HEADERS=HeaderWithQueryNumber
+    - NODE_NAME=sorter-consolidator-percentile
     env_file:
     - .env
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./packetTracker:/packetTracker
     - ./statefulNode:/statefulNode
     - ./eofController:/eofController
@@ -919,6 +995,7 @@ services:
     environment:
     - PYTHONUNBUFFERED=1
     - PREFETCH_COUNT=1
+    - NODE_NAME=border-node
     - STORAGE_PATH=/data/
     - LISTENING_QUEUE=Dispatcher
     env_file:
@@ -926,6 +1003,7 @@ services:
     volumes:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
+    - ./healthcheckAnswerController:/healthcheckAnswerController
     - ./borderNode/data:/data
     networks:
     - sa_net
@@ -968,6 +1046,74 @@ services:
     - joiner-percentile-1
     - joiner-percentile-2
     - sorter-consolidator-percentile
+  monitor-1:
+    build:
+      context: ./monitor
+      dockerfile: ../monitor.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
+    - ID=1
+    - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
+    env_file:
+    - .env
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+    - sa_net
+    depends_on:
+    - border-node
+  monitor-2:
+    build:
+      context: ./monitor
+      dockerfile: ../monitor.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
+    - ID=2
+    - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
+    env_file:
+    - .env
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+    - sa_net
+    depends_on:
+    - border-node
+  monitor-3:
+    build:
+      context: ./monitor
+      dockerfile: ../monitor.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
+    - ID=3
+    - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
+    env_file:
+    - .env
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+    - sa_net
+    depends_on:
+    - border-node
+  monitor-4:
+    build:
+      context: ./monitor
+      dockerfile: ../monitor.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
+    - ID=4
+    - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
+    env_file:
+    - .env
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+    - sa_net
+    depends_on:
+    - border-node
 networks:
   sa_net:
     ipam:
