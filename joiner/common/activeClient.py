@@ -27,6 +27,10 @@ class ActiveClient:
             print("it exists, removing tree")
             shutil.rmtree(self._folderPath)
 
+    # TODO delete
+    def getTracker(self):
+        return self._gamesTracker
+    
     def gamesPath(self):
         return self._folderPath + f'games'
 

@@ -19,6 +19,10 @@ class ActiveClient:
         if os.path.exists(self._folderPath + f'{self._clientId}.csv'):
             os.remove(self._folderPath + f'{self._clientId}.csv')
 
+    # TODO delete
+    def getTracker(self):
+        return self._tracker
+    
     def getClientIdBytes(self):
         return self._clientId.bytes
 

@@ -34,7 +34,7 @@ class Initializer:
 
     def handleDataMessage(self, body):
         header, data = self._headerType.deserialize(body)
-        if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
+        if header.getFragmentNumber() % PRINT_FREQUENCY == 0 or header.getFragmentNumber() == 1:
             logging.info(f'action: received msg corresponding to table {header.getTable()} | {header}')
 
         if header.isGamesTable():

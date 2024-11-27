@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import logging
 import os
 import time
 from entryParsing.common.fieldParsing import getClientIdUUID
@@ -70,12 +71,14 @@ class StatefulNode(ABC):
     def handleDataMessage(self, channel, tag, body):
         header, batch = self._headerType.deserialize(body)
         clientId = header.getClient()
+        self.setCurrentClient(clientId)
+
         if clientId in self._deletedClients:
             channel.basic_ack(delivery_tag=tag)
             return
-        self.setCurrentClient(clientId)
-        
-        if self._currentClient.isDuplicate(header):
+
+        receivedClient = self._activeClients.get(clientId)
+        if receivedClient and receivedClient.isDuplicate(header):
             channel.basic_ack(delivery_tag=tag)
             return
         
