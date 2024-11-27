@@ -83,6 +83,7 @@ class StatefulNode(ABC):
             return
         
         self.processDataPacket(header, batch, tag, channel)
+        
 
     def handleMessage(self, ch, method, _properties, body):
         msgType, msg = InternalMessageType.deserialize(body)

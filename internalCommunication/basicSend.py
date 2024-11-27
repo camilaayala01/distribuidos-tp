@@ -30,6 +30,7 @@ class BasicSend(SendingStrategy):
         try: 
             while True:
                 entry = next(generator)
+                print(entry)
                 entryBytes = entryConverter(entry).serialize()
                 if len(currPacket) + len(entryBytes) <= maxBytes:
                     currPacket += entryBytes

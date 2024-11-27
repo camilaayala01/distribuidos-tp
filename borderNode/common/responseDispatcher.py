@@ -1,9 +1,11 @@
 import logging
 import os
 from threading import Event
+import uuid
 from .borderCommunication import BorderNodeCommunication
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from entryParsing.common.messageType import MessageType
+from entryParsing.common.fieldParsing import getClientIdUUID
 from internalCommunication.internalCommunication import InternalCommunication
 from internalCommunication.internalMessageType import InternalMessageType
 
@@ -24,7 +26,7 @@ class ResponseDispatcher:
             self.stop()
         header, _ = HeaderWithQueryNumber.deserialize(body)
         self._communication.sendToClient(clientId=header.getClient(), data=MessageType.QUERY_RESPONSE.serialize() + body)
-        logging.info(f'action: sending query info to client | result: success')
+        logging.info(f'action: sending query {header.getQueryNumber()} info to client {getClientIdUUID(header.getClient())}| result: success')
 
     def handleMessage(self, ch, method, _properties, body):
         if self._stopEvent.is_set():
