@@ -30,7 +30,7 @@ class ActiveClients:
                         uuid_str = buffer[:UUID_LEN]
                         buffer = buffer[UUID_LEN:]
                         try:
-                            logging.info("loading client", uuid_str)
+                            logging.info(f"loading client {uuid_str}")
                             clients[UUID(uuid_str).bytes] = time.perf_counter()
                         except ValueError as e:
                             raise Exception(f"Error in clients file: file is corrupted")
@@ -107,6 +107,8 @@ class ActiveClients:
 
     def getExpiredTimers(self, lastTimer: float) -> tuple[float, set[bytes]]:
         now = time.perf_counter()
+        print(now)
+        print(lastTimer)
         with self._clientsMonitorLock:
             expired = {clientId for clientId, clientTimer in self._clientMonitor.items() if lastTimer > clientTimer}
         return now, expired

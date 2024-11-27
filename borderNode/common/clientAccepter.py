@@ -2,6 +2,7 @@ import threading
 import time
 import uuid
 import zmq
+import logging
 from internalCommunication.internalCommunication import InternalCommunication
 from .activeClients import ActiveClients
 from entryParsing.common.clientHeader import ClientHeader
@@ -73,13 +74,14 @@ class ClientAccepter:
     def handleTimeoutSignal(self, _signum, _):
         self._currentTimer, expired = self._activeClients.getExpiredTimers(lastTimer=self._currentTimer)
         for clientId in expired:
-            print(f"oops, client {getClientIdUUID(clientId)} expired :( so sad for him")
+            logging.info(f"oops, client {getClientIdUUID(clientId)} expired :( so sad for him")
             self._internalCommunication.sendToInitializer(InternalMessageType.CLIENT_FLUSH.serialize() + clientId)
         self._activeClients.removeClientsFromActive(expired)
 
     def listenForClient(self):
         while not self._stopEvent.is_set():
             try:
+                print("listen ")
                 received = self._clientCommunication.receiveFromClient()
                 if received is None:
                     continue

@@ -61,8 +61,15 @@ class ClientCommunication:
 
     def sendDataAndWaitForAck(self, fragment, eof, table, data):
         header = ClientHeader(fragment, eof, table)
+        retries = 0
         self.sendDataToServer(header.serialize() + data)
-        self.waitForServerAck(header)
+        while retries < MAX_TIMEOUTS:
+            try:
+                self.waitForServerAck(header)
+            except:
+                retries += 1
+                time.sleep(1)
+
 
     # TODO add sending retries and maybe delete max timeouts
     def waitForServerAck(self, sentHeader: ClientHeader):
@@ -83,10 +90,6 @@ class ClientCommunication:
             except zmq.Again:
                 timeoutCycles += 1
                 print("salto timeout")
-            except:
-                print("socket cerrado")
-                time.sleep(1)
-                timeoutCycles += 1
         
         raise Exception(f"Couldn't send data correctly, server failed to ack message. tried:{timeoutCycles} times")
 
