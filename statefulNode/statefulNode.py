@@ -57,8 +57,8 @@ class StatefulNode(ABC):
             self._currentClient = None
         self.deleteAccumulated(clientToRemove)
         if clientToRemove in self._activeClients:
-            print("removed client", clientToRemove)
             client = self._activeClients.pop(clientToRemove)
+            print(f"deleting {client._clientId}")
             client.destroy()
             
         self.handleFlushQueuingAndPropagation(clientToRemove, tag, channel)

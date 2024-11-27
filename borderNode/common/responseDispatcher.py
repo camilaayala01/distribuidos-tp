@@ -28,6 +28,7 @@ class ResponseDispatcher:
 
     def handleMessage(self, ch, method, _properties, body):
         if self._stopEvent.is_set():
+            print("stopped")
             self.stop()
         msgType, msg = InternalMessageType.deserialize(body)
         match msgType:
