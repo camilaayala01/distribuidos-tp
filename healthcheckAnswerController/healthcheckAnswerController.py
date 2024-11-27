@@ -39,6 +39,7 @@ class HealthcheckAnswerController:
         self._running = False
         if self._handle:
             self._handle.join()
+            print("joineo")
 
     def execute(self):
         healthcheckThread = threading.Thread(target=self.setUpHealthcheck)

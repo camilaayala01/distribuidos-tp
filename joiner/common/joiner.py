@@ -29,11 +29,8 @@ class Joiner(StatefulNode):
         self._accumulatedBatches = None
 
     def stop(self, _signum, _frame):
-        for client in self._activeClients.values():
-            client.destroy()
         self._eofController.terminateProcess(self._internalCommunication)
-        self._healthcheckAnswerController.stop()
-        self._internalCommunication.stop()
+        super().stop(_signum, _frame)
         
     """keeps the client if there is one, set a new one if there's not"""
     def setCurrentClient(self, clientId: bytes):

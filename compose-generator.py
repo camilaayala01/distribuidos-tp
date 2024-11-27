@@ -430,14 +430,14 @@ def add_monitor(compose: dict[str, Any], cluster_nodes, id):
             'PYTHONUNBUFFERED=1',
             'PREFETCH_COUNT=1',
             f'ID={id}',
-            f'TO_CHECK={";".join(cluster_nodes)}'
+            f'TO_CHECK={";".join(cluster_nodes + ["border-node"])}'
         ],
         'env_file': default_env_file(),
         'volumes':[
             '/var/run/docker.sock:/var/run/docker.sock'
         ],
         'networks': default_network(),
-        'depends_on': cluster_nodes
+        'depends_on': ['border-node']
     }
     return compose
 
