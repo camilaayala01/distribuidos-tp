@@ -43,7 +43,8 @@ class Monitor:
                 self.setPendingStatus(False)
             status = self._pending[leader]
             if status.expired():
-                self._electionHandler.setLeaderIsRunning(False)
+                with self._electionHandler.getLeaderIsRunningLock():
+                    self._electionHandler.startElection()
             self._pending[leader].update()
 
     def checkForDeadNodes(self):
@@ -68,7 +69,6 @@ class Monitor:
                 self.checkLeader()
     
     def sendHealthcheck(self):
-        print("mando healthchecks gorda puta")
         sock = self._healthcheckSock
         for id in self._toCheck:
             if not self._electionHandler.iAmLeader():
@@ -93,9 +93,6 @@ class Monitor:
     def listenForLeader(self):
         sock = self._healthcheckSock
         while self.isRunning() and self._electionHandler.isLeaderRunning(): 
-            # with self._electionHandler.getLeaderIsRunningLock:
-            #     if not self._electionHandler.isLeaderRunning():
-            #         break
             try:
                 data, addr = sock.recvfrom(1024)
                 msg, node = HeartbeatMessage.deserialize(data)    
@@ -110,10 +107,6 @@ class Monitor:
 
         if not self.isRunning():
             return
-
-        with self._electionHandler.getLeaderIsRunningLock():
-            if not self._electionHandler.isLeaderRunning():
-                self._electionHandler.startElection()
 
         sock.close()
         self._electionHandler.waitForNewLeader()

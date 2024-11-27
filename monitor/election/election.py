@@ -44,9 +44,7 @@ class ElectionHandler:
     def waitForNewLeader(self): 
         try:
             self._leaderSemaphore.acquire(timeout=self._timeout)
-            print("leaving semaphore")
         except TimeoutError:
-            print("estoy empezando eleccion porque hubo timeout en semaforo")
             self.startElection()
 
     def resolveElection(self):
@@ -86,10 +84,7 @@ class ElectionHandler:
                         print(f"le mando answer a {sender}")
                         with self.getLeaderIsRunningLock(): #yo pienso que esta corriendo pero mi companiero se dio cuenta que no
                             if self.isLeaderRunning():
-                                if self._id == self._leader:
-                                    print(f"el bolido de {sender} me envio election pero estoy vivo")
-                                else:
-                                    self.startElection()
+                                self.startElection()
                     case ElectionMessage.COORDINATOR:
                         self._leader = sender
                         print(f"winner is {sender}")
@@ -116,7 +111,6 @@ class ElectionHandler:
                     msg, sender = ElectionMessage.deserialize(data)
                     if msg == ElectionMessage.ANSWER:
                         candidates += 1
-                        print(f"recibi answer de {sender}")
                 except TimeoutError:
                     pass
             except:
@@ -124,7 +118,6 @@ class ElectionHandler:
             finally:
                 s.close()
 
-        print(f"candidates: {candidates}")
         if candidates == 0:
             self.declareAsLeader()
         
