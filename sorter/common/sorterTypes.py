@@ -40,7 +40,7 @@ class SorterType(Enum):
         currEntry = nextEntry(topEntries)
         filepath = os.getenv('LISTENING_QUEUE') + f'filtering.tmp'
         entryIndex = 0
-        with open(filepath, 'a+') as file:
+        with open(filepath, 'w+') as file:
             writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
             while currEntry is not None and entryIndex < index:
                 writer.writerow(EntryAppIDName.fromAnother(currEntry).__dict__.values())
