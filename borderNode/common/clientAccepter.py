@@ -1,11 +1,8 @@
 import threading
 import time
 import uuid
-
 import zmq
-
 from internalCommunication.internalCommunication import InternalCommunication
-
 from .activeClients import ActiveClients
 from entryParsing.common.clientHeader import ClientHeader
 from entryParsing.common.messageType import MessageType

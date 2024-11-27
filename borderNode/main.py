@@ -12,7 +12,7 @@ def main():
     dispatcher = ResponseDispatcher(borderCommunication, stopEvent)
     signal.signal(signal.SIGTERM, accepter.stop)
     signal.signal(signal.SIGALRM, accepter.handleTimeoutSignal)
-    signal.setitimer(signal.ITIMER_REAL, 2, 2)
+    signal.setitimer(signal.ITIMER_REAL, 5, 5)
     thread = Thread(target=dispatcher.execute, args=())
     thread.start()
     accepter.listenForClient()

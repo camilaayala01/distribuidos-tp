@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import os
 import time
+from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.utils import initializeLog
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
@@ -17,7 +18,10 @@ class StatefulNode(ABC):
         self._deletedClients = {} # client id: timestamp of the first time flush was seen
         self._activeClients = {}
         self._currentClient = None
-        
+    
+    def deleteIsEmpty(self):
+        return len(self._deletedClients) == 0
+    
     def stop(self, _signum, _frame):
         for client in self._activeClients.values():
             client.destroy()
@@ -33,11 +37,13 @@ class StatefulNode(ABC):
     def handleFlushQueuingAndPropagation(self, clientToRemove, tag, channel):
         if clientToRemove in self._deletedClients:
             if time.perf_counter() - self._deletedClients[clientToRemove] > DELETE_TIMEOUT:
+                print(f"flush for {getClientIdUUID(clientToRemove)} is done")
                 channel.basic_ack(delivery_tag = tag)
                 self._deletedClients.pop(clientToRemove, None)
             else:
                 self._internalCommunication.requeuePacket(tag)
         else:
+            print(f"received flush for {getClientIdUUID(clientToRemove)} is done")
             self._deletedClients[clientToRemove] = time.perf_counter()
             self._internalCommunication.requeuePacket(tag)
             for strategy in self._sendingStrategies:

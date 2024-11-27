@@ -122,7 +122,7 @@ class Joiner(StatefulNode):
         if self._currentClient.isGamesDone():
             self._currentClient.removeUnjoinedReviews()
         toAck = self._accumulatedBatches.toAck()
-        self._activeClients[self._accumulatedBatches.getClient()] = self._currentClient
+        self._activeClients[self._accumulatedBatches._clientId] = self._currentClient
         self._accumulatedBatches = None
         return toAck
     
@@ -139,6 +139,7 @@ class Joiner(StatefulNode):
         if self._accumulatedBatches is None:
             self.setAccumulatedBatches(tag, header, batch)
         elif not self._accumulatedBatches.accumulate(header=header, tag=tag, batch=batch):
+            print(f"was accumulating {getClientIdUUID(self._accumulatedBatches._clientId)}. got message from {clientId}")
             self._internalCommunication.ackAll(self.processPendingBatches())
             # reset accumulated and set client to correspond to the most recent packet
             self.setAccumulatedBatches(tag, header, batch)
@@ -151,13 +152,15 @@ class Joiner(StatefulNode):
 
         self._currentClient.updateTracker(header)
         if not self.shouldProcessAccumulated():
+            self._activeClients[self._accumulatedBatches.getClient()] = self._currentClient
             return
-    
+
         self._internalCommunication.ackAll(self.processPendingBatches())
 
         if self._currentClient.finishedReceiving():
-            logging.info(f'action: finished receiving data from client {clientId}| result: success')
+            logging.info(f'action: finished receiving data from client {getClientIdUUID(clientId)}| result: success')
             self._eofController.finishedProcessing(self._currentClient._fragment, clientId, self._internalCommunication)
             self._currentClient.destroy()
+            self._currentClient = None
             self._activeClients.pop(clientId)
 
