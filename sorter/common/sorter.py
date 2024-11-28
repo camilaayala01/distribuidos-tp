@@ -14,6 +14,7 @@ DELETE_TIMEOUT = 5
 class Sorter(StatefulNode):
     def __init__(self):
         super().__init__()
+        self._currentClient: ActiveClient = None
         self._sorterType = SorterType(int(os.getenv('SORTER_TYPE')))
         self._entryType = getEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
@@ -27,7 +28,6 @@ class Sorter(StatefulNode):
             self._eofController.terminateProcess(self._internalCommunication)
         super().stop(_signum, _frame)
         
-
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 
@@ -47,7 +47,7 @@ class Sorter(StatefulNode):
 
     def drainTop(self, entriesGenerator, topEntry, savedAmount):
         while self.topHasCapacity(savedAmount) and topEntry is not None:
-            self._currentClient.storeEntry(topEntry)
+            self._currentClient.storeEntry(topEntry) #considerar no escribir todo el tiempo, acumular varias
             topEntry = nextEntry(entriesGenerator)
             savedAmount += 1
         return savedAmount
@@ -86,7 +86,8 @@ class Sorter(StatefulNode):
         elif j < len(newBatchTop):
             savedAmount = self.drainNewBatch(j, savedAmount, newBatchTop)
         
-        self._currentClient.saveNewTop(savedAmount)
+        self._currentClient.newSavedAmount(savedAmount)
+        
 
     def sendToNext(self, generator):
         extraParamsForHeader = self._sorterType.extraParamsForHeader()
@@ -108,9 +109,9 @@ class Sorter(StatefulNode):
     
     def setCurrentClient(self, clientId: bytes):
         self._currentClient = self._activeClients.setdefault(clientId, 
-                                                             ActiveClient(self._sorterType.initializeTracker(clientId), 
-                                                                          getClientIdUUID(clientId),
-                                                                          self._entryType))
+                                                             ActiveClient(getClientIdUUID(clientId),
+                                                                          self._entryType,
+                                                                          self._sorterType))
         
     def processDataPacket(self, header, batch, tag, channel):
         clientId = header.getClient() 
@@ -119,4 +120,5 @@ class Sorter(StatefulNode):
         self.mergeKeepTop(entries)
         self._activeClients[clientId] = self._currentClient
         self.handleSending(clientId)
+        self._currentClient.saveNewTop()
         channel.basic_ack(delivery_tag = tag)

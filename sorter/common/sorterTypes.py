@@ -7,6 +7,7 @@ from entryParsing.entryAppIDName import EntryAppIDName
 from packetTracker.multiTracker import MultiTracker
 from packetTracker.packetTracker import PacketTracker
 from entryParsing.common.utils import nextEntry
+from packetTracker.tracker import TrackerInterface
 
 class SorterType(Enum):
     PLAYTIME = 0
@@ -15,12 +16,12 @@ class SorterType(Enum):
     CONSOLIDATOR_INDIE = 3
     CONSOLIDATOR_PERCENTILE = 4
 
-    def initializeTracker(self, clientId: bytes) -> PacketTracker:
+    def initializeTracker(self, filepath):
         match self:
             case SorterType.PLAYTIME | SorterType.INDIE:
-                return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')), getClientIdUUID(clientId))
+                return PacketTracker.initialize(filepath, int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')))
             case _:
-                return MultiTracker(getClientIdUUID(clientId))        
+                return MultiTracker.initialize(filepath)   
 
     def requireController(self) -> PacketTracker:
         match self:
