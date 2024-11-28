@@ -6,6 +6,7 @@ class DefaultTracker(PacketTracker):
         super().__init__(nodesInCluster=1, module=0)
 
     @classmethod
-    def fromStorage(cls, attributes):
-        super().fromStorage(nodesInCluster=1, module=0, attributes=attributes)
-
+    #[biggestFragment,pending,receivedEnd]
+    def fromStorage(cls, row: list[str]):
+        tracker = cls()
+        return tracker.setFromRow(row)

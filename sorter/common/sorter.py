@@ -16,11 +16,10 @@ DELETE_TIMEOUT = 5
 class Sorter(StatefulNode):
     def __init__(self):
         super().__init__()
-        self.loadActiveClientsFromDisk()
-        self._currentClient: ActiveClient = None
         self._sorterType = SorterType(int(os.getenv('SORTER_TYPE')))
         self._entryType = getEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
+        self.loadActiveClientsFromDisk()
         self._topAmount = int(os.getenv('TOP_AMOUNT')) if os.getenv('TOP_AMOUNT') is not None else None
         if self._sorterType.requireController():
             self._eofController = EofController(int(os.getenv('NODE_ID')), os.getenv('LISTENING_QUEUE'), int(os.getenv('NODE_COUNT')), self._sendingStrategies)
@@ -41,7 +40,7 @@ class Sorter(StatefulNode):
                 continue
             
             elif path.endswith('.csv'):
-                clientIdstr = path.removesuffix('.csv')
+                clientIdstr = filename.removesuffix('.csv')
                 with open(path, 'r') as file:
                     reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
                     packetTrackerRow = nextRow(reader)
@@ -71,51 +70,49 @@ class Sorter(StatefulNode):
     def mustElementGoFirst(self, first: EntrySorterTopFinder, other: EntrySorterTopFinder):
         return first.isGreaterThanOrEqual(other)
 
-    def drainTop(self, entriesGenerator, topEntry, savedAmount):
+    def drainTop(self, entriesGenerator, topEntry, savedAmount, file):
         while self.topHasCapacity(savedAmount) and topEntry is not None:
-            self._currentClient.storeEntry(topEntry)  
+            self._currentClient.storeEntry(topEntry, file)
             topEntry = nextRow(entriesGenerator)
             savedAmount += 1
         return savedAmount
 
-    def drainNewBatch(self, currElement, savedAmount, newBatchTop):
+    def drainNewBatch(self, currElement, savedAmount, newBatchTop, file):
         while currElement < len(newBatchTop) and self.topHasCapacity(savedAmount):
-            self._currentClient.storeEntry(newBatchTop[currElement]) 
+            self._currentClient.storeEntry(newBatchTop[currElement], file)
             currElement += 1
             savedAmount += 1
         return savedAmount
 
     def mergeKeepTop(self, batch: list[EntrySorterTopFinder]):
-        # open file
         if len(batch) == 0:
             return
-        self._currentClient.openFile()
+        
         newBatchTop = self.getBatchTop(batch)
         j = 0
         savedAmount = 0
-
-        entriesGen = self._currentClient.loadEntries()
-        topEntry = nextRow(entriesGen)
         
-        while topEntry is not None and j < len(newBatchTop) and self.topHasCapacity(savedAmount):
-            if self.mustElementGoFirst(topEntry, newBatchTop[j]):
-                self._currentClient.storeEntry(topEntry) 
-                topEntry = nextRow(entriesGen)
-            else:
-                self._currentClient.storeEntry(newBatchTop[j]) 
-                j += 1
-            savedAmount += 1
-        
-        # it could happen that both of them still have elements, but if so its because top does not 
-        # have capacity, so it will not save anything either way
-        if topEntry is not None:
-            savedAmount = self.drainTop(entriesGen, topEntry, savedAmount)
-        elif j < len(newBatchTop):
-            savedAmount = self.drainNewBatch(j, savedAmount, newBatchTop)
-        
-        self._currentClient.newSavedAmount(savedAmount)
-        self._currentClient.closeFile()
-
+        with open(self._currentClient.getTmpPath(), 'w+') as file:
+            entriesGen = self._currentClient.loadEntries()
+            topEntry = nextRow(entriesGen)
+            
+            while topEntry is not None and j < len(newBatchTop) and self.topHasCapacity(savedAmount):
+                if self.mustElementGoFirst(topEntry, newBatchTop[j]):
+                    self._currentClient.storeEntry(topEntry, file) 
+                    topEntry = nextRow(entriesGen)
+                else:
+                    self._currentClient.storeEntry(newBatchTop[j], file) 
+                    j += 1
+                savedAmount += 1
+            # it could happen that both of them still have elements, but if so its because top does not 
+            # have capacity, so it will not save anything either way
+            if topEntry is not None:
+                savedAmount = self.drainTop(entriesGen, topEntry, savedAmount, file)
+            elif j < len(newBatchTop):
+                savedAmount = self.drainNewBatch(j, savedAmount, newBatchTop, file)
+            
+            self._currentClient.setNewSavedEntries(savedAmount)
+            
     def sendToNext(self, generator):
         extraParamsForHeader = self._sorterType.extraParamsForHeader()
         fragment = 1
@@ -126,13 +123,15 @@ class Sorter(StatefulNode):
     def handleSending(self, clientId: bytes):
         if not self._currentClient.isDone():
             return
-        logging.info(f'action: received all required batches | result: success')
+        logging.info(f'action: received all required batches for {clientId} | result: success')
         topGenerator, topAmount = self._currentClient.getResults()
+        print(f"top amount is {topAmount}")
         topGenerator = self._sorterType.preprocessPackets(topGenerator, topAmount)
         fragment = self.sendToNext(topGenerator)
         if self._sorterType.requireController():
             self._eofController.finishedProcessing(fragment, clientId, self._internalCommunication)
         self._activeClients.pop(clientId)
+        # TODO self._activeClients.pop(clientId).destroy()
     
     def setCurrentClient(self, clientId: bytes):
         self._currentClient = self._activeClients.setdefault(clientId, 

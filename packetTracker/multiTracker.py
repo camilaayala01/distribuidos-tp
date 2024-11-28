@@ -31,7 +31,7 @@ class MultiTracker(TrackerInterface):
     def asCSVRow(self):
         row = []
         for senderId, tracker in self._trackers.items():
-            row.append(f'{[senderId].extend(tracker.asCSVRow())}')
+            row.append(f'{[senderId] + tracker.asCSVRow()}')
         return row
     
     #[senderId,biggestFragment,pending,receivedEnd],[senderId,biggestFragment,pending,receivedEnd]

@@ -29,26 +29,22 @@ class AggregatorTypes(Enum):
                 return {}
             case AggregatorTypes.OS:
                 return EntryOSCount(0,0,0,0)
-            case AggregatorTypes.INDIE:
+            case _:
                 return None
 
-    def storeEntry(self, entry: EntryInterface, priorResultsPath, fragment: int, written: int):
+    def storeEntry(self, entry: EntryInterface, priorResultsPath):
         filepath = f'{priorResultsPath}.tmp'
         with open(filepath, 'a+') as file:
             writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
-            if written == 0:
-                writer.writerow([fragment])
             writer.writerow(entry.__dict__.values())
-        written += 1
-
     
-    def loadState(self, entryType, priorResultsPath):
+    def loadEntries(self, entryType, priorResultsPath):
         filepath = f'{priorResultsPath}.csv'
         if not os.path.exists(filepath):
             return iter([])
+        
         with open(filepath, 'r') as file:
             reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
-            yield next(reader) # get fragment
             for row in reader:
                 try:
                     yield entryType.fromArgs(row)
@@ -56,12 +52,9 @@ class AggregatorTypes(Enum):
                     print("exception", e)
                     print(row)
       
-    def getFragment(self, generator) -> int:
-        try:
-            fragment = next(generator)
-            return int(fragment)
-        except StopIteration:
-            return 0
+    def saveNewResults(self, priorResultsPath):
+        if os.path.exists(priorResultsPath + '.tmp'):
+            os.rename(priorResultsPath + '.tmp', priorResultsPath + '.csv')
 
     def getEnglishCountResults(self, entryType, priorResultsPath, entries: list[EntryInterface]):
         toSend = []
@@ -69,11 +62,13 @@ class AggregatorTypes(Enum):
         if not len(entries):
             return []
         batch = {entry.getAppID(): entry for entry in entries} 
-        generator = self.loadState(entryType, priorResultsPath)
-        fragment = self.getFragment(generator)
-        fragment += 1
-        written = 0
-        for priorEntry in generator:
+        generator = self.loadEntries(entryType, priorResultsPath)
+        
+        while True:
+            priorEntry = nextRow(generator)
+            if priorEntry is None:
+                break
+
             id = priorEntry.getAppID()
             if priorEntry.getCount() >= requiredReviews:
                 batch.pop(id, None)
@@ -89,23 +84,24 @@ class AggregatorTypes(Enum):
                     toSend.append(priorEntry)
             
             batch.pop(id, None)
-            self.storeEntry(entryToWrite, priorResultsPath, fragment, written)
-
+            self.storeEntry(entryToWrite, priorResultsPath)
+            
         for remainingEntry in batch.values():
             if remainingEntry.getCount() >= requiredReviews:
                 toSend.append(priorEntry)
-            self.storeEntry(remainingEntry, priorResultsPath, fragment, written)
+            self.storeEntry(remainingEntry, priorResultsPath)
+        
+        self.saveNewResults(priorResultsPath)
         return toSend
 
     def getOSCountResults(self, entryType, priorResultsPath, entry, isDone):
-        generator = self.loadState(entryType, priorResultsPath)
-        fragment = self.getFragment(generator)
-        fragment += 1
+        generator = self.loadEntries(entryType, priorResultsPath)
         priorResult = nextRow(generator)
         if priorResult is None:
             priorResult = self.getInitialResults()
         priorResult.sumEntry(entry)
-        self.storeEntry(priorResult, priorResultsPath, fragment, 0)
+        self.storeEntry(priorResult, priorResultsPath)
+        os.rename(priorResultsPath + '.tmp', priorResultsPath + '.csv')
         if not isDone:
             return []
         return [priorResult]
@@ -123,5 +119,5 @@ class AggregatorTypes(Enum):
         match self:
             case AggregatorTypes.OS | AggregatorTypes.ENGLISH:
                 return HeaderWithQueryNumber.fromAnother(header, _queryNumber=int(os.getenv('QUERY_NUMBER')))
-            case AggregatorTypes.INDIE:
+            case _:
                 return header

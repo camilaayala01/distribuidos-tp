@@ -83,8 +83,7 @@ class Joiner(StatefulNode):
         self._currentClient.storeGamesEntries(entries)
 
     def shouldSendPackets(self, toSend):
-        return (self._currentClient.finishedReceiving() or 
-                (not self._currentClient.finishedReceiving() and toSend is not None))
+        return toSend is not None
     
     def handleSending(self):
         currClient = self._currentClient
