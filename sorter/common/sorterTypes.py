@@ -20,7 +20,7 @@ class SorterType(Enum):
             case SorterType.PLAYTIME | SorterType.INDIE:
                 return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')), getClientIdUUID(clientId))
             case _:
-                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), getClientIdUUID(clientId))        
+                return MultiTracker(getClientIdUUID(clientId))        
 
     def requireController(self) -> PacketTracker:
         match self:

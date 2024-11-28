@@ -21,7 +21,7 @@ class AggregatorTypes(Enum):
             case AggregatorTypes.OS:
                 return DefaultTracker(getClientIdUUID(clientId))
             case _:
-                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), getClientIdUUID(clientId))
+                return MultiTracker(getClientIdUUID(clientId))
             
     def getInitialResults(self):
         match self:

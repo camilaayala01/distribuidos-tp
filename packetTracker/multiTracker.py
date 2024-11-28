@@ -3,7 +3,7 @@ from packetTracker.defaultTracker import DefaultTracker
 from packetTracker.tracker import TrackerInterface
 
 class MultiTracker(TrackerInterface):
-    def __init__(self, priorNodeCount: int, storagePath: str):
+    def __init__(self, storagePath: str):
         self._storagePath = storagePath
         self._trackers = {}
 

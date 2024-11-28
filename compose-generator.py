@@ -193,7 +193,6 @@ def add_aggregator_english(compose: dict[str, Any]):
                                           entry_type='EntryAppIDNameReviewCount', 
                                           aggregator_type=AggregatorTypes.ENGLISH.value,
                                           query_number=4,
-                                          prior_node_count=os.getenv("JOIN_ACT_COUNT"),
                                           required_reviews=5000)
     return compose, [container_name]
 
@@ -203,8 +202,7 @@ def add_aggregator_indie(compose: dict[str, Any]):
                                           next_nodes=f"{os.getenv('SORT_INDIE')},{os.getenv('SORT_INDIE_COUNT')},{ShardingAttribute.FRAGMENT_NUMBER.value}", 
                                           header_type ='HeaderWithSender', 
                                           entry_type='EntryNameReviewCount', 
-                                          aggregator_type=AggregatorTypes.INDIE.value,
-                                          prior_node_count=os.getenv("JOIN_INDIE_COUNT"))
+                                          aggregator_type=AggregatorTypes.INDIE.value)
 
     return compose, [container_name]
 
@@ -362,7 +360,6 @@ def add_sorter_consolidator_avg_playtime(compose: dict[str, Any]):
                                    header_type= 'HeaderWithSender', 
                                    entry_type='EntryNameAvgPlaytime',
                                    sorter_type=f'{SorterType.CONSOLIDATOR_PLAYTIME.value}',
-                                   prior_node_count=f'{os.getenv("SORT_AVG_PT_COUNT")}',
                                    top_amount=f'{os.getenv("SORT_AVG_PT_TOP")}',
                                    query_number=2)
 
@@ -372,8 +369,7 @@ def add_sorter_consolidator_indie(compose: dict[str, Any]):
                                    next_headers='HeaderWithQueryNumber',
                                    header_type='HeaderWithSender',
                                    entry_type='EntryNameReviewCount', 
-                                   sorter_type=f'{SorterType.CONSOLIDATOR_INDIE.value}', 
-                                   prior_node_count=f'{os.getenv("SORT_INDIE_COUNT")}',
+                                   sorter_type=f'{SorterType.CONSOLIDATOR_INDIE.value}',
                                    top_amount=f'{os.getenv("SORT_INDIE_TOP")}', 
                                    query_number=3)
 
@@ -381,8 +377,7 @@ def add_sorter_consolidator_action_percentile(compose: dict[str, Any]):
     return add_sorter_consolidator_percentile(compose, 
                                               next_nodes=f"{os.getenv('DISP')}", 
                                               header_type='HeaderWithSender', entry_type='EntryAppIDNameReviewCount', 
-                                              sorter_type=f'{SorterType.CONSOLIDATOR_PERCENTILE.value}', 
-                                              prior_node_count=f'{os.getenv("JOIN_PERC_COUNT")}', 
+                                              sorter_type=f'{SorterType.CONSOLIDATOR_PERCENTILE.value}',
                                               percentile=f'{os.getenv("CONS_PERC")}', 
                                               query_number=5, 
                                               next_headers='HeaderWithQueryNumber')
