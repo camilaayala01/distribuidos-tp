@@ -22,6 +22,12 @@ class Sorter(StatefulNode):
             self._eofController = EofController(int(os.getenv('NODE_ID')), os.getenv('LISTENING_QUEUE'), int(os.getenv('NODE_COUNT')), self._sendingStrategies)
             self._eofController.execute()
 
+    def stop(self, _signum, _frame):
+        if self._sorterType.requireController():
+            self._eofController.terminateProcess(self._internalCommunication)
+        super().stop(_signum, _frame)
+        
+
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 

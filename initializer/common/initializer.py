@@ -1,4 +1,5 @@
 import logging
+from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
 from entryParsing.reviewEntry import ReviewEntry
@@ -19,9 +20,12 @@ class Initializer:
         self._gamesSendingStrategies = createStrategiesFromNextNodes('GAMES_NEXT_NODES', 'GAMES_NEXT_ENTRIES', 'GAMES_NEXT_HEADERS')
         self._reviewsSendingStrategies = createStrategiesFromNextNodes('REVIEWS_NEXT_NODES', 'REVIEWS_NEXT_ENTRIES')
         self._internalCommunication = InternalCommunication(queueName, os.getenv('NODE_ID'))
+        self._healthcheckAnswerController = HealthcheckAnswerController()
+        self._healthcheckAnswerController.execute()      
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
+        self._healthcheckAnswerController.stop()
 
     def separatePositiveAndNegative(self, reviews: list[ReviewEntry]):
         positiveReviewEntries, negativeReviewEntries = [], []
@@ -34,7 +38,7 @@ class Initializer:
 
     def handleDataMessage(self, body):
         header, data = self._headerType.deserialize(body)
-        if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
+        if header.getFragmentNumber() % PRINT_FREQUENCY == 0 or header.getFragmentNumber() == 1:
             logging.info(f'action: received msg corresponding to table {header.getTable()} | {header}')
 
         if header.isGamesTable():

@@ -1,5 +1,6 @@
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID
+from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 from statefulNode.statefulNode import StatefulNode
 from .activeClient import ActiveClient
 from entryParsing.common.header import Header
@@ -13,7 +14,7 @@ class Aggregator(StatefulNode):
         super().__init__()
         self._aggregatorType = AggregatorTypes(int(os.getenv('AGGREGATOR_TYPE')))
         self._entryType = getEntryTypeFromEnv()
-        self._headerType = getHeaderTypeFromEnv()        
+        self._headerType = getHeaderTypeFromEnv()  
 
     def sendToNext(self, header: HeaderInterface, entries: list[EntryInterface]):
         for strategy in self._sendingStrategies:

@@ -2,8 +2,9 @@ from enum import Enum
 MESSAGE_TYPE_LEN = 1
 
 class InternalMessageType(Enum):
-    DATA_TRANSFER = 0 # sending info
-    CLIENT_FLUSH = 1 # remove client from actives
+    SHUTDOWN = 0
+    DATA_TRANSFER = 1 # sending info
+    CLIENT_FLUSH = 2 # remove client from actives
 
     def serialize(self):
         return self.value.to_bytes(MESSAGE_TYPE_LEN,'big')

@@ -29,6 +29,9 @@ class PacketTracker(TrackerInterface):
     def isDone(self):
         return len(self._pending) == 0 and self._receivedEnd
     
+    def __repr__(self):
+        return f"Max: {self._biggestFragment}, Pending: {self._pending}, Eof: {self._receivedEnd}"
+    
     def reset(self):
         self._biggestFragment = 0
         self._pending = set()

@@ -22,6 +22,7 @@ class AccumulatedBatches:
     def accumulate(self, tag, header: HeaderInterface, batch) -> bool:
         if header.getClient() != self._clientId:
             return False
+        
         self._pendingTags.append(tag)
         match header.getTable():
             case Table.GAMES:

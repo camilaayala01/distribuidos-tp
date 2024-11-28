@@ -28,10 +28,8 @@ class Joiner(StatefulNode):
         self._accumulatedBatches = None
 
     def stop(self, _signum, _frame):
-        for client in self._activeClients.values():
-            client.destroy()
         self._eofController.terminateProcess(self._internalCommunication)
-        self._internalCommunication.stop()
+        super().stop(_signum, _frame)
         
     """keeps the client if there is one, set a new one if there's not"""
     def setCurrentClient(self, clientId: bytes):
@@ -121,19 +119,19 @@ class Joiner(StatefulNode):
         
         if self._currentClient.isGamesDone():
             self._currentClient.removeUnjoinedReviews()
+
         toAck = self._accumulatedBatches.toAck()
-        self._activeClients[self._accumulatedBatches.getClient()] = self._currentClient
+        self._activeClients[self._accumulatedBatches._clientId] = self._currentClient
         self._accumulatedBatches = None
         return toAck
     
     def shouldProcessAccumulated(self):
         return self._accumulatedBatches.accumulatedLen() == PREFETCH_COUNT or self._currentClient.finishedReceiving()
     
-    
     def deleteAccumulated(self, clientToRemove):        
         if self._accumulatedBatches and clientToRemove == self._accumulatedBatches.getClient():
             self._internalCommunication.ackAll(self._accumulatedBatches.toAck())
-        self._accumulatedBatches = None
+            self._accumulatedBatches = None
            
     def processDataPacket(self, header, batch, tag, channel):
         clientId = header.getClient()
@@ -144,21 +142,19 @@ class Joiner(StatefulNode):
             # reset accumulated and set client to correspond to the most recent packet
             self.setAccumulatedBatches(tag, header, batch)
             self.setNewClient(clientId)
-            self._currentClient.updateTracker(header)
-            return
-
-        if header.getFragmentNumber() % PRINT_FREQUENCY == 0:
-            logging.info(f'action: received batch from table {header.getTable()} | {header} | result: success')
 
         self._currentClient.updateTracker(header)
+
         if not self.shouldProcessAccumulated():
+            self._activeClients[self._accumulatedBatches.getClient()] = self._currentClient
             return
-    
+
         self._internalCommunication.ackAll(self.processPendingBatches())
 
         if self._currentClient.finishedReceiving():
-            logging.info(f'action: finished receiving data from client {clientId}| result: success')
+            logging.info(f'action: finished receiving data from client {getClientIdUUID(clientId)}| result: success')
             self._eofController.finishedProcessing(self._currentClient._fragment, clientId, self._internalCommunication)
             self._currentClient.destroy()
+            self._currentClient = None
             self._activeClients.pop(clientId)
 

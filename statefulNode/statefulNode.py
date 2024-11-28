@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 import os
 import time
+from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.utils import initializeLog
+from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
 from internalCommunication.internalMessageType import InternalMessageType
@@ -17,11 +19,18 @@ class StatefulNode(ABC):
         self._deletedClients = {} # client id: timestamp of the first time flush was seen
         self._activeClients = {}
         self._currentClient = None
+        self._healthcheckAnswerController = HealthcheckAnswerController()
+        self._healthcheckAnswerController.execute()      
+    
+    def deleteIsEmpty(self):
+        return len(self._deletedClients) == 0
         
     def stop(self, _signum, _frame):
         for client in self._activeClients.values():
             client.destroy()
         self._internalCommunication.stop()
+        print("voy a parar todo")
+        self._healthcheckAnswerController.stop()
         
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
@@ -33,11 +42,13 @@ class StatefulNode(ABC):
     def handleFlushQueuingAndPropagation(self, clientToRemove, tag, channel):
         if clientToRemove in self._deletedClients:
             if time.perf_counter() - self._deletedClients[clientToRemove] > DELETE_TIMEOUT:
+                print(f"flush for {getClientIdUUID(clientToRemove)} is done")
                 channel.basic_ack(delivery_tag = tag)
                 self._deletedClients.pop(clientToRemove, None)
             else:
                 self._internalCommunication.requeuePacket(tag)
         else:
+            print(f"received flush for {getClientIdUUID(clientToRemove)} is done")
             self._deletedClients[clientToRemove] = time.perf_counter()
             self._internalCommunication.requeuePacket(tag)
             for strategy in self._sendingStrategies:
@@ -52,6 +63,7 @@ class StatefulNode(ABC):
         self.deleteAccumulated(clientToRemove)
         if clientToRemove in self._activeClients:
             client = self._activeClients.pop(clientToRemove)
+            print(f"deleting {client._clientId}")
             client.destroy()
             
         self.handleFlushQueuingAndPropagation(clientToRemove, tag, channel)
@@ -63,16 +75,19 @@ class StatefulNode(ABC):
     def handleDataMessage(self, channel, tag, body):
         header, batch = self._headerType.deserialize(body)
         clientId = header.getClient()
+        self.setCurrentClient(clientId)
+
         if clientId in self._deletedClients:
             channel.basic_ack(delivery_tag=tag)
             return
-        self.setCurrentClient(clientId)
-        
-        if self._currentClient.isDuplicate(header):
+
+        receivedClient = self._activeClients.get(clientId)
+        if receivedClient and receivedClient.isDuplicate(header):
             channel.basic_ack(delivery_tag=tag)
             return
         
         self.processDataPacket(header, batch, tag, channel)
+        
 
     def handleMessage(self, ch, method, _properties, body):
         msgType, msg = InternalMessageType.deserialize(body)

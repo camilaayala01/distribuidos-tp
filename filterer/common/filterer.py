@@ -1,6 +1,7 @@
 import os
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
+from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalMessageType import InternalMessageType
 from .filtererTypes import FiltererType
@@ -18,6 +19,8 @@ class Filterer:
         self._headerType = getHeaderTypeFromEnv()
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'))
         self._sendingStrategies = createStrategiesFromNextNodes()
+        self._healthcheckAnswerController = HealthcheckAnswerController()
+        self._healthcheckAnswerController.execute()      
 
     def _sendToNext(self, header: HeaderInterface, batch: list[EntryInterface]):
         for strategy in self._sendingStrategies:
@@ -25,6 +28,7 @@ class Filterer:
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
+        self._healthcheckAnswerController.stop()
 
     def handleDataMessage(self, body):
         header, data = self._headerType.deserialize(body)

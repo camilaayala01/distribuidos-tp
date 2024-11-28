@@ -11,6 +11,10 @@ class ActiveClient:
         self._folderPath = f"/{os.getenv('LISTENING_QUEUE')}/clientData/"
         os.makedirs(self._folderPath, exist_ok=True)
 
+    # TODO delete
+    def getTracker(self):
+        return self._tracker
+    
     def getClientIdBytes(self):
         return self._clientId.bytes
         

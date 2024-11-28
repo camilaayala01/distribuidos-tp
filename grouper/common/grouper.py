@@ -1,5 +1,6 @@
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
+from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalMessageType import InternalMessageType
 from .grouperTypes import GrouperType
@@ -18,9 +19,12 @@ class Grouper:
         self._headerType = getHeaderTypeFromEnv()
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'))
         self._sendingStrategies = createStrategiesFromNextNodes()
+        self._healthcheckAnswerController = HealthcheckAnswerController()
+        self._healthcheckAnswerController.execute()      
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
+        self._healthcheckAnswerController.stop()
     
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)

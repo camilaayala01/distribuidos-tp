@@ -19,11 +19,11 @@ purge-queues:
 .PHONY: purge-queues
 
 run:
-	docker compose -f docker-compose-test.yaml up --build
+	docker compose -f docker-compose-test2.yaml up --build
 .PHONY: run
 
 stop:
-	docker compose -f docker-compose-test.yaml stop -t 10
-	docker compose -f docker-compose-test.yaml down
+	docker compose -f docker-compose-test2.yaml stop -t 10
+	docker compose -f docker-compose-test2.yaml down
 	docker image prune -f
 .PHONY: stop
