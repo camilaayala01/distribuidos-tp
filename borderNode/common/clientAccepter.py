@@ -81,7 +81,6 @@ class ClientAccepter:
     def listenForClient(self):
         while not self._stopEvent.is_set():
             try:
-                print("listen ")
                 received = self._clientCommunication.receiveFromClient()
                 if received is None:
                     continue
