@@ -14,7 +14,8 @@ class Aggregator(StatefulNode):
         super().__init__()
         self._aggregatorType = AggregatorTypes(int(os.getenv('AGGREGATOR_TYPE')))
         self._entryType = getEntryTypeFromEnv()
-        self._headerType = getHeaderTypeFromEnv()  
+        self._headerType = getHeaderTypeFromEnv()
+        self._currentClient: ActiveClient = None  
 
     def sendToNext(self, header: HeaderInterface, entries: list[EntryInterface]):
         for strategy in self._sendingStrategies:
@@ -30,8 +31,8 @@ class Aggregator(StatefulNode):
         header = self._aggregatorType.getResultingHeader(self.getHeader(clientId))
         if self.shouldSendPackets(ready):
             self.sendToNext(header, ready)
-            # TODO write fragment in file
             self._currentClient._fragment += 1
+            self._currentClient.saveNewResults()
         self._activeClients[clientId] = self._currentClient
 
         if self._currentClient.finishedReceiving():
@@ -50,4 +51,5 @@ class Aggregator(StatefulNode):
         path = self._currentClient.partialResPath()
         toSend = self._aggregatorType.handleResults(entries, self._entryType, path, self._currentClient.finishedReceiving())
         self.handleSending(toSend, clientId)
+        self._currentClient.saveNewResults()
         channel.basic_ack(delivery_tag = tag)

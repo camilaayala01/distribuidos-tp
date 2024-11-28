@@ -11,10 +11,6 @@ class ActiveClient:
         self._folderPath = f"/{os.getenv('LISTENING_QUEUE')}/clientData/"
         os.makedirs(self._folderPath, exist_ok=True)
 
-    # TODO delete
-    def getTracker(self):
-        return self._tracker
-    
     def getClientIdBytes(self):
         return self._clientId.bytes
         
@@ -33,3 +29,9 @@ class ActiveClient:
     
     def isDuplicate(self, header: HeaderInterface) -> bool:
         return self._tracker.isDuplicate(header)
+    
+    def saveNewResults(self):
+        if os.path.exists(self.partialResPath() + '.tmp'):
+            os.rename(self.partialResPath() + '.tmp', self.partialResPath() + '.csv')
+
+    
