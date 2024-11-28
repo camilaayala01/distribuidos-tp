@@ -1,12 +1,15 @@
 import logging
 import os
+import csv
+import uuid
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from eofController.eofController import EofController
-from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, nextEntry
+from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, nextRow
 from statefulNode.statefulNode import StatefulNode
 from .sorterTypes import SorterType
 from .activeClient import ActiveClient
+
 
 PRINT_FREQUENCY=500
 DELETE_TIMEOUT = 5
@@ -23,9 +26,29 @@ class Sorter(StatefulNode):
             self._eofController = EofController(int(os.getenv('NODE_ID')), os.getenv('LISTENING_QUEUE'), int(os.getenv('NODE_COUNT')), self._sendingStrategies)
             self._eofController.execute()
 
+    def loadActiveClientsFromDisk(self):
+        dataDirectory = f"/{os.getenv('LISTENING_QUEUE')}/clientData/"
+        for filename in os.listdir(dataDirectory):
+            path = os.path.join(dataDirectory, filename)
+            if not os.path.isfile(path): 
+                continue
+            
+            if path.endswith('.tmp'):
+                os.remove(path)
+                continue
+            elif path.endswith('.csv'):
+                clientIdstr = path.removesuffix('.csv')
+            
+                with open(path, 'r') as file:
+                    reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
+                    packetTrackerRow = nextRow(reader)
+                    tracker = self._sorterType.loadTracker(packetTrackerRow)
+                    clientUUID = uuid.UUID(clientIdstr)
+                    self._activeClients[clientUUID.bytes] = ActiveClient(clientUUID, self._entryType, tracker)
+                    
     def stop(self, _signum, _frame):
         if self._sorterType.requireController():
-            self._eofController.terminateProcess(self._internalCommunication)
+           self._eofController.terminateProcess(self._internalCommunication)
         super().stop(_signum, _frame)
         
     def execute(self):
@@ -48,7 +71,7 @@ class Sorter(StatefulNode):
     def drainTop(self, entriesGenerator, topEntry, savedAmount):
         while self.topHasCapacity(savedAmount) and topEntry is not None:
             self._currentClient.storeEntry(topEntry) #considerar no escribir todo el tiempo, acumular varias
-            topEntry = nextEntry(entriesGenerator)
+            topEntry = nextRow(entriesGenerator)
             savedAmount += 1
         return savedAmount
 
@@ -68,12 +91,12 @@ class Sorter(StatefulNode):
         savedAmount = 0
 
         entriesGen = self._currentClient.loadEntries()
-        topEntry = nextEntry(entriesGen)
+        topEntry = nextRow(entriesGen)
 
         while topEntry is not None and j < len(newBatchTop) and self.topHasCapacity(savedAmount):
             if self.mustElementGoFirst(topEntry, newBatchTop[j]):
                 self._currentClient.storeEntry(topEntry)
-                topEntry = nextEntry(entriesGen)
+                topEntry = nextRow(entriesGen)
             else:
                 self._currentClient.storeEntry(newBatchTop[j])
                 j += 1
@@ -111,7 +134,7 @@ class Sorter(StatefulNode):
         self._currentClient = self._activeClients.setdefault(clientId, 
                                                              ActiveClient(getClientIdUUID(clientId),
                                                                           self._entryType,
-                                                                          self._sorterType))
+                                                                          self._sorterType.initializeTracker(clientId)))
         
     def processDataPacket(self, header, batch, tag, channel):
         clientId = header.getClient() 

@@ -4,7 +4,7 @@ import os
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
-from entryParsing.common.utils import nextEntry
+from entryParsing.common.utils import nextRow
 from entryParsing.entry import EntryInterface
 from entryParsing.entryOSCount import EntryOSCount
 from packetTracker.defaultTracker import DefaultTracker
@@ -101,7 +101,7 @@ class AggregatorTypes(Enum):
         generator = self.loadState(entryType, priorResultsPath)
         fragment = self.getFragment(generator)
         fragment += 1
-        priorResult = nextEntry(generator)
+        priorResult = nextRow(generator)
         if priorResult is None:
             priorResult = self.getInitialResults()
         priorResult.sumEntry(entry)

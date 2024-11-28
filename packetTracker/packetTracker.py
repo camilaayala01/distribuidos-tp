@@ -10,23 +10,12 @@ class PacketTracker(TrackerInterface):
         self._pending = set()
         self._receivedEnd = False
     
-
     @classmethod
-    def initialize(cls, filepath, nodesInCluster: int, module: int) -> TrackerInterface:
-        generator = readRow(filepath) 
-        if generator is None:
-            return cls(nodesInCluster, module)
-        trackerCount = int(next(generator))
-        if trackerCount != 1:
-            raise ValueError("The packet tracker can only have only one row")
-        row = next(generator)
-        return cls.fromStorage(nodesInCluster, module, row)
-    
-    @classmethod
-    def fromStorage(cls, nodesInCluster: int, module: int, row):
+    #[biggestFragment,pending,receivedEnd]
+    def fromStorage(cls, nodesInCluster: int, module: int, row: list[str]):
         tracker = cls(nodesInCluster, module)
         tracker._biggestFragment = int(row[0])
-        tracker._pending = set(list[map(lambda frag: int(frag), row[1])])
+        tracker._pending = eval(row[1])
         tracker._receivedEnd = bool(row[2])
         return tracker
 
@@ -49,12 +38,7 @@ class PacketTracker(TrackerInterface):
 
     def isDone(self):
         return len(self._pending) == 0 and self._receivedEnd
-    
-    def asRows(self):
-        rows = [1]
-        rows.extend([self._biggestFragment, str(self._pending), self._receivedEnd])
-        return rows
-
+        
     def __repr__(self):
         return f"Max: {self._biggestFragment}, Pending: {self._pending}, Eof: {self._receivedEnd}"
     
@@ -62,3 +46,7 @@ class PacketTracker(TrackerInterface):
         self._biggestFragment = 0
         self._pending = set()
         self._receivedEnd = False
+    
+    def asCSVRow(self):
+        return self.__dict__.values()
+    

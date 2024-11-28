@@ -2,7 +2,7 @@ from collections import defaultdict
 import logging
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID
-from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextEntry
+from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextRow
 from entryParsing.entry import EntryInterface
 from eofController.eofController import EofController
 from statefulNode.statefulNode import StatefulNode
@@ -54,7 +54,7 @@ class Joiner(StatefulNode):
 
         generator = self._currentClient.loadGamesEntries(self._gamesEntry)
         while True:
-            game = nextEntry(generator)
+            game = nextRow(generator)
             if game is None or not len(batch):
                 break
             id = game._appID

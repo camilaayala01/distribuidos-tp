@@ -4,7 +4,7 @@ from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.table import Table
 from entryParsing.entry import EntryInterface
 from packetTracker.defaultTracker import DefaultTracker
-from entryParsing.common.utils import copyFile, nextEntry
+from entryParsing.common.utils import copyFile, nextRow
 import os
 import csv
 
@@ -109,7 +109,7 @@ class ActiveClient:
         generator = self.loadJoinedEntries(entryType)
         writer = csv.writer(newResults, quoting=csv.QUOTE_MINIMAL)
         while True:
-            entry = nextEntry(generator)
+            entry = nextRow(generator)
             if not entry:
                 break
             if entry.getAppID() in joinedEntries:
