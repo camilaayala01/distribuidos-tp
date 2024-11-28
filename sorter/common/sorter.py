@@ -10,13 +10,13 @@ from statefulNode.statefulNode import StatefulNode
 from .sorterTypes import SorterType
 from .activeClient import ActiveClient
 
-
 PRINT_FREQUENCY=500
 DELETE_TIMEOUT = 5
 
 class Sorter(StatefulNode):
     def __init__(self):
         super().__init__()
+        self.loadActiveClientsFromDisk()
         self._currentClient: ActiveClient = None
         self._sorterType = SorterType(int(os.getenv('SORTER_TYPE')))
         self._entryType = getEntryTypeFromEnv()
@@ -28,6 +28,9 @@ class Sorter(StatefulNode):
 
     def loadActiveClientsFromDisk(self):
         dataDirectory = f"/{os.getenv('LISTENING_QUEUE')}/clientData/"
+        if not os.path.exists(dataDirectory) or not os.path.isdir(dataDirectory):
+            return
+        
         for filename in os.listdir(dataDirectory):
             path = os.path.join(dataDirectory, filename)
             if not os.path.isfile(path): 
@@ -36,9 +39,9 @@ class Sorter(StatefulNode):
             if path.endswith('.tmp'):
                 os.remove(path)
                 continue
+            
             elif path.endswith('.csv'):
                 clientIdstr = path.removesuffix('.csv')
-            
                 with open(path, 'r') as file:
                     reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
                     packetTrackerRow = nextRow(reader)
@@ -70,35 +73,36 @@ class Sorter(StatefulNode):
 
     def drainTop(self, entriesGenerator, topEntry, savedAmount):
         while self.topHasCapacity(savedAmount) and topEntry is not None:
-            self._currentClient.storeEntry(topEntry) #considerar no escribir todo el tiempo, acumular varias
+            self._currentClient.storeEntry(topEntry)  
             topEntry = nextRow(entriesGenerator)
             savedAmount += 1
         return savedAmount
 
     def drainNewBatch(self, currElement, savedAmount, newBatchTop):
         while currElement < len(newBatchTop) and self.topHasCapacity(savedAmount):
-            self._currentClient.storeEntry(newBatchTop[currElement])
+            self._currentClient.storeEntry(newBatchTop[currElement]) 
             currElement += 1
             savedAmount += 1
         return savedAmount
 
     def mergeKeepTop(self, batch: list[EntrySorterTopFinder]):
+        # open file
         if len(batch) == 0:
             return
-        
+        self._currentClient.openFile()
         newBatchTop = self.getBatchTop(batch)
         j = 0
         savedAmount = 0
 
         entriesGen = self._currentClient.loadEntries()
         topEntry = nextRow(entriesGen)
-
+        
         while topEntry is not None and j < len(newBatchTop) and self.topHasCapacity(savedAmount):
             if self.mustElementGoFirst(topEntry, newBatchTop[j]):
-                self._currentClient.storeEntry(topEntry)
+                self._currentClient.storeEntry(topEntry) 
                 topEntry = nextRow(entriesGen)
             else:
-                self._currentClient.storeEntry(newBatchTop[j])
+                self._currentClient.storeEntry(newBatchTop[j]) 
                 j += 1
             savedAmount += 1
         
@@ -110,7 +114,7 @@ class Sorter(StatefulNode):
             savedAmount = self.drainNewBatch(j, savedAmount, newBatchTop)
         
         self._currentClient.newSavedAmount(savedAmount)
-        
+        self._currentClient.closeFile()
 
     def sendToNext(self, generator):
         extraParamsForHeader = self._sorterType.extraParamsForHeader()
@@ -134,7 +138,7 @@ class Sorter(StatefulNode):
         self._currentClient = self._activeClients.setdefault(clientId, 
                                                              ActiveClient(getClientIdUUID(clientId),
                                                                           self._entryType,
-                                                                          self._sorterType.initializeTracker(clientId)))
+                                                                          self._sorterType.initializeTracker()))
         
     def processDataPacket(self, header, batch, tag, channel):
         clientId = header.getClient() 

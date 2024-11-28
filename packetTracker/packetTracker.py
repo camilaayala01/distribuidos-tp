@@ -1,4 +1,3 @@
-from entryParsing.common.fieldParsing import readRow
 from entryParsing.common.header import Header
 from packetTracker.tracker import TrackerInterface
 

@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
-import re
 
 from entryParsing.common.header import Header
-from packetTracker.defaultTracker import DefaultTracker
 
 class TrackerInterface(ABC):
     @abstractmethod

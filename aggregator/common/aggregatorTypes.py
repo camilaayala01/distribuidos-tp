@@ -16,12 +16,12 @@ class AggregatorTypes(Enum):
     ENGLISH = 1
     INDIE = 2
     
-    def initializeTracker(self, clientId: bytes) -> PacketTracker:
+    def initializeTracker(self) -> PacketTracker:
         match self:
             case AggregatorTypes.OS:
-                return DefaultTracker(getClientIdUUID(clientId))
+                return DefaultTracker()
             case _:
-                return MultiTracker(getClientIdUUID(clientId))
+                return MultiTracker()
             
     def getInitialResults(self):
         match self:
@@ -37,7 +37,7 @@ class AggregatorTypes(Enum):
         with open(filepath, 'a+') as file:
             writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
             if written == 0:
-                writer.writerow(fragment)
+                writer.writerow([fragment])
             writer.writerow(entry.__dict__.values())
         written += 1
 

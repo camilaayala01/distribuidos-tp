@@ -13,8 +13,8 @@ class ActiveClient:
         self._clientId = clientId
         self._fragment = 1
         self._joinedEntries = {} #appid, entry[]
-        self._gamesTracker = DefaultTracker(clientId)
-        self._reviewsTracker = DefaultTracker(clientId)
+        self._gamesTracker = DefaultTracker()
+        self._reviewsTracker = DefaultTracker()
         self._folderPath = f"/{os.getenv('LISTENING_QUEUE')}/{clientId}/"
         os.makedirs(self._folderPath, exist_ok=True)
 

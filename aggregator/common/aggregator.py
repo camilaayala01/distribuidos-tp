@@ -42,7 +42,7 @@ class Aggregator(StatefulNode):
         self._currentClient = self._activeClients.setdefault(clientId, 
                                                              ActiveClient(getClientIdUUID(clientId), 
                                                                           self._aggregatorType.getInitialResults(), 
-                                                                          self._aggregatorType.initializeTracker(clientId)))
+                                                                          self._aggregatorType.initializeTracker()))
         
     def processDataPacket(self, header, batch, tag, channel):
         clientId = header.getClient()

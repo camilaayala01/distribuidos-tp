@@ -50,6 +50,7 @@ class SorterType(Enum):
         entryIndex = 0
         with open(filepath, 'w+') as file:
             writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
+            writer.writerow()
             while currEntry is not None and entryIndex < index:
                 writer.writerow(EntryAppIDName.fromAnother(currEntry).__dict__.values())
                 entryIndex +=1
