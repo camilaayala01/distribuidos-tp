@@ -65,33 +65,28 @@ class ClientCommunication:
         self.sendDataToServer(header.serialize() + data)
         while retries < MAX_TIMEOUTS:
             try:
-                self.waitForServerAck(header)
-            except:
+                if not self.waitForServerAck(header):
+                    continue
+                return
+            except zmq.Again:
+                self.sendDataToServer(header.serialize() + data)
                 retries += 1
-                time.sleep(1)
-
 
     # TODO add sending retries and maybe delete max timeouts
     def waitForServerAck(self, sentHeader: ClientHeader):
-        timeoutCycles = 0
-        while timeoutCycles < MAX_TIMEOUTS:
-            try:
-                msg = self._socket.recv()
-                type, msg = MessageType.deserialize(msg)
-                match type:
-                    case MessageType.MESSAGE_ACK:
-                        header, _ = ClientHeader.deserialize(msg)
-                        if header.isEqual(sentHeader):
-                            return
-                    case MessageType.QUERY_RESPONSE:
-                        self._responsesObtained.append(msg)
-                    case _:
-                        raise Exception(f"Received a message of type {type} from server")
-            except zmq.Again:
-                timeoutCycles += 1
-                print("salto timeout")
-        
-        raise Exception(f"Couldn't send data correctly, server failed to ack message. tried:{timeoutCycles} times")
+        msg = self._socket.recv()
+        type, msg = MessageType.deserialize(msg)
+        match type:
+            case MessageType.MESSAGE_ACK:
+                header, _ = ClientHeader.deserialize(msg)
+                if header.isEqual(sentHeader):
+                    return True
+            case MessageType.QUERY_RESPONSE:
+                self._responsesObtained.append(msg)
+            case _:
+                raise Exception(f"Received a message of type {type} from server")
+        return False
+
 
     def sendTable(self, client, maxDataBytes, generatorFunction, table):
         # stop and wait logic, it sends one message at a time

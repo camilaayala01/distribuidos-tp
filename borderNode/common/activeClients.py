@@ -107,8 +107,6 @@ class ActiveClients:
 
     def getExpiredTimers(self, lastTimer: float) -> tuple[float, set[bytes]]:
         now = time.perf_counter()
-        print(now)
-        print(lastTimer)
         with self._clientsMonitorLock:
             expired = {clientId for clientId, clientTimer in self._clientMonitor.items() if lastTimer > clientTimer}
         return now, expired
