@@ -122,6 +122,7 @@ class Sorter(StatefulNode):
 
     def handleSending(self, clientId: bytes):
         if not self._currentClient.isDone():
+            self._activeClients[clientId] = self._currentClient
             return
         logging.info(f'action: received all required batches for {getClientIdUUID(clientId)} | active clients: {self._activeClients.keys()} | result: success')
         topGenerator, topAmount = self._currentClient.getResults()
@@ -138,13 +139,16 @@ class Sorter(StatefulNode):
                                                              ActiveClient(getClientIdUUID(clientId),
                                                                           self._entryType,
                                                                           self._sorterType.initializeTracker()))
+        if self._sorterType == SorterType.CONSOLIDATOR_PLAYTIME:
+            print(f"current client id: {self._currentClient._clientId}. tracker: {self._currentClient._tracker}")
         
     def processDataPacket(self, header, batch, tag, channel):
-        clientId = header.getClient() 
+        clientId = header.getClient()
+        if self._sorterType == SorterType.CONSOLIDATOR_PLAYTIME:
+            print(f"Header recibido: {header}")
         self._currentClient.update(header)
         entries = self._entryType.deserialize(batch)
         self.mergeKeepTop(entries)
-        self._activeClients[clientId] = self._currentClient
         self.handleSending(clientId)
         self._currentClient.saveNewTop()
         channel.basic_ack(delivery_tag = tag)
