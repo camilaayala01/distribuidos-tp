@@ -124,7 +124,7 @@ class Sorter(StatefulNode):
         if not self._currentClient.isDone():
             self._activeClients[clientId] = self._currentClient
             return
-        logging.info(f'action: received all required batches for {getClientIdUUID(clientId)} | active clients: {self._activeClients.keys()} | result: success')
+        logging.info(f'action: received all required batches for {getClientIdUUID(clientId)} | result: success')
         topGenerator, topAmount = self._currentClient.getResults()
         topGenerator = self._sorterType.preprocessPackets(topGenerator, topAmount)
         fragment = self.sendToNext(topGenerator)
