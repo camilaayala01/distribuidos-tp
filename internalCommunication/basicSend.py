@@ -27,6 +27,7 @@ class BasicSend(SendingStrategy):
         entryConverter = self._nextNode.entryForNextNode
         maxBytes = maxDataBytes(headerType)
         currPacket = bytes()
+
         try: 
             while True:
                 entry = next(generator)
@@ -40,6 +41,7 @@ class BasicSend(SendingStrategy):
                     currPacket = entryBytes
         except StopIteration:
             packet = headerType(_clientId=clientId, _fragment=fragment, _eof=hasEOF, **headerExtraArgs).serialize() + currPacket
+            fragment += 1
             self.sendDataBytes(middleware, packet)
         return fragment
     

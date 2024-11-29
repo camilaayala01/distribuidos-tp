@@ -14,8 +14,8 @@ class EofController:
         self._sendingStrategies = sendingStrategies
         self._nextQueue = self._nodeName + 'EOF' + str((self._nodeID + 1) % self._nodeAmount)
 
-    def finishedProcessing(self, lastFragment, clientID, nodeInternalCommunication):
-        eofMessage = HeaderWithSender(clientID, lastFragment + 1, True, self._nodeID).serialize()
+    def finishedProcessing(self, fragment, clientID, nodeInternalCommunication):
+        eofMessage = HeaderWithSender(clientID, fragment, True, self._nodeID).serialize()
         self._eofMessage[clientID] = eofMessage
         messageToSend = EOFControlMessage(EOFControlMessageType.EOF, clientID, self._nodeID).serialize()
         nodeInternalCommunication.basicSend(self._nextQueue, messageToSend)

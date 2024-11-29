@@ -30,8 +30,9 @@ class Aggregator(StatefulNode):
         if self.shouldSendPackets(ready):
             self.sendToNext(header, ready)
             self._currentClient._fragment += 1
-            self._currentClient.saveNewResults()
+        
         self._activeClients[clientId] = self._currentClient
+        self._currentClient.saveNewResults()
 
         if self._currentClient.finishedReceiving():
             self._activeClients.pop(clientId).destroy()
@@ -44,10 +45,11 @@ class Aggregator(StatefulNode):
         
     def processDataPacket(self, header, batch, tag, channel):
         clientId = header.getClient()
+        if self._aggregatorType == AggregatorTypes.ENGLISH:
+            print(f"Header recibido: {header}, client: {clientId}")
         self._currentClient.update(header)
         entries = self._entryType.deserialize(batch)
         path = self._currentClient.partialResPath()
         toSend = self._aggregatorType.handleResults(entries, self._entryType, path, self._currentClient.finishedReceiving())
         self.handleSending(toSend, clientId)
-        self._currentClient.saveNewResults()
         channel.basic_ack(delivery_tag = tag)

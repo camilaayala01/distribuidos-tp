@@ -154,6 +154,5 @@ class Joiner(StatefulNode):
             logging.info(f'action: finished receiving data from client {getClientIdUUID(clientId)}| result: success')
             self._eofController.finishedProcessing(self._currentClient._fragment, clientId, self._internalCommunication)
             self._currentClient = None
-            self._activeClients.pop(clientId)
-            # TODO: self._activeClients.pop(clientId).destroy()
+            self._activeClients.pop(clientId).destroy()
 

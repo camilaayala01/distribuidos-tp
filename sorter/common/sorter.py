@@ -131,21 +131,20 @@ class Sorter(StatefulNode):
         fragment = self.sendToNext(topGenerator)
         if self._sorterType.requireController():
             self._eofController.finishedProcessing(fragment, clientId, self._internalCommunication)
-        self._activeClients.pop(clientId)
-        # TODO self._activeClients.pop(clientId).destroy()
+        self._activeClients.pop(clientId).destroy()
     
     def setCurrentClient(self, clientId: bytes):
         self._currentClient = self._activeClients.setdefault(clientId, 
                                                              ActiveClient(getClientIdUUID(clientId),
                                                                           self._entryType,
                                                                           self._sorterType.initializeTracker()))
-        if self._sorterType == SorterType.CONSOLIDATOR_PLAYTIME:
-            print(f"current client id: {self._currentClient._clientId}. tracker: {self._currentClient._tracker}")
+        #if self._sorterType == SorterType.CONSOLIDATOR_PLAYTIME:
+        #    print(f"current client id: {self._currentClient._clientId}. tracker: {self._currentClient._tracker}")
         
     def processDataPacket(self, header, batch, tag, channel):
         clientId = header.getClient()
-        if self._sorterType == SorterType.CONSOLIDATOR_PLAYTIME:
-            print(f"Header recibido: {header}")
+        #if self._sorterType == SorterType.CONSOLIDATOR_PLAYTIME:
+        #    print(f"Header recibido: {header}")
         self._currentClient.update(header)
         entries = self._entryType.deserialize(batch)
         self.mergeKeepTop(entries)

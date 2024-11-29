@@ -52,9 +52,9 @@ class AggregatorTypes(Enum):
                     print("exception", e)
                     print(row)
       
-    def saveNewResults(self, priorResultsPath):
-        if os.path.exists(priorResultsPath + '.tmp'):
-            os.rename(priorResultsPath + '.tmp', priorResultsPath + '.csv')
+    # def saveNewResults(self, priorResultsPath):
+    #     if os.path.exists(priorResultsPath + '.tmp'):
+    #         os.rename(priorResultsPath + '.tmp', priorResultsPath + '.csv')
 
     def getEnglishCountResults(self, entryType, priorResultsPath, entries: list[EntryInterface]):
         toSend = []
@@ -91,7 +91,7 @@ class AggregatorTypes(Enum):
                 toSend.append(priorEntry)
             self.storeEntry(remainingEntry, priorResultsPath)
         
-        self.saveNewResults(priorResultsPath)
+        #self.saveNewResults(priorResultsPath)
         return toSend
 
     def getOSCountResults(self, entryType, priorResultsPath, entry, isDone):
