@@ -13,7 +13,7 @@ class PacketTracker(TrackerInterface):
     #[biggestFragment,pending,receivedEnd]
     def fromStorage(cls, nodesInCluster: int, module: int, row: list[str]):
         tracker = cls(nodesInCluster, module)
-        return tracker.setArgs(biggestFragment=int(row[0]))
+        return tracker.setFromRow(row)
 
     def setFromRow(self, row):
         self.setArgs(biggestFragment=int(row[0]), pending=eval(row[1]), receivedEnd=bool(row[2]))
