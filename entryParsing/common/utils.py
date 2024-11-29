@@ -1,8 +1,6 @@
 import os
 import importlib
-import math
 import logging
-from entryParsing.entry import EntryInterface
 import hashlib
 
 MAX_PACKET_SIZE = 8192

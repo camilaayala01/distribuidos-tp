@@ -1,25 +1,7 @@
-import datetime
-
-from entryParsing.common.fieldParsing import  serializeAppID, serializeGameName, serializeNumber, serializePlaytime, serializeReviewText, serializeVariableLen
+from entryParsing.common.fieldParsing import  floatToInt, parseDate, serializeAppID, serializeGameName, serializeNumber, serializePlaytime, serializeReviewText, serializeVariableLen, tryToFloat
 from entryParsing.common.utils import strToBoolInt
 from entryParsing.common import fieldLen
-from entryParsing.entry import EntryInterface
-
-def floatToInt(number) -> int:
-    return int(number * 100)
-        
-def tryToFloat(string)-> float:
-    try: 
-        return float(string)
-    except Exception:
-        return 0
-    
-def parseDate(string)-> datetime.datetime:
-    try:
-        return datetime.datetime.strptime(string,"%b %d, %Y").strftime("%d-%m-%Y")
-    except Exception:
-        return datetime.datetime.strptime("1 " + string, "%d %b %Y").strftime("%d-%m-%Y")
-            
+from entryParsing.entry import EntryInterface            
 
 class GameEntry(EntryInterface):
     def __init__(self, _appID, _name, _releaseDate, _estimatedOwners, _peakCCU, _reqAge, _price, _discCount, 

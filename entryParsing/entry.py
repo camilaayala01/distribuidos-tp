@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 import inspect
 
+from .mappers import DESERIALIZERS, SERIALIZERS
+
 class EntryInterface(ABC):
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
@@ -37,13 +39,45 @@ class EntryInterface(ABC):
         
         return cls(**validParams)
 
-    @abstractmethod
     def serialize(self) -> bytes:
-        pass
+        signatureConst = inspect.signature(self.__init__)
+        params = list(signatureConst.parameters.keys())
+        serialized_data = b""
+    
+        for field in params:
+            value = getattr(self, field)
+            if field in SERIALIZERS:
+                serialized_data += SERIALIZERS[field](value)
+            else:
+                raise ValueError(f"Serializer not found for field: {field}")
+        
+        return serialized_data
 
     @classmethod
-    @abstractmethod
+    def deserializeEntry(cls, curr: int, data: bytes):
+        signatureConst = inspect.signature(cls.__init__)
+        params = list(signatureConst.parameters.keys())[1:]
+
+        deserialized_data = {}
+        for field in params:
+            try:
+                if field in DESERIALIZERS:
+                    deserialized_data[field], curr = DESERIALIZERS[field](curr, data)
+                else:
+                    raise ValueError(f"Deserializer not found for field {field}")
+            except Exception as e:
+                raise ValueError(f"error deserializing field {field}: {e}")
+        
+        return cls(**deserialized_data), curr
+
+    @classmethod
     def deserialize(cls, data: bytes): 
-        pass
-
-
+        curr = 0
+        entries = []
+        while len(data) > curr:
+            try:
+                entry, curr = cls.deserializeEntry(curr, data)
+                entries.append(entry)
+            except Exception as e:
+                raise Exception(f"Can't deserialize entry: {e}")
+        return entries
