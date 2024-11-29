@@ -3,7 +3,7 @@ from .common import fieldParsing, fieldLen
 SERIALIZERS = {
     "_appID": fieldParsing.serializeAppID,
     "_name": fieldParsing.serializeGameName,
-    "_releaseDate": lambda x: fieldParsing.serializeVariableLen(x, fieldLen.DATE_LEN),
+    "_releaseDate": fieldParsing.serializeReleaseDate,
     "_estimatedOwners": lambda x: fieldParsing.serializeVariableLen(x, fieldLen.EST_OWN_LEN),
     "_peakCCU": lambda x: fieldParsing.serializeNumber(x, fieldLen.PEAK_CCU_BYTES),
     "_reqAge": lambda x: fieldParsing.serializeNumber(x, fieldLen.REQ_AGE_BYTES),
@@ -36,7 +36,7 @@ SERIALIZERS = {
     "_devs": lambda x: fieldParsing.serializeVariableLen(x, fieldLen.TEAM_LEN),
     "_pubs": lambda x: fieldParsing.serializeVariableLen(x, fieldLen.TEAM_LEN),
     "_categories": lambda x: fieldParsing.serializeVariableLen(x, fieldLen.GENRE_LEN),
-    "_genres": lambda x: fieldParsing.serializeVariableLen(x, fieldLen.GENRE_LEN),
+    "_genres": fieldParsing.serializeGenres,
     "_tags": lambda x: fieldParsing.serializeVariableLen(x, fieldLen.GENRE_LEN),
     "_screens": lambda x: fieldParsing.serializeVariableLen(x, fieldLen.MEDIA_LEN),
     "_movies": lambda x: fieldParsing.serializeVariableLen(x, fieldLen.MEDIA_LEN),

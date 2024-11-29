@@ -19,7 +19,7 @@ class ReducedGameEntry(EntryInterface):
             try:
                 appID, curr = fieldParsing.deserializeAppID(curr, data)
                 name, curr = fieldParsing.deserializeGameName(curr, data)
-                releaseDate, curr = fieldParsing.deserializeVariableLen(curr, data, fieldLen.DATE_LEN)
+                releaseDate, curr = fieldParsing.deserializeReleaseDate(curr, data)
                 
                 # skip unused variable len fields
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.EST_OWN_LEN)
@@ -58,7 +58,7 @@ class ReducedGameEntry(EntryInterface):
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.TEAM_LEN)
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.GENRE_LEN)
 
-                genres, curr = fieldParsing.deserializeVariableLen(curr, data, fieldLen.GENRE_LEN)
+                genres, curr = fieldParsing.deserializeGenres(curr, data)
 
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.GENRE_LEN)
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.MEDIA_LEN)
