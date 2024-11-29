@@ -18,7 +18,7 @@ class GrouperType(Enum):
                 macCount +=1
             if entry._linux:
                 linuxCount +=1
-        return [EntryOSCount(_windows=windowsCount, _mac=macCount, _linux=linuxCount, _total=len(entries))]
+        return [EntryOSCount(_windowsCount=windowsCount, _macCount=macCount, _linuxCount=linuxCount, _totalCount=len(entries))]
     
     def buildResultingEntry(self, entry: EntryInterface) -> EntryInterface:
         if self == GrouperType.APP_ID_NAME_COUNT:

@@ -16,21 +16,3 @@ class EntryAppIDNameReviewText(EntryInterface):
 
     def __str__(self):
         return f"EntryAppIDNameReviewText(appID={self._appID}, name={self._name}, reviewText={self._reviewText})"
-    
-    @classmethod
-    def deserialize(cls, data: bytes) -> list['EntryAppIDNameReviewText']: 
-        curr = 0
-        entries = []
-
-        while len(data) > curr:
-            try:
-                appID, curr = deserializeAppID(curr, data)
-                name, curr = deserializeGameName(curr, data)
-                reviewText, curr = deserializeReviewText(curr, data)
-                entries.append(EntryAppIDNameReviewText(appID, name, reviewText))
-                
-            except (IndexError, UnicodeDecodeError):
-                raise Exception("There was an error parsing data")
-
-        return entries
-    

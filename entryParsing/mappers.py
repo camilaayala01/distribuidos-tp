@@ -40,6 +40,12 @@ SERIALIZERS = {
     "_tags": lambda x: fieldParsing.serializeVariableLen(x, fieldLen.GENRE_LEN),
     "_screens": lambda x: fieldParsing.serializeVariableLen(x, fieldLen.MEDIA_LEN),
     "_movies": lambda x: fieldParsing.serializeVariableLen(x, fieldLen.MEDIA_LEN),
+    "_reviewCount": fieldParsing.serializeCount,
+    "_windowsCount": fieldParsing.serializeCount,
+    "_macCount":  fieldParsing.serializeCount,
+    "_linuxCount": fieldParsing.serializeCount, 
+    "_totalCount":  fieldParsing.serializeCount,
+    "_reviewText": fieldParsing.serializeReviewText
 }
 
 DESERIALIZERS = {
@@ -47,6 +53,7 @@ DESERIALIZERS = {
     "_name": fieldParsing.deserializeGameName,
     "_releaseDate": fieldParsing.deserializeReleaseDate,
     "_reviewText": fieldParsing.deserializeReviewText,
+    "_reviewCount":  fieldParsing.deserializeCount,
     "_reviewScore": fieldParsing.deserializeSignedInt,
     "_reviewVotes": lambda curr, data: fieldParsing.deserializeNumber(curr, data, fieldLen.VOTE_LEN),
     "_windows": fieldParsing.deserializeBoolean,
@@ -54,4 +61,8 @@ DESERIALIZERS = {
     "_linux": fieldParsing.deserializeBoolean,
     "_avgPlaytime": fieldParsing.deserializePlaytime,
     "_genres": fieldParsing.deserializeGenres,
+    "_windowsCount": fieldParsing.deserializeCount,
+    "_macCount":  fieldParsing.deserializeCount,
+    "_linuxCount": fieldParsing.deserializeCount, 
+    "_totalCount": fieldParsing.deserializeCount
 }

@@ -109,9 +109,9 @@ class AggregatorTypes(Enum):
     def handleResults(self, entries, entryType, priorResultsPath, isDone) -> list[EntryInterface]:
         match self:
             case AggregatorTypes.ENGLISH:
-                return self.getEnglishCountResults(entryType, priorResultsPath, entries)
+                return self.getEnglishCountResults(entryType, priorResultsPath, entries) # gets a list with only 1
             case AggregatorTypes.OS:
-                return self.getOSCountResults(entryType, priorResultsPath, entries, isDone)
+                return self.getOSCountResults(entryType, priorResultsPath, entries[0], isDone)
             case AggregatorTypes.INDIE:
                 return entries
 

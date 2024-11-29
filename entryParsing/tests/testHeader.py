@@ -41,13 +41,13 @@ class TestHeader(unittest.TestCase):
         serializedEntryOsCount = EntryOSCount(10, 600000, 500, 600200).serialize()
         data = serializedHeader + serializedEntryOsCount
         deserializedHeader, rest = Header.deserialize(data)
-        deserializedOsCount = EntryOSCount.deserialize(rest)
+        deserializedOsCount = EntryOSCount.deserialize(rest)[0]
         self.assertEqual(deserializedHeader._fragment, 10)
         self.assertTrue(deserializedHeader._eof)
-        self.assertEqual(deserializedOsCount._windows, 10)
-        self.assertEqual(deserializedOsCount._mac, 600000)
-        self.assertEqual(deserializedOsCount._linux, 500)
-        self.assertEqual(deserializedOsCount._total, 600200)
+        self.assertEqual(deserializedOsCount._windowsCount, 10)
+        self.assertEqual(deserializedOsCount._macCount, 600000)
+        self.assertEqual(deserializedOsCount._linuxCount, 500)
+        self.assertEqual(deserializedOsCount._totalCount, 600200)
     
 if __name__ == "__main__":
     unittest.main()

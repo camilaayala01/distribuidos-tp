@@ -13,11 +13,11 @@ class TestEntryOSCount(unittest.TestCase):
 
     def testSerializeAndDeserialize(self):
         serialized = self._entry.serialize()
-        deserialized = EntryOSCount.deserialize(serialized)
-        self.assertEqual(deserialized._windows, 10)
-        self.assertEqual(deserialized._mac, 600000)
-        self.assertEqual(deserialized._linux, 500)
-        self.assertEqual(deserialized._total, 600200)
+        deserialized = EntryOSCount.deserialize(serialized)[0]
+        self.assertEqual(deserialized._windowsCount, 10)
+        self.assertEqual(deserialized._macCount, 600000)
+        self.assertEqual(deserialized._linuxCount, 500)
+        self.assertEqual(deserialized._totalCount, 600200)
     
 if __name__ == "__main__":
     unittest.main()
