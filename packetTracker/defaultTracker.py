@@ -8,6 +8,6 @@ class DefaultTracker(PacketTracker):
     @classmethod
     #[biggestFragment,pending,receivedEnd]
     def fromStorage(cls, row: list[str]):
-        tracker = cls()
-        return tracker.setFromRow(row)
+        tracker = cls().setFromRow(row)
+        return tracker
     

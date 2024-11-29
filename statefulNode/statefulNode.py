@@ -83,7 +83,6 @@ class StatefulNode(ABC):
 
         receivedClient = self._activeClients.get(clientId)
         if receivedClient and receivedClient.isDuplicate(header):
-            print(f'header: {header} | {clientId}')
             channel.basic_ack(delivery_tag=tag)
             return
         

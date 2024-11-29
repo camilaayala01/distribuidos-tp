@@ -45,8 +45,6 @@ class Aggregator(StatefulNode):
         
     def processDataPacket(self, header, batch, tag, channel):
         clientId = header.getClient()
-        if self._aggregatorType == AggregatorTypes.ENGLISH:
-            print(f"Header recibido: {header}, client: {clientId}")
         self._currentClient.update(header)
         entries = self._entryType.deserialize(batch)
         path = self._currentClient.partialResPath()

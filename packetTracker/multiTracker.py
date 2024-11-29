@@ -12,8 +12,6 @@ class MultiTracker(TrackerInterface):
         return self._trackers[header.getSenderID()]
     
     def isDuplicate(self, header: HeaderWithSender):
-        if self.getProcessingTracker(header).isDuplicate(header):
-            print("Tracker state: ", self._trackers)
         return self.getProcessingTracker(header).isDuplicate(header)
 
     def update(self, header: HeaderWithSender):

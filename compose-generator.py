@@ -206,30 +206,19 @@ def add_aggregator_indie(compose: dict[str, Any]):
 
     return compose, [container_name]
 
-def add_border_node(compose: dict[str, Any], cluster_nodes):
-    compose['services']['border-node']= {
+def add_border_node(compose: dict[str, Any]):
+    container_name = "border-node"
+    compose['services'][container_name]= {
         'build': {
             'context': './borderNode',
             'dockerfile': '../zmqUser.Dockerfile'
         },
-        'environment':[
-            'PYTHONUNBUFFERED=1',
-            'PREFETCH_COUNT=1',
-            'NODE_NAME=border-node',
-            'STORAGE_PATH=/data/',
-            f'LISTENING_QUEUE={os.getenv("DISP")}'
-        ],
+        'environment': default_environment(os.getenv("DISP")) +  ['NODE_NAME=border-node','STORAGE_PATH=/data/'],
         'env_file': default_env_file(),
-        'volumes':[
-        './internalCommunication:/internalCommunication',
-        './entryParsing:/entryParsing',
-        './healthcheckAnswerController:/healthcheckAnswerController',
-        './borderNode/data:/data'
-        ],
-        'networks': default_network(),
-        'depends_on': cluster_nodes
+        'volumes': default_volumes() + ['./borderNode/data:/data'],
+        'networks': default_network()
     }
-    return compose
+    return compose, [container_name]
 
 def add_multiple(compose: dict[str, Any], count, generator_func, name, queue, **kwargs):
     containers = []
@@ -414,8 +403,9 @@ def add_joiner_action_english(compose: dict[str, Any]):
         containers.append(new_container)
     return compose, containers
 
-def add_monitor(compose: dict[str, Any], cluster_nodes, id):
-    compose['services'][f'monitor-{id}']= {
+def add_monitor(compose: dict[str, Any], cluster_nodes: list[str], id):
+    container_name = f'monitor-{id}'
+    compose['services'][container_name]= {
         'build': {
             'context': './monitor',
             'dockerfile': '../monitor.Dockerfile'
@@ -424,22 +414,26 @@ def add_monitor(compose: dict[str, Any], cluster_nodes, id):
             'PYTHONUNBUFFERED=1',
             'PREFETCH_COUNT=1',
             f'ID={id}',
-            f'TO_CHECK={";".join(cluster_nodes + ["border-node"])}'
+            f'TO_CHECK={";".join(cluster_nodes)}'
         ],
         'env_file': default_env_file(),
         'volumes':[
             '/var/run/docker.sock:/var/run/docker.sock'
         ],
         'networks': default_network(),
-        'depends_on': ['border-node']
+        'depends_on': cluster_nodes
     }
-    return compose
+    return compose, container_name
 
-def add_all_monitors(compose: dict[str, Any], cluster_nodes):
+def add_all_monitors(compose: dict[str, Any], containers):
     monitors_amount = 4
+    monitors = []
     for id in range(1, monitors_amount + 1):
-        compose = add_monitor(compose, cluster_nodes, id)
-    return compose
+        compose, new_container = add_monitor(compose, containers, id)
+        monitors.append(new_container)
+
+    monitors.extend(containers)
+    return compose, monitors
 
 def add_container(compose, containers, generation):
     compose, new_containers = generation(compose)
@@ -499,13 +493,17 @@ def generate_compose(output_file: str, client_number: int):
 
 
     # Border Node
-    compose = add_border_node(compose, cluster_nodes=containers)
+    compose, containers = add_container(compose, containers, generation=add_border_node)
 
     # Monitors
-    compose = add_all_monitors(compose, cluster_nodes=containers)
+    compose, containers = add_all_monitors(compose, containers=containers)
 
     with open(output_file, 'w') as file:
-        yaml.dump(compose, file,sort_keys=False, default_flow_style=False)
+        yaml.dump(compose, file, sort_keys=False, default_flow_style=False)
+    
+    with open("chaos.env", "w+") as file:
+        file.write(f'TO_CHECK={";".join(containers)}\n')
+        file.write(f'CONTAINER_NAME=distribuidos-tp')
 
 
 def main():

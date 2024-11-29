@@ -126,7 +126,6 @@ class Sorter(StatefulNode):
             return
         logging.info(f'action: received all required batches for {getClientIdUUID(clientId)} | active clients: {self._activeClients.keys()} | result: success')
         topGenerator, topAmount = self._currentClient.getResults()
-        print(f"top amount is {topAmount}")
         topGenerator = self._sorterType.preprocessPackets(topGenerator, topAmount)
         fragment = self.sendToNext(topGenerator)
         if self._sorterType.requireController():
@@ -138,13 +137,9 @@ class Sorter(StatefulNode):
                                                              ActiveClient(getClientIdUUID(clientId),
                                                                           self._entryType,
                                                                           self._sorterType.initializeTracker()))
-        #if self._sorterType == SorterType.CONSOLIDATOR_PLAYTIME:
-        #    print(f"current client id: {self._currentClient._clientId}. tracker: {self._currentClient._tracker}")
         
     def processDataPacket(self, header, batch, tag, channel):
         clientId = header.getClient()
-        #if self._sorterType == SorterType.CONSOLIDATOR_PLAYTIME:
-        #    print(f"Header recibido: {header}")
         self._currentClient.update(header)
         entries = self._entryType.deserialize(batch)
         self.mergeKeepTop(entries)

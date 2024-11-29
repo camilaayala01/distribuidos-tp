@@ -17,24 +17,6 @@ services:
     - sa_net
     depends_on:
     - border-node
-  client-2:
-    build:
-      context: ./client
-      dockerfile: ../zmqUser.Dockerfile
-    environment:
-    - PYTHONUNBUFFERED=1
-    - MAX_DATA_BYTES=51200
-    - REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv
-    - GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv
-    - AMOUNT_OF_EXECUTIONS=1
-    volumes:
-    - ./entryParsing:/entryParsing
-    - ~/.kaggle/distribuidos:/datasets
-    - ./client-2/responses:/responses
-    networks:
-    - sa_net
-    depends_on:
-    - border-node
   initializer-0:
     build:
       context: ./initializer
@@ -1008,9 +990,9 @@ services:
     environment:
     - PYTHONUNBUFFERED=1
     - PREFETCH_COUNT=1
+    - LISTENING_QUEUE=Dispatcher
     - NODE_NAME=border-node
     - STORAGE_PATH=/data/
-    - LISTENING_QUEUE=Dispatcher
     env_file:
     - .env
     volumes:
@@ -1020,7 +1002,22 @@ services:
     - ./borderNode/data:/data
     networks:
     - sa_net
-    depends_on:
+  monitor-1:
+    build:
+      context: ./monitor
+      dockerfile: ../monitor.Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    - PREFETCH_COUNT=1
+    - ID=1
+    - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
+    env_file:
+    - .env
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+    - sa_net
+    depends_on: &id001
     - initializer-0
     - initializer-1
     - initializer-2
@@ -1059,22 +1056,6 @@ services:
     - joiner-percentile-1
     - joiner-percentile-2
     - sorter-consolidator-percentile
-  monitor-1:
-    build:
-      context: ./monitor
-      dockerfile: ../monitor.Dockerfile
-    environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - ID=1
-    - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
-    env_file:
-    - .env
-    volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-    - sa_net
-    depends_on:
     - border-node
   monitor-2:
     build:
@@ -1091,8 +1072,7 @@ services:
     - /var/run/docker.sock:/var/run/docker.sock
     networks:
     - sa_net
-    depends_on:
-    - border-node
+    depends_on: *id001
   monitor-3:
     build:
       context: ./monitor
@@ -1108,8 +1088,7 @@ services:
     - /var/run/docker.sock:/var/run/docker.sock
     networks:
     - sa_net
-    depends_on:
-    - border-node
+    depends_on: *id001
   monitor-4:
     build:
       context: ./monitor
@@ -1125,8 +1104,7 @@ services:
     - /var/run/docker.sock:/var/run/docker.sock
     networks:
     - sa_net
-    depends_on:
-    - border-node
+    depends_on: *id001
 networks:
   sa_net:
     ipam:

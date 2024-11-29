@@ -25,10 +25,9 @@ class BorderNodeCommunication:
         self._clientSocket.close()
 
     def receiveFromClient(self):
-        with self._lock:
-            try:
-                return self._clientSocket.recv_multipart()
-            except zmq.Again:
-                return None
+        try:
+            return self._clientSocket.recv_multipart()
+        except zmq.Again:
+            return None
         # any other exception must be thrown
  
