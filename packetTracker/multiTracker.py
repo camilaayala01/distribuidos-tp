@@ -40,5 +40,5 @@ class MultiTracker(TrackerInterface):
         trackers = {}
         for tracker in row:
             attrs = eval(tracker)
-            trackers[attrs[0]] = DefaultTracker.fromStorage(attrs[1:])
+            trackers[attrs[0]] = DefaultTracker().setArgs(biggestFragment=attrs[1], pending=attrs[3], receivedEnd=attrs[3])
         return cls(trackers)

@@ -10,3 +10,4 @@ class DefaultTracker(PacketTracker):
     def fromStorage(cls, row: list[str]):
         tracker = cls()
         return tracker.setFromRow(row)
+    

@@ -123,7 +123,7 @@ class Sorter(StatefulNode):
     def handleSending(self, clientId: bytes):
         if not self._currentClient.isDone():
             return
-        logging.info(f'action: received all required batches for {clientId} | result: success')
+        logging.info(f'action: received all required batches for {getClientIdUUID(clientId)} | active clients: {self._activeClients.keys()} | result: success')
         topGenerator, topAmount = self._currentClient.getResults()
         print(f"top amount is {topAmount}")
         topGenerator = self._sorterType.preprocessPackets(topGenerator, topAmount)

@@ -13,12 +13,15 @@ class PacketTracker(TrackerInterface):
     #[biggestFragment,pending,receivedEnd]
     def fromStorage(cls, nodesInCluster: int, module: int, row: list[str]):
         tracker = cls(nodesInCluster, module)
-        return tracker.setFromRow(row)
+        return tracker.setArgs(biggestFragment=int(row[0]))
 
     def setFromRow(self, row):
-        self._biggestFragment = int(row[0])
-        self._pending = eval(row[1])
-        self._receivedEnd = bool(row[2])
+        self.setArgs(biggestFragment=int(row[0]), pending=eval(row[1]), receivedEnd=bool(row[2]))
+
+    def setArgs(self, biggestFragment: int, pending: set, receivedEnd: bool):
+        self._biggestFragment = biggestFragment
+        self._pending = pending
+        self._receivedEnd = receivedEnd
         
     def isDuplicate(self, header: Header):
         newFrag = header.getFragmentNumber()
