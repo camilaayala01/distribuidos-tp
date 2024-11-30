@@ -60,11 +60,9 @@ class Aggregator(StatefulNode):
         with open(self._currentClient.storagePath() + '.tmp', 'w+') as file:
             written = self._currentClient.storeTracker(file)
             if not len(entries):
-                print("copying file")
                 copyFileSkippingTracker(newResultsFile=file, 
                                         newResultsOffset=written, 
                                         oldFilePath=priorFile)
-                print("copied successfully")
                 # already copied fragment from last iteration
             else:
                 toSend = self._aggregatorType.handleResults(entries, 
