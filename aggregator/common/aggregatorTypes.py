@@ -15,12 +15,12 @@ class AggregatorTypes(Enum):
     ENGLISH = 1
     INDIE = 2
     
-    def initializeTracker(self) -> PacketTracker:
+    def trackerType(self) -> type:
         match self:
             case AggregatorTypes.OS:
-                return DefaultTracker()
+                return DefaultTracker
             case _:
-                return MultiTracker()
+                return MultiTracker
             
     def getInitialResults(self):
         match self:

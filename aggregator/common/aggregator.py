@@ -1,5 +1,8 @@
+import csv
 import os
+from uuid import UUID
 from entryParsing.common.fieldParsing import getClientIdUUID
+from packetTracker.tracker import TrackerInterface
 from statefulNode.statefulNode import StatefulNode
 from .activeClient import ActiveClient
 from entryParsing.common.header import Header
@@ -14,6 +17,15 @@ class Aggregator(StatefulNode):
         self._aggregatorType = AggregatorTypes(int(os.getenv('AGGREGATOR_TYPE')))
         self._entryType = getEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
+        self.loadActiveClientsFromDisk()
+    
+    def createTrackerFromRow(self, row):
+        return self._aggregatorType.trackerType().fromStorage(row)
+    
+    def createClient(self, filepath: str, clientId: UUID, tracker: TrackerInterface):
+        client = ActiveClient(clientId=clientId, tracker=tracker)
+        client.loadFragment(filepath=filepath)
+        return client
 
     def sendToNext(self, header: HeaderInterface, entries: list[EntryInterface]):
         for strategy in self._sendingStrategies:
@@ -37,19 +49,18 @@ class Aggregator(StatefulNode):
             self._activeClients.pop(clientId).destroy()
 
     def setCurrentClient(self, clientId: bytes):
+        trackerType = self._aggregatorType.trackerType()
         self._currentClient = self._activeClients.setdefault(clientId, 
-                                                             ActiveClient(getClientIdUUID(clientId), 
-                                                                          self._aggregatorType.getInitialResults(), 
-                                                                          self._aggregatorType.initializeTracker()))
+                                                             ActiveClient(getClientIdUUID(clientId),
+                                                                          trackerType()))
 
     def persistNewData(self, entries):
         priorFile = self._currentClient.storagePath() + '.csv'
         toSend = []
         with open(self._currentClient.storagePath() + '.tmp', 'w+') as file:
-            trackerLen = self._currentClient.storeTracker(file)
+            self._currentClient.storeTracker(file)
             if not len(entries):
-                copyFileSkippingTracker(newResultsFile=file, 
-                                        newResultsOffset=trackerLen, 
+                copyFileSkippingTracker(newResultsFile=file,  
                                         oldFilePath=priorFile)
                 # already copied fragment from last iteration
             else:

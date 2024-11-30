@@ -31,6 +31,12 @@ class Joiner(StatefulNode):
         self._eofController.terminateProcess(self._internalCommunication)
         super().stop(_signum, _frame)
         
+    def createTrackerFromRow(self, row): # TODO
+        raise NotImplementedError
+    
+    def createClient(self, filepath, clientId, tracker): # TODO
+        raise NotImplementedError
+    
     """keeps the client if there is one, set a new one if there's not"""
     def setCurrentClient(self, clientId: bytes):
         if self._currentClient:

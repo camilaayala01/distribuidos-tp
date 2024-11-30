@@ -25,29 +25,12 @@ class Sorter(StatefulNode):
             self._eofController = EofController(int(os.getenv('NODE_ID')), os.getenv('LISTENING_QUEUE'), int(os.getenv('NODE_COUNT')), self._sendingStrategies)
             self._eofController.execute()
 
-    def loadActiveClientsFromDisk(self):
-        dataDirectory = f"/{os.getenv('LISTENING_QUEUE')}/clientData/"
-        if not os.path.exists(dataDirectory) or not os.path.isdir(dataDirectory):
-            return
-        
-        for filename in os.listdir(dataDirectory):
-            path = os.path.join(dataDirectory, filename)
-            if not os.path.isfile(path): 
-                continue
-            
-            if path.endswith('.tmp'):
-                os.remove(path)
-                continue
-            
-            elif path.endswith('.csv'):
-                clientIdstr = filename.removesuffix('.csv')
-                with open(path, 'r') as file:
-                    reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
-                    packetTrackerRow = nextRow(reader)
-                    tracker = self._sorterType.loadTracker(packetTrackerRow)
-                    clientUUID = uuid.UUID(clientIdstr)
-                    self._activeClients[clientUUID.bytes] = ActiveClient(clientUUID, self._entryType, tracker)
-                    
+    def createTrackerFromRow(self, row):
+        return self._sorterType.loadTracker(row)
+    
+    def createClient(self, _file, clientId, tracker):
+        return ActiveClient(clientId, self._entryType, tracker)
+   
     def stop(self, _signum, _frame):
         if self._sorterType.requireController():
            self._eofController.terminateProcess(self._internalCommunication)
