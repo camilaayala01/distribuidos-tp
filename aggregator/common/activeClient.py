@@ -1,12 +1,13 @@
 import os
 import csv
 from entryParsing.common.header import HeaderInterface
+from entryParsing.common.utils import nextRow
 from packetTracker.tracker import TrackerInterface
 
 class ActiveClient:
-    def __init__(self, clientId, initialResults, tracker: TrackerInterface):
+    def __init__(self, clientId, initialResults, tracker: TrackerInterface, fragment: int = 1):
         self._clientId = clientId
-        self._fragment = 1 # TODO persistir :(
+        self._fragment = fragment
         self._tracker = tracker
         self._partialRes = initialResults
         self._folderPath = f"/{os.getenv('LISTENING_QUEUE')}/clientData/"
@@ -26,6 +27,12 @@ class ActiveClient:
         writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
         return writer.writerow(self._tracker.asCSVRow())
 
+    # sendingFragments is true if it will be sending data this time
+    def storeFragment(self, storageFile, sendingFragments: bool):
+        writer = csv.writer(storageFile, quoting=csv.QUOTE_MINIMAL)
+        # stores the fragment it will use next time it needs to send data
+        writer.writerow([self._fragment + (1 if sendingFragments else 0)])
+
     def storagePath(self):
         return self._folderPath + f'{self._clientId}'
 
@@ -36,14 +43,15 @@ class ActiveClient:
         
         with open(self.storagePath() + '.csv', 'r+') as file:
             reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
-            next(reader) # skip packet tracker
+            nextRow(reader) # skip packet tracker
             for row in reader:
                 try:
-                    yield entryType.fromArgs(row)
-                except Exception as e:
-                    print("exception", e)
-                    print(row)
+                    yield entryType.fromArgs(row), False
+                except TypeError:
+                    # reached end of entries, got to fragment number
+                    yield int(row[0]), True
 
+                
     def update(self, header: HeaderInterface):
         self._tracker.update(header)
     

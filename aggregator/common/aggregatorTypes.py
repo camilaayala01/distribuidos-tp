@@ -42,44 +42,50 @@ class AggregatorTypes(Enum):
         batch = {entry.getAppID(): entry for entry in entries} 
         
         while True:
-            priorEntry = nextRow(priorEntriesGenerator)
-            if priorEntry is None:
+            row = nextRow(priorEntriesGenerator)
+            if row is None:
                 break
-
-            id = priorEntry.getAppID()
-            if priorEntry.getCount() >= requiredReviews:
+            data, reachedFragment = row
+            if reachedFragment:
+                break
+            id = data.getAppID()
+            if data.getCount() >= requiredReviews:
                 batch.pop(id, None)
+                self.storeEntry(data, storageFile) 
+                # do not add more to the count, but keep it for future references
                 continue
                 
             entry = batch.get(id, None)
             if entry is None:
-                entryToWrite = priorEntry
+                entryToWrite = data
             else:
-                priorEntry.addToCount(entry.getCount())
-                entryToWrite = priorEntry
-                if priorEntry.getCount() >= requiredReviews:
-                    toSend.append(priorEntry) 
+                data.addToCount(entry.getCount())
+                entryToWrite = data
+                if data.getCount() >= requiredReviews:
+                    toSend.append(data) 
             
             batch.pop(id, None)
             self.storeEntry(entryToWrite, storageFile)
             
         for remainingEntry in batch.values():
             if remainingEntry.getCount() >= requiredReviews:
-                toSend.append(priorEntry) 
+                toSend.append(data) 
             self.storeEntry(remainingEntry, storageFile)
 
         return toSend
 
     def getOSCountResults(self, entry: EntryInterface, priorEntriesGenerator, storageFile, isDone: bool):
-        priorResult = nextRow(priorEntriesGenerator)
-        if priorResult is None:
+        row = nextRow(priorEntriesGenerator)
+        if row is None:
             priorResult = self.getInitialResults()
+        else:
+            priorResult, _ = row
         priorResult.sumEntry(entry[0]) # only receives 1 in vector
         self.storeEntry(priorResult, storageFile)
         if not isDone:
             return []
         return [priorResult]
-    
+
     def handleResults(self, entries: list[EntryInterface], priorEntriesGenerator, storageFile, isDone: bool) -> list[EntryInterface]:
         match self:
             case AggregatorTypes.ENGLISH:
@@ -87,7 +93,6 @@ class AggregatorTypes(Enum):
             case AggregatorTypes.OS:
                 return self.getOSCountResults(entries, priorEntriesGenerator, storageFile, isDone)
             case AggregatorTypes.INDIE:
-                # update fragment
                 return entries
 
     def getResultingHeader(self, header: HeaderInterface) -> EntryInterface:

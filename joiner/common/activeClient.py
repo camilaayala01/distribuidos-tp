@@ -25,9 +25,6 @@ class ActiveClient:
         if os.path.exists(self._folderPath):
             shutil.rmtree(self._folderPath)
 
-    # TODO delete
-    def getTracker(self):
-        return self._gamesTracker
     
     def gamesPath(self):
         return self._folderPath + f'games'

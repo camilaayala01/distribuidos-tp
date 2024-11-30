@@ -30,7 +30,6 @@ class Aggregator(StatefulNode):
         if self.shouldSendPackets(ready):
             self.sendToNext(header, ready)
             self._currentClient._fragment += 1
-        
         self._activeClients[clientId] = self._currentClient
         self._currentClient.saveNewResults()
 
@@ -42,24 +41,29 @@ class Aggregator(StatefulNode):
                                                              ActiveClient(getClientIdUUID(clientId), 
                                                                           self._aggregatorType.getInitialResults(), 
                                                                           self._aggregatorType.initializeTracker()))
-        
-    def processDataPacket(self, header, batch, tag, channel):
-        clientId = header.getClient()
-        self._currentClient.update(header)
-        entries = self._entryType.deserialize(batch)
+
+    def persistNewData(self, entries):
         priorFile = self._currentClient.storagePath() + '.csv'
+        toSend = []
         with open(self._currentClient.storagePath() + '.tmp', 'w+') as file:
             trackerLen = self._currentClient.storeTracker(file)
             if not len(entries):
                 copyFileSkippingTracker(newResultsFile=file, 
                                         newResultsOffset=trackerLen, 
                                         oldFilePath=priorFile)
-                toSend = []
+                # already copied fragment from last iteration
             else:
                 toSend = self._aggregatorType.handleResults(entries, 
                                                             self._currentClient.loadEntries(self._entryType), 
                                                             file, 
                                                             self._currentClient.finishedReceiving())
-                
+                self._currentClient.storeFragment(file, self.shouldSendPackets(toSend))
+        return toSend
+
+    def processDataPacket(self, header, batch, tag, channel):
+        clientId = header.getClient()
+        self._currentClient.update(header)
+        entries = self._entryType.deserialize(batch)
+        toSend = self.persistNewData(entries)
         self.handleSending(toSend, clientId)
         channel.basic_ack(delivery_tag = tag)
