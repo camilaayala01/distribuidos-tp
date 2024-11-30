@@ -4,7 +4,7 @@ import os
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
-from entryParsing.common.utils import nextEntry
+from entryParsing.common.utils import nextRow
 from entryParsing.entry import EntryInterface
 from entryParsing.entryOSCount import EntryOSCount
 from packetTracker.defaultTracker import DefaultTracker
@@ -16,12 +16,12 @@ class AggregatorTypes(Enum):
     ENGLISH = 1
     INDIE = 2
     
-    def initializeTracker(self, clientId: bytes) -> PacketTracker:
+    def initializeTracker(self) -> PacketTracker:
         match self:
             case AggregatorTypes.OS:
-                return DefaultTracker(getClientIdUUID(clientId))
+                return DefaultTracker()
             case _:
-                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), getClientIdUUID(clientId))
+                return MultiTracker()
             
     def getInitialResults(self):
         match self:
@@ -52,9 +52,9 @@ class AggregatorTypes(Enum):
                     print("exception", e)
                     print(row)
       
-    def saveNewResults(self, priorResultsPath):
-        if os.path.exists(priorResultsPath + '.tmp'):
-            os.rename(priorResultsPath + '.tmp', priorResultsPath + '.csv')
+    # def saveNewResults(self, priorResultsPath):
+    #     if os.path.exists(priorResultsPath + '.tmp'):
+    #         os.rename(priorResultsPath + '.tmp', priorResultsPath + '.csv')
 
     def getEnglishCountResults(self, entryType, priorResultsPath, entries: list[EntryInterface]):
         toSend = []
@@ -65,7 +65,7 @@ class AggregatorTypes(Enum):
         generator = self.loadEntries(entryType, priorResultsPath)
         
         while True:
-            priorEntry = nextEntry(generator)
+            priorEntry = nextRow(generator)
             if priorEntry is None:
                 break
 
@@ -91,12 +91,12 @@ class AggregatorTypes(Enum):
                 toSend.append(priorEntry)
             self.storeEntry(remainingEntry, priorResultsPath)
         
-        self.saveNewResults(priorResultsPath)
+        #self.saveNewResults(priorResultsPath)
         return toSend
 
     def getOSCountResults(self, entryType, priorResultsPath, entry, isDone):
         generator = self.loadEntries(entryType, priorResultsPath)
-        priorResult = nextEntry(generator)
+        priorResult = nextRow(generator)
         if priorResult is None:
             priorResult = self.getInitialResults()
         priorResult.sumEntry(entry)

@@ -4,7 +4,7 @@ from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.table import Table
 from entryParsing.entry import EntryInterface
 from packetTracker.defaultTracker import DefaultTracker
-from entryParsing.common.utils import copyFile, nextEntry
+from entryParsing.common.utils import copyFile, nextRow
 import os
 import csv
 
@@ -13,8 +13,8 @@ class ActiveClient:
         self._clientId = clientId
         self._fragment = 1
         self._joinedEntries = {} #appid, entry[]
-        self._gamesTracker = DefaultTracker(clientId)
-        self._reviewsTracker = DefaultTracker(clientId)
+        self._gamesTracker = DefaultTracker()
+        self._reviewsTracker = DefaultTracker()
         self._folderPath = f"/{os.getenv('LISTENING_QUEUE')}/{clientId}/"
         os.makedirs(self._folderPath, exist_ok=True)
 
@@ -22,9 +22,7 @@ class ActiveClient:
         return self._clientId.bytes
     
     def destroy(self):
-        print("Path", self._folderPath)
         if os.path.exists(self._folderPath):
-            print("it exists, removing tree")
             shutil.rmtree(self._folderPath)
 
     # TODO delete
@@ -109,7 +107,7 @@ class ActiveClient:
         generator = self.loadJoinedEntries(entryType)
         writer = csv.writer(newResults, quoting=csv.QUOTE_MINIMAL)
         while True:
-            entry = nextEntry(generator)
+            entry = nextRow(generator)
             if not entry:
                 break
             if entry.getAppID() in joinedEntries:

@@ -6,7 +6,8 @@ from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.entryAppIDName import EntryAppIDName
 from packetTracker.multiTracker import MultiTracker
 from packetTracker.packetTracker import PacketTracker
-from entryParsing.common.utils import nextEntry
+from entryParsing.common.utils import nextRow
+from packetTracker.tracker import TrackerInterface
 
 class SorterType(Enum):
     PLAYTIME = 0
@@ -15,14 +16,21 @@ class SorterType(Enum):
     CONSOLIDATOR_INDIE = 3
     CONSOLIDATOR_PERCENTILE = 4
 
-    def initializeTracker(self, clientId: bytes) -> PacketTracker:
+    def initializeTracker(self) -> TrackerInterface:
         match self:
             case SorterType.PLAYTIME | SorterType.INDIE:
-                return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')), getClientIdUUID(clientId))
+                return PacketTracker(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')))
             case _:
-                return MultiTracker(int(os.getenv('PRIOR_NODE_COUNT')), getClientIdUUID(clientId))        
+                return MultiTracker() 
 
-    def requireController(self) -> PacketTracker:
+    def loadTracker(self, row) -> TrackerInterface:
+        match self:
+            case SorterType.PLAYTIME | SorterType.INDIE:
+                return PacketTracker.fromStorage(int(os.getenv('NODE_COUNT')), int(os.getenv('NODE_ID')), row)
+            case _:
+                return MultiTracker.fromStorage(row)  
+           
+    def requireController(self) -> bool:
         match self:
             case SorterType.PLAYTIME | SorterType.INDIE:
                 return True
@@ -37,7 +45,7 @@ class SorterType(Enum):
         if index < 0:
             index = 0
 
-        currEntry = nextEntry(topEntries)
+        currEntry = nextRow(topEntries)
         filepath = os.getenv('LISTENING_QUEUE') + f'filtering.tmp'
         entryIndex = 0
         with open(filepath, 'w+') as file:
@@ -45,14 +53,14 @@ class SorterType(Enum):
             while currEntry is not None and entryIndex < index:
                 writer.writerow(EntryAppIDName.fromAnother(currEntry).__dict__.values())
                 entryIndex +=1
-                currEntry = nextEntry(topEntries)
+                currEntry = nextRow(topEntries)
     
             writer.writerow(EntryAppIDName.fromAnother(currEntry).__dict__.values())
-            followingEntry = nextEntry(topEntries)
+            followingEntry = nextRow(topEntries)
 
             while currEntry is not None and followingEntry is not None and currEntry.getCount() == followingEntry.getCount():
                 writer.writerow(EntryAppIDName.fromAnother(followingEntry).__dict__.values())
-                followingEntry = nextEntry(topEntries)
+                followingEntry = nextRow(topEntries)
         
         with open(filepath, 'r') as file:
             reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)

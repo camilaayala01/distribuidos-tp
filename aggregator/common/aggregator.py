@@ -1,6 +1,5 @@
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID
-from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 from statefulNode.statefulNode import StatefulNode
 from .activeClient import ActiveClient
 from entryParsing.common.header import Header
@@ -14,7 +13,7 @@ class Aggregator(StatefulNode):
         super().__init__()
         self._aggregatorType = AggregatorTypes(int(os.getenv('AGGREGATOR_TYPE')))
         self._entryType = getEntryTypeFromEnv()
-        self._headerType = getHeaderTypeFromEnv()  
+        self._headerType = getHeaderTypeFromEnv()
 
     def sendToNext(self, header: HeaderInterface, entries: list[EntryInterface]):
         for strategy in self._sendingStrategies:
@@ -30,9 +29,10 @@ class Aggregator(StatefulNode):
         header = self._aggregatorType.getResultingHeader(self.getHeader(clientId))
         if self.shouldSendPackets(ready):
             self.sendToNext(header, ready)
-            # TODO write fragment in file
             self._currentClient._fragment += 1
+        
         self._activeClients[clientId] = self._currentClient
+        self._currentClient.saveNewResults()
 
         if self._currentClient.finishedReceiving():
             self._activeClients.pop(clientId).destroy()
@@ -41,7 +41,7 @@ class Aggregator(StatefulNode):
         self._currentClient = self._activeClients.setdefault(clientId, 
                                                              ActiveClient(getClientIdUUID(clientId), 
                                                                           self._aggregatorType.getInitialResults(), 
-                                                                          self._aggregatorType.initializeTracker(clientId)))
+                                                                          self._aggregatorType.initializeTracker()))
         
     def processDataPacket(self, header, batch, tag, channel):
         clientId = header.getClient()
