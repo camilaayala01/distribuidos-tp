@@ -1,7 +1,6 @@
 import csv
 from enum import Enum
 import os
-from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
 from entryParsing.common.utils import nextRow
@@ -32,37 +31,18 @@ class AggregatorTypes(Enum):
             case _:
                 return None
 
-    def storeEntry(self, entry: EntryInterface, priorResultsPath):
-        filepath = f'{priorResultsPath}.tmp'
-        with open(filepath, 'a+') as file:
-            writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(entry.__dict__.values())
-    
-    def loadEntries(self, entryType, priorResultsPath):
-        filepath = f'{priorResultsPath}.csv'
-        if not os.path.exists(filepath):
-            return iter([])
-        
-        with open(filepath, 'r') as file:
-            reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
-            for row in reader:
-                try:
-                    yield entryType.fromArgs(row)
-                except Exception as e:
-                    print("exception", e)
-                    print(row)
+    def storeEntry(self, entry: EntryInterface, storageFile):
+        writer = csv.writer(storageFile, quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(entry.__dict__.values())
 
-    def getEnglishCountResults(self, entryType, priorResultsPath, entries: list[EntryInterface]):
+    def getEnglishCountResults(self, entries: list[EntryInterface], priorEntriesGenerator, storageFile):
         toSend = []
         requiredReviews = int(os.getenv('REQUIRED_REVIEWS'))
-        if not len(entries):
-            #shouldnt do this, should enter the loop anyways, or maybe simply do a copy
-            return []
+        
         batch = {entry.getAppID(): entry for entry in entries} 
-        generator = self.loadEntries(entryType, priorResultsPath)
         
         while True:
-            priorEntry = nextRow(generator)
+            priorEntry = nextRow(priorEntriesGenerator)
             if priorEntry is None:
                 break
 
@@ -78,36 +58,36 @@ class AggregatorTypes(Enum):
                 priorEntry.addToCount(entry.getCount())
                 entryToWrite = priorEntry
                 if priorEntry.getCount() >= requiredReviews:
-                    toSend.append(priorEntry)
+                    toSend.append(priorEntry) 
             
             batch.pop(id, None)
-            self.storeEntry(entryToWrite, priorResultsPath)
+            self.storeEntry(entryToWrite, storageFile)
             
         for remainingEntry in batch.values():
             if remainingEntry.getCount() >= requiredReviews:
-                toSend.append(priorEntry)
-            self.storeEntry(remainingEntry, priorResultsPath)
+                toSend.append(priorEntry) 
+            self.storeEntry(remainingEntry, storageFile)
 
         return toSend
 
-    def getOSCountResults(self, entryType, priorResultsPath, entry, isDone):
-        generator = self.loadEntries(entryType, priorResultsPath)
-        priorResult = nextRow(generator)
+    def getOSCountResults(self, entry: EntryInterface, priorEntriesGenerator, storageFile, isDone: bool):
+        priorResult = nextRow(priorEntriesGenerator)
         if priorResult is None:
             priorResult = self.getInitialResults()
-        priorResult.sumEntry(entry)
-        self.storeEntry(priorResult, priorResultsPath)
+        priorResult.sumEntry(entry[0]) # only receives 1 in vector
+        self.storeEntry(priorResult, storageFile)
         if not isDone:
             return []
         return [priorResult]
     
-    def handleResults(self, entries, entryType, priorResultsPath, isDone) -> list[EntryInterface]:
+    def handleResults(self, entries: list[EntryInterface], priorEntriesGenerator, storageFile, isDone: bool) -> list[EntryInterface]:
         match self:
             case AggregatorTypes.ENGLISH:
-                return self.getEnglishCountResults(entryType, priorResultsPath, entries)
+                return self.getEnglishCountResults(entries, priorEntriesGenerator, storageFile)
             case AggregatorTypes.OS:
-                return self.getOSCountResults(entryType, priorResultsPath, entries, isDone)
+                return self.getOSCountResults(entries, priorEntriesGenerator, storageFile, isDone)
             case AggregatorTypes.INDIE:
+                # update fragment
                 return entries
 
     def getResultingHeader(self, header: HeaderInterface) -> EntryInterface:

@@ -41,7 +41,7 @@ class EntryOSCount(EntryInterface):
             mac, curr = deserializeCount(curr, data)
             linux, curr = deserializeCount(curr, data)
             total, _ = deserializeCount(curr, data)
-            return EntryOSCount(windows, mac, linux, total)
+            return [EntryOSCount(windows, mac, linux, total)]
 
         except (IndexError, UnicodeDecodeError):
             raise Exception("There was an error parsing data")

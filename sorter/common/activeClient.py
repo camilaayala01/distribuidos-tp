@@ -12,9 +12,12 @@ class ActiveClient:
         os.makedirs(self._folderPath, exist_ok=True)
         self._tracker = tracker
 
+    def storagePath(self):
+        return self._folderPath + f'{self._clientId}'
+
     def destroy(self):
-        if os.path.exists(self._folderPath + f'{self._clientId}.csv'):
-            os.remove(self._folderPath + f'{self._clientId}.csv')
+        if os.path.exists(self.storagePath() + '.csv'):
+            os.remove(self.storagePath() + '.csv')
     
     def getClientIdBytes(self):
         return self._clientId.bytes
@@ -31,10 +34,7 @@ class ActiveClient:
     def isDuplicate(self, header: Header) -> bool:
         return self._tracker.isDuplicate(header)
 
-    def getTmpPath(self):
-        return self._folderPath + f'{self._clientId}.tmp'
-
-    def storeTracker(self, file):
+    def storeTracker(self, file) -> int:
         writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(self._tracker.asCSVRow())
         
@@ -43,7 +43,7 @@ class ActiveClient:
         writer.writerow(entry.__dict__.values())
     
     def loadEntries(self):
-        filepath = self._folderPath + f'{self._clientId}.csv'
+        filepath = self.storagePath() + '.csv'
         if not os.path.exists(filepath):
             return iter([])
         
@@ -54,6 +54,5 @@ class ActiveClient:
                 yield self._entryType.fromArgs(row)
 
     def saveNewTop(self):
-        path = self._folderPath + f'{self._clientId}'
-        os.rename(path + '.tmp', path + '.csv')
+        os.rename(self.storagePath() + '.tmp', self.storagePath() + '.csv')
     

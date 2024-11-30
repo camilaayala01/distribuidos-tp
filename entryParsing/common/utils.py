@@ -110,3 +110,16 @@ def copyFile(newResultsFile, oldFilePath):
         copied = 0
         while copied < fileLen:
             copied += os.copy_file_range(currentResults.fileno(), newResultsFile.fileno(), fileLen)
+
+def copyFileSkippingTracker(newResultsFile, newResultsOffset, oldFilePath):
+    filepath = oldFilePath
+    if not os.path.exists(filepath):
+        return
+    fileLen = os.stat(filepath).st_size
+    with open(filepath, 'r+') as currentResults:
+        offset = len(currentResults.readline())
+        if offset == 0:
+            return
+        while offset < fileLen:
+            offset += os.copy_file_range(currentResults.fileno(), newResultsFile.fileno(), 
+                                         fileLen, offset_src=offset, offset_dst=newResultsOffset)

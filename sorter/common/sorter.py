@@ -89,7 +89,7 @@ class Sorter(StatefulNode):
         j = 0
         savedAmount = 0
         
-        with open(self._currentClient.getTmpPath(), 'w+') as file:
+        with open(self._currentClient.storagePath() + '.tmp', 'w+') as file:
             self._currentClient.storeTracker(file) 
             entriesGen = self._currentClient.loadEntries()
             topEntry = nextRow(entriesGen)

@@ -6,7 +6,7 @@ from entryParsing.common.header import Header
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
 from .aggregatorTypes import AggregatorTypes
-from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv
+from entryParsing.common.utils import copyFileSkippingTracker, getEntryTypeFromEnv, getHeaderTypeFromEnv
 
 class Aggregator(StatefulNode):
     def __init__(self):
@@ -47,7 +47,19 @@ class Aggregator(StatefulNode):
         clientId = header.getClient()
         self._currentClient.update(header)
         entries = self._entryType.deserialize(batch)
-        path = self._currentClient.partialResPath()
-        toSend = self._aggregatorType.handleResults(entries, self._entryType, path, self._currentClient.finishedReceiving())
+        priorFile = self._currentClient.storagePath() + '.csv'
+        with open(self._currentClient.storagePath() + '.tmp', 'w+') as file:
+            trackerLen = self._currentClient.storeTracker(file)
+            if not len(entries):
+                copyFileSkippingTracker(newResultsFile=file, 
+                                        newResultsOffset=trackerLen, 
+                                        oldFilePath=priorFile)
+                toSend = []
+            else:
+                toSend = self._aggregatorType.handleResults(entries, 
+                                                            self._currentClient.loadEntries(self._entryType), 
+                                                            file, 
+                                                            self._currentClient.finishedReceiving())
+                
         self.handleSending(toSend, clientId)
         channel.basic_ack(delivery_tag = tag)

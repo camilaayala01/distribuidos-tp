@@ -1,4 +1,5 @@
 import os
+import csv
 from entryParsing.common.header import HeaderInterface
 from packetTracker.tracker import TrackerInterface
 
@@ -18,11 +19,30 @@ class ActiveClient:
         return self._tracker.isDone()
     
     def destroy(self):
-        if os.path.exists(self.partialResPath() + '.csv'):
-            os.remove(self.partialResPath() + '.csv')
+        if os.path.exists(self.storagePath() + '.csv'):
+            os.remove(self.storagePath() + '.csv')
 
-    def partialResPath(self):
+    def storeTracker(self, file) -> int:
+        writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
+        return writer.writerow(self._tracker.asCSVRow())
+
+    def storagePath(self):
         return self._folderPath + f'{self._clientId}'
+
+    def loadEntries(self, entryType):
+        filepath = self.storagePath() + '.csv'
+        if not os.path.exists(filepath):
+            return iter([])
+        
+        with open(self.storagePath() + '.csv', 'r+') as file:
+            reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
+            next(reader) # skip packet tracker
+            for row in reader:
+                try:
+                    yield entryType.fromArgs(row)
+                except Exception as e:
+                    print("exception", e)
+                    print(row)
 
     def update(self, header: HeaderInterface):
         self._tracker.update(header)
@@ -31,7 +51,6 @@ class ActiveClient:
         return self._tracker.isDuplicate(header)
     
     def saveNewResults(self):
-        if os.path.exists(self.partialResPath() + '.tmp'):
-            os.rename(self.partialResPath() + '.tmp', self.partialResPath() + '.csv')
+        os.rename(self.storagePath() + '.tmp', self.storagePath() + '.csv')
 
     

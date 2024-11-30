@@ -1,13 +1,13 @@
-import socket
 import re
 import os
 import subprocess
 from threading import Thread, Lock
 from election.election import ElectionHandler
+from healthcheckAnswerController.messages import HeartbeatMessage
 from utils import container, getSocket, monitorName, sendall
 from status import Status
-from messages import HeartbeatMessage
-import time
+
+TIMER_DURATION = int(os.getenv('TIMER_DURATION'))
 
 class Monitor:
     def __init__(self):
@@ -17,7 +17,6 @@ class Monitor:
         nodesToCheck = set(re.split(r';', os.getenv('TO_CHECK')) if os.getenv('TO_CHECK') else [])
         monitorsToCheck = set([id for id in range(1, int(os.getenv('MONITOR_COUNT')) + 1) if id != self._id])
         self._toCheck = set(map(lambda m: monitorName(m), monitorsToCheck)).union(nodesToCheck)
-        self._timeout = int(os.getenv('TIMEOUT'))
         self._healthcheckPort = int(os.getenv('HEALTHCHECK_PORT'))
         self._pendingLock = Lock()
         self._pending = {}
@@ -123,7 +122,7 @@ class Monitor:
     def runMonitor(self): 
         with self._pendingLock:
             self.setPendingStatus(self._electionHandler.iAmLeader())
-        self._healthcheckSock = getSocket(self._id, self._healthcheckPort)
+        self._healthcheckSock = getSocket(self._id, self._healthcheckPort, TIMER_DURATION)
         self._electionHandler.setLeaderIsRunning(True)
         match self._electionHandler.iAmLeader():
             case True:

@@ -15,7 +15,7 @@ class ElectionHandler:
         self._leaderIsRunning = True
         self._leaderSemaphore = Semaphore(0)
         self._leaderIsRunningLock = Lock()
-        self._timeout = int(os.getenv('TIMEOUT'))
+        self._timeout = int(os.getenv('TIMER_DURATION'))
 
     def stop(self):
         self._running = False
