@@ -51,15 +51,12 @@ class AggregatorTypes(Enum):
                 except Exception as e:
                     print("exception", e)
                     print(row)
-      
-    # def saveNewResults(self, priorResultsPath):
-    #     if os.path.exists(priorResultsPath + '.tmp'):
-    #         os.rename(priorResultsPath + '.tmp', priorResultsPath + '.csv')
 
     def getEnglishCountResults(self, entryType, priorResultsPath, entries: list[EntryInterface]):
         toSend = []
         requiredReviews = int(os.getenv('REQUIRED_REVIEWS'))
         if not len(entries):
+            #shouldnt do this, should enter the loop anyways, or maybe simply do a copy
             return []
         batch = {entry.getAppID(): entry for entry in entries} 
         generator = self.loadEntries(entryType, priorResultsPath)
@@ -90,8 +87,7 @@ class AggregatorTypes(Enum):
             if remainingEntry.getCount() >= requiredReviews:
                 toSend.append(priorEntry)
             self.storeEntry(remainingEntry, priorResultsPath)
-        
-        #self.saveNewResults(priorResultsPath)
+
         return toSend
 
     def getOSCountResults(self, entryType, priorResultsPath, entry, isDone):
@@ -101,7 +97,6 @@ class AggregatorTypes(Enum):
             priorResult = self.getInitialResults()
         priorResult.sumEntry(entry)
         self.storeEntry(priorResult, priorResultsPath)
-        os.rename(priorResultsPath + '.tmp', priorResultsPath + '.csv')
         if not isDone:
             return []
         return [priorResult]

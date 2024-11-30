@@ -84,15 +84,13 @@ class Sorter(StatefulNode):
             savedAmount += 1
         return savedAmount
 
-    def mergeKeepTop(self, batch: list[EntrySorterTopFinder]):
-        if len(batch) == 0:
-            return
-        
+    def mergeKeepTop(self, batch: list[EntrySorterTopFinder]):        
         newBatchTop = self.getBatchTop(batch)
         j = 0
         savedAmount = 0
         
         with open(self._currentClient.getTmpPath(), 'w+') as file:
+            self._currentClient.storeTracker(file) 
             entriesGen = self._currentClient.loadEntries()
             topEntry = nextRow(entriesGen)
             
@@ -111,7 +109,7 @@ class Sorter(StatefulNode):
             elif j < len(newBatchTop):
                 savedAmount = self.drainNewBatch(j, savedAmount, newBatchTop, file)
             
-            self._currentClient.setNewSavedEntries(savedAmount)
+            return savedAmount
             
     def sendToNext(self, generator):
         extraParamsForHeader = self._sorterType.extraParamsForHeader()
@@ -120,13 +118,14 @@ class Sorter(StatefulNode):
             fragment = strategy.sendFragmenting(self._internalCommunication, self._currentClient.getClientIdBytes(), 1, generator, not self._sorterType.requireController(), **extraParamsForHeader)
         return fragment
 
-    def handleSending(self, clientId: bytes):
+    def handleSending(self, savedAmount):
+        clientId = self._currentClient.getClientIdBytes()
         if not self._currentClient.isDone():
             self._activeClients[clientId] = self._currentClient
             return
         logging.info(f'action: received all required batches for {getClientIdUUID(clientId)} | result: success')
-        topGenerator, topAmount = self._currentClient.getResults()
-        topGenerator = self._sorterType.preprocessPackets(topGenerator, topAmount)
+        topGenerator= self._currentClient.getResults()
+        topGenerator = self._sorterType.preprocessPackets(topGenerator, savedAmount)
         fragment = self.sendToNext(topGenerator)
         if self._sorterType.requireController():
             self._eofController.finishedProcessing(fragment, clientId, self._internalCommunication)
@@ -142,7 +141,7 @@ class Sorter(StatefulNode):
         clientId = header.getClient()
         self._currentClient.update(header)
         entries = self._entryType.deserialize(batch)
-        self.mergeKeepTop(entries)
-        self.handleSending(clientId)
+        savedAmount = self.mergeKeepTop(entries)
+        self.handleSending(savedAmount)
         self._currentClient.saveNewTop()
         channel.basic_ack(delivery_tag = tag)
