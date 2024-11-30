@@ -1,14 +1,16 @@
 from entryParsing.common import fieldParsing, fieldLen
 from entryParsing.entry import EntryInterface
 
+"""
+This entry is used by the initializer in order to skip the unnecessary fields coming from
+the client. It implements its own deserialization as skipping fields is not contemplated 
+in the base class.
+"""
 class ReducedGameEntry(EntryInterface):
     def __init__(self, _appID, _name, _releaseDate, _windows, _mac, _linux, _avgPlaytime, _genres):
         super().__init__(_appID=_appID, _name=_name, _releaseDate=_releaseDate,
                          _windows=_windows, _mac=_mac, _linux=_linux,
                          _avgPlaytime=_avgPlaytime, _genres=_genres)
-    
-    def serialize(self) -> bytes:
-        raise Exception("The should be no need to serialize this type of entry")
     
     @classmethod
     def deserialize(cls, data: bytes)-> list['ReducedGameEntry']:

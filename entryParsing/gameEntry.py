@@ -35,5 +35,5 @@ class GameEntry(EntryInterface):
                          _tags=_tags, _screens=_screens, _movies=_movies)
     
     @classmethod    
-    def deserialize(cls, data: bytes) -> list['GameEntry']:
+    def deserialize(cls, _data: bytes) -> list['GameEntry']:
         raise Exception("The should be no need to deserialize this type of entry")

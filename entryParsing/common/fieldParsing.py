@@ -5,6 +5,8 @@ from entryParsing.common.table import Table
 from entryParsing.common.utils import boolToInt, intToBool
 from entryParsing.common import fieldLen
 
+MAX_REVIEW_TEXT = 150
+
 def floatToInt(number) -> int:
     return int(number * 100)
         
@@ -48,7 +50,8 @@ def skipReviewText(curr: int, data: bytes)-> int:
     return skipVariableLen(curr, data, fieldLen.TEXT_LEN)
 
 def deserializeReviewText(curr: int, data: bytes)-> tuple[str, int]:
-    return deserializeVariableLen(curr, data, fieldLen.TEXT_LEN)
+    text, curr = deserializeVariableLen(curr, data, fieldLen.TEXT_LEN)
+    return text[:MAX_REVIEW_TEXT]
 
 def serializeGenres(field: str):
     return serializeVariableLen(field, fieldLen.GENRE_LEN)

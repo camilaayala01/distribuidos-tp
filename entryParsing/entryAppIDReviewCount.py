@@ -14,6 +14,3 @@ class EntryAppIDReviewCount(EntryInterface):
     
     def addToCount(self, count: int):
         self._reviewCount += count
-
-    def __str__(self):
-        return f"appID={self._appID}, count={self._reviewCount})"

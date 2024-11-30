@@ -10,6 +10,3 @@ class EntryAppIDReviewText(EntryInterface):
 
     def getReviewText(self):
         return self._reviewText
-
-    def __str__(self):
-        return f"appID={self._appID}, reviewText={self._reviewText})"

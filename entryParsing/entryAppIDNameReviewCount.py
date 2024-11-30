@@ -18,6 +18,3 @@ class EntryAppIDNameReviewCount(EntrySorterTopFinder):
     
     def getSortingAtribute(self) -> int:
         return self._reviewCount
-
-    def __str__(self):
-        return f"EntryAppIDNameReviewCount(appID={self._appID}, name={self._name}, count={self._reviewCount})"
