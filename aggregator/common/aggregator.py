@@ -17,7 +17,7 @@ class Aggregator(StatefulNode):
         self._aggregatorType = AggregatorTypes(int(os.getenv('AGGREGATOR_TYPE')))
         self._entryType = getEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
-        self.loadActiveClientsFromDisk()
+        # self.loadActiveClientsFromDisk()
     
     def createTrackerFromRow(self, row):
         return self._aggregatorType.trackerType().fromStorage(row)
@@ -58,10 +58,13 @@ class Aggregator(StatefulNode):
         priorFile = self._currentClient.storagePath() + '.csv'
         toSend = []
         with open(self._currentClient.storagePath() + '.tmp', 'w+') as file:
-            self._currentClient.storeTracker(file)
+            written = self._currentClient.storeTracker(file)
             if not len(entries):
-                copyFileSkippingTracker(newResultsFile=file,  
+                print("copying file")
+                copyFileSkippingTracker(newResultsFile=file, 
+                                        newResultsOffset=written, 
                                         oldFilePath=priorFile)
+                print("copied successfully")
                 # already copied fragment from last iteration
             else:
                 toSend = self._aggregatorType.handleResults(entries, 

@@ -4,9 +4,9 @@ from common.aggregator import Aggregator
 
 def main():
     initializeLog()
-    joiner = Aggregator()
-    signal.signal(signal.SIGTERM, joiner.stop)
-    joiner.execute()
+    aggregator = Aggregator()
+    signal.signal(signal.SIGTERM, aggregator.stop)
+    aggregator.execute()
 
 if __name__ == "__main__":
     main()
