@@ -1,10 +1,13 @@
 from collections import defaultdict
+import csv
 import logging
 import os
+import uuid
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextRow
 from entryParsing.entry import EntryInterface
 from eofController.eofController import EofController
+from packetTracker.defaultTracker import DefaultTracker
 from statefulNode.statefulNode import StatefulNode
 from .accumulatedBatches import AccumulatedBatches
 from .activeClient import ActiveClient
@@ -17,6 +20,7 @@ PREFETCH_COUNT = int(os.getenv('PREFETCH_COUNT'))
 class Joiner(StatefulNode):
     def __init__(self):
         super().__init__()
+        self.loadActiveClientsFromDisk()
         self._joinerType = JoinerType(int(os.getenv('JOINER_TYPE')))
         self._gamesEntry = getGamesEntryTypeFromEnv()
         self._reviewsEntry = getReviewsEntryTypeFromEnv()
@@ -30,18 +34,54 @@ class Joiner(StatefulNode):
     def stop(self, _signum, _frame):
         self._eofController.terminateProcess(self._internalCommunication)
         super().stop(_signum, _frame)
+    
+    def createClient(self, clientId: uuid.UUID, gamesTracker: DefaultTracker, reviewsTracker: DefaultTracker):
+        client = ActiveClient(clientId=clientId, gamesTracker=gamesTracker, reviewsTracker=reviewsTracker)
+        client.loadFragment()
+        return client
+    
+    def createTrackerFromRow(self, row):
+        return DefaultTracker.fromStorage(row)
+    
+    def loadTrackerFromFile(self, filepath):
+        with open(filepath, 'r') as file:
+            reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
+            packetTrackerRow = nextRow(reader)
+        return self.createTrackerFromRow(packetTrackerRow)
+    
+    def loadActiveClientsFromDisk(self):
+        dataDirectory = f"/{os.getenv('LISTENING_QUEUE')}/"
+        if not os.path.exists(dataDirectory) or not os.path.isdir(dataDirectory):
+            return
         
-    def createTrackerFromRow(self, row): # TODO
-        raise NotImplementedError
-    
-    def createClient(self, filepath, clientId, tracker): # TODO
-        raise NotImplementedError
-    
+        for dirname in os.listdir(dataDirectory):
+            path = os.path.join(dataDirectory, dirname)
+            if not os.path.isdir(path): 
+                continue
+            filepaths = {os.path.join(path, filename) for filename in os.listdir(path)}
+            clientUUID = uuid.UUID(dirname)
+            gamesTracker, reviewsTracker = DefaultTracker(), DefaultTracker()
+            
+            if path + '/games.csv' in filepaths:
+                gamesTracker = self.loadTrackerFromFile(path + '/games.csv')                
+                filepaths.remove(path + '/games.csv')
+            
+            if path + '/joined.csv' in filepaths:
+                reviewsTracker = self.loadTrackerFromFile(path + '/joined.csv')
+                filepaths.remove(path + '/joined.csv')
+            elif path + '/reviews.csv' in filepaths:
+                reviewsTracker = self.loadTrackerFromFile(path + '/reviews.csv')
+                filepaths.remove(path + '/reviews.csv')
+                    
+            self._activeClients[clientUUID.bytes] = self.createClient(clientUUID, gamesTracker, reviewsTracker)
+            for filepath in filepaths:
+                os.remove(filepath)
+
     """keeps the client if there is one, set a new one if there's not"""
     def setCurrentClient(self, clientId: bytes):
         if self._currentClient:
             return
-        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(getClientIdUUID(clientId)))
+        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(getClientIdUUID(clientId), DefaultTracker(), DefaultTracker()))
     
     """replaces the old client with a new one"""
     def setNewClient(self, clientId: bytes):

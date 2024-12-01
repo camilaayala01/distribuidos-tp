@@ -9,11 +9,11 @@ import os
 import csv
 
 class ActiveClient:
-    def __init__(self, clientId: UUID):
+    def __init__(self, clientId: UUID, gamesTracker, reviewsTracker):
         self._clientId = clientId
         self._fragment = 1
-        self._gamesTracker = DefaultTracker()
-        self._reviewsTracker = DefaultTracker()
+        self._gamesTracker = gamesTracker
+        self._reviewsTracker = reviewsTracker
         self._folderPath = f"/{os.getenv('LISTENING_QUEUE')}/{clientId}/"
         os.makedirs(self._folderPath, exist_ok=True)
 
@@ -59,6 +59,17 @@ class ActiveClient:
     
     def unjoinedReviews(self):
         return os.path.exists(self.reviewsPath() + '.csv')
+
+    def loadFragment(self):
+        filepath = self.joinedPath() + '.csv'
+        if not os.path.exists(filepath):
+            return
+        with open(filepath, 'rb') as file:
+            file.seek(-2, os.SEEK_END)
+            while file.read(1) != b'\n':
+                file.seek(-2, os.SEEK_CUR)
+            lastLine = file.readline().decode().strip()
+        self._fragment = int(lastLine)
 
     def loadEntries(self, entryType, filepath):
         if not os.path.exists(filepath):
