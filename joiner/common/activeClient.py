@@ -25,7 +25,6 @@ class ActiveClient:
         if os.path.exists(self._folderPath):
             shutil.rmtree(self._folderPath)
 
-    
     def gamesPath(self):
         return self._folderPath + f'games'
 
@@ -61,8 +60,20 @@ class ActiveClient:
     
     def unjoinedReviews(self):
         return os.path.exists(self.reviewsPath() + '.csv')
+    
+    def loadEntries(self, entryType, filepath):
+        filepath = filepath + '.csv'
+        if not os.path.exists(filepath):
+            return iter([])
+        
+        with open(filepath, 'r') as file:
+            reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
+            next(reader) # skip packet tracker
+            for row in reader:
+                yield entryType.fromArgs(row)
 
-    def loadEntries(self, filepath, entryType):
+    def loadJoinedEntries(self, entryType):
+        filepath = self.joinedPath() + '.csv'
         if not os.path.exists(filepath):
             return iter([])
         
@@ -70,39 +81,50 @@ class ActiveClient:
             reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
             for row in reader:
                 yield entryType.fromArgs(row)
-    
-    def loadGamesEntries(self, entryType):
-        return self.loadEntries(self.gamesPath() + '.csv', entryType)
-
+                
     def loadReviewsEntries(self, entryType):
-        return self.loadEntries(self.reviewsPath() + '.csv', entryType)
+        return self.loadEntries(entryType, self.reviewsPath())
 
-    def loadJoinedEntries(self, entryType):
-        return self.loadEntries(self.joinedPath() + '.csv', entryType)
+    def loadGamesEntries(self, entryType):
+        return self.loadEntries(entryType, self.gamesPath())
+
+    def storeTracker(self, file, tracker):
+        writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(tracker.asCSVRow())
     
-    def storeEntries(self, filepath, entries):
-        newResults = open(filepath + '.tmp', 'w+')
-        copyFile(newResults, filepath + '.csv')
-
-        writer = csv.writer(newResults, quoting=csv.QUOTE_MINIMAL)
-        for entry in entries:
-            written = writer.writerow(entry.__dict__.values())
-            if written < entry.expectedCsvLen():
-                raise Exception('File could not be written propperly')
+    def copyEntriesFromCSV(self, srcFilePath, dstFile):
+        if not os.path.exists(srcFilePath +'.csv'): 
+            return
+        writer = csv.writer(dstFile, quoting=csv.QUOTE_MINIMAL)
+        with open(srcFilePath +'.csv', 'r') as srcFile:
+            reader = csv.reader(srcFile, quoting=csv.QUOTE_MINIMAL)
+            next(reader) # skip packet tracker
+            for row in reader:
+                writer.writerow(row)
         
-        newResults.close()
+    def storeEntries(self, entries, filepath, tracker):
+        with open(filepath + '.tmp', 'w+') as dstFile:
+            self.storeTracker(dstFile, tracker)
+            self.copyEntriesFromCSV(srcFilePath=filepath, dstFile=dstFile)
+            writer = csv.writer(dstFile, quoting=csv.QUOTE_MINIMAL)
+            for entry in entries:
+                written = writer.writerow(entry.__dict__.values())
+                if written < entry.expectedCsvLen():
+                    raise Exception('File could not be written properly')
+                
         os.rename(filepath + '.tmp', filepath + '.csv')
-        
-    def storeUnjoinedReviews(self, reviews: list[EntryInterface]):
-        self.storeEntries(self.reviewsPath(), reviews)
 
     def storeGamesEntries(self, entries: list[EntryInterface]):
-        self.storeEntries(self.gamesPath(), entries)
+        self.storeEntries(entries, self.gamesPath(), self._gamesTracker)
+
+    def storeUnjoinedReviews(self, reviews: list[EntryInterface]):
+        self.storeEntries(reviews, self.reviewsPath(), self._reviewsTracker)
 
     def storeJoinedEntries(self, joinedEntries: dict[EntryInterface], entryType):
         newResults = open(self.joinedPath() + '.tmp', 'w+')
         generator = self.loadJoinedEntries(entryType)
         writer = csv.writer(newResults, quoting=csv.QUOTE_MINIMAL)
+        
         while True:
             entry = nextRow(generator)
             if not entry:
@@ -120,4 +142,6 @@ class ActiveClient:
                 raise Exception('File could not be written propperly')
                         
         newResults.close()
-        os.rename(self.joinedPath() + '.tmp', self.joinedPath() + '.csv')
+        os.rename(self.joinedPath() + '.tmp', self.joinedPath() + '.csv') # remove and persist after sending
+
+

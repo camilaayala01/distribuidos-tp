@@ -75,6 +75,7 @@ class Joiner(StatefulNode):
 
     def handleReviewsMessage(self, data: bytes):
         if len(data) == 0 and not self._currentClient.unjoinedReviews():
+            # persist tracker
             return
         reviews = self._reviewsEntry.deserialize(data)
         if not self._currentClient.isGamesDone():
@@ -86,6 +87,7 @@ class Joiner(StatefulNode):
         if len(data) == 0:
             return
         entries = self._gamesEntry.deserialize(data)
+        gamesPath = self._currentClient.gamesPath()
         self._currentClient.storeGamesEntries(entries)
 
     def shouldSendPackets(self, toSend):
@@ -123,7 +125,8 @@ class Joiner(StatefulNode):
         self.handleSending()
         
         if self._currentClient.isGamesDone():
-            self._currentClient.removeUnjoinedReviews()
+            # que lo remueva despues de persistir el de joined
+            self._currentClient.removeUnjoinedReviews() 
 
         toAck = self._accumulatedBatches.toAck()
         self._activeClients[self._accumulatedBatches._clientId] = self._currentClient
@@ -144,7 +147,6 @@ class Joiner(StatefulNode):
             self.setAccumulatedBatches(tag, header, batch)
         elif not self._accumulatedBatches.accumulate(header=header, tag=tag, batch=batch):
             self._internalCommunication.ackAll(self.processPendingBatches())
-            # reset accumulated and set client to correspond to the most recent packet
             self.setAccumulatedBatches(tag, header, batch)
             self.setNewClient(clientId)
 
