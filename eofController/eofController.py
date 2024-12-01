@@ -15,13 +15,42 @@ class EofController:
         self._nodeName = nodeName
         self._internalCommunication = InternalCommunication(self._nodeName + 'EOF' + str(self._nodeID))
         self._pending = set()
+        self._filepath = f"/{os.getenv('LISTENING_QUEUE')}/eofController"
+        self.loadPendingFromDisk()
         self._sendingStrategies = sendingStrategies
         self._nextQueue = self._nodeName + 'EOF' + str((self._nodeID + 1) % self._nodeAmount)
 
+    def loadPendingFromDisk(self):
+        if os.path.isfile(self._filepath + '.tmp'):
+            os.remove(self._filepath + '.tmp')
+
+        if os.path.isfile(self._filepath + '.csv'):
+            with open(self._filepath + '.csv', 'r') as file:
+                reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
+                while True:
+                    row = nextRow(reader)
+                    if row == None:
+                        break
+                    clientUUID = uuid.UUID(row[0]).bytes
+                    self._pending.add(clientUUID)
+
+    def storePendingInTemporaryFile(self, rename):
+        with open(self._filepath + '.tmp', 'w+') as file:
+            writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
+            for client in self._pending:
+                written = writer.writerow([f"{client}"])
+                if written < len(f"{client}"):
+                    raise Exception('File could not be written propperly')   
+        if rename:
+            os.rename(self._filepath + '.tmp', self._filepath + '.csv') 
+
+
     def finishedProcessing(self, fragment, clientID, nodeInternalCommunication):
         self._pending.add(clientID)
+        self.storePendingInTemporaryFile(False) 
         messageToSend = EOFControlMessage(EOFControlMessageType.EOF, clientID, self._nodeID, fragment).serialize()
-        nodeInternalCommunication.basicSend(self._nextQueue, messageToSend)
+        nodeInternalCommunication.basicSend(self._nextQueue, messageToSend) 
+        os.rename(self._filepath + '.tmp', self._filepath + '.csv') 
 
     def terminateProcess(self, nodeInternalCommunication):
         messageToSend = EOFControlMessage(EOFControlMessageType.TERMINATION, 0, 0).serialize()
@@ -45,11 +74,10 @@ class EofController:
             case EOFControlMessageType.ACK:
                 if msg.getClientID() in self._pending:
                     self._pending.remove(msg.getClientID())
+                    self.storePendingInTemporaryFile(True)
                 if msg.getNodeID() != self._nodeID:
                     self._internalCommunication.basicSend(self._nextQueue, body)
             case EOFControlMessageType.EOF:
-                if msg.getNodeID() == self._nodeID:
-                    self.manageEOF(msg.getClientID(), msg.getFragment())
                 if msg.getClientID() not in self._pending:
                     ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
                     return
