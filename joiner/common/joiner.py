@@ -116,7 +116,8 @@ class Joiner(StatefulNode):
     def handleReviewsMessage(self, data: bytes):
         reviews = self._reviewsEntry.deserialize(data)
         if not self._currentClient.isGamesDone():
-            self._currentClient.storeUnjoinedReviews(reviews)
+            if reviews:
+                self._currentClient.storeUnjoinedReviews(reviews)
             return
         return self.joinReviews(reviews) 
 
