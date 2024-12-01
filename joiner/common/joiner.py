@@ -50,55 +50,50 @@ class Joiner(StatefulNode):
 
     def joinReviews(self, reviews: list[EntryInterface]):
         unjoined = list(self._currentClient.loadReviewsEntries(self._reviewsEntry))
+        
         reviews.extend(unjoined)
-        if not reviews:
-            return
         batch = defaultdict(list)
-
+        
+        joinedEntries = {}
         for entry in reviews:
             batch[entry._appID].append(entry)
 
         generator = self._currentClient.loadGamesEntries(self._gamesEntry)
-        while True:
-            game = nextRow(generator)
-            if game is None or not len(batch):
+        for game in generator:
+            if not len(batch): # once we joined all reviews available, quit
                 break
             id = game._appID
             name = game._name
             if id in batch:
                 reviewsWithID = batch.pop(id)
                 for review in reviewsWithID:
-                    priorJoined =  self._currentClient._joinedEntries.get(id, self._joinerType.defaultEntry(name, id))
-                    self._currentClient._joinedEntries[id] = self._joinerType.applyJoining(id, name, priorJoined, review)
+                    priorJoined =  joinedEntries.get(id, self._joinerType.defaultEntry(name, id))
+                    joinedEntries[id] = self._joinerType.applyJoining(id, name, priorJoined, review)
         
-        self._joinerType.storeJoinedEntries(self._currentClient._joinedEntries, self._currentClient)
-
+        self._currentClient.storeJoinedEntries(self._joinerType.entriesToSave(joinedEntries), self._joinerType.joinedEntryType())
+        return joinedEntries
+        
     def handleReviewsMessage(self, data: bytes):
-        if len(data) == 0 and not self._currentClient.unjoinedReviews():
-            # persist tracker
-            return
         reviews = self._reviewsEntry.deserialize(data)
         if not self._currentClient.isGamesDone():
             self._currentClient.storeUnjoinedReviews(reviews)
-            return 
-        self.joinReviews(reviews) 
+            return
+        return self.joinReviews(reviews) 
 
     def handleGamesMessage(self, data: bytes):
-        if len(data) == 0:
-            return
         entries = self._gamesEntry.deserialize(data)
-        gamesPath = self._currentClient.gamesPath()
         self._currentClient.storeGamesEntries(entries)
 
     def shouldSendPackets(self, toSend):
         return toSend is not None
     
-    def handleSending(self):
+    def handleSending(self, joinedEntries):
         currClient = self._currentClient
-        toSend = self._joinerType.entriesToSend(joinedEntries=currClient._joinedEntries, 
+        if joinedEntries is None:
+            return
+        toSend = self._joinerType.entriesToSend(joinedEntries=joinedEntries, 
                                                 isDone=currClient.finishedReceiving(),
                                                 activeClient=currClient)
-        self._currentClient._joinedEntries = {}
         if not self.shouldSendPackets(toSend):
             return
         self.sendToNext(toSend)
@@ -120,12 +115,12 @@ class Joiner(StatefulNode):
 
     def processPendingBatches(self):
         self.handleGamesMessage(self._accumulatedBatches.getGamesBatches())
-        self.handleReviewsMessage(self._accumulatedBatches.getReviewsBatches())
+        joinedEntries = self.handleReviewsMessage(self._accumulatedBatches.getReviewsBatches())
 
-        self.handleSending()
-        
+        self.handleSending(joinedEntries)
+
         if self._currentClient.isGamesDone():
-            # que lo remueva despues de persistir el de joined
+            self._currentClient.saveNewResults(self._currentClient.joinedPath())
             self._currentClient.removeUnjoinedReviews() 
 
         toAck = self._accumulatedBatches.toAck()
@@ -163,4 +158,3 @@ class Joiner(StatefulNode):
             self._eofController.finishedProcessing(self._currentClient._fragment, clientId, self._internalCommunication)
             self._currentClient = None
             self._activeClients.pop(clientId).destroy()
-

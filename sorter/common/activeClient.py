@@ -53,6 +53,6 @@ class ActiveClient:
             for row in reader:
                 yield self._entryType.fromArgs(row)
 
-    def saveNewTop(self):
+    def saveNewResults(self):
         os.rename(self.storagePath() + '.tmp', self.storagePath() + '.csv')
     
