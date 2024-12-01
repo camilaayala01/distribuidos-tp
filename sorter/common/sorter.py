@@ -112,7 +112,7 @@ class Sorter(StatefulNode):
         fragment = self.sendToNext(topGenerator)
         if self._sorterType.requireController():
             self._eofController.finishedProcessing(fragment, clientId, self._internalCommunication)
-        self._activeClients.pop(clientId).destroy()
+        return self._activeClients.pop(clientId)
     
     def setCurrentClient(self, clientId: bytes):
         self._currentClient = self._activeClients.setdefault(clientId, 
@@ -125,6 +125,8 @@ class Sorter(StatefulNode):
         self._currentClient.update(header)
         entries = self._entryType.deserialize(batch)
         savedAmount = self.mergeKeepTop(entries)
-        self.handleSending(savedAmount)
+        clientDeleted = self.handleSending(savedAmount)
         self._currentClient.saveNewTop()
+        if clientDeleted is not None:
+            clientDeleted.destroy()
         channel.basic_ack(delivery_tag = tag)

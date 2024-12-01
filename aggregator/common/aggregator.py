@@ -9,7 +9,7 @@ from entryParsing.common.header import Header
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
 from .aggregatorTypes import AggregatorTypes
-from entryParsing.common.utils import copyFileSkippingTracker, getEntryTypeFromEnv, getHeaderTypeFromEnv
+from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv
 
 class Aggregator(StatefulNode):
     def __init__(self):
@@ -17,7 +17,7 @@ class Aggregator(StatefulNode):
         self._aggregatorType = AggregatorTypes(int(os.getenv('AGGREGATOR_TYPE')))
         self._entryType = getEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
-        # self.loadActiveClientsFromDisk()
+        self.loadActiveClientsFromDisk()
     
     def createTrackerFromRow(self, row):
         return self._aggregatorType.trackerType().fromStorage(row)
@@ -55,10 +55,9 @@ class Aggregator(StatefulNode):
                                                                           trackerType()))
 
     def persistNewData(self, entries):
-        priorFile = self._currentClient.storagePath() + '.csv'
         toSend = []
         with open(self._currentClient.storagePath() + '.tmp', 'w+') as file:
-            written = self._currentClient.storeTracker(file)
+            self._currentClient.storeTracker(file)
             toSend = self._aggregatorType.handleResults(entries, 
                                                         self._currentClient.loadEntries(self._entryType), 
                                                         file, 

@@ -29,7 +29,6 @@ class ActiveClient:
 
     # sendingFragments is true if it will be sending data this time
     def storeFragment(self, storageFile, sendingFragments: bool):
-        storageFile.seek(0, os.SEEK_END)
         writer = csv.writer(storageFile, quoting=csv.QUOTE_MINIMAL)
         # stores the fragment it will use next time it needs to send data
         writer.writerow([self._fragment + (1 if sendingFragments else 0)])
