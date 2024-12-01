@@ -68,19 +68,23 @@ class ActiveClient:
             reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
             next(reader) # skip packet tracker
             for row in reader:
-                yield entryType.fromArgs(row)
+                try:
+                    yield entryType.fromArgs(row), False
+                except TypeError:
+                    # reached end of entries, got to fragment number
+                    yield int(row[0]), True
          
     def loadJoinedEntries(self, entryType):
         return self.loadEntries(entryType, self.joinedPath() + '.csv')
     
     def loadAllJoinedEntries(self, entryType):
-        return self.loadEntries(entryType, self.joinedPath() + '.tmp')
-    
+        return (entry for entry, _ in self.loadEntries(entryType, self.joinedPath() + '.tmp'))
+
     def loadReviewsEntries(self, entryType):
-        return self.loadEntries(entryType, self.reviewsPath() + '.csv')
+        return (entry for entry, _ in self.loadEntries(entryType, self.reviewsPath() + '.csv'))
 
     def loadGamesEntries(self, entryType):
-        return self.loadEntries(entryType, self.gamesPath() + '.csv')
+        return (entry for entry, _ in self.loadEntries(entryType, self.gamesPath() + '.csv'))
 
     def storeTracker(self, file, tracker):
         writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
@@ -114,12 +118,20 @@ class ActiveClient:
         self.storeEntries(reviews, self.reviewsPath(), self._reviewsTracker)
         self.saveNewResults(self.reviewsPath())
 
+    def storeFragment(self):
+        with open(self.joinedPath() + '.tmp', 'a') as storageFile:
+            writer = csv.writer(storageFile, quoting=csv.QUOTE_MINIMAL)
+            writer.writerow([self._fragment])
+
     def storeJoinedEntries(self, entriesToSave: dict[EntryInterface], entryType):
         newResults = open(self.joinedPath() + '.tmp', 'w+')
         writer = csv.writer(newResults, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(self._reviewsTracker.asCSVRow())
         generator = self.loadJoinedEntries(entryType)
-        for entry in generator:
+        for data, isFragment in generator:
+            if isFragment:
+                break
+            entry = data
             if entry.getAppID() in entriesToSave:
                 entry.addToCount(entriesToSave[entry.getAppID()].getCount())
                 entriesToSave.pop(entry.getAppID(), None)
@@ -131,7 +143,7 @@ class ActiveClient:
             written = writer.writerow(entry.__dict__.values())
             if written < entry.expectedCsvLen():
                 raise Exception('File could not be written propperly')
-                        
+        
         newResults.close()
 
     def saveNewResults(self, path):

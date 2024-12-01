@@ -120,6 +120,7 @@ class Joiner(StatefulNode):
         self.handleSending(joinedEntries)
 
         if self._currentClient.isGamesDone():
+            self._currentClient.storeFragment()
             self._currentClient.saveNewResults(self._currentClient.joinedPath())
             self._currentClient.removeUnjoinedReviews() 
 

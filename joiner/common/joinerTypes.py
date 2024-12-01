@@ -37,7 +37,7 @@ class JoinerType(Enum):
     def entriesForRegularJoiner(self, isDone, activeClient):
         if not isDone:
             return None
-        return activeClient.loadAllJoinedEntries(self.joinedEntryType()) 
+        return activeClient.loadAllJoinedEntries(self.joinedEntryType())
 
     def entriesToSave(self, joinedEntries):
         match self:
