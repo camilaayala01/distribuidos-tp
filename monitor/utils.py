@@ -1,9 +1,8 @@
 import os
 import socket
 
-MSG_FREQ =int(os.getenv('MESSAGE_FREQ'))
 CONTAINER_NAME = os.getenv('CONTAINER_NAME')
-TIMEOUT = int(os.getenv('TIMEOUT'))
+MONITOR_COUNT = int(os.getenv('MONITOR_COUNT'))
 
 def monitorName(id):
     return f'monitor-{id}'
@@ -20,9 +19,19 @@ def sendall(msg, addr, sock):
             print(e)
             break
         
-def getSocket(id, port):
+def getSocket(id, port, socketTimeout):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((monitorName(id), port))
-    sock.settimeout(2 * MSG_FREQ)
+    sock.settimeout(socketTimeout)
     return sock
+
+def getServerSocket(id, port, socketTimeout):
+    listeningSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listeningSock.bind((monitorName(id), port)) 
+    listeningSock.settimeout(socketTimeout)      
+    listeningSock.listen(MONITOR_COUNT)
+    return listeningSock
+
+
+
         

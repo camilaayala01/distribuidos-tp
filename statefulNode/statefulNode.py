@@ -1,12 +1,16 @@
 from abc import ABC, abstractmethod
+import csv
 import os
 import time
+from uuid import UUID
+import uuid
 from entryParsing.common.fieldParsing import getClientIdUUID
-from entryParsing.common.utils import initializeLog
+from entryParsing.common.utils import initializeLog, nextRow
 from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
 from internalCommunication.internalMessageType import InternalMessageType
+from packetTracker.tracker import TrackerInterface
 
 PRINT_FREQUENCY = 1000
 DELETE_TIMEOUT = 5
@@ -22,6 +26,35 @@ class StatefulNode(ABC):
         self._healthcheckAnswerController = HealthcheckAnswerController()
         self._healthcheckAnswerController.execute()      
     
+    @abstractmethod
+    def createClient(self, filepath: str, clientId: UUID, tracker: TrackerInterface):
+        pass
+    
+    @abstractmethod
+    def createTrackerFromRow(self, row):
+        pass
+    
+    def loadActiveClientsFromDisk(self):
+        dataDirectory = f"/{os.getenv('LISTENING_QUEUE')}/clientData/"
+        if not os.path.exists(dataDirectory) or not os.path.isdir(dataDirectory):
+            return
+        
+        for filename in os.listdir(dataDirectory):
+            path = os.path.join(dataDirectory, filename)
+            if not os.path.isfile(path): 
+                continue
+            
+            if path.endswith('.tmp'):
+                os.remove(path)
+                continue
+            elif path.endswith('.csv'):
+                with open(path, 'r') as file:
+                    reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
+                    packetTrackerRow = nextRow(reader)
+                tracker = self.createTrackerFromRow(packetTrackerRow)
+                clientUUID = uuid.UUID(filename.removesuffix('.csv'))
+                self._activeClients[clientUUID.bytes] = self.createClient(path, clientUUID, tracker)
+
     def deleteIsEmpty(self):
         return len(self._deletedClients) == 0
         

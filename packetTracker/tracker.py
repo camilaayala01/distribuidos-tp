@@ -18,3 +18,11 @@ class TrackerInterface(ABC):
     @abstractmethod
     def reset(self):
         pass
+
+    @abstractmethod
+    def asCSVRow(self):
+        pass
+    
+    
+    
+   

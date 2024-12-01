@@ -19,13 +19,13 @@ def initializeLog():
     )
     logging.getLogger("pika").setLevel(logging.WARNING)
 
-def nextEntry(entriesGenerator):
+def nextRow(generator):
     try:
-        entry = next(entriesGenerator)
-        return entry
+        row = next(generator)
+        return row
     except StopIteration:
         return None
-
+    
 def convertFirstLetterToLowerCase(string: str):
     return string[0].lower() + string[1:]
 

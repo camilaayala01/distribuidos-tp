@@ -9,6 +9,11 @@ services:
       - REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv
       - GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv
       - AMOUNT_OF_EXECUTIONS=1
+      - PYTHONUNBUFFERED=1
+      - MAX_DATA_BYTES=51200
+      - REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv
+      - GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv
+      - AMOUNT_OF_EXECUTIONS=1
     volumes:
       - ./entryParsing:/entryParsing
       - ./mapping:/mapping
@@ -16,7 +21,9 @@ services:
       - ./client-1/responses:/responses
     networks:
       - sa_net
+      - sa_net
     depends_on:
+      - border-node
       - border-node
   initializer-0:
     build:
@@ -35,7 +42,20 @@ services:
       - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
       - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
       - NODE_NAME=initializer-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=Initializer
+      - HEADER_TYPE=HeaderWithTable
+      - GAMES_ENTRY_TYPE=ReducedGameEntry
+      - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
+      - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
+      - GAMES_NEXT_HEADERS=Header;;
+      - REVIEWS_ENTRY_TYPE=ReviewEntry
+      - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
+      - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
+      - NODE_NAME=initializer-0
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -43,6 +63,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   initializer-1:
     build:
@@ -61,7 +82,20 @@ services:
       - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
       - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
       - NODE_NAME=initializer-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=Initializer
+      - HEADER_TYPE=HeaderWithTable
+      - GAMES_ENTRY_TYPE=ReducedGameEntry
+      - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
+      - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
+      - GAMES_NEXT_HEADERS=Header;;
+      - REVIEWS_ENTRY_TYPE=ReviewEntry
+      - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
+      - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
+      - NODE_NAME=initializer-1
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -69,6 +103,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   initializer-2:
     build:
@@ -87,7 +122,20 @@ services:
       - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
       - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
       - NODE_NAME=initializer-2
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=Initializer
+      - HEADER_TYPE=HeaderWithTable
+      - GAMES_ENTRY_TYPE=ReducedGameEntry
+      - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
+      - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
+      - GAMES_NEXT_HEADERS=Header;;
+      - REVIEWS_ENTRY_TYPE=ReviewEntry
+      - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
+      - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
+      - NODE_NAME=initializer-2
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -95,6 +143,8 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
+  grouper-os-0:
       - sa_net
   grouper-os-0:
     build:
@@ -109,7 +159,16 @@ services:
       - HEADER_TYPE=Header
       - ENTRY_TYPE=EntryOSSupport
       - NODE_NAME=grouper-os-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=GrouperOSCounts
+      - GROUPER_TYPE=0
+      - NEXT_NODES=AggregatorOs
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryOSSupport
+      - NODE_NAME=grouper-os-0
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -117,6 +176,8 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
+  grouper-os-1:
       - sa_net
   grouper-os-1:
     build:
@@ -131,7 +192,16 @@ services:
       - HEADER_TYPE=Header
       - ENTRY_TYPE=EntryOSSupport
       - NODE_NAME=grouper-os-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=GrouperOSCounts
+      - GROUPER_TYPE=0
+      - NEXT_NODES=AggregatorOs
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryOSSupport
+      - NODE_NAME=grouper-os-1
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -139,6 +209,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   aggregator-os:
     build:
@@ -154,7 +225,17 @@ services:
       - AGGREGATOR_TYPE=0
       - QUERY_NUMBER=1
       - NODE_NAME=aggregator-os
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=AggregatorOs
+      - NEXT_NODES=Dispatcher
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryOSCount
+      - AGGREGATOR_TYPE=0
+      - QUERY_NUMBER=1
+      - NODE_NAME=aggregator-os
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -166,6 +247,7 @@ services:
       - ./eofController:/eofController
       - ./aggregator/AggregatorOs:/AggregatorOs
     networks:
+      - sa_net
       - sa_net
   filterer-indie:
     build:
@@ -182,7 +264,18 @@ services:
       - HEADER_TYPE=HeaderWithTable
       - ENTRY_TYPE=EntryAppIDNameGenresReleaseDateAvgPlaytime
       - NODE_NAME=filterer-indie
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterIndie
+      - FILTERER_TYPE=1
+      - NEXT_NODES=FilterDecade;JoinerIndie,3,0
+      - NEXT_ENTRIES=EntryNameDateAvgPlaytime;EntryAppIDName
+      - NEXT_HEADERS=Header;
+      - HEADER_TYPE=HeaderWithTable
+      - ENTRY_TYPE=EntryAppIDNameGenresReleaseDateAvgPlaytime
+      - NODE_NAME=filterer-indie
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -190,6 +283,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   filterer-date:
     build:
@@ -205,7 +299,17 @@ services:
       - HEADER_TYPE=Header
       - ENTRY_TYPE=EntryNameDateAvgPlaytime
       - NODE_NAME=filterer-date
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterDecade
+      - FILTERER_TYPE=0
+      - NEXT_NODES=SorterAvgPlaytime,2,1
+      - NEXT_ENTRIES=EntryNameAvgPlaytime
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryNameDateAvgPlaytime
+      - NODE_NAME=filterer-date
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -213,6 +317,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   sorter-playtime-0:
     build:
@@ -231,7 +336,20 @@ services:
       - NODE_COUNT=2
       - NEXT_HEADERS=HeaderWithSender
       - NODE_NAME=sorter-playtime-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=SorterAvgPlaytime
+      - NEXT_NODES=ConsolidatorSorterPlaytime
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryNameAvgPlaytime
+      - NODE_ID=0
+      - SORTER_TYPE=0
+      - TOP_AMOUNT=10
+      - NODE_COUNT=2
+      - NEXT_HEADERS=HeaderWithSender
+      - NODE_NAME=sorter-playtime-0
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -243,6 +361,7 @@ services:
       - ./eofController:/eofController
       - ./sorter/SorterAvgPlaytime0:/SorterAvgPlaytime
     networks:
+      - sa_net
       - sa_net
   sorter-playtime-1:
     build:
@@ -261,7 +380,20 @@ services:
       - NODE_COUNT=2
       - NEXT_HEADERS=HeaderWithSender
       - NODE_NAME=sorter-playtime-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=SorterAvgPlaytime
+      - NEXT_NODES=ConsolidatorSorterPlaytime
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryNameAvgPlaytime
+      - NODE_ID=1
+      - SORTER_TYPE=0
+      - TOP_AMOUNT=10
+      - NODE_COUNT=2
+      - NEXT_HEADERS=HeaderWithSender
+      - NODE_NAME=sorter-playtime-1
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -273,6 +405,7 @@ services:
       - ./eofController:/eofController
       - ./sorter/SorterAvgPlaytime1:/SorterAvgPlaytime
     networks:
+      - sa_net
       - sa_net
   sorter-consolidator-playtime:
     build:
@@ -293,6 +426,7 @@ services:
       - NODE_NAME=sorter-consolidator-playtime
     env_file:
       - .env
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -303,6 +437,7 @@ services:
       - ./eofController:/eofController
       - ./sorter/ConsolidatorSorterPlaytime:/ConsolidatorSorterPlaytime
     networks:
+      - sa_net
       - sa_net
   grouper-indie:
     build:
@@ -317,7 +452,16 @@ services:
       - HEADER_TYPE=HeaderWithTable
       - ENTRY_TYPE=EntryAppID
       - NODE_NAME=grouper-indie
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=GrouperIndie
+      - GROUPER_TYPE=1
+      - NEXT_NODES=JoinerIndie,3,0
+      - HEADER_TYPE=HeaderWithTable
+      - ENTRY_TYPE=EntryAppID
+      - NODE_NAME=grouper-indie
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -325,6 +469,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   joiner-indie-0:
     build:
@@ -344,7 +489,21 @@ services:
       - NODE_ID=0
       - NODE_COUNT=3
       - NODE_NAME=joiner-indie-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=50
+      - LISTENING_QUEUE=JoinerIndie
+      - JOINER_TYPE=0
+      - NEXT_NODES=AggregatorIndie
+      - NEXT_HEADERS=HeaderWithSender
+      - NEXT_ENTRIES=EntryNameReviewCount
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - HEADER_TYPE=HeaderWithTable
+      - NODE_ID=0
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-indie-0
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -356,6 +515,7 @@ services:
       - ./eofController:/eofController
       - ./joiner/JoinerIndie0:/JoinerIndie
     networks:
+      - sa_net
       - sa_net
   joiner-indie-1:
     build:
@@ -375,7 +535,21 @@ services:
       - NODE_ID=1
       - NODE_COUNT=3
       - NODE_NAME=joiner-indie-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=50
+      - LISTENING_QUEUE=JoinerIndie
+      - JOINER_TYPE=0
+      - NEXT_NODES=AggregatorIndie
+      - NEXT_HEADERS=HeaderWithSender
+      - NEXT_ENTRIES=EntryNameReviewCount
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - HEADER_TYPE=HeaderWithTable
+      - NODE_ID=1
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-indie-1
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -387,6 +561,7 @@ services:
       - ./eofController:/eofController
       - ./joiner/JoinerIndie1:/JoinerIndie
     networks:
+      - sa_net
       - sa_net
   joiner-indie-2:
     build:
@@ -406,7 +581,21 @@ services:
       - NODE_ID=2
       - NODE_COUNT=3
       - NODE_NAME=joiner-indie-2
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=50
+      - LISTENING_QUEUE=JoinerIndie
+      - JOINER_TYPE=0
+      - NEXT_NODES=AggregatorIndie
+      - NEXT_HEADERS=HeaderWithSender
+      - NEXT_ENTRIES=EntryNameReviewCount
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - HEADER_TYPE=HeaderWithTable
+      - NODE_ID=2
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-indie-2
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -418,6 +607,7 @@ services:
       - ./eofController:/eofController
       - ./joiner/JoinerIndie2:/JoinerIndie
     networks:
+      - sa_net
       - sa_net
   aggregator-indie:
     build:
@@ -435,6 +625,7 @@ services:
       - NODE_NAME=aggregator-indie
     env_file:
       - .env
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -445,6 +636,7 @@ services:
       - ./eofController:/eofController
       - ./aggregator/AggregatorIndie:/AggregatorIndie
     networks:
+      - sa_net
       - sa_net
   sorter-indie-0:
     build:
@@ -463,7 +655,20 @@ services:
       - NODE_COUNT=2
       - NEXT_HEADERS=HeaderWithSender
       - NODE_NAME=sorter-indie-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=SorterIndie
+      - NEXT_NODES=ConsolidatorSorterIndie
+      - NODE_ID=0
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryNameReviewCount
+      - SORTER_TYPE=1
+      - TOP_AMOUNT=5
+      - NODE_COUNT=2
+      - NEXT_HEADERS=HeaderWithSender
+      - NODE_NAME=sorter-indie-0
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -475,6 +680,7 @@ services:
       - ./eofController:/eofController
       - ./sorter/SorterIndie0:/SorterIndie
     networks:
+      - sa_net
       - sa_net
   sorter-indie-1:
     build:
@@ -493,7 +699,20 @@ services:
       - NODE_COUNT=2
       - NEXT_HEADERS=HeaderWithSender
       - NODE_NAME=sorter-indie-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=SorterIndie
+      - NEXT_NODES=ConsolidatorSorterIndie
+      - NODE_ID=1
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryNameReviewCount
+      - SORTER_TYPE=1
+      - TOP_AMOUNT=5
+      - NODE_COUNT=2
+      - NEXT_HEADERS=HeaderWithSender
+      - NODE_NAME=sorter-indie-1
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -505,6 +724,7 @@ services:
       - ./eofController:/eofController
       - ./sorter/SorterIndie1:/SorterIndie
     networks:
+      - sa_net
       - sa_net
   sorter-consolidator-indie:
     build:
@@ -525,6 +745,7 @@ services:
       - NODE_NAME=sorter-consolidator-indie
     env_file:
       - .env
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -535,6 +756,7 @@ services:
       - ./eofController:/eofController
       - ./sorter/ConsolidatorSorterIndie:/ConsolidatorSorterIndie
     networks:
+      - sa_net
       - sa_net
   filterer-action:
     build:
@@ -550,7 +772,17 @@ services:
       - HEADER_TYPE=HeaderWithTable
       - ENTRY_TYPE=EntryAppIDNameGenres
       - NODE_NAME=filterer-action
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterAction
+      - FILTERER_TYPE=2
+      - NEXT_NODES=JoinerActionEnglish,3,0;JoinerActionPercentile,3,0
+      - NEXT_ENTRIES=EntryAppIDName;EntryAppIDName
+      - HEADER_TYPE=HeaderWithTable
+      - ENTRY_TYPE=EntryAppIDNameGenres
+      - NODE_NAME=filterer-action
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -558,6 +790,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   joiner-english-0:
     build:
@@ -576,7 +809,20 @@ services:
       - NODE_ID=0
       - NODE_COUNT=3
       - NODE_NAME=joiner-english-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=50
+      - LISTENING_QUEUE=JoinerActionEnglish
+      - JOINER_TYPE=1
+      - NEXT_NODES=FilterEnglish
+      - NEXT_HEADERS=HeaderWithSender
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
+      - HEADER_TYPE=HeaderWithTable
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - NODE_ID=0
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-english-0
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -588,6 +834,7 @@ services:
       - ./eofController:/eofController
       - ./joiner/JoinerActionEnglish0:/JoinerActionEnglish
     networks:
+      - sa_net
       - sa_net
   joiner-english-1:
     build:
@@ -606,7 +853,20 @@ services:
       - NODE_ID=1
       - NODE_COUNT=3
       - NODE_NAME=joiner-english-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=50
+      - LISTENING_QUEUE=JoinerActionEnglish
+      - JOINER_TYPE=1
+      - NEXT_NODES=FilterEnglish
+      - NEXT_HEADERS=HeaderWithSender
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
+      - HEADER_TYPE=HeaderWithTable
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - NODE_ID=1
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-english-1
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -618,6 +878,7 @@ services:
       - ./eofController:/eofController
       - ./joiner/JoinerActionEnglish1:/JoinerActionEnglish
     networks:
+      - sa_net
       - sa_net
   joiner-english-2:
     build:
@@ -636,7 +897,20 @@ services:
       - NODE_ID=2
       - NODE_COUNT=3
       - NODE_NAME=joiner-english-2
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=50
+      - LISTENING_QUEUE=JoinerActionEnglish
+      - JOINER_TYPE=1
+      - NEXT_NODES=FilterEnglish
+      - NEXT_HEADERS=HeaderWithSender
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
+      - HEADER_TYPE=HeaderWithTable
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - NODE_ID=2
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-english-2
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -648,6 +922,7 @@ services:
       - ./eofController:/eofController
       - ./joiner/JoinerActionEnglish2:/JoinerActionEnglish
     networks:
+      - sa_net
       - sa_net
   filterer-english-0:
     build:
@@ -663,7 +938,17 @@ services:
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - NODE_NAME=filterer-english-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-0
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -671,6 +956,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   filterer-english-1:
     build:
@@ -686,7 +972,17 @@ services:
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - NODE_NAME=filterer-english-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-1
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -694,6 +990,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   filterer-english-2:
     build:
@@ -709,7 +1006,17 @@ services:
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - NODE_NAME=filterer-english-2
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-2
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -717,6 +1024,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   filterer-english-3:
     build:
@@ -732,7 +1040,17 @@ services:
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - NODE_NAME=filterer-english-3
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-3
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -740,6 +1058,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   filterer-english-4:
     build:
@@ -755,7 +1074,17 @@ services:
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - NODE_NAME=filterer-english-4
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-4
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -763,6 +1092,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   filterer-english-5:
     build:
@@ -778,7 +1108,17 @@ services:
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - NODE_NAME=filterer-english-5
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-5
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -786,6 +1126,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   filterer-english-6:
     build:
@@ -801,7 +1142,17 @@ services:
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - NODE_NAME=filterer-english-6
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-6
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -809,6 +1160,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   filterer-english-7:
     build:
@@ -824,7 +1176,17 @@ services:
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDNameReviewText
       - NODE_NAME=filterer-english-7
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-7
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -832,6 +1194,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   grouper-english:
     build:
@@ -846,7 +1209,16 @@ services:
       - HEADER_TYPE=HeaderWithSender
       - ENTRY_TYPE=EntryAppIDName
       - NODE_NAME=grouper-english
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=GrouperActionEnglish
+      - GROUPER_TYPE=2
+      - NEXT_NODES=AggregatorEnglish
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDName
+      - NODE_NAME=grouper-english
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -854,6 +1226,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   aggregator-english:
     build:
@@ -874,6 +1247,7 @@ services:
       - NODE_NAME=aggregator-english
     env_file:
       - .env
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -884,6 +1258,7 @@ services:
       - ./eofController:/eofController
       - ./aggregator/AggregatorEnglish:/AggregatorEnglish
     networks:
+      - sa_net
       - sa_net
   grouper-percentile:
     build:
@@ -898,7 +1273,16 @@ services:
       - HEADER_TYPE=HeaderWithTable
       - ENTRY_TYPE=EntryAppID
       - NODE_NAME=grouper-percentile
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=GrouperActionPercentile
+      - GROUPER_TYPE=1
+      - NEXT_NODES=JoinerActionPercentile,3,0
+      - HEADER_TYPE=HeaderWithTable
+      - ENTRY_TYPE=EntryAppID
+      - NODE_NAME=grouper-percentile
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -906,6 +1290,7 @@ services:
       - ./mapping:/mapping
       - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
+      - sa_net
       - sa_net
   joiner-percentile-0:
     build:
@@ -924,7 +1309,20 @@ services:
       - NODE_ID=0
       - NODE_COUNT=3
       - NODE_NAME=joiner-percentile-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=50
+      - LISTENING_QUEUE=JoinerActionPercentile
+      - JOINER_TYPE=0
+      - NEXT_NODES=ConsolidatorSorterPercentile
+      - NEXT_HEADERS=HeaderWithSender
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - HEADER_TYPE=HeaderWithTable
+      - NODE_ID=0
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-percentile-0
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -936,6 +1334,7 @@ services:
       - ./eofController:/eofController
       - ./joiner/JoinerActionPercentile0:/JoinerActionPercentile
     networks:
+      - sa_net
       - sa_net
   joiner-percentile-1:
     build:
@@ -954,7 +1353,20 @@ services:
       - NODE_ID=1
       - NODE_COUNT=3
       - NODE_NAME=joiner-percentile-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=50
+      - LISTENING_QUEUE=JoinerActionPercentile
+      - JOINER_TYPE=0
+      - NEXT_NODES=ConsolidatorSorterPercentile
+      - NEXT_HEADERS=HeaderWithSender
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - HEADER_TYPE=HeaderWithTable
+      - NODE_ID=1
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-percentile-1
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -966,6 +1378,7 @@ services:
       - ./eofController:/eofController
       - ./joiner/JoinerActionPercentile1:/JoinerActionPercentile
     networks:
+      - sa_net
       - sa_net
   joiner-percentile-2:
     build:
@@ -984,7 +1397,20 @@ services:
       - NODE_ID=2
       - NODE_COUNT=3
       - NODE_NAME=joiner-percentile-2
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=50
+      - LISTENING_QUEUE=JoinerActionPercentile
+      - JOINER_TYPE=0
+      - NEXT_NODES=ConsolidatorSorterPercentile
+      - NEXT_HEADERS=HeaderWithSender
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - HEADER_TYPE=HeaderWithTable
+      - NODE_ID=2
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-percentile-2
     env_file:
+      - .env
       - .env
     volumes:
       - ./internalCommunication:/internalCommunication
@@ -996,6 +1422,7 @@ services:
       - ./eofController:/eofController
       - ./joiner/JoinerActionPercentile2:/JoinerActionPercentile
     networks:
+      - sa_net
       - sa_net
   sorter-consolidator-percentile:
     build:
@@ -1016,6 +1443,7 @@ services:
       - NODE_NAME=sorter-consolidator-percentile
     env_file:
       - .env
+      - .env
     volumes:
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
@@ -1026,6 +1454,7 @@ services:
       - ./eofController:/eofController
       - ./sorter/ConsolidatorSorterPercentile:/ConsolidatorSorterPercentile
     networks:
+      - sa_net
       - sa_net
   border-node:
     build:
@@ -1039,7 +1468,12 @@ services:
       - LISTENING_QUEUE=Dispatcher
     env_file:
       - .env
+      - .env
     volumes:
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./borderNode/data:/data
       - ./internalCommunication:/internalCommunication
       - ./entryParsing:/entryParsing
       - ./healthcheckAnswerController:/healthcheckAnswerController
@@ -1158,4 +1592,5 @@ networks:
     ipam:
       driver: default
       config:
+        - subnet: 172.25.125.0/24
         - subnet: 172.25.125.0/24

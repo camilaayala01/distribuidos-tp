@@ -3,6 +3,7 @@ from monitor import Monitor
 import os
 
 TIMER_DURATION = int(os.getenv('TIMER_DURATION'))
+
 def main():
     monitor = Monitor()
     signal.signal(signal.SIGTERM, monitor.stop)

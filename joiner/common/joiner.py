@@ -2,7 +2,7 @@ from collections import defaultdict
 import logging
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID
-from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextEntry
+from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextRow
 from entryParsing.entry import EntryInterface
 from eofController.eofController import EofController
 from statefulNode.statefulNode import StatefulNode
@@ -31,6 +31,12 @@ class Joiner(StatefulNode):
         self._eofController.terminateProcess(self._internalCommunication)
         super().stop(_signum, _frame)
         
+    def createTrackerFromRow(self, row): # TODO
+        raise NotImplementedError
+    
+    def createClient(self, filepath, clientId, tracker): # TODO
+        raise NotImplementedError
+    
     """keeps the client if there is one, set a new one if there's not"""
     def setCurrentClient(self, clientId: bytes):
         if self._currentClient:
@@ -54,7 +60,7 @@ class Joiner(StatefulNode):
 
         generator = self._currentClient.loadGamesEntries(self._gamesEntry)
         while True:
-            game = nextEntry(generator)
+            game = nextRow(generator)
             if game is None or not len(batch):
                 break
             id = game._appID
@@ -83,8 +89,7 @@ class Joiner(StatefulNode):
         self._currentClient.storeGamesEntries(entries)
 
     def shouldSendPackets(self, toSend):
-        return (self._currentClient.finishedReceiving() or 
-                (not self._currentClient.finishedReceiving() and toSend is not None))
+        return toSend is not None
     
     def handleSending(self):
         currClient = self._currentClient
@@ -154,7 +159,6 @@ class Joiner(StatefulNode):
         if self._currentClient.finishedReceiving():
             logging.info(f'action: finished receiving data from client {getClientIdUUID(clientId)}| result: success')
             self._eofController.finishedProcessing(self._currentClient._fragment, clientId, self._internalCommunication)
-            self._currentClient.destroy()
             self._currentClient = None
-            self._activeClients.pop(clientId)
+            self._activeClients.pop(clientId).destroy()
 
