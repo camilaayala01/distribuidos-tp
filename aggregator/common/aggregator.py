@@ -59,17 +59,11 @@ class Aggregator(StatefulNode):
         toSend = []
         with open(self._currentClient.storagePath() + '.tmp', 'w+') as file:
             written = self._currentClient.storeTracker(file)
-            if not len(entries):
-                copyFileSkippingTracker(newResultsFile=file, 
-                                        newResultsOffset=written, 
-                                        oldFilePath=priorFile)
-                # already copied fragment from last iteration
-            else:
-                toSend = self._aggregatorType.handleResults(entries, 
-                                                            self._currentClient.loadEntries(self._entryType), 
-                                                            file, 
-                                                            self._currentClient.finishedReceiving())
-                self._currentClient.storeFragment(file, self.shouldSendPackets(toSend))
+            toSend = self._aggregatorType.handleResults(entries, 
+                                                        self._currentClient.loadEntries(self._entryType), 
+                                                        file, 
+                                                        self._currentClient.finishedReceiving())
+            self._currentClient.storeFragment(file, self.shouldSendPackets(toSend))
         return toSend
 
     def processDataPacket(self, header, batch, tag, channel):
