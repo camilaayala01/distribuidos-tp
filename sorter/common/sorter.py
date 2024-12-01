@@ -2,10 +2,11 @@ import logging
 import os
 import csv
 import uuid
-from entryParsing.common.fieldParsing import getClientIdUUID
+from entryParsing.common.fieldParsing import getClientIdUUID, serializeBoolean
 from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
 from eofController.eofController import EofController
 from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, nextRow
+from internalCommunication.internalMessageType import InternalMessageType
 from statefulNode.statefulNode import StatefulNode
 from .sorterTypes import SorterType
 from .activeClient import ActiveClient
@@ -105,14 +106,14 @@ class Sorter(StatefulNode):
         clientId = self._currentClient.getClientIdBytes()
         if not self._currentClient.isDone():
             self._activeClients[clientId] = self._currentClient
-            return
+            return None
         logging.info(f'action: received all required batches for {getClientIdUUID(clientId)} | result: success')
         topGenerator= self._currentClient.getResults()
         topGenerator = self._sorterType.preprocessPackets(topGenerator, savedAmount)
         fragment = self.sendToNext(topGenerator)
         if self._sorterType.requireController():
             self._eofController.finishedProcessing(fragment, clientId, self._internalCommunication)
-        return self._activeClients.pop(clientId)
+        return clientId
     
     def setCurrentClient(self, clientId: bytes):
         self._currentClient = self._activeClients.setdefault(clientId, 
@@ -127,6 +128,7 @@ class Sorter(StatefulNode):
         savedAmount = self.mergeKeepTop(entries)
         clientDeleted = self.handleSending(savedAmount)
         self._currentClient.saveNewTop()
-        if clientDeleted is not None:
-            clientDeleted.destroy()
+        if clientDeleted:
+            self._internalCommunication.basicSend(self._internalCommunication.getQueueName(), InternalMessageType.CLIENT_FLUSH.serialize() + clientId + serializeBoolean(False))
+            pass
         channel.basic_ack(delivery_tag = tag)

@@ -15,6 +15,9 @@ class InternalCommunication:
         if name != None:
             logging.info(f'action: initialized an entity | result: success | msg: binded to queue {name}')
 
+    def getQueueName(self) -> str:
+        return self._executerName + self._nodeID
+
     def startConnection(self) -> pika.BlockingConnection:
         return pika.BlockingConnection(
         pika.ConnectionParameters(host=os.getenv('HOST'), heartbeat=0))

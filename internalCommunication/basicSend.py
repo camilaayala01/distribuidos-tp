@@ -1,3 +1,4 @@
+from entryParsing.common.fieldParsing import serializeBoolean
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.entry import EntryInterface
 from internalCommunication.internalCommunication import InternalCommunication
@@ -46,4 +47,4 @@ class BasicSend(SendingStrategy):
         return fragment
     
     def sendFlush(self, middleware, clientId):
-        self.sendBytes(middleware, InternalMessageType.CLIENT_FLUSH.serialize() + clientId)
+        self.sendBytes(middleware, InternalMessageType.CLIENT_FLUSH.serialize() + clientId + serializeBoolean(True))
