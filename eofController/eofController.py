@@ -38,7 +38,7 @@ class EofController:
         with open(self._filepath + '.tmp', 'w+') as file:
             writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
             for client in self._pending:
-                written = writer.writerow([f"{client}"])
+                written = writer.writerow([f"{client}"]) # TODO: this probably needs a fix idk help
                 if written < len(f"{client}"):
                     raise Exception('File could not be written propperly')   
         if rename:
