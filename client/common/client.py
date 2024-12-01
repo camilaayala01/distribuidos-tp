@@ -39,7 +39,7 @@ class Client:
         return len(self._queriesReceived) == QUERY_COUNT
     
     def receiveQuery1Answer(self, data):
-        response = EntryOSCount.deserialize(data)
+        response = EntryOSCount.deserialize(data)[0]
         logging.info(f'action: store query 1 data | data received: {response}')
         storeResultsQuery1(str(response), self._currentExecution)
 

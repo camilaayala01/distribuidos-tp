@@ -25,29 +25,12 @@ class Sorter(StatefulNode):
             self._eofController = EofController(int(os.getenv('NODE_ID')), os.getenv('LISTENING_QUEUE'), int(os.getenv('NODE_COUNT')), self._sendingStrategies)
             self._eofController.execute()
 
-    def loadActiveClientsFromDisk(self):
-        dataDirectory = f"/{os.getenv('LISTENING_QUEUE')}/clientData/"
-        if not os.path.exists(dataDirectory) or not os.path.isdir(dataDirectory):
-            return
-        
-        for filename in os.listdir(dataDirectory):
-            path = os.path.join(dataDirectory, filename)
-            if not os.path.isfile(path): 
-                continue
-            
-            if path.endswith('.tmp'):
-                os.remove(path)
-                continue
-            
-            elif path.endswith('.csv'):
-                clientIdstr = filename.removesuffix('.csv')
-                with open(path, 'r') as file:
-                    reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
-                    packetTrackerRow = nextRow(reader)
-                    tracker = self._sorterType.loadTracker(packetTrackerRow)
-                    clientUUID = uuid.UUID(clientIdstr)
-                    self._activeClients[clientUUID.bytes] = ActiveClient(clientUUID, self._entryType, tracker)
-                    
+    def createTrackerFromRow(self, row):
+        return self._sorterType.loadTracker(row)
+    
+    def createClient(self, _file, clientId, tracker):
+        return ActiveClient(clientId, self._entryType, tracker)
+   
     def stop(self, _signum, _frame):
         if self._sorterType.requireController():
            self._eofController.terminateProcess(self._internalCommunication)
@@ -84,15 +67,13 @@ class Sorter(StatefulNode):
             savedAmount += 1
         return savedAmount
 
-    def mergeKeepTop(self, batch: list[EntrySorterTopFinder]):
-        if len(batch) == 0:
-            return
-        
+    def mergeKeepTop(self, batch: list[EntrySorterTopFinder]):        
         newBatchTop = self.getBatchTop(batch)
         j = 0
         savedAmount = 0
         
-        with open(self._currentClient.getTmpPath(), 'w+') as file:
+        with open(self._currentClient.storagePath() + '.tmp', 'w+') as file:
+            self._currentClient.storeTracker(file) 
             entriesGen = self._currentClient.loadEntries()
             topEntry = nextRow(entriesGen)
             
@@ -111,7 +92,7 @@ class Sorter(StatefulNode):
             elif j < len(newBatchTop):
                 savedAmount = self.drainNewBatch(j, savedAmount, newBatchTop, file)
             
-            self._currentClient.setNewSavedEntries(savedAmount)
+            return savedAmount
             
     def sendToNext(self, generator):
         extraParamsForHeader = self._sorterType.extraParamsForHeader()
@@ -120,17 +101,18 @@ class Sorter(StatefulNode):
             fragment = strategy.sendFragmenting(self._internalCommunication, self._currentClient.getClientIdBytes(), 1, generator, not self._sorterType.requireController(), **extraParamsForHeader)
         return fragment
 
-    def handleSending(self, clientId: bytes):
+    def handleSending(self, savedAmount):
+        clientId = self._currentClient.getClientIdBytes()
         if not self._currentClient.isDone():
             self._activeClients[clientId] = self._currentClient
             return
         logging.info(f'action: received all required batches for {getClientIdUUID(clientId)} | result: success')
-        topGenerator, topAmount = self._currentClient.getResults()
-        topGenerator = self._sorterType.preprocessPackets(topGenerator, topAmount)
+        topGenerator= self._currentClient.getResults()
+        topGenerator = self._sorterType.preprocessPackets(topGenerator, savedAmount)
         fragment = self.sendToNext(topGenerator)
         if self._sorterType.requireController():
             self._eofController.finishedProcessing(fragment, clientId, self._internalCommunication)
-        self._activeClients.pop(clientId).destroy()
+        return self._activeClients.pop(clientId)
     
     def setCurrentClient(self, clientId: bytes):
         self._currentClient = self._activeClients.setdefault(clientId, 
@@ -142,7 +124,9 @@ class Sorter(StatefulNode):
         clientId = header.getClient()
         self._currentClient.update(header)
         entries = self._entryType.deserialize(batch)
-        self.mergeKeepTop(entries)
-        self.handleSending(clientId)
+        savedAmount = self.mergeKeepTop(entries)
+        clientDeleted = self.handleSending(savedAmount)
         self._currentClient.saveNewTop()
+        if clientDeleted is not None:
+            clientDeleted.destroy()
         channel.basic_ack(delivery_tag = tag)

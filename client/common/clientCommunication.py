@@ -72,7 +72,6 @@ class ClientCommunication:
                 self.sendDataToServer(header.serialize() + data)
                 retries += 1
 
-    # TODO add sending retries and maybe delete max timeouts
     def waitForServerAck(self, sentHeader: ClientHeader):
         msg = self._socket.recv()
         type, msg = MessageType.deserialize(msg)

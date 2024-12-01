@@ -403,7 +403,7 @@ def add_joiner_action_english(compose: dict[str, Any]):
         containers.append(new_container)
     return compose, containers
 
-def add_monitor(compose: dict[str, Any], cluster_nodes: list[str], id):
+def add_monitor(compose: dict[str, Any], cluster_nodes: list[str], id, monitors_amount):
     container_name = f'monitor-{id}'
     compose['services'][container_name]= {
         'build': {
@@ -414,11 +414,17 @@ def add_monitor(compose: dict[str, Any], cluster_nodes: list[str], id):
             'PYTHONUNBUFFERED=1',
             'PREFETCH_COUNT=1',
             f'ID={id}',
-            f'TO_CHECK={";".join(cluster_nodes)}'
+            f'TO_CHECK={";".join(cluster_nodes)}',
+            'RETRIES=3',
+            'TIMER_DURATION=3',
+            'CONTAINER_NAME=distribuidos-tp',
+            'ELECTION_PORT=9500',
+            f'MONITOR_COUNT={monitors_amount}',
         ],
         'env_file': default_env_file(),
         'volumes':[
-            '/var/run/docker.sock:/var/run/docker.sock'
+            '/var/run/docker.sock:/var/run/docker.sock',
+            './healthcheckAnswerController:/healthcheckAnswerController'
         ],
         'networks': default_network(),
         'depends_on': cluster_nodes
@@ -429,7 +435,7 @@ def add_all_monitors(compose: dict[str, Any], containers):
     monitors_amount = 4
     monitors = []
     for id in range(1, monitors_amount + 1):
-        compose, new_container = add_monitor(compose, containers, id)
+        compose, new_container = add_monitor(compose, containers, id, monitors_amount)
         monitors.append(new_container)
 
     monitors.extend(containers)
