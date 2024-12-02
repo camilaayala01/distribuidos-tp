@@ -25,7 +25,7 @@ class EntryOSCount(EntryInterface):
 
     def __str__(self):
         return f"Total de juegos: {str(self._totalCount)}\n\
-                Total de juegos soportados en Windows: {str(self._windowsCount)}\n\
+            Total de juegos soportados en Windows: {str(self._windowsCount)}\n\
                 Total de juegos soportados en Linux: {str(self._linuxCount)}\n\
-                Total de juegos soportados en Mac: {str(self._macCount)}"
+                    Total de juegos soportados en Mac: {str(self._macCount)}"
     

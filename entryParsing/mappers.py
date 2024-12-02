@@ -45,7 +45,9 @@ SERIALIZERS = {
     "_macCount":  fieldParsing.serializeCount,
     "_linuxCount": fieldParsing.serializeCount, 
     "_totalCount":  fieldParsing.serializeCount,
-    "_reviewText": fieldParsing.serializeReviewText
+    "_reviewText": fieldParsing.serializeReviewText,
+    "_reviewScore": fieldParsing.serializeSignedInt,
+    "_reviewVotes": lambda x: fieldParsing.serializeNumber(x, fieldLen.VOTE_LEN)
 }
 
 DESERIALIZERS = {

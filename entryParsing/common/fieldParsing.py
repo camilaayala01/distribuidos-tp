@@ -51,7 +51,7 @@ def skipReviewText(curr: int, data: bytes)-> int:
 
 def deserializeReviewText(curr: int, data: bytes)-> tuple[str, int]:
     text, curr = deserializeVariableLen(curr, data, fieldLen.TEXT_LEN)
-    return text[:MAX_REVIEW_TEXT]
+    return text[:MAX_REVIEW_TEXT], curr
 
 def serializeGenres(field: str):
     return serializeVariableLen(field, fieldLen.GENRE_LEN)
