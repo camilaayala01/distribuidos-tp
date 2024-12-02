@@ -9,12 +9,11 @@ import os
 import csv
 
 class ActiveClient:
-    def __init__(self, clientId: UUID):
+    def __init__(self, clientId: UUID, gamesTracker, reviewsTracker):
         self._clientId = clientId
         self._fragment = 1
-        self._joinedEntries = {} #appid, entry[]
-        self._gamesTracker = DefaultTracker()
-        self._reviewsTracker = DefaultTracker()
+        self._gamesTracker = gamesTracker
+        self._reviewsTracker = reviewsTracker
         self._folderPath = f"/{os.getenv('LISTENING_QUEUE')}/{clientId}/"
         os.makedirs(self._folderPath, exist_ok=True)
 
@@ -25,7 +24,6 @@ class ActiveClient:
         if os.path.exists(self._folderPath):
             shutil.rmtree(self._folderPath)
 
-    
     def gamesPath(self):
         return self._folderPath + f'games'
 
@@ -62,62 +60,102 @@ class ActiveClient:
     def unjoinedReviews(self):
         return os.path.exists(self.reviewsPath() + '.csv')
 
-    def loadEntries(self, filepath, entryType):
+    def loadFragment(self):
+        filepath = self.joinedPath() + '.csv'
+        if not os.path.exists(filepath):
+            return
+        with open(filepath, 'rb') as file:
+            file.seek(-2, os.SEEK_END)
+            while file.read(1) != b'\n':
+                file.seek(-2, os.SEEK_CUR)
+            lastLine = file.readline().decode().strip()
+        self._fragment = int(lastLine)
+
+    def loadEntries(self, entryType, filepath):
         if not os.path.exists(filepath):
             return iter([])
         
         with open(filepath, 'r') as file:
             reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
+            next(reader) # skip packet tracker
             for row in reader:
-                yield entryType.fromArgs(row)
+                try:
+                    yield entryType.fromArgs(row), False
+                except TypeError:
+                    # reached end of entries, got to fragment number
+                    yield int(row[0]), True
+         
+    def loadJoinedEntries(self, entryType):
+        return self.loadEntries(entryType, self.joinedPath() + '.csv')
     
-    def loadGamesEntries(self, entryType):
-        return self.loadEntries(self.gamesPath() + '.csv', entryType)
+    def loadAllJoinedEntries(self, entryType):
+        return (entry for entry, _ in self.loadEntries(entryType, self.joinedPath() + '.tmp'))
 
     def loadReviewsEntries(self, entryType):
-        return self.loadEntries(self.reviewsPath() + '.csv', entryType)
+        return (entry for entry, _ in self.loadEntries(entryType, self.reviewsPath() + '.csv'))
 
-    def loadJoinedEntries(self, entryType):
-        return self.loadEntries(self.joinedPath() + '.csv', entryType)
+    def loadGamesEntries(self, entryType):
+        return (entry for entry, _ in self.loadEntries(entryType, self.gamesPath() + '.csv'))
+
+    def storeTracker(self, file, tracker):
+        writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(tracker.asCSVRow())
     
-    def storeEntries(self, filepath, entries):
-        newResults = open(filepath + '.tmp', 'w+')
-        copyFile(newResults, filepath + '.csv')
-
-        writer = csv.writer(newResults, quoting=csv.QUOTE_MINIMAL)
-        for entry in entries:
-            written = writer.writerow(entry.__dict__.values())
-            if written < entry.expectedCsvLen():
-                raise Exception('File could not be written propperly')
+    def copyEntriesFromCSV(self, srcFilePath, dstFile):
+        if not os.path.exists(srcFilePath +'.csv'): 
+            return
+        writer = csv.writer(dstFile, quoting=csv.QUOTE_MINIMAL)
+        with open(srcFilePath +'.csv', 'r') as srcFile:
+            reader = csv.reader(srcFile, quoting=csv.QUOTE_MINIMAL)
+            next(reader) # skip packet tracker
+            for row in reader:
+                writer.writerow(row)
         
-        newResults.close()
-        os.rename(filepath + '.tmp', filepath + '.csv')
-        
-    def storeUnjoinedReviews(self, reviews: list[EntryInterface]):
-        self.storeEntries(self.reviewsPath(), reviews)
+    def storeEntries(self, entries, filepath, tracker):
+        with open(filepath + '.tmp', 'w+') as dstFile:
+            self.storeTracker(dstFile, tracker)
+            self.copyEntriesFromCSV(srcFilePath=filepath, dstFile=dstFile)
+            writer = csv.writer(dstFile, quoting=csv.QUOTE_MINIMAL)
+            for entry in entries:
+                written = writer.writerow(entry.__dict__.values())
+                if written < entry.expectedCsvLen():
+                    raise Exception('File could not be written properly')
 
     def storeGamesEntries(self, entries: list[EntryInterface]):
-        self.storeEntries(self.gamesPath(), entries)
+        self.storeEntries(entries, self.gamesPath(), self._gamesTracker)
+        self.saveNewResults(self.gamesPath())
 
-    def storeJoinedEntries(self, joinedEntries: dict[EntryInterface], entryType):
+    def storeUnjoinedReviews(self, reviews: list[EntryInterface]):
+        self.storeEntries(reviews, self.reviewsPath(), self._reviewsTracker)
+        self.saveNewResults(self.reviewsPath())
+
+    def storeFragment(self):
+        with open(self.joinedPath() + '.tmp', 'a') as storageFile:
+            writer = csv.writer(storageFile, quoting=csv.QUOTE_MINIMAL)
+            writer.writerow([self._fragment])
+
+    def storeJoinedEntries(self, entriesToSave: dict[EntryInterface], entryType):
         newResults = open(self.joinedPath() + '.tmp', 'w+')
-        generator = self.loadJoinedEntries(entryType)
         writer = csv.writer(newResults, quoting=csv.QUOTE_MINIMAL)
-        while True:
-            entry = nextRow(generator)
-            if not entry:
+        writer.writerow(self._reviewsTracker.asCSVRow())
+        generator = self.loadJoinedEntries(entryType)
+        for data, isFragment in generator:
+            if isFragment:
                 break
-            if entry.getAppID() in joinedEntries:
-                entry.addToCount(joinedEntries[entry.getAppID()].getCount())
-                joinedEntries.pop(entry.getAppID(), None)
+            entry = data
+            if entry.getAppID() in entriesToSave:
+                entry.addToCount(entriesToSave[entry.getAppID()].getCount())
+                entriesToSave.pop(entry.getAppID(), None)
             written = writer.writerow(entry.__dict__.values())
             if written < entry.expectedCsvLen():
                 raise Exception('File could not be written propperly')
             
-        for entry in joinedEntries.values():
+        for entry in entriesToSave.values():
             written = writer.writerow(entry.__dict__.values())
             if written < entry.expectedCsvLen():
                 raise Exception('File could not be written propperly')
-                        
+        
         newResults.close()
-        os.rename(self.joinedPath() + '.tmp', self.joinedPath() + '.csv')
+
+    def saveNewResults(self, path):
+        os.rename(path + '.tmp', path + '.csv')

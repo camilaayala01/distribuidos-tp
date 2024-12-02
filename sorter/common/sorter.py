@@ -126,7 +126,7 @@ class Sorter(StatefulNode):
         entries = self._entryType.deserialize(batch)
         savedAmount = self.mergeKeepTop(entries)
         clientDeleted = self.handleSending(savedAmount)
-        self._currentClient.saveNewTop()
+        self._currentClient.saveNewResults()
         if clientDeleted is not None:
             clientDeleted.destroy()
         channel.basic_ack(delivery_tag = tag)
