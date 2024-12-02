@@ -1,8 +1,8 @@
 import csv
 import os
 from uuid import UUID
-from entryParsing.common.header import Header
-from entryParsing.entry import EntryInterface
+from entryParsing.headerInterface import HeaderInterface
+from entryParsing.messagePart import MessagePartInterface
 
 class ActiveClient:
     def __init__(self, clientId: UUID, entryType: type, tracker):
@@ -28,17 +28,17 @@ class ActiveClient:
     def isDone(self):
         return self._tracker.isDone()
     
-    def update(self, header: Header):
+    def update(self, header: HeaderInterface):
         self._tracker.update(header)
     
-    def isDuplicate(self, header: Header) -> bool:
+    def isDuplicate(self, header: HeaderInterface) -> bool:
         return self._tracker.isDuplicate(header)
 
     def storeTracker(self, file) -> int:
         writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(self._tracker.asCSVRow())
         
-    def storeEntry(self, entry: EntryInterface, file):            
+    def storeEntry(self, entry: MessagePartInterface, file):            
         writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(entry.__dict__.values())
     

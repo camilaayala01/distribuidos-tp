@@ -1,11 +1,11 @@
-from entryParsing.common.headerInterface import HeaderInterface
-from entryParsing.entry import EntryInterface
+from entryParsing.headerInterface import HeaderInterface
+from entryParsing.messagePart import MessagePartInterface
 from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalMessageType import InternalMessageType
 from .grouperTypes import GrouperType
 from internalCommunication.internalCommunication import InternalCommunication
-from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
+from entryParsing.common.utils import getReducedEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
 import logging
 import os
 
@@ -15,7 +15,7 @@ class Grouper:
     def __init__(self):
         initializeLog()
         self._grouperType = GrouperType(int(os.getenv('GROUPER_TYPE')))
-        self._entryType = getEntryTypeFromEnv()
+        self._entryType = getReducedEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'))
         self._sendingStrategies = createStrategiesFromNextNodes()
@@ -29,7 +29,7 @@ class Grouper:
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
     
-    def _sendToNext(self, header: HeaderInterface, batch: list[EntryInterface]):
+    def _sendToNext(self, header: HeaderInterface, batch: list[MessagePartInterface]):
         for strategy in self._sendingStrategies:
             strategy.sendData(self._internalCommunication, header, batch)
 

@@ -1,12 +1,12 @@
 from entryParsing.common import fieldParsing, fieldLen
-from entryParsing.entry import EntryInterface
+from entryParsing.messagePart import MessagePartInterface
 
 """
 This entry is used by the initializer in order to skip the unnecessary fields coming from
 the client. It implements its own deserialization as skipping fields is not contemplated 
 in the base class.
 """
-class ReducedGameEntry(EntryInterface):
+class ReducedGameEntry(MessagePartInterface):
     def __init__(self, _appID, _name, _releaseDate, _windows, _mac, _linux, _avgPlaytime, _genres):
         super().__init__(_appID=_appID, _name=_name, _releaseDate=_releaseDate,
                          _windows=_windows, _mac=_mac, _linux=_linux,

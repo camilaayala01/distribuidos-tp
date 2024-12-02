@@ -1,6 +1,6 @@
 import logging
 import threading
-from entryParsing.common.headerWithSender import HeaderWithSender
+from entryParsing.headerInterface import HeaderWithSender
 from eofController.eofControlMessage import EOFControlMessage, EOFControlMessageType
 from internalCommunication.internalCommunication import InternalCommunication
 

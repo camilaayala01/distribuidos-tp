@@ -5,7 +5,7 @@ import zmq
 import logging
 from internalCommunication.internalCommunication import InternalCommunication
 from .activeClients import ActiveClients
-from entryParsing.common.clientHeader import ClientHeader
+from entryParsing.headerInterface import ClientHeader
 from entryParsing.common.messageType import MessageType
 from entryParsing.common.fieldParsing import getClientIdUUID
 from internalCommunication.internalMessageType import InternalMessageType

@@ -1,8 +1,8 @@
 import shutil
 from uuid import UUID
-from entryParsing.common.headerInterface import HeaderInterface
+from entryParsing.headerInterface import HeaderInterface
 from entryParsing.common.table import Table
-from entryParsing.entry import EntryInterface
+from entryParsing.messagePart import MessagePartInterface
 from packetTracker.defaultTracker import DefaultTracker
 from entryParsing.common.utils import copyFile, nextRow
 import os
@@ -93,13 +93,13 @@ class ActiveClient:
         newResults.close()
         os.rename(filepath + '.tmp', filepath + '.csv')
         
-    def storeUnjoinedReviews(self, reviews: list[EntryInterface]):
+    def storeUnjoinedReviews(self, reviews: list[MessagePartInterface]):
         self.storeEntries(self.reviewsPath(), reviews)
 
-    def storeGamesEntries(self, entries: list[EntryInterface]):
+    def storeGamesEntries(self, entries: list[MessagePartInterface]):
         self.storeEntries(self.gamesPath(), entries)
 
-    def storeJoinedEntries(self, joinedEntries: dict[EntryInterface], entryType):
+    def storeJoinedEntries(self, joinedEntries: dict[MessagePartInterface], entryType):
         newResults = open(self.joinedPath() + '.tmp', 'w+')
         generator = self.loadJoinedEntries(entryType)
         writer = csv.writer(newResults, quoting=csv.QUOTE_MINIMAL)

@@ -1,9 +1,8 @@
-from entryParsing.common.fieldParsing import  floatToInt, parseDate, serializeAppID, serializeGameName, serializeNumber, serializePlaytime, serializeReviewText, serializeVariableLen, tryToFloat
+from .common.fieldParsing import parseDate, tryToFloat
 from entryParsing.common.utils import strToBoolInt
-from entryParsing.common import fieldLen
-from entryParsing.entry import EntryInterface            
+from .messagePart import MessagePartInterface
 
-class GameEntry(EntryInterface):
+class GameEntry(MessagePartInterface):
     def __init__(self, _appID, _name, _releaseDate, _estimatedOwners, _peakCCU, _reqAge, _price, _discCount, 
                  _about, _supLang, _audioLang, _reviews, _headerImg, _website, _supportUrl, _supportEmail, 
                  _windows, _mac, _linux, _metaScore, _metaUrl, _userScore, _positive, _negative, 
@@ -37,3 +36,12 @@ class GameEntry(EntryInterface):
     @classmethod    
     def deserialize(cls, _data: bytes) -> list['GameEntry']:
         raise Exception("The should be no need to deserialize this type of entry")
+    
+
+class ReviewEntry(MessagePartInterface):
+    def __init__(self, _appID, _name, _reviewText, _reviewScore, _reviewVotes):
+        super().__init__(_appID=_appID, _name=_name, _reviewText=_reviewText,
+                         _reviewScore=int(_reviewScore), _reviewVotes=int(_reviewVotes))
+
+    def isPositive(self) -> bool:
+        return True if self._reviewScore == 1 else False

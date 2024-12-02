@@ -1,6 +1,7 @@
 from .common import fieldParsing, fieldLen
 
 SERIALIZERS = {
+    # game or review entry
     "_appID": fieldParsing.serializeAppID,
     "_name": fieldParsing.serializeGameName,
     "_releaseDate": fieldParsing.serializeReleaseDate,
@@ -47,10 +48,18 @@ SERIALIZERS = {
     "_totalCount":  fieldParsing.serializeCount,
     "_reviewText": fieldParsing.serializeReviewText,
     "_reviewScore": fieldParsing.serializeSignedInt,
-    "_reviewVotes": lambda x: fieldParsing.serializeNumber(x, fieldLen.VOTE_LEN)
+    "_reviewVotes": lambda x: fieldParsing.serializeNumber(x, fieldLen.VOTE_LEN),
+    # header
+    "_fragment": fieldParsing.serializeCount,
+    "_eof": fieldParsing.serializeBoolean,
+    "_clientId": lambda x: x,
+    "_table": fieldParsing.serializeTable,
+    "_sender": fieldParsing.serializeSenderID,
+    "_queryNumber": fieldParsing.serializeQueryNumber
 }
 
 DESERIALIZERS = {
+    # game or review entry
     "_appID": fieldParsing.deserializeAppID,
     "_name": fieldParsing.deserializeGameName,
     "_releaseDate": fieldParsing.deserializeReleaseDate,
@@ -66,5 +75,12 @@ DESERIALIZERS = {
     "_windowsCount": fieldParsing.deserializeCount,
     "_macCount":  fieldParsing.deserializeCount,
     "_linuxCount": fieldParsing.deserializeCount, 
-    "_totalCount": fieldParsing.deserializeCount
+    "_totalCount": fieldParsing.deserializeCount,
+    # header
+    "_fragment": fieldParsing.deserializeCount,
+    "_eof": fieldParsing.deserializeBoolean,
+    "_clientId": fieldParsing.getClientID,
+    "_table": fieldParsing.deserializeTable,
+    "_sender": fieldParsing.deserializeSenderID,
+    "_queryNumber": fieldParsing.deserializeQueryNumber
 }

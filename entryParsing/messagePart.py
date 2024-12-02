@@ -1,9 +1,9 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 import inspect
 
 from .mappers import DESERIALIZERS, SERIALIZERS
 
-class EntryInterface(ABC):
+class MessagePartInterface(ABC):
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             setattr(self, key, value)

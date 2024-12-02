@@ -1,19 +1,19 @@
 import unittest
 import uuid
-from entryParsing.common.header import Header
-from entryParsing.common.headerWithSender import HeaderWithSender
+from entryParsing.headerInterface import HeaderInterface
+from entryParsing.headerInterface import HeaderWithSender
 from entryParsing.entryOSCount import EntryOSCount
 
 class TestHeader(unittest.TestCase):
     def setUp(self):
         clientId = uuid.UUID('6bbe9f2a-1c58-4951-a92c-3f2b05147a29').bytes
-        self._entrySome = Header(_clientId = clientId, _fragment = 2, _eof = False)
-        self._entryLast = Header(_clientId= clientId, _fragment=10, _eof = True)
+        self._entrySome = HeaderInterface(_clientId = clientId, _fragment = 2, _eof = False)
+        self._entryLast = HeaderInterface(_clientId= clientId, _fragment=10, _eof = True)
         self._headerWithSender = HeaderWithSender(clientId, 2, False, 1)
 
     def testSerializeDefault(self):
         serialized = self._entrySome.serialize()
-        self.assertEqual(len(serialized), Header.size())
+        self.assertEqual(len(serialized), HeaderInterface.size())
 
     def testSerializeWithSender(self):
         serialized = self._headerWithSender.serialize()
@@ -22,8 +22,8 @@ class TestHeader(unittest.TestCase):
     def testSerializeAndDeserializeHeader(self):
         serializedSome = self._entrySome.serialize()
         serializedLast = self._entryLast.serialize()
-        deserializedSome, _ = Header.deserialize(serializedSome)
-        deserializedLast, _ = Header.deserialize(serializedLast)
+        deserializedSome, _ = HeaderInterface.deserialize(serializedSome)
+        deserializedLast, _ = HeaderInterface.deserialize(serializedLast)
         self.assertEqual(deserializedSome._fragment, 2)
         self.assertFalse(deserializedSome._eof)
         self.assertEqual(deserializedLast._fragment, 10)
@@ -40,7 +40,7 @@ class TestHeader(unittest.TestCase):
         serializedHeader = self._entryLast.serialize()
         serializedEntryOsCount = EntryOSCount(10, 600000, 500, 600200).serialize()
         data = serializedHeader + serializedEntryOsCount
-        deserializedHeader, rest = Header.deserialize(data)
+        deserializedHeader, rest = HeaderInterface.deserialize(data)
         deserializedOsCount = EntryOSCount.deserialize(rest)[0]
         self.assertEqual(deserializedHeader._fragment, 10)
         self.assertTrue(deserializedHeader._eof)

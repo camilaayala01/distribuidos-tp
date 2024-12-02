@@ -3,7 +3,7 @@ import os
 from threading import Event
 import uuid
 from .borderCommunication import BorderNodeCommunication
-from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
+from entryParsing.headerInterface import HeaderWithQueryNumber
 from entryParsing.common.messageType import MessageType
 from entryParsing.common.fieldParsing import getClientIdUUID
 from internalCommunication.internalCommunication import InternalCommunication

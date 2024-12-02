@@ -2,12 +2,8 @@ import logging
 import os
 from common.utils import receiveCSVAnswer, storeResultsQuery1
 from common.clientCommunication import ClientCommunication
-from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
-from entryParsing.entryAppIDName import EntryAppIDName
-from entryParsing.entryName import EntryName
-from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
-from entryParsing.entryNameReviewCount import EntryNameReviewCount
-from entryParsing.entryOSCount import EntryOSCount
+from entryParsing.headerInterface import HeaderWithQueryNumber
+from entryParsing.reducedEntries import EntryAppIDName, EntryName, EntryNameAvgPlaytime, EntryNameReviewCount, EntryOSCount
 
 QUERY_COUNT = 5
 
