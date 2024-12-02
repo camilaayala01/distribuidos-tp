@@ -1,8 +1,7 @@
 import os
-import socket
 from threading import Lock, Semaphore
 from .messages import ElectionMessage
-from utils import monitorName
+from utils import getServerSocket, sendto
 
 PORT = int(os.getenv('ELECTION_PORT'))
 MONITOR_COUNT = int(os.getenv('MONITOR_COUNT'))
@@ -52,27 +51,19 @@ class ElectionHandler:
 
     def sendCoordinator(self): 
         for id in range(1, self._leader):
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            try:
-                s.connect((monitorName(id), PORT))
-                s.sendall(ElectionMessage.COORDINATOR.serialize(self._id))
-            except:
-                continue
-            finally:
+            s = sendto(senderId=self._id, port=PORT, recvId=id, msg=ElectionMessage.COORDINATOR, timeout=TIMEOUT)
+            if s is not None:
                 s.close()
-            
+
     def declareAsLeader(self):
         self._leader = self._id
         self.resolveElection()
     
     def listenForElection(self): 
-        listeningSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        listeningSock.bind((monitorName(self._id), PORT)) 
-        listeningSock.settimeout(5)      
-        listeningSock.listen(5)
+        listeningSock = getServerSocket(self._id, PORT, TIMEOUT)
         while self.isRunning():
             try:
-                (sock, addr) = listeningSock.accept()
+                (sock, _addr) = listeningSock.accept()
                 data = sock.recv(ElectionMessage.size())
                 msg, sender = ElectionMessage.deserialize(data)
                 match msg:
@@ -95,23 +86,16 @@ class ElectionHandler:
         self._leaderIsRunning = False 
         candidates = 0
         for id in range(self._id + 1, MONITOR_COUNT + 1):
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(TIMEOUT)
-            try:
-                s.connect((monitorName(id), PORT))
-                s.sendall(ElectionMessage.ELECTION.serialize(self._id))
+            s = sendto(senderId=self._id, port=PORT, recvId=id, msg=ElectionMessage.ELECTION,timeout=TIMEOUT)
+            if s is not None:
                 try:
-                    data = s.recv(1024)
-                    msg, sender = ElectionMessage.deserialize(data)
+                    data = s.recv(ElectionMessage.size())
+                    msg, _sender = ElectionMessage.deserialize(data)
                     if msg == ElectionMessage.ANSWER:
                         candidates += 1
                 except TimeoutError:
                     pass
-            except:
-                continue
-            finally:
                 s.close()
-
         if candidates == 0:
             self.declareAsLeader()
         
