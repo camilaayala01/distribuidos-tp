@@ -11,4 +11,5 @@ class HeartbeatMessage(Enum):
     @classmethod
     def deserialize(cls, message) -> tuple['HeartbeatMessage', str]:
         return cls(int.from_bytes(message[:VALUE_LEN], 'big')), message[VALUE_LEN:].decode('utf-8')
+
     

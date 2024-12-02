@@ -5,17 +5,17 @@ from .messages import ElectionMessage
 from utils import monitorName
 
 PORT = int(os.getenv('ELECTION_PORT'))
+MONITOR_COUNT = int(os.getenv('MONITOR_COUNT'))
+TIMEOUT = int(os.getenv('TIMER_DURATION'))
 
 class ElectionHandler:
     def __init__(self):
         self._running = True
-        self._monitorCount = int(os.getenv('MONITOR_COUNT'))
         self._id = int(os.getenv('ID'))
-        self._leader = self._monitorCount
+        self._leader = MONITOR_COUNT
         self._leaderIsRunning = True
         self._leaderSemaphore = Semaphore(0)
         self._leaderIsRunningLock = Lock()
-        self._timeout = int(os.getenv('TIMER_DURATION'))
 
     def stop(self):
         self._running = False
@@ -43,7 +43,7 @@ class ElectionHandler:
     
     def waitForNewLeader(self): 
         try:
-            self._leaderSemaphore.acquire(timeout=self._timeout)
+            self._leaderSemaphore.acquire(timeout=TIMEOUT)
         except TimeoutError:
             self.startElection()
 
@@ -73,12 +73,12 @@ class ElectionHandler:
         while self.isRunning():
             try:
                 (sock, addr) = listeningSock.accept()
-                data = sock.recv(1024)
+                data = sock.recv(ElectionMessage.size())
                 msg, sender = ElectionMessage.deserialize(data)
                 match msg:
                     case ElectionMessage.ELECTION:
                         sock.sendall(ElectionMessage.ANSWER.serialize(self._id))
-                        with self.getLeaderIsRunningLock(): #yo pienso que esta corriendo pero mi companiero se dio cuenta que no
+                        with self.getLeaderIsRunningLock(): 
                             if self.isLeaderRunning():
                                 self.startElection()
                     case ElectionMessage.COORDINATOR:
@@ -94,9 +94,9 @@ class ElectionHandler:
     def startElection(self):
         self._leaderIsRunning = False 
         candidates = 0
-        for id in range(self._id + 1, self._monitorCount + 1):
+        for id in range(self._id + 1, MONITOR_COUNT + 1):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(self._timeout)
+            s.settimeout(TIMEOUT)
             try:
                 s.connect((monitorName(id), PORT))
                 s.sendall(ElectionMessage.ELECTION.serialize(self._id))
