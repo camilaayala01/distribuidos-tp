@@ -15,6 +15,7 @@ class Client:
     def __init__(self):
         self._working = True
         self._queriesReceived = set()
+        self._amountOfExecutions = int(os.getenv("AMOUNT_OF_EXECUTIONS"))
         self._maxData = int(os.getenv('MAX_DATA_BYTES'))
         self._communication = ClientCommunication()
         self._currentExecution = 1
@@ -28,7 +29,12 @@ class Client:
     def reset(self):
         self._currentExecution += 1
         self._queriesReceived = set()
+        self._communication.stop() 
+        self._communication = ClientCommunication()
 
+    def isLastExecution(self):
+        return self._amountOfExecutions == self._currentExecution
+    
     def shutdown(self):
         self._communication.stop()
 
