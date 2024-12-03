@@ -14,8 +14,8 @@ def main():
     client = Client()
     signal.signal(signal.SIGTERM, client.stopWorking)
 
-    for i in range(client._amountOfExecutions):
-        logging.info(f'action: starting execution number {i + 1} | result: success')
+    for _ in range(client._amountOfExecutions):
+        logging.info(f'action: starting execution number {client._currentExecution} | result: success')
         client.sendTables(loadGames, loadReviews)
         if client.isRunning():
             logging.info(f'action: wait for responses | result: success | msg: finalized data sending')
