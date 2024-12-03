@@ -1,21 +1,19 @@
-import csv
 import os
 from uuid import UUID
 from entryParsing.common.fieldParsing import getClientIdUUID
 from packetTracker.tracker import TrackerInterface
 from statefulNode.statefulNode import StatefulNode
 from .activeClient import ActiveClient
-from entryParsing.common.header import Header
-from entryParsing.common.headerInterface import HeaderInterface
-from entryParsing.entry import EntryInterface
+from entryParsing.headerInterface import Header, HeaderInterface
+from entryParsing.messagePart import MessagePartInterface
 from .aggregatorTypes import AggregatorTypes
-from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv
+from entryParsing.common.utils import getReducedEntryTypeFromEnv, getHeaderTypeFromEnv
 
 class Aggregator(StatefulNode):
     def __init__(self):
         super().__init__()
         self._aggregatorType = AggregatorTypes(int(os.getenv('AGGREGATOR_TYPE')))
-        self._entryType = getEntryTypeFromEnv()
+        self._entryType = getReducedEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
         self.loadActiveClientsFromDisk()
     
@@ -27,17 +25,17 @@ class Aggregator(StatefulNode):
         client.loadFragment(filepath=filepath)
         return client
 
-    def sendToNext(self, header: HeaderInterface, entries: list[EntryInterface]):
+    def sendToNext(self, header: HeaderInterface, entries: list[MessagePartInterface]):
         for strategy in self._sendingStrategies:
             strategy.sendData(self._internalCommunication, header, entries)
 
     def getHeader(self, clientId: bytes):
         return Header(_clientId=clientId, _fragment=self._currentClient._fragment, _eof=self._currentClient.finishedReceiving())
 
-    def shouldSendPackets(self, toSend: list[EntryInterface]):
+    def shouldSendPackets(self, toSend: list[MessagePartInterface]):
         return self._currentClient.finishedReceiving() or (not self._currentClient.finishedReceiving() and len(toSend) != 0)
     
-    def handleSending(self, ready: list[EntryInterface], clientId):
+    def handleSending(self, ready: list[MessagePartInterface], clientId):
         header = self._aggregatorType.getResultingHeader(self.getHeader(clientId))
         if self.shouldSendPackets(ready):
             self.sendToNext(header, ready)

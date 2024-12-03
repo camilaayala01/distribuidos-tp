@@ -2,8 +2,7 @@ import csv
 import logging
 import os
 import sys
-from entryParsing.gameEntry import GameEntry
-from entryParsing.reviewEntry import ReviewEntry
+from entryParsing.fullEntry import GameEntry, ReviewEntry
 csv.field_size_limit(sys.maxsize)
 
 """ Games storage location. """

@@ -1,4 +1,4 @@
-from entryParsing.common.headerInterface import HeaderInterface
+from entryParsing.headerInterface import HeaderInterface
 from entryParsing.common.table import Table
 
 class AccumulatedBatches:

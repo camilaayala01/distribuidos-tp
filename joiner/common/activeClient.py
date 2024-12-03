@@ -1,8 +1,8 @@
 import shutil
 from uuid import UUID
-from entryParsing.common.headerInterface import HeaderInterface
+from entryParsing.headerInterface import HeaderInterface
 from entryParsing.common.table import Table
-from entryParsing.entry import EntryInterface
+from entryParsing.messagePart import MessagePartInterface
 from packetTracker.defaultTracker import DefaultTracker
 from entryParsing.common.utils import copyFile, nextRow
 import os
@@ -121,11 +121,11 @@ class ActiveClient:
                 if written < entry.expectedCsvLen():
                     raise Exception('File could not be written properly')
 
-    def storeGamesEntries(self, entries: list[EntryInterface]):
+    def storeGamesEntries(self, entries: list[MessagePartInterface]):
         self.storeEntries(entries, self.gamesPath(), self._gamesTracker)
         self.saveNewResults(self.gamesPath())
 
-    def storeUnjoinedReviews(self, reviews: list[EntryInterface]):
+    def storeUnjoinedReviews(self, reviews: list[MessagePartInterface]):
         self.storeEntries(reviews, self.reviewsPath(), self._reviewsTracker)
         self.saveNewResults(self.reviewsPath())
 
@@ -134,7 +134,7 @@ class ActiveClient:
             writer = csv.writer(storageFile, quoting=csv.QUOTE_MINIMAL)
             writer.writerow([self._fragment])
 
-    def storeJoinedEntries(self, entriesToSave: dict[EntryInterface], entryType):
+    def storeJoinedEntries(self, joinedEntries: dict[MessagePartInterface], entryType):
         newResults = open(self.joinedPath() + '.tmp', 'w+')
         writer = csv.writer(newResults, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(self._reviewsTracker.asCSVRow())
@@ -143,14 +143,14 @@ class ActiveClient:
             if isFragment:
                 break
             entry = data
-            if entry.getAppID() in entriesToSave:
-                entry.addToCount(entriesToSave[entry.getAppID()].getCount())
-                entriesToSave.pop(entry.getAppID(), None)
+            if entry.getAppID() in joinedEntries:
+                entry.addToCount(joinedEntries[entry.getAppID()].getCount())
+                joinedEntries.pop(entry.getAppID(), None)
             written = writer.writerow(entry.__dict__.values())
             if written < entry.expectedCsvLen():
                 raise Exception('File could not be written propperly')
             
-        for entry in entriesToSave.values():
+        for entry in joinedEntries.values():
             written = writer.writerow(entry.__dict__.values())
             if written < entry.expectedCsvLen():
                 raise Exception('File could not be written propperly')

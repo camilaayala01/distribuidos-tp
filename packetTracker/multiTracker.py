@@ -1,4 +1,4 @@
-from entryParsing.common.headerWithSender import HeaderWithSender
+from entryParsing.headerInterface import HeaderWithSender
 from packetTracker.defaultTracker import DefaultTracker
 from packetTracker.tracker import TrackerInterface
 

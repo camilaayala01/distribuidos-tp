@@ -3,9 +3,9 @@ import os
 import csv
 import uuid
 from entryParsing.common.fieldParsing import getClientIdUUID
-from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
+from entryParsing.reducedEntries import EntrySorterTopFinder
 from eofController.eofController import EofController
-from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, nextRow
+from entryParsing.common.utils import getReducedEntryTypeFromEnv, getHeaderTypeFromEnv, nextRow
 from statefulNode.statefulNode import StatefulNode
 from .sorterTypes import SorterType
 from .activeClient import ActiveClient
@@ -17,7 +17,7 @@ class Sorter(StatefulNode):
     def __init__(self):
         super().__init__()
         self._sorterType = SorterType(int(os.getenv('SORTER_TYPE')))
-        self._entryType = getEntryTypeFromEnv()
+        self._entryType = getReducedEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
         self.loadActiveClientsFromDisk()
         self._topAmount = int(os.getenv('TOP_AMOUNT')) if os.getenv('TOP_AMOUNT') is not None else None

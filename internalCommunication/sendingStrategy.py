@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from entryParsing.common.header import HeaderInterface
-from entryParsing.entry import EntryInterface
+from entryParsing.headerInterface import HeaderInterface
+from entryParsing.messagePart import MessagePartInterface
 from internalCommunication.internalCommunication import InternalCommunication
 from internalCommunication.common.nextNode import NextNode
 
@@ -12,7 +12,7 @@ class SendingStrategy(ABC):
         return f"Strategy: {type(self).__name__}, Next node: {self._nextNode}"
     
     @abstractmethod
-    def sendData(self, middleware: InternalCommunication, header: HeaderInterface, batch: list[EntryInterface]):
+    def sendData(self, middleware: InternalCommunication, header: HeaderInterface, batch: list[MessagePartInterface]):
         pass
 
     @abstractmethod

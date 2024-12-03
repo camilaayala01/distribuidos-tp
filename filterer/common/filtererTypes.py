@@ -1,6 +1,6 @@
 from enum import Enum
 from py3langid.langid import classify
-from entryParsing.entry import EntryInterface
+from entryParsing.messagePart import MessagePartInterface
 
 class FiltererType(Enum):
     DECADE = 0
@@ -8,7 +8,7 @@ class FiltererType(Enum):
     ACTION = 2
     ENGLISH = 3
 
-    def executeCondition(self, entry: EntryInterface) -> bool:
+    def executeCondition(self, entry: MessagePartInterface) -> bool:
         match self:
             case FiltererType.DECADE:
                 return "201" in entry.getDate()

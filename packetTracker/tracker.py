@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
 
-from entryParsing.common.header import Header
+from entryParsing.headerInterface import HeaderInterface
 
 class TrackerInterface(ABC):
     @abstractmethod
-    def isDuplicate(self, header: Header):
+    def isDuplicate(self, HeaderInterface: HeaderInterface):
         pass
 
     @abstractmethod
-    def update(self, header: Header):
+    def update(self, HeaderInterface: HeaderInterface):
         pass
 
     @abstractmethod

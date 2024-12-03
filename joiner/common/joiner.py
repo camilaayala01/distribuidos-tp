@@ -5,7 +5,7 @@ import os
 import uuid
 from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextRow
-from entryParsing.entry import EntryInterface
+from entryParsing.messagePart import MessagePartInterface
 from eofController.eofController import EofController
 from packetTracker.defaultTracker import DefaultTracker
 from statefulNode.statefulNode import StatefulNode
@@ -88,7 +88,7 @@ class Joiner(StatefulNode):
         self._currentClient = None
         self.setCurrentClient(clientId)
 
-    def joinReviews(self, reviews: list[EntryInterface]):
+    def joinReviews(self, reviews: list[MessagePartInterface]):
         unjoined = list(self._currentClient.loadReviewsEntries(self._reviewsEntry))
         
         reviews.extend(unjoined)

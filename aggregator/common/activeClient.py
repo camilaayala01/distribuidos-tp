@@ -1,7 +1,7 @@
 import os
 import csv
 from uuid import UUID
-from entryParsing.common.header import HeaderInterface
+from entryParsing.headerInterface import HeaderInterface
 from entryParsing.common.utils import nextRow
 from packetTracker.tracker import TrackerInterface
 
