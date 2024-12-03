@@ -1,17 +1,18 @@
 from enum import Enum
-from entryParsing.common.fieldParsing import deserializeNumber, getClientID, serializeNumber
+from entryParsing.common.fieldParsing import deserializeCount, deserializeNumber, getClientID, serializeCount, serializeNumber
 
+CONTROL_LEN = 1
 class EOFControlMessageType(Enum):
     EOF = 0
     ACK = 1
     TERMINATION = 2
 
     def serialize(self):
-        return serializeNumber(self.value, 1)
+        return serializeNumber(self.value, CONTROL_LEN)
 
     @staticmethod
     def deserialize(data: bytes)-> tuple['EOFControlMessageType', bytes]:
-        typeNumber, curr = deserializeNumber(0, data, 1)
+        typeNumber, curr = deserializeNumber(0, data, CONTROL_LEN)
         return EOFControlMessageType(typeNumber), curr
 
 class EOFControlMessage:
@@ -26,7 +27,7 @@ class EOFControlMessage:
         if self._type == EOFControlMessageType.TERMINATION:
             return typeBytes
         nodeIDBytes = serializeNumber(self._nodeID, 1)
-        fragmentBytes = serializeNumber(self._fragment, 3)
+        fragmentBytes = serializeCount(self._fragment)
         return typeBytes + self._clientID + nodeIDBytes + fragmentBytes
     
     def getClientID(self) -> bytes:
@@ -48,5 +49,5 @@ class EOFControlMessage:
             return EOFControlMessage(type, bytes(1), 0)
         clientID, curr = getClientID(curr, body)
         nodeID, curr = deserializeNumber(curr, body, 1)
-        fragment, curr = deserializeNumber(curr, body, 3)
+        fragment, curr = deserializeCount(curr, body)
         return EOFControlMessage(type, clientID, nodeID, fragment)

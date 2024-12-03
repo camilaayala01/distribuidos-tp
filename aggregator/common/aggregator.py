@@ -45,7 +45,7 @@ class Aggregator(StatefulNode):
         self._currentClient.saveNewResults()
 
         if self._currentClient.finishedReceiving():
-            self._internalCommunication.basicSend(self._internalCommunication.getQueueName(), InternalMessageType.CLIENT_FLUSH.serialize() + clientId + serializeBoolean(False))
+            self._internalCommunication.sendFlushToSelf(clientId)
 
     def setCurrentClient(self, clientId: bytes):
         trackerType = self._aggregatorType.trackerType()
