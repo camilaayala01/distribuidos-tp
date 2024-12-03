@@ -3,8 +3,6 @@ from uuid import UUID
 from entryParsing.headerInterface import HeaderInterface
 from entryParsing.common.table import Table
 from entryParsing.messagePart import MessagePartInterface
-from packetTracker.defaultTracker import DefaultTracker
-from entryParsing.common.utils import copyFile, nextRow
 import os
 import csv
 
@@ -108,7 +106,7 @@ class JoinerClient(ActiveClient):
             writer = csv.writer(storageFile, quoting=csv.QUOTE_MINIMAL)
             writer.writerow([self._fragment])
 
-    def storeJoinedEntries(self, joinedEntries: dict[MessagePartInterface], entryType):
+    def storeJoinedEntries(self, entriesToSave: dict[MessagePartInterface], entryType):
         newResults = open(self.joinedPath() + '.tmp', 'w+')
         self.storeTracker(newResults, self._reviewsTracker)
         generator = self.loadJoinedEntries(entryType)

@@ -2,8 +2,8 @@ import csv
 import os
 from uuid import UUID
 
-from entryParsing.common.headerInterface import HeaderInterface
-from entryParsing.entry import EntryInterface
+from entryParsing.headerInterface import HeaderInterface
+from entryParsing.messagePart import MessagePartInterface
 
 class ActiveClient:
     def __init__(self, clientId: UUID, fragment=None, tracker=None):
@@ -32,7 +32,7 @@ class ActiveClient:
         writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(self._tracker.asCSVRow())
         
-    def storeEntry(self, entry: EntryInterface, file):        
+    def storeEntry(self, entry: MessagePartInterface, file):        
         writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)    
         written = writer.writerow(entry.__dict__.values())
         if written < entry.expectedCsvLen():
