@@ -29,12 +29,6 @@ cd distribuidos
 unzip steam-games-dataset.zip ; unzip steam-reviews.zip
 rm games.json ; rm steam-games-dataset.zip ; rm steam-reviews.zip
 
-```
-# Reducir datasets
-```
-head -n 100 games.csv > games-reducido.csv
-head -n 10000 dataset.csv > reviews-reducido.csv
-```
 
 # Ejecución
 ## Prerequisites
@@ -71,7 +65,7 @@ Para correr este script, se debe correr el comando
 ```
 En particular, está configurado para correrlo como
 ```
-./comparison.sh client/expectedResponses client/responses
+./comparison.sh client/expectedResponses client/exec{exec-number}responses
 ```
 pero pueden ubicar los archivos en donde deseen
 
