@@ -1,8 +1,10 @@
 import shutil
 from uuid import UUID
-from entryParsing.common.headerInterface import HeaderInterface
+from entryParsing.headerInterface import HeaderInterface
 from entryParsing.common.table import Table
-from entryParsing.entry import EntryInterface
+from entryParsing.messagePart import MessagePartInterface
+from packetTracker.defaultTracker import DefaultTracker
+from entryParsing.common.utils import copyFile, nextRow
 import os
 import csv
 
@@ -93,11 +95,11 @@ class JoinerClient(ActiveClient):
             for entry in entries:
                 self.storeEntry(entry, dstFile)
 
-    def storeGamesEntries(self, entries: list[EntryInterface]):
+    def storeGamesEntries(self, entries: list[MessagePartInterface]):
         self.storeEntries(entries, self.gamesPath(), self._gamesTracker)
         self.saveNewResults(self.gamesPath())
 
-    def storeUnjoinedReviews(self, reviews: list[EntryInterface]):
+    def storeUnjoinedReviews(self, reviews: list[MessagePartInterface]):
         self.storeEntries(reviews, self.reviewsPath(), self._reviewsTracker)
         self.saveNewResults(self.reviewsPath())
 
@@ -106,7 +108,7 @@ class JoinerClient(ActiveClient):
             writer = csv.writer(storageFile, quoting=csv.QUOTE_MINIMAL)
             writer.writerow([self._fragment])
 
-    def storeJoinedEntries(self, entriesToSave: dict[EntryInterface], entryType):
+    def storeJoinedEntries(self, joinedEntries: dict[MessagePartInterface], entryType):
         newResults = open(self.joinedPath() + '.tmp', 'w+')
         self.storeTracker(newResults, self._reviewsTracker)
         generator = self.loadJoinedEntries(entryType)

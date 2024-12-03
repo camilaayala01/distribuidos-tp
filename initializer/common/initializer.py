@@ -1,9 +1,10 @@
 import logging
+from entryParsing.reducedGameEntry import ReducedGameEntry
 from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalCommunication import InternalCommunication
-from entryParsing.reviewEntry import ReviewEntry
-from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, initializeLog
+from entryParsing.fullEntry import ReviewEntry
+from entryParsing.common.utils import getHeaderTypeFromEnv, initializeLog
 import os
 
 from internalCommunication.internalMessageType import InternalMessageType
@@ -14,8 +15,8 @@ class Initializer:
     def __init__(self): 
         initializeLog()
         queueName = os.getenv('LISTENING_QUEUE')
-        self._gamesEntry = getGamesEntryTypeFromEnv()
-        self._reviewsEntry = getReviewsEntryTypeFromEnv()
+        self._gamesEntry = ReducedGameEntry
+        self._reviewsEntry = ReviewEntry
         self._headerType = getHeaderTypeFromEnv()
         self._gamesSendingStrategies = createStrategiesFromNextNodes('GAMES_NEXT_NODES', 'GAMES_NEXT_ENTRIES', 'GAMES_NEXT_HEADERS')
         self._reviewsSendingStrategies = createStrategiesFromNextNodes('REVIEWS_NEXT_NODES', 'REVIEWS_NEXT_ENTRIES')
