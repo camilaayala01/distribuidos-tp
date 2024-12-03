@@ -1,21 +1,20 @@
 import os
-import socket
 from threading import Lock, Semaphore
 from .messages import ElectionMessage
-from utils import monitorName
+from utils import getServerSocket, sendto
 
 PORT = int(os.getenv('ELECTION_PORT'))
+MONITOR_COUNT = int(os.getenv('MONITOR_COUNT'))
+TIMEOUT = int(os.getenv('TIMER_DURATION'))
 
 class ElectionHandler:
     def __init__(self):
         self._running = True
-        self._monitorCount = int(os.getenv('MONITOR_COUNT'))
         self._id = int(os.getenv('ID'))
-        self._leader = self._monitorCount
+        self._leader = MONITOR_COUNT
         self._leaderIsRunning = True
         self._leaderSemaphore = Semaphore(0)
         self._leaderIsRunningLock = Lock()
-        self._timeout = int(os.getenv('TIMER_DURATION'))
 
     def stop(self):
         self._running = False
@@ -43,7 +42,7 @@ class ElectionHandler:
     
     def waitForNewLeader(self): 
         try:
-            self._leaderSemaphore.acquire(timeout=self._timeout)
+            self._leaderSemaphore.acquire(timeout=TIMEOUT)
         except TimeoutError:
             self.startElection()
 
@@ -52,33 +51,25 @@ class ElectionHandler:
 
     def sendCoordinator(self): 
         for id in range(1, self._leader):
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            try:
-                s.connect((monitorName(id), PORT))
-                s.sendall(ElectionMessage.COORDINATOR.serialize(self._id))
-            except:
-                continue
-            finally:
+            s = sendto(senderId=self._id, port=PORT, recvId=id, msg=ElectionMessage.COORDINATOR, timeout=TIMEOUT)
+            if s is not None:
                 s.close()
-            
+
     def declareAsLeader(self):
         self._leader = self._id
         self.resolveElection()
     
     def listenForElection(self): 
-        listeningSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        listeningSock.bind((monitorName(self._id), PORT)) 
-        listeningSock.settimeout(5)      
-        listeningSock.listen(5)
+        listeningSock = getServerSocket(self._id, PORT, TIMEOUT)
         while self.isRunning():
             try:
-                (sock, addr) = listeningSock.accept()
-                data = sock.recv(1024)
+                (sock, _addr) = listeningSock.accept()
+                data = sock.recv(ElectionMessage.size())
                 msg, sender = ElectionMessage.deserialize(data)
                 match msg:
                     case ElectionMessage.ELECTION:
                         sock.sendall(ElectionMessage.ANSWER.serialize(self._id))
-                        with self.getLeaderIsRunningLock(): #yo pienso que esta corriendo pero mi companiero se dio cuenta que no
+                        with self.getLeaderIsRunningLock(): 
                             if self.isLeaderRunning():
                                 self.startElection()
                     case ElectionMessage.COORDINATOR:
@@ -94,24 +85,17 @@ class ElectionHandler:
     def startElection(self):
         self._leaderIsRunning = False 
         candidates = 0
-        for id in range(self._id + 1, self._monitorCount + 1):
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(self._timeout)
-            try:
-                s.connect((monitorName(id), PORT))
-                s.sendall(ElectionMessage.ELECTION.serialize(self._id))
+        for id in range(self._id + 1, MONITOR_COUNT + 1):
+            s = sendto(senderId=self._id, port=PORT, recvId=id, msg=ElectionMessage.ELECTION,timeout=TIMEOUT)
+            if s is not None:
                 try:
-                    data = s.recv(1024)
-                    msg, sender = ElectionMessage.deserialize(data)
+                    data = s.recv(ElectionMessage.size())
+                    msg, _sender = ElectionMessage.deserialize(data)
                     if msg == ElectionMessage.ANSWER:
                         candidates += 1
                 except TimeoutError:
                     pass
-            except:
-                continue
-            finally:
                 s.close()
-
         if candidates == 0:
             self.declareAsLeader()
         
