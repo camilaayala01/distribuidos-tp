@@ -73,7 +73,7 @@ class InternalCommunication:
         self._channel.basic_nack(delivery_tag=tag, requeue=True)
 
     def sendFlushToSelf(self, clientToRemove):
-        self.basicSend(self._internalCommunication.getQueueName(), 
-                                              InternalMessageType.CLIENT_FLUSH.serialize() 
-                                              + clientToRemove 
-                                              + serializeBoolean(False))
+        self.basicSend(self.getQueueName(), 
+                       InternalMessageType.CLIENT_FLUSH.serialize() 
+                       + clientToRemove 
+                       + serializeBoolean(False))
