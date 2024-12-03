@@ -1,3 +1,4 @@
+from entryParsing.common.fieldParsing import serializeBoolean
 from entryParsing.headerInterface import HeaderInterface
 from entryParsing.common.utils import getShardingKey
 from entryParsing.messagePart import MessagePartInterface
@@ -53,4 +54,4 @@ class DirectSend(SendingStrategy):
 
     def sendFlush(self, middleware, clientId):
         for i in range(self._nextNode._count):
-            self.sendBytes(middleware, str(i), InternalMessageType.CLIENT_FLUSH.serialize() + clientId)
+            self.sendBytes(middleware, str(i), InternalMessageType.CLIENT_FLUSH.serialize() + clientId + serializeBoolean(True))

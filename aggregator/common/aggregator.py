@@ -1,6 +1,7 @@
 import os
 from uuid import UUID
-from entryParsing.common.fieldParsing import getClientIdUUID
+from entryParsing.common.fieldParsing import getClientIdUUID, serializeBoolean
+from internalCommunication.internalMessageType import InternalMessageType
 from packetTracker.tracker import TrackerInterface
 from statefulNode.statefulNode import StatefulNode
 from .activeClient import AggregatorClient
@@ -44,7 +45,7 @@ class Aggregator(StatefulNode):
         self._currentClient.saveNewResults()
 
         if self._currentClient.finishedReceiving():
-            self._activeClients.pop(clientId).destroy()
+            self._internalCommunication.sendFlushToSelf(clientId)
 
     def setCurrentClient(self, clientId: bytes):
         trackerType = self._aggregatorType.trackerType()

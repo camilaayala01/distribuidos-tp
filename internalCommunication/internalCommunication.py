@@ -2,6 +2,9 @@ import pika
 import os
 import logging
 
+from entryParsing.common.fieldParsing import serializeBoolean
+from internalCommunication.internalMessageType import InternalMessageType
+
 PREFETCH_COUNT = int(os.getenv('PREFETCH_COUNT'))
 DELIVERY_MODE = 2 
 
@@ -14,6 +17,9 @@ class InternalCommunication:
         self._channel = self.createChannel()
         if name != None:
             logging.info(f'action: initialized an entity | result: success | msg: binded to queue {name}')
+
+    def getQueueName(self) -> str:
+        return self._executerName + self._nodeID
 
     def startConnection(self) -> pika.BlockingConnection:
         return pika.BlockingConnection(
@@ -65,3 +71,9 @@ class InternalCommunication:
 
     def requeuePacket(self, tag):
         self._channel.basic_nack(delivery_tag=tag, requeue=True)
+
+    def sendFlushToSelf(self, clientToRemove):
+        self.basicSend(self.getQueueName(), 
+                       InternalMessageType.CLIENT_FLUSH.serialize() 
+                       + clientToRemove 
+                       + serializeBoolean(False))

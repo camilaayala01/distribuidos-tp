@@ -2,11 +2,12 @@ from collections import defaultdict
 import csv
 import logging
 import os
+from entryParsing.common.fieldParsing import getClientIdUUID, serializeBoolean
 import uuid
-from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextRow
 from entryParsing.messagePart import MessagePartInterface
 from eofController.eofController import EofController
+from internalCommunication.internalMessageType import InternalMessageType
 from packetTracker.defaultTracker import DefaultTracker
 from statefulNode.statefulNode import StatefulNode
 from .accumulatedBatches import AccumulatedBatches
@@ -199,4 +200,4 @@ class Joiner(StatefulNode):
             logging.info(f'action: finished receiving data from client {getClientIdUUID(clientId)}| result: success')
             self._eofController.finishedProcessing(self._currentClient._fragment, clientId, self._internalCommunication)
             self._currentClient = None
-            self._activeClients.pop(clientId).destroy()
+            self._internalCommunication.sendFlushToSelf(clientId)
