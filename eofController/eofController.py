@@ -38,8 +38,8 @@ class EofController:
         with open(self._filepath + '.tmp', 'w+') as file:
             writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
             for client in self._pending:
-                written = writer.writerow([f"{client}"]) # TODO: this probably needs a fix idk help
-                if written < len(f"{client}"):
+                written = writer.writerow([f"{uuid.UUID(bytes=client)}"])
+                if written < len(f"{uuid.UUID(bytes=client)}"):
                     raise Exception('File could not be written propperly')   
         if rename:
             os.rename(self._filepath + '.tmp', self._filepath + '.csv') 
@@ -60,7 +60,7 @@ class EofController:
         eofMessage = HeaderWithSender(clientID, fragment, True, self._nodeID).serialize()
         for strategy in self._sendingStrategies:
             strategy.sendDataBytes(self._internalCommunication, eofMessage)
-        logging.info(f'action: sending EOF for client {clientID}| result: success')
+        logging.info(f'action: sending EOF for client {clientID} | result: success')
         messageToSend = EOFControlMessage(EOFControlMessageType.ACK, clientID, self._nodeID).serialize()
         self._internalCommunication.basicSend(self._nextQueue, messageToSend)
 
