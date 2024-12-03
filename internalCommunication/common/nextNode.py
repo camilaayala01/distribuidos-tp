@@ -1,8 +1,7 @@
 import re
-from entryParsing.common.header import Header
-from entryParsing.common.headerInterface import HeaderInterface
+from entryParsing.headerInterface import HeaderInterface, Header
 from entryParsing.common.utils import getEntryTypeFromString, getHeaderTypeFromString
-from entryParsing.entry import EntryInterface
+from entryParsing.messagePart import MessagePartInterface
 from internalCommunication.common.shardingAtribute import ShardingAttribute
 
 class NextNode:
@@ -22,7 +21,7 @@ class NextNode:
     def getHeader(self) -> type:
         return self._headerType
     
-    def entryForNextNode(self, entry: EntryInterface, **kwargs) -> EntryInterface:
+    def entryForNextNode(self, entry: MessagePartInterface, **kwargs) -> MessagePartInterface:
         if self._entryType is None:
             return entry
         return self._entryType.fromAnother(entry, **kwargs)

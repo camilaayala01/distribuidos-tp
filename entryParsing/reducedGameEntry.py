@@ -1,14 +1,16 @@
 from entryParsing.common import fieldParsing, fieldLen
-from entryParsing.entry import EntryInterface
+from entryParsing.messagePart import MessagePartInterface
 
-class ReducedGameEntry(EntryInterface):
+"""
+This entry is used by the initializer in order to skip the unnecessary fields coming from
+the client. It implements its own deserialization as skipping fields is not contemplated 
+in the base class.
+"""
+class ReducedGameEntry(MessagePartInterface):
     def __init__(self, _appID, _name, _releaseDate, _windows, _mac, _linux, _avgPlaytime, _genres):
         super().__init__(_appID=_appID, _name=_name, _releaseDate=_releaseDate,
                          _windows=_windows, _mac=_mac, _linux=_linux,
                          _avgPlaytime=_avgPlaytime, _genres=_genres)
-    
-    def serialize(self) -> bytes:
-        raise Exception("The should be no need to serialize this type of entry")
     
     @classmethod
     def deserialize(cls, data: bytes)-> list['ReducedGameEntry']:
@@ -19,7 +21,7 @@ class ReducedGameEntry(EntryInterface):
             try:
                 appID, curr = fieldParsing.deserializeAppID(curr, data)
                 name, curr = fieldParsing.deserializeGameName(curr, data)
-                releaseDate, curr = fieldParsing.deserializeVariableLen(curr, data, fieldLen.DATE_LEN)
+                releaseDate, curr = fieldParsing.deserializeReleaseDate(curr, data)
                 
                 # skip unused variable len fields
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.EST_OWN_LEN)
@@ -58,7 +60,7 @@ class ReducedGameEntry(EntryInterface):
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.TEAM_LEN)
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.GENRE_LEN)
 
-                genres, curr = fieldParsing.deserializeVariableLen(curr, data, fieldLen.GENRE_LEN)
+                genres, curr = fieldParsing.deserializeGenres(curr, data)
 
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.GENRE_LEN)
                 curr = fieldParsing.skipVariableLen(curr, data, fieldLen.MEDIA_LEN)

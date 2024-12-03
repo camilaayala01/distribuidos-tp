@@ -17,24 +17,6 @@ services:
     - sa_net
     depends_on:
     - border-node
-  client-2:
-    build:
-      context: ./client
-      dockerfile: ../zmqUser.Dockerfile
-    environment:
-    - PYTHONUNBUFFERED=1
-    - MAX_DATA_BYTES=51200
-    - REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv
-    - GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv
-    - AMOUNT_OF_EXECUTIONS=1
-    volumes:
-    - ./entryParsing:/entryParsing
-    - ~/.kaggle/distribuidos:/datasets
-    - ./client-2/responses:/responses
-    networks:
-    - sa_net
-    depends_on:
-    - border-node
   initializer-0:
     build:
       context: ./initializer
@@ -44,11 +26,9 @@ services:
     - PREFETCH_COUNT=1
     - LISTENING_QUEUE=Initializer
     - HEADER_TYPE=HeaderWithTable
-    - GAMES_ENTRY_TYPE=ReducedGameEntry
     - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
     - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
     - GAMES_NEXT_HEADERS=Header;;
-    - REVIEWS_ENTRY_TYPE=ReviewEntry
     - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
     - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
     - NODE_NAME=initializer-0
@@ -69,11 +49,9 @@ services:
     - PREFETCH_COUNT=1
     - LISTENING_QUEUE=Initializer
     - HEADER_TYPE=HeaderWithTable
-    - GAMES_ENTRY_TYPE=ReducedGameEntry
     - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
     - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
     - GAMES_NEXT_HEADERS=Header;;
-    - REVIEWS_ENTRY_TYPE=ReviewEntry
     - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
     - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
     - NODE_NAME=initializer-1
@@ -94,11 +72,9 @@ services:
     - PREFETCH_COUNT=1
     - LISTENING_QUEUE=Initializer
     - HEADER_TYPE=HeaderWithTable
-    - GAMES_ENTRY_TYPE=ReducedGameEntry
     - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
     - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
     - GAMES_NEXT_HEADERS=Header;;
-    - REVIEWS_ENTRY_TYPE=ReviewEntry
     - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
     - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
     - NODE_NAME=initializer-2
@@ -1030,7 +1006,7 @@ services:
     - ID=1
     - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
     - RETRIES=3
-    - TIMER_DURATION=3
+    - TIMER_DURATION=10
     - CONTAINER_NAME=distribuidos-tp
     - ELECTION_PORT=9500
     - MONITOR_COUNT=4
@@ -1091,7 +1067,7 @@ services:
     - ID=2
     - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
     - RETRIES=3
-    - TIMER_DURATION=3
+    - TIMER_DURATION=10
     - CONTAINER_NAME=distribuidos-tp
     - ELECTION_PORT=9500
     - MONITOR_COUNT=4
@@ -1113,7 +1089,7 @@ services:
     - ID=3
     - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
     - RETRIES=3
-    - TIMER_DURATION=3
+    - TIMER_DURATION=10
     - CONTAINER_NAME=distribuidos-tp
     - ELECTION_PORT=9500
     - MONITOR_COUNT=4
@@ -1135,7 +1111,7 @@ services:
     - ID=4
     - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
     - RETRIES=3
-    - TIMER_DURATION=3
+    - TIMER_DURATION=10
     - CONTAINER_NAME=distribuidos-tp
     - ELECTION_PORT=9500
     - MONITOR_COUNT=4

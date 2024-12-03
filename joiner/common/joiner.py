@@ -1,14 +1,17 @@
 from collections import defaultdict
+import csv
 import logging
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID, serializeBoolean
+import uuid
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextRow
-from entryParsing.entry import EntryInterface
+from entryParsing.messagePart import MessagePartInterface
 from eofController.eofController import EofController
 from internalCommunication.internalMessageType import InternalMessageType
+from packetTracker.defaultTracker import DefaultTracker
 from statefulNode.statefulNode import StatefulNode
 from .accumulatedBatches import AccumulatedBatches
-from .activeClient import ActiveClient
+from .activeClient import JoinerClient
 from .joinerTypes import JoinerType
 from statefulNode.statefulNode import StatefulNode
 PRINT_FREQUENCY = 1000
@@ -18,6 +21,7 @@ PREFETCH_COUNT = int(os.getenv('PREFETCH_COUNT'))
 class Joiner(StatefulNode):
     def __init__(self):
         super().__init__()
+        self.loadActiveClientsFromDisk()
         self._joinerType = JoinerType(int(os.getenv('JOINER_TYPE')))
         self._gamesEntry = getGamesEntryTypeFromEnv()
         self._reviewsEntry = getReviewsEntryTypeFromEnv()
@@ -31,73 +35,107 @@ class Joiner(StatefulNode):
     def stop(self, _signum, _frame):
         self._eofController.terminateProcess(self._internalCommunication)
         super().stop(_signum, _frame)
+    
+    def createClient(self, clientId: uuid.UUID, gamesTracker: DefaultTracker, reviewsTracker: DefaultTracker):
+        client = JoinerClient(clientId=clientId, gamesTracker=gamesTracker, reviewsTracker=reviewsTracker)
+        client.loadFragment()
+        return client
+    
+    def createTrackerFromRow(self, row):
+        return DefaultTracker.fromStorage(row)
+    
+    def loadTrackerFromFile(self, filepath):
+        with open(filepath, 'r') as file:
+            reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
+            packetTrackerRow = nextRow(reader)
+        return self.createTrackerFromRow(packetTrackerRow)
+    
+    def loadActiveClientsFromDisk(self):
+        dataDirectory = f"/{os.getenv('LISTENING_QUEUE')}/"
+        if not os.path.exists(dataDirectory) or not os.path.isdir(dataDirectory):
+            return
         
-    def createTrackerFromRow(self, row): # TODO
-        raise NotImplementedError
-    
-    def createClient(self, filepath, clientId, tracker): # TODO
-        raise NotImplementedError
-    
+        for dirname in os.listdir(dataDirectory):
+            path = os.path.join(dataDirectory, dirname)
+            if not os.path.isdir(path): 
+                continue
+            filepaths = {os.path.join(path, filename) for filename in os.listdir(path)}
+            clientUUID = uuid.UUID(dirname)
+            gamesTracker, reviewsTracker = DefaultTracker(), DefaultTracker()
+            
+            if path + '/games.csv' in filepaths:
+                gamesTracker = self.loadTrackerFromFile(path + '/games.csv')                
+                filepaths.remove(path + '/games.csv')
+            
+            if path + '/joined.csv' in filepaths:
+                reviewsTracker = self.loadTrackerFromFile(path + '/joined.csv')
+                filepaths.remove(path + '/joined.csv')
+            elif path + '/reviews.csv' in filepaths:
+                reviewsTracker = self.loadTrackerFromFile(path + '/reviews.csv')
+                filepaths.remove(path + '/reviews.csv')
+                    
+            self._activeClients[clientUUID.bytes] = self.createClient(clientUUID, gamesTracker, reviewsTracker)
+            for filepath in filepaths:
+                os.remove(filepath)
+
     """keeps the client if there is one, set a new one if there's not"""
     def setCurrentClient(self, clientId: bytes):
         if self._currentClient:
             return
-        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(getClientIdUUID(clientId)))
+        self._currentClient = self._activeClients.setdefault(clientId, JoinerClient(getClientIdUUID(clientId), DefaultTracker(), DefaultTracker()))
     
     """replaces the old client with a new one"""
     def setNewClient(self, clientId: bytes):
         self._currentClient = None
         self.setCurrentClient(clientId)
 
-    def joinReviews(self, reviews: list[EntryInterface]):
+    def joinReviews(self, reviews: list[MessagePartInterface]):
         unjoined = list(self._currentClient.loadReviewsEntries(self._reviewsEntry))
+        
         reviews.extend(unjoined)
-        if not reviews:
-            return
         batch = defaultdict(list)
-
+        
+        joinedEntries = {}
         for entry in reviews:
             batch[entry._appID].append(entry)
 
         generator = self._currentClient.loadGamesEntries(self._gamesEntry)
-        while True:
-            game = nextRow(generator)
-            if game is None or not len(batch):
+        for game in generator:
+            if not len(batch): # once we joined all reviews available, quit
                 break
             id = game._appID
             name = game._name
             if id in batch:
                 reviewsWithID = batch.pop(id)
                 for review in reviewsWithID:
-                    priorJoined =  self._currentClient._joinedEntries.get(id, self._joinerType.defaultEntry(name, id))
-                    self._currentClient._joinedEntries[id] = self._joinerType.applyJoining(id, name, priorJoined, review)
+                    priorJoined =  joinedEntries.get(id, self._joinerType.defaultEntry(name, id))
+                    joinedEntries[id] = self._joinerType.applyJoining(id, name, priorJoined, review)
         
-        self._joinerType.storeJoinedEntries(self._currentClient._joinedEntries, self._currentClient)
-
+        self._currentClient.storeJoinedEntries(self._joinerType.entriesToSave(joinedEntries), self._joinerType.joinedEntryType())
+        return joinedEntries
+        
     def handleReviewsMessage(self, data: bytes):
-        if len(data) == 0 and not self._currentClient.unjoinedReviews():
-            return
         reviews = self._reviewsEntry.deserialize(data)
         if not self._currentClient.isGamesDone():
-            self._currentClient.storeUnjoinedReviews(reviews)
-            return 
-        self.joinReviews(reviews) 
+            if reviews:
+                self._currentClient.storeUnjoinedReviews(reviews)
+            return
+        return self.joinReviews(reviews) 
 
     def handleGamesMessage(self, data: bytes):
-        if len(data) == 0:
-            return
         entries = self._gamesEntry.deserialize(data)
         self._currentClient.storeGamesEntries(entries)
 
     def shouldSendPackets(self, toSend):
         return toSend is not None
     
-    def handleSending(self):
+    def handleSending(self, joinedEntries):
         currClient = self._currentClient
-        toSend = self._joinerType.entriesToSend(joinedEntries=currClient._joinedEntries, 
+        if joinedEntries is None:
+            return
+        toSend = self._joinerType.entriesToSend(joinedEntries=joinedEntries, 
                                                 isDone=currClient.finishedReceiving(),
                                                 activeClient=currClient)
-        self._currentClient._joinedEntries = {}
         if not self.shouldSendPackets(toSend):
             return
         self.sendToNext(toSend)
@@ -119,12 +157,14 @@ class Joiner(StatefulNode):
 
     def processPendingBatches(self):
         self.handleGamesMessage(self._accumulatedBatches.getGamesBatches())
-        self.handleReviewsMessage(self._accumulatedBatches.getReviewsBatches())
+        joinedEntries = self.handleReviewsMessage(self._accumulatedBatches.getReviewsBatches())
 
-        self.handleSending()
-        
+        self.handleSending(joinedEntries)
+
         if self._currentClient.isGamesDone():
-            self._currentClient.removeUnjoinedReviews()
+            self._currentClient.storeFragment()
+            self._currentClient.saveNewResults(self._currentClient.joinedPath())
+            self._currentClient.removeUnjoinedReviews() 
 
         toAck = self._accumulatedBatches.toAck()
         self._activeClients[self._accumulatedBatches._clientId] = self._currentClient
@@ -145,7 +185,6 @@ class Joiner(StatefulNode):
             self.setAccumulatedBatches(tag, header, batch)
         elif not self._accumulatedBatches.accumulate(header=header, tag=tag, batch=batch):
             self._internalCommunication.ackAll(self.processPendingBatches())
-            # reset accumulated and set client to correspond to the most recent packet
             self.setAccumulatedBatches(tag, header, batch)
             self.setNewClient(clientId)
 
@@ -162,5 +201,3 @@ class Joiner(StatefulNode):
             self._eofController.finishedProcessing(self._currentClient._fragment, clientId, self._internalCommunication)
             self._currentClient = None
             self._internalCommunication.basicSend(self._internalCommunication.getQueueName(), InternalMessageType.CLIENT_FLUSH.serialize() + clientId + serializeBoolean(False))
-            # MANDAR FLUSH
-            

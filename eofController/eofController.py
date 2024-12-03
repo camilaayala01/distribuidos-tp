@@ -3,8 +3,8 @@ import logging
 import os
 import threading
 import uuid
-from entryParsing.common.headerWithSender import HeaderWithSender
 from entryParsing.common.utils import nextRow
+from entryParsing.headerInterface import HeaderWithSender
 from eofController.eofControlMessage import EOFControlMessage, EOFControlMessageType
 from internalCommunication.internalCommunication import InternalCommunication
 

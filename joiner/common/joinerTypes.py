@@ -1,6 +1,5 @@
 from enum import Enum
-from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
-from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
+from entryParsing.reducedEntries import EntryAppIDNameReviewCount, EntryAppIDNameReviewText
 
 class JoinerType(Enum):
     REGULAR = 0
@@ -37,14 +36,14 @@ class JoinerType(Enum):
     def entriesForRegularJoiner(self, isDone, activeClient):
         if not isDone:
             return None
-        return activeClient.loadJoinedEntries(self.joinedEntryType())
+        return activeClient.loadAllJoinedEntries(self.joinedEntryType())
 
-    def storeJoinedEntries(self, joinedEntries, activeClient):
+    def entriesToSave(self, joinedEntries):
         match self:
             case JoinerType.ENGLISH:
-                return 
+                return {}
             case JoinerType.REGULAR:
-                activeClient.storeJoinedEntries(joinedEntries, self.joinedEntryType())
+                return joinedEntries
 
     def entriesToSend(self, joinedEntries, isDone, activeClient): 
         match self:
@@ -52,3 +51,4 @@ class JoinerType(Enum):
                 return self.entriesForEnglish(joinedEntries)
             case JoinerType.REGULAR:
                 return self.entriesForRegularJoiner(isDone, activeClient)
+    

@@ -2,8 +2,7 @@ import csv
 import os
 import math
 from enum import Enum
-from entryParsing.common.fieldParsing import getClientIdUUID
-from entryParsing.entryAppIDName import EntryAppIDName
+from entryParsing.reducedEntries import EntryAppIDName
 from packetTracker.multiTracker import MultiTracker
 from packetTracker.packetTracker import PacketTracker
 from entryParsing.common.utils import nextRow

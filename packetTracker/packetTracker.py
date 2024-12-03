@@ -1,4 +1,4 @@
-from entryParsing.common.header import Header
+from entryParsing.headerInterface import HeaderInterface
 from packetTracker.tracker import TrackerInterface
 
 class PacketTracker(TrackerInterface):
@@ -24,11 +24,11 @@ class PacketTracker(TrackerInterface):
         self._pending = pending
         self._receivedEnd = receivedEnd
         
-    def isDuplicate(self, header: Header):
+    def isDuplicate(self, header: HeaderInterface):
         newFrag = header.getFragmentNumber()
         return newFrag <= self._biggestFragment and newFrag not in self._pending
 
-    def update(self, header: Header):
+    def update(self, header: HeaderInterface):
         newFrag = header.getFragmentNumber()
 
         if newFrag > self._biggestFragment:

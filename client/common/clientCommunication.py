@@ -1,6 +1,5 @@
 import logging
-import time
-from entryParsing.common.clientHeader import ClientHeader
+from entryParsing.headerInterface import ClientHeader
 import zmq
 
 from entryParsing.common.messageType import MessageType

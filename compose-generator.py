@@ -128,11 +128,9 @@ def add_initializer(compose: dict[str, Any], id):
     container_name = f'initializer-{id}' 
     compose = default_config(compose, container_name, './initializer', os.getenv('INIT'),
                              header_type='HeaderWithTable',
-                             games_entry_type='ReducedGameEntry',
                              games_next_nodes=f'{os.getenv("GROUP_OS")};{os.getenv("FILT_INDIE")};{os.getenv("FILT_ACT")}',
                              games_next_entries='EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres',
                              games_next_headers='Header;;',
-                             reviews_entry_type='ReviewEntry',
                              reviews_next_nodes=f'{os.getenv("GROUP_INDIE")};{os.getenv("JOIN_ACT")},{os.getenv("JOIN_ACT_COUNT")},{ShardingAttribute.APP_ID.value};{os.getenv("GROUP_PERC")}',
                              reviews_next_entries='EntryAppID;EntryAppIDReviewText;EntryAppID')
     return compose, container_name
@@ -416,7 +414,7 @@ def add_monitor(compose: dict[str, Any], cluster_nodes: list[str], id, monitors_
             f'ID={id}',
             f'TO_CHECK={";".join(cluster_nodes)}',
             'RETRIES=3',
-            'TIMER_DURATION=3',
+            'TIMER_DURATION=10',
             'CONTAINER_NAME=distribuidos-tp',
             'ELECTION_PORT=9500',
             f'MONITOR_COUNT={monitors_amount}',
