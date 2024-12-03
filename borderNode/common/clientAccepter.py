@@ -53,7 +53,7 @@ class ClientAccepter:
     
     def handleEndOfDataTransfer(self, clientId: bytes):
         self._activeClients.removeClientsFromActive({clientId})
-        # TODO send ack exactly here
+        self._clientCommunication.sendToClient(clientId=clientId, data=MessageType.ACK_END_OF_DATA.serialize())
     
     def handleClientMessage(self, clientId: bytes, data: bytes):
         try:
