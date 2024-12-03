@@ -414,7 +414,7 @@ def add_monitor(compose: dict[str, Any], cluster_nodes: list[str], id, monitors_
             f'ID={id}',
             f'TO_CHECK={";".join(cluster_nodes)}',
             'RETRIES=3',
-            'TIMER_DURATION=3',
+            'TIMER_DURATION=10',
             'CONTAINER_NAME=distribuidos-tp',
             'ELECTION_PORT=9500',
             f'MONITOR_COUNT={monitors_amount}',

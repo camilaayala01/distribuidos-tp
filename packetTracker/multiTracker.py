@@ -43,4 +43,5 @@ class MultiTracker(TrackerInterface):
         for track in row:
             attrs = eval(track)
             tracker._trackers[attrs[0]] = DefaultTracker().setArgs(biggestFragment=attrs[1], pending=attrs[3], receivedEnd=attrs[3])
+        print(tracker)
         return tracker

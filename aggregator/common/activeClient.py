@@ -68,5 +68,3 @@ class ActiveClient:
     
     def saveNewResults(self):
         os.rename(self.storagePath() + '.tmp', self.storagePath() + '.csv')
-
-    
