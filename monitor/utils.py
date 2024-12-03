@@ -16,7 +16,6 @@ def sendall(msg, addr, sock):
         try:
             sent += sock.sendto(msg[sent:], addr)
         except Exception as e:
-            print(e)
             break
         
 def getSocket(id, port, socketTimeout):

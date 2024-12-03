@@ -63,7 +63,6 @@ class StatefulNode(ABC):
         for client in self._activeClients.values():
             client.destroy()
         self._internalCommunication.stop()
-        print("voy a parar todo")
         self._healthcheckAnswerController.stop()
         
     def execute(self):
