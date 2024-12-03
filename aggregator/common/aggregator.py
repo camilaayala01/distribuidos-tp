@@ -3,7 +3,7 @@ from uuid import UUID
 from entryParsing.common.fieldParsing import getClientIdUUID
 from packetTracker.tracker import TrackerInterface
 from statefulNode.statefulNode import StatefulNode
-from .activeClient import ActiveClient
+from .activeClient import AggregatorClient
 from entryParsing.headerInterface import Header, HeaderInterface
 from entryParsing.messagePart import MessagePartInterface
 from .aggregatorTypes import AggregatorTypes
@@ -21,7 +21,7 @@ class Aggregator(StatefulNode):
         return self._aggregatorType.trackerType().fromStorage(row)
     
     def createClient(self, filepath: str, clientId: UUID, tracker: TrackerInterface):
-        client = ActiveClient(clientId=clientId, tracker=tracker)
+        client = AggregatorClient(clientId=clientId, tracker=tracker)
         client.loadFragment(filepath=filepath)
         return client
 
@@ -49,7 +49,7 @@ class Aggregator(StatefulNode):
     def setCurrentClient(self, clientId: bytes):
         trackerType = self._aggregatorType.trackerType()
         self._currentClient = self._activeClients.setdefault(clientId, 
-                                                             ActiveClient(getClientIdUUID(clientId),
+                                                             AggregatorClient(getClientIdUUID(clientId),
                                                                           trackerType()))
 
     def persistNewData(self, entries):

@@ -8,7 +8,7 @@ from eofController.eofController import EofController
 from entryParsing.common.utils import getReducedEntryTypeFromEnv, getHeaderTypeFromEnv, nextRow
 from statefulNode.statefulNode import StatefulNode
 from .sorterTypes import SorterType
-from .activeClient import ActiveClient
+from .activeClient import SorterClient
 
 PRINT_FREQUENCY=500
 DELETE_TIMEOUT = 5
@@ -29,7 +29,7 @@ class Sorter(StatefulNode):
         return self._sorterType.loadTracker(row)
     
     def createClient(self, _file, clientId, tracker):
-        return ActiveClient(clientId, self._entryType, tracker)
+        return SorterClient(clientId, self._entryType, tracker)
    
     def stop(self, _signum, _frame):
         if self._sorterType.requireController():
@@ -103,7 +103,7 @@ class Sorter(StatefulNode):
 
     def handleSending(self, savedAmount):
         clientId = self._currentClient.getClientIdBytes()
-        if not self._currentClient.isDone():
+        if not self._currentClient.finishedReceiving():
             self._activeClients[clientId] = self._currentClient
             return
         logging.info(f'action: received all required batches for {getClientIdUUID(clientId)} | result: success')
@@ -116,7 +116,7 @@ class Sorter(StatefulNode):
     
     def setCurrentClient(self, clientId: bytes):
         self._currentClient = self._activeClients.setdefault(clientId, 
-                                                             ActiveClient(getClientIdUUID(clientId),
+                                                             SorterClient(getClientIdUUID(clientId),
                                                                           self._entryType,
                                                                           self._sorterType.initializeTracker()))
         
