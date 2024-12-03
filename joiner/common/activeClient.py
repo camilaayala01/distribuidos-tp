@@ -3,8 +3,6 @@ from uuid import UUID
 from entryParsing.common.headerInterface import HeaderInterface
 from entryParsing.common.table import Table
 from entryParsing.entry import EntryInterface
-from packetTracker.defaultTracker import DefaultTracker
-from entryParsing.common.utils import copyFile, nextRow
 import os
 import csv
 
@@ -12,7 +10,7 @@ from statefulNode.activeClient import ActiveClient
 
 class JoinerClient(ActiveClient):
     def __init__(self, clientId: UUID, gamesTracker, reviewsTracker):
-        super()._init__(clientId, fragment=1)
+        super().__init__(clientId, fragment=1)
         self._gamesTracker = gamesTracker
         self._reviewsTracker = reviewsTracker
     
@@ -20,17 +18,17 @@ class JoinerClient(ActiveClient):
         return f"/{os.getenv('LISTENING_QUEUE')}/{self._clientId}/"
     
     def destroy(self):
-        if os.path.exists(self._folderPath):
-            shutil.rmtree(self._folderPath)
+        if os.path.exists(self.getFolderPath()):
+            shutil.rmtree(self.getFolderPath())
 
     def gamesPath(self):
-        return self._folderPath + f'games'
+        return self.getFolderPath() + f'games'
 
     def reviewsPath(self):
-        return self._folderPath + f'reviews'
+        return self.getFolderPath() + f'reviews'
 
     def joinedPath(self):
-        return self._folderPath + f'joined'
+        return self.getFolderPath() + f'joined'
 
     def finishedReceiving(self):
         return self._gamesTracker.isDone() and self._reviewsTracker.isDone()
@@ -125,3 +123,6 @@ class JoinerClient(ActiveClient):
            self.storeEntry(entry, newResults)
         
         newResults.close()
+
+    def saveNewResults(self, path):
+        return os.rename(path + '.tmp', path + '.csv')

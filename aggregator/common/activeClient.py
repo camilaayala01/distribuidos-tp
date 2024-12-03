@@ -1,8 +1,6 @@
 import os
 import csv
 from uuid import UUID
-from entryParsing.common.header import HeaderInterface
-from entryParsing.common.utils import nextRow
 from packetTracker.tracker import TrackerInterface
 from statefulNode.activeClient import ActiveClient
 
@@ -19,4 +17,5 @@ class AggregatorClient(ActiveClient):
     def loadFragment(self, filepath):
         self.loadFragmentFromPath(filepath)
 
-    
+    def loadEntries(self, entryType):
+        return super().loadEntries(entryType, self.storagePath() + '.csv')
