@@ -13,7 +13,6 @@ from internalCommunication.internalCommunication import InternalCommunication
 from internalCommunication.internalMessageType import InternalMessageType
 from packetTracker.tracker import TrackerInterface
 
-PRINT_FREQUENCY = 1000
 DELETE_TIMEOUT = 10
 
 class StatefulNode(ABC):
@@ -63,7 +62,6 @@ class StatefulNode(ABC):
         for client in self._activeClients.values():
             client.destroy()
         self._internalCommunication.stop()
-        print("voy a parar todo")
         self._healthcheckAnswerController.stop()
         
     def execute(self):
@@ -76,7 +74,6 @@ class StatefulNode(ABC):
     def handleFlushQueuingAndPropagation(self, clientToRemove, tag, channel, propagate):
         if clientToRemove in self._deletedClients:
             if time.perf_counter() - self._deletedClients[clientToRemove] > DELETE_TIMEOUT:
-                print(f"flush for {getClientIdUUID(clientToRemove)} is done")
                 channel.basic_ack(delivery_tag = tag)
                 self._deletedClients.pop(clientToRemove, None)
             else:
@@ -100,7 +97,6 @@ class StatefulNode(ABC):
         self.deleteAccumulated(clientToRemove)
         if clientToRemove in self._activeClients:
             client = self._activeClients.pop(clientToRemove)
-            print(f"deleting {client._clientId}")
             client.destroy()
             
         self.handleFlushQueuingAndPropagation(clientToRemove, tag, channel, propagate)

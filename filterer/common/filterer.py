@@ -9,7 +9,6 @@ from internalCommunication.internalCommunication import InternalCommunication
 import logging
 from entryParsing.common.utils import getReducedEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
 
-PRINT_FREQUENCY = 1000
 
 class Filterer:
     def __init__(self):
@@ -32,8 +31,6 @@ class Filterer:
 
     def handleDataMessage(self, body):
         header, data = self._headerType.deserialize(body)
-        if header.getFragmentNumber() % PRINT_FREQUENCY == 0 | header.isEOF():
-            logging.info(f'action: received batch | {header} | result: success')
         entries = self._entryType.deserialize(data)
         filteredEntries = self.filterBatch(entries)
         self._sendToNext(header, filteredEntries)
