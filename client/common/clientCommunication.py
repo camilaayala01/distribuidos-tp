@@ -51,8 +51,32 @@ class ClientCommunication:
         self._socket.send(MessageType.DATA_TRANSFER.serialize() + msg)
 
     def sendEndOfDataTransfer(self):
-        self._socket.send(MessageType.FINISH_DATA_TRANSFER.serialize())
-        # wait for ack
+        msg = MessageType.FINISH_DATA_TRANSFER.serialize()
+        self._socket.send(msg)
+        retries = 0
+        while retries < MAX_TIMEOUTS:
+            try:
+                if not self.waitForEndOfDataAck():
+                    continue
+                return
+            except zmq.Again:
+                self._socket.send(msg)
+                retries += 1
+
+    def waitForEndOfDataAck(self):
+        msg = self._socket.recv()
+        type, msg = MessageType.deserialize(msg)
+        match type:
+            case MessageType.ACK_END_OF_DATA:
+                return True
+            case MessageType.MESSAGE_ACK:
+                # some repeated ack probably
+                pass
+            case MessageType.QUERY_RESPONSE:
+                self._responsesObtained.append(msg)
+            case _:
+                raise Exception(f"Received a message of type {type} from server")
+        return False
     
     def sendAllData(self, client, maxDataBytes, gamesGeneratorFunc, reviewsGeneratorFunc):
         self.sendTable(client, maxDataBytes, gamesGeneratorFunc, Table.GAMES)
