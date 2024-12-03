@@ -200,4 +200,4 @@ class Joiner(StatefulNode):
             logging.info(f'action: finished receiving data from client {getClientIdUUID(clientId)}| result: success')
             self._eofController.finishedProcessing(self._currentClient._fragment, clientId, self._internalCommunication)
             self._currentClient = None
-            self._internalCommunication.basicSend(self._internalCommunication.getQueueName(), InternalMessageType.CLIENT_FLUSH.serialize() + clientId + serializeBoolean(False))
+            self._internalCommunication.sendFlushToSelf(clientId)

@@ -129,5 +129,5 @@ class Sorter(StatefulNode):
         clientDeleted = self.handleSending(savedAmount)
         self._currentClient.saveNewResults()
         if clientDeleted:
-            self._internalCommunication.basicSend(self._internalCommunication.getQueueName(), InternalMessageType.CLIENT_FLUSH.serialize() + clientId + serializeBoolean(False))
+            self._internalCommunication.sendFlushToSelf(clientId)
         channel.basic_ack(delivery_tag = tag)

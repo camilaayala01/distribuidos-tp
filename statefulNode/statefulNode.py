@@ -86,7 +86,7 @@ class StatefulNode(ABC):
             if not propagate:
                 self._internalCommunication.requeuePacket(tag)
                 return
-            self._internalCommunication.basicSend(self._internalCommunication.getQueueName(), InternalMessageType.CLIENT_FLUSH.serialize() + clientToRemove + serializeBoolean(False))
+            self._internalCommunication.sendFlushToSelf(clientToRemove)
             for strategy in self._sendingStrategies:
                 strategy.sendFlush(middleware=self._internalCommunication, clientId=clientToRemove)
             channel.basic_ack(delivery_tag=tag)

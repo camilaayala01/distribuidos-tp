@@ -2,6 +2,9 @@ import pika
 import os
 import logging
 
+from entryParsing.common.fieldParsing import serializeBoolean
+from internalCommunication.internalMessageType import InternalMessageType
+
 PREFETCH_COUNT = int(os.getenv('PREFETCH_COUNT'))
 DELIVERY_MODE = 2 
 
@@ -68,3 +71,9 @@ class InternalCommunication:
 
     def requeuePacket(self, tag):
         self._channel.basic_nack(delivery_tag=tag, requeue=True)
+
+    def sendFlushToSelf(self, clientToRemove):
+        self._internalCommunication.basicSend(self._internalCommunication.getQueueName(), 
+                                              InternalMessageType.CLIENT_FLUSH.serialize() 
+                                              + clientToRemove 
+                                              + serializeBoolean(False))
