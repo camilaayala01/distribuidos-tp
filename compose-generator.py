@@ -164,7 +164,7 @@ def add_sorter_consolidator_percentile(compose: dict[str, Any], **kwargs):
 
 def add_joiner(compose: dict[str, Any], name, queue, **kwargs):
     container_name = f'joiner-{name}'
-    compose = default_config_with_tracker(compose, container_name, './joiner', queue, 'joiner', 50, **kwargs)
+    compose = default_config_with_tracker(compose, container_name, './joiner', queue, 'joiner', 200, **kwargs)
     return compose, container_name
     
 def add_filterer(compose: dict[str, Any], name, queue, **kwargs):
@@ -414,7 +414,7 @@ def add_monitor(compose: dict[str, Any], cluster_nodes: list[str], id, monitors_
             f'ID={id}',
             f'TO_CHECK={";".join(cluster_nodes)}',
             'RETRIES=3',
-            'TIMER_DURATION=10',
+            'TIMER_DURATION=1',
             'CONTAINER_NAME=distribuidos-tp',
             'ELECTION_PORT=9500',
             f'MONITOR_COUNT={monitors_amount}',
