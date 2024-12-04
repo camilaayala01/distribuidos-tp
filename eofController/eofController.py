@@ -79,6 +79,7 @@ class EofController:
                     self._internalCommunication.basicSend(self._nextQueue, body)
             case EOFControlMessageType.EOF:
                 if msg.getClientID() not in self._pending:
+                    #print(msg)
                     ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
                     return
                 if msg.getNodeID() == self._nodeID:

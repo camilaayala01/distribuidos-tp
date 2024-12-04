@@ -164,7 +164,7 @@ def add_sorter_consolidator_percentile(compose: dict[str, Any], **kwargs):
 
 def add_joiner(compose: dict[str, Any], name, queue, **kwargs):
     container_name = f'joiner-{name}'
-    compose = default_config_with_tracker(compose, container_name, './joiner', queue, 'joiner', 200, **kwargs)
+    compose = default_config_with_tracker(compose, container_name, './joiner', queue, 'joiner', 50, **kwargs)
     return compose, container_name
     
 def add_filterer(compose: dict[str, Any], name, queue, **kwargs):
@@ -490,7 +490,7 @@ def generate_compose(output_file: str, client_number: int):
     compose, containers = add_container(compose, containers, generation=add_aggregator_english)
 
     # Query 5
-    #filter action
+    # filter action
     compose, containers = add_container(compose, containers, generation=add_groupers_action_percentile)
     compose, containers = add_container(compose, containers, generation=add_joiners_action_percentile)
     compose, containers = add_container(compose, containers, generation=add_sorter_consolidator_action_percentile)

@@ -111,8 +111,7 @@ class StatefulNode(ABC):
     def handleDataMessage(self, channel, tag, body):
         header, batch = self._headerType.deserialize(body)
         clientId = header.getClient()
-        self.setCurrentClient(clientId)
-
+    
         if clientId in self._deletedClients:
             channel.basic_ack(delivery_tag=tag)
             return
@@ -122,6 +121,7 @@ class StatefulNode(ABC):
             channel.basic_ack(delivery_tag=tag)
             return
         
+        self.setCurrentClient(clientId)
         self.processDataPacket(header, batch, tag, channel)
         
 

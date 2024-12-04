@@ -2,7 +2,7 @@ from collections import defaultdict
 import csv
 import logging
 import os
-from entryParsing.common.fieldParsing import getClientIdUUID, serializeBoolean
+from entryParsing.common.fieldParsing import getClientIdUUID
 import uuid
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextRow
 from entryParsing.messagePart import MessagePartInterface
@@ -125,6 +125,8 @@ class Joiner(StatefulNode):
         return self.joinReviews(reviews) 
 
     def handleGamesMessage(self, data: bytes):
+        if self._currentClient.isGamesDone():
+            return
         entries = self._gamesEntry.deserialize(data)
         self._currentClient.storeGamesEntries(entries)
 
@@ -183,6 +185,7 @@ class Joiner(StatefulNode):
            
     def processDataPacket(self, header, batch, tag, channel):
         clientId = header.getClient()
+        
         if self._accumulatedBatches is None:
             self.setAccumulatedBatches(tag, header, batch)
         elif not self._accumulatedBatches.accumulate(header=header, tag=tag, batch=batch):

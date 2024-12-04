@@ -42,6 +42,9 @@ class EOFControlMessage:
     def getFragment(self) -> int:
         return self._fragment
 
+    def __repr__(self):
+        return f"type: {self._type} client id: {self._clientID} node id: {self._nodeID}"
+    
     @classmethod
     def deserialize(self, body) -> 'EOFControlMessage':
         type, curr = EOFControlMessageType.deserialize(body)
