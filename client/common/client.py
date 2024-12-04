@@ -2,12 +2,8 @@ import logging
 import os
 from common.utils import receiveCSVAnswer, storeResultsQuery1
 from common.clientCommunication import ClientCommunication
-from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
-from entryParsing.entryAppIDName import EntryAppIDName
-from entryParsing.entryName import EntryName
-from entryParsing.entryNameAvgPlaytime import EntryNameAvgPlaytime
-from entryParsing.entryNameReviewCount import EntryNameReviewCount
-from entryParsing.entryOSCount import EntryOSCount
+from entryParsing.headerInterface import HeaderWithQueryNumber
+from entryParsing.reducedEntries import EntryAppIDName, EntryName, EntryNameAvgPlaytime, EntryNameReviewCount, EntryOSCount
 
 QUERY_COUNT = 5
 
@@ -15,6 +11,7 @@ class Client:
     def __init__(self):
         self._working = True
         self._queriesReceived = set()
+        self._amountOfExecutions = int(os.getenv("AMOUNT_OF_EXECUTIONS"))
         self._maxData = int(os.getenv('MAX_DATA_BYTES'))
         self._communication = ClientCommunication()
         self._currentExecution = 1
@@ -28,7 +25,12 @@ class Client:
     def reset(self):
         self._currentExecution += 1
         self._queriesReceived = set()
+        self._communication.stop() 
+        self._communication = ClientCommunication()
 
+    def isLastExecution(self):
+        return self._amountOfExecutions == self._currentExecution
+    
     def shutdown(self):
         self._communication.stop()
 

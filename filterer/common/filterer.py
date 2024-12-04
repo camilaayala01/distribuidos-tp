@@ -1,13 +1,13 @@
 import os
-from entryParsing.common.headerInterface import HeaderInterface
-from entryParsing.entry import EntryInterface
+from entryParsing.headerInterface import HeaderInterface
+from entryParsing.messagePart import MessagePartInterface
 from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 from internalCommunication.common.utils import createStrategiesFromNextNodes
 from internalCommunication.internalMessageType import InternalMessageType
 from .filtererTypes import FiltererType
 from internalCommunication.internalCommunication import InternalCommunication
 import logging
-from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
+from entryParsing.common.utils import getReducedEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
 
 PRINT_FREQUENCY = 1000
 
@@ -15,14 +15,14 @@ class Filterer:
     def __init__(self):
         initializeLog()
         self._filtererType = FiltererType(int(os.getenv('FILTERER_TYPE')))
-        self._entryType = getEntryTypeFromEnv()
+        self._entryType = getReducedEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
         self._internalCommunication = InternalCommunication(os.getenv('LISTENING_QUEUE'))
         self._sendingStrategies = createStrategiesFromNextNodes()
         self._healthcheckAnswerController = HealthcheckAnswerController()
         self._healthcheckAnswerController.execute()      
 
-    def _sendToNext(self, header: HeaderInterface, batch: list[EntryInterface]):
+    def _sendToNext(self, header: HeaderInterface, batch: list[MessagePartInterface]):
         for strategy in self._sendingStrategies:
             strategy.sendData(self._internalCommunication, header, batch)
 
@@ -51,5 +51,5 @@ class Filterer:
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
 
-    def filterBatch(self, batch: list[EntryInterface]) -> list[EntryInterface]:
+    def filterBatch(self, batch: list[MessagePartInterface]) -> list[MessagePartInterface]:
         return [entry for entry in batch if self._filtererType.executeCondition(entry)]

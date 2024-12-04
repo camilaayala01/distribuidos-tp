@@ -1,5 +1,6 @@
-from entryParsing.common.headerInterface import HeaderInterface
-from entryParsing.entry import EntryInterface
+from entryParsing.common.fieldParsing import serializeBoolean
+from entryParsing.headerInterface import HeaderInterface
+from entryParsing.messagePart import MessagePartInterface
 from internalCommunication.internalCommunication import InternalCommunication
 from internalCommunication.common.nextNode import NextNode
 from internalCommunication.internalMessageType import InternalMessageType
@@ -16,7 +17,7 @@ class BasicSend(SendingStrategy):
     def sendDataBytes(self, middleware: InternalCommunication, msg: bytes):
         self.sendBytes(middleware, InternalMessageType.DATA_TRANSFER.serialize() + msg)
 
-    def sendData(self, middleware: InternalCommunication, header: HeaderInterface, batch: list[EntryInterface]):
+    def sendData(self, middleware: InternalCommunication, header: HeaderInterface, batch: list[MessagePartInterface]):
         msg = self._nextNode.headerForNextNode(header).serialize()
         for entry in batch:
             msg += self._nextNode.entryForNextNode(entry).serialize()
@@ -46,4 +47,4 @@ class BasicSend(SendingStrategy):
         return fragment
     
     def sendFlush(self, middleware, clientId):
-        self.sendBytes(middleware, InternalMessageType.CLIENT_FLUSH.serialize() + clientId)
+        self.sendBytes(middleware, InternalMessageType.CLIENT_FLUSH.serialize() + clientId + serializeBoolean(True))

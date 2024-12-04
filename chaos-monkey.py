@@ -19,11 +19,10 @@ def kill(node):
 
 def main():
     nodesToKill = set(re.split(r';', os.getenv('TO_CHECK')) if os.getenv('TO_CHECK') else [])
-    print(nodesToKill)
     while True:
         node_to_kill = random.choice(list(nodesToKill))
         kill(node_to_kill)
-        time.sleep(10)
+        time.sleep(7)
 
 if __name__ == '__main__':
     main()

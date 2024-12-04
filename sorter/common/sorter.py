@@ -2,13 +2,14 @@ import logging
 import os
 import csv
 import uuid
-from entryParsing.common.fieldParsing import getClientIdUUID
-from entryParsing.entrySorterTopFinder import EntrySorterTopFinder
+from entryParsing.common.fieldParsing import getClientIdUUID, serializeBoolean
 from eofController.eofController import EofController
-from entryParsing.common.utils import getEntryTypeFromEnv, getHeaderTypeFromEnv, nextRow
+from internalCommunication.internalMessageType import InternalMessageType
+from entryParsing.reducedEntries import EntrySorterTopFinder
+from entryParsing.common.utils import getReducedEntryTypeFromEnv, getHeaderTypeFromEnv, nextRow
 from statefulNode.statefulNode import StatefulNode
 from .sorterTypes import SorterType
-from .activeClient import ActiveClient
+from .activeClient import SorterClient
 
 PRINT_FREQUENCY=500
 DELETE_TIMEOUT = 5
@@ -17,7 +18,7 @@ class Sorter(StatefulNode):
     def __init__(self):
         super().__init__()
         self._sorterType = SorterType(int(os.getenv('SORTER_TYPE')))
-        self._entryType = getEntryTypeFromEnv()
+        self._entryType = getReducedEntryTypeFromEnv()
         self._headerType = getHeaderTypeFromEnv()
         self.loadActiveClientsFromDisk()
         self._topAmount = int(os.getenv('TOP_AMOUNT')) if os.getenv('TOP_AMOUNT') is not None else None
@@ -29,7 +30,7 @@ class Sorter(StatefulNode):
         return self._sorterType.loadTracker(row)
     
     def createClient(self, _file, clientId, tracker):
-        return ActiveClient(clientId, self._entryType, tracker)
+        return SorterClient(clientId, self._entryType, tracker)
    
     def stop(self, _signum, _frame):
         if self._sorterType.requireController():
@@ -103,20 +104,20 @@ class Sorter(StatefulNode):
 
     def handleSending(self, savedAmount):
         clientId = self._currentClient.getClientIdBytes()
-        if not self._currentClient.isDone():
+        if not self._currentClient.finishedReceiving():
             self._activeClients[clientId] = self._currentClient
-            return
+            return None
         logging.info(f'action: received all required batches for {getClientIdUUID(clientId)} | result: success')
         topGenerator= self._currentClient.getResults()
         topGenerator = self._sorterType.preprocessPackets(topGenerator, savedAmount)
         fragment = self.sendToNext(topGenerator)
         if self._sorterType.requireController():
             self._eofController.finishedProcessing(fragment, clientId, self._internalCommunication)
-        return self._activeClients.pop(clientId)
+        return clientId
     
     def setCurrentClient(self, clientId: bytes):
         self._currentClient = self._activeClients.setdefault(clientId, 
-                                                             ActiveClient(getClientIdUUID(clientId),
+                                                             SorterClient(getClientIdUUID(clientId),
                                                                           self._entryType,
                                                                           self._sorterType.initializeTracker()))
         
@@ -127,6 +128,6 @@ class Sorter(StatefulNode):
         savedAmount = self.mergeKeepTop(entries)
         clientDeleted = self.handleSending(savedAmount)
         self._currentClient.saveNewResults()
-        if clientDeleted is not None:
-            clientDeleted.destroy()
+        if clientDeleted:
+            self._internalCommunication.sendFlushToSelf(clientId)
         channel.basic_ack(delivery_tag = tag)

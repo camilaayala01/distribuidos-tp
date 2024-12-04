@@ -1,6 +1,5 @@
 from enum import Enum
-from entryParsing.entryAppIDNameReviewCount import EntryAppIDNameReviewCount
-from entryParsing.entryAppIDNameReviewText import EntryAppIDNameReviewText
+from entryParsing.reducedEntries import EntryAppIDNameReviewCount, EntryAppIDNameReviewText
 
 class JoinerType(Enum):
     REGULAR = 0

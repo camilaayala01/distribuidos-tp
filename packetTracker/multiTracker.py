@@ -1,4 +1,4 @@
-from entryParsing.common.headerWithSender import HeaderWithSender
+from entryParsing.headerInterface import HeaderWithSender
 from packetTracker.defaultTracker import DefaultTracker
 from packetTracker.tracker import TrackerInterface
 
@@ -42,6 +42,6 @@ class MultiTracker(TrackerInterface):
         tracker = cls()
         for track in row:
             attrs = eval(track)
-            tracker._trackers[attrs[0]] = DefaultTracker().setArgs(biggestFragment=attrs[1], pending=attrs[3], receivedEnd=attrs[3])
-        print(tracker)
+            tracker._trackers[attrs[0]] = DefaultTracker()
+            tracker._trackers[attrs[0]].setArgs(biggestFragment=attrs[1], pending=attrs[2], receivedEnd=attrs[3])
         return tracker

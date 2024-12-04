@@ -1,8 +1,6 @@
 import os
 import importlib
-import math
 import logging
-from entryParsing.entry import EntryInterface
 import hashlib
 
 MAX_PACKET_SIZE = 8192
@@ -27,9 +25,6 @@ def nextRow(generator):
         return row
     except StopIteration:
         return None
-    
-def convertFirstLetterToLowerCase(string: str):
-    return string[0].lower() + string[1:]
 
 def generateFullPath(path: str, module: str):
     return path + '.' + module
@@ -42,20 +37,21 @@ def getModuleFromEnvVars(entryType: str, path: str):
         raise ValueError("Path environment variable is missing.")
     
     try:
-        classImport = generateFullPath(entryPath, convertFirstLetterToLowerCase(entryType)) + '.' + entryType
-        moduleName, classImport = classImport.rsplit('.', 1)
-        module = importlib.import_module(moduleName)
-        return getattr(module, classImport)
+        module = importlib.import_module(entryPath)
+        return getattr(module, entryType)
     except Exception as e:
-        raise ImportError(f"Class '{classImport}' could not be found in module '{moduleName}'.")
+        raise ImportError(f"Class '{entryType}' could not be found in module '{entryPath}'.")
 
 def getHeaderTypeFromEnv():
     return getModuleFromEnvVars(os.getenv('HEADER_TYPE'), 'HEADER_PATH')
 
-def getEntryTypeFromEnv():
+def getReducedEntryTypeFromEnv():
     return getModuleFromEnvVars(os.getenv('ENTRY_TYPE'), 'ENTRY_PATH')
 
 def getGamesEntryTypeFromEnv():
+    return getModuleFromEnvVars(os.getenv('GAMES_ENTRY_TYPE'), 'ENTRY_PATH')
+
+def getInitializerGamesTypeFromEnv():
     return getModuleFromEnvVars(os.getenv('GAMES_ENTRY_TYPE'), 'ENTRY_PATH')
 
 def getReviewsEntryTypeFromEnv():

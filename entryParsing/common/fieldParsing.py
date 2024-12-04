@@ -1,8 +1,26 @@
+import datetime
 import struct
 import uuid
 from entryParsing.common.table import Table
 from entryParsing.common.utils import boolToInt, intToBool
 from entryParsing.common import fieldLen
+
+MAX_REVIEW_TEXT = 150
+
+def floatToInt(number) -> int:
+    return int(number * 100)
+        
+def tryToFloat(string)-> float:
+    try: 
+        return float(string)
+    except Exception:
+        return 0
+    
+def parseDate(string)-> datetime.datetime:
+    try:
+        return datetime.datetime.strptime(string,"%b %d, %Y").strftime("%d-%m-%Y")
+    except Exception:
+        return datetime.datetime.strptime("1 " + string, "%d %b %Y").strftime("%d-%m-%Y")
 
 # 0 for games, 1 for reviews
 def serializeTable(table: Table): 
@@ -32,7 +50,9 @@ def skipReviewText(curr: int, data: bytes)-> int:
     return skipVariableLen(curr, data, fieldLen.TEXT_LEN)
 
 def deserializeReviewText(curr: int, data: bytes)-> tuple[str, int]:
-    return deserializeVariableLen(curr, data, fieldLen.TEXT_LEN)
+    text, curr = deserializeVariableLen(curr, data, fieldLen.TEXT_LEN)
+    text = text[:MAX_REVIEW_TEXT]
+    return text, curr
 
 def serializeGenres(field: str):
     return serializeVariableLen(field, fieldLen.GENRE_LEN)

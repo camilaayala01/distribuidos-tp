@@ -5,7 +5,7 @@ import zmq
 import logging
 from internalCommunication.internalCommunication import InternalCommunication
 from .activeClients import ActiveClients
-from entryParsing.common.clientHeader import ClientHeader
+from entryParsing.headerInterface import ClientHeader
 from entryParsing.common.messageType import MessageType
 from entryParsing.common.fieldParsing import getClientIdUUID
 from internalCommunication.internalMessageType import InternalMessageType
@@ -53,7 +53,7 @@ class ClientAccepter:
     
     def handleEndOfDataTransfer(self, clientId: bytes):
         self._activeClients.removeClientsFromActive({clientId})
-        # TODO send ack exactly here
+        self._clientCommunication.sendToClient(clientId=clientId, data=MessageType.ACK_END_OF_DATA.serialize())
     
     def handleClientMessage(self, clientId: bytes, data: bytes):
         try:

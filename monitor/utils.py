@@ -16,7 +16,6 @@ def sendall(msg, addr, sock):
         try:
             sent += sock.sendto(msg[sent:], addr)
         except Exception as e:
-            print(e)
             break
         
 def getSocket(id, port, socketTimeout):
@@ -31,6 +30,16 @@ def getServerSocket(id, port, socketTimeout):
     listeningSock.settimeout(socketTimeout)      
     listeningSock.listen(MONITOR_COUNT)
     return listeningSock
+
+def sendto(senderId, port, recvId, msg, timeout):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(timeout)
+    try:
+        s.connect((monitorName(recvId), port))
+        s.sendall(msg.serialize(senderId))
+    except:
+        return None
+    return s
 
 
 

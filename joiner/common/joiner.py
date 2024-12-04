@@ -2,15 +2,16 @@ from collections import defaultdict
 import csv
 import logging
 import os
+from entryParsing.common.fieldParsing import getClientIdUUID, serializeBoolean
 import uuid
-from entryParsing.common.fieldParsing import getClientIdUUID
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextRow
-from entryParsing.entry import EntryInterface
+from entryParsing.messagePart import MessagePartInterface
 from eofController.eofController import EofController
+from internalCommunication.internalMessageType import InternalMessageType
 from packetTracker.defaultTracker import DefaultTracker
 from statefulNode.statefulNode import StatefulNode
 from .accumulatedBatches import AccumulatedBatches
-from .activeClient import ActiveClient
+from .activeClient import JoinerClient
 from .joinerTypes import JoinerType
 from statefulNode.statefulNode import StatefulNode
 PRINT_FREQUENCY = 1000
@@ -36,7 +37,7 @@ class Joiner(StatefulNode):
         super().stop(_signum, _frame)
     
     def createClient(self, clientId: uuid.UUID, gamesTracker: DefaultTracker, reviewsTracker: DefaultTracker):
-        client = ActiveClient(clientId=clientId, gamesTracker=gamesTracker, reviewsTracker=reviewsTracker)
+        client = JoinerClient(clientId=clientId, gamesTracker=gamesTracker, reviewsTracker=reviewsTracker)
         client.loadFragment()
         return client
     
@@ -81,14 +82,14 @@ class Joiner(StatefulNode):
     def setCurrentClient(self, clientId: bytes):
         if self._currentClient:
             return
-        self._currentClient = self._activeClients.setdefault(clientId, ActiveClient(getClientIdUUID(clientId), DefaultTracker(), DefaultTracker()))
+        self._currentClient = self._activeClients.setdefault(clientId, JoinerClient(getClientIdUUID(clientId), DefaultTracker(), DefaultTracker()))
     
     """replaces the old client with a new one"""
     def setNewClient(self, clientId: bytes):
         self._currentClient = None
         self.setCurrentClient(clientId)
 
-    def joinReviews(self, reviews: list[EntryInterface]):
+    def joinReviews(self, reviews: list[MessagePartInterface]):
         unjoined = list(self._currentClient.loadReviewsEntries(self._reviewsEntry))
         
         reviews.extend(unjoined)
@@ -199,4 +200,4 @@ class Joiner(StatefulNode):
             logging.info(f'action: finished receiving data from client {getClientIdUUID(clientId)}| result: success')
             self._eofController.finishedProcessing(self._currentClient._fragment, clientId, self._internalCommunication)
             self._currentClient = None
-            self._activeClients.pop(clientId).destroy()
+            self._internalCommunication.sendFlushToSelf(clientId)

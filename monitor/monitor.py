@@ -8,7 +8,7 @@ from utils import container, getSocket, monitorName, sendall
 from status import Status
 
 TIMER_DURATION = int(os.getenv('TIMER_DURATION'))
-
+HEALTHCHECK_PORT = int(os.getenv('HEALTHCHECK_PORT'))
 class Monitor:
     def __init__(self):
         self._running = True
@@ -17,7 +17,6 @@ class Monitor:
         nodesToCheck = set(re.split(r';', os.getenv('TO_CHECK')) if os.getenv('TO_CHECK') else [])
         monitorsToCheck = set([id for id in range(1, int(os.getenv('MONITOR_COUNT')) + 1) if id != self._id])
         self._toCheck = set(map(lambda m: monitorName(m), monitorsToCheck)).union(nodesToCheck)
-        self._healthcheckPort = int(os.getenv('HEALTHCHECK_PORT'))
         self._pendingLock = Lock()
         self._pending = {}
       
@@ -72,7 +71,7 @@ class Monitor:
         for id in self._toCheck:
             if not self._electionHandler.iAmLeader():
                 break
-            sendall(HeartbeatMessage.CHECK.serialize(monitorName(self._id)), (id, self._healthcheckPort), sock)   
+            sendall(HeartbeatMessage.CHECK.serialize(monitorName(self._id)), (id, HEALTHCHECK_PORT), sock)   
             with self._pendingLock:
                 self._pending[id].update()
 
@@ -122,7 +121,7 @@ class Monitor:
     def runMonitor(self): 
         with self._pendingLock:
             self.setPendingStatus(self._electionHandler.iAmLeader())
-        self._healthcheckSock = getSocket(self._id, self._healthcheckPort, TIMER_DURATION)
+        self._healthcheckSock = getSocket(self._id, HEALTHCHECK_PORT, TIMER_DURATION)
         self._electionHandler.setLeaderIsRunning(True)
         match self._electionHandler.iAmLeader():
             case True:

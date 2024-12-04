@@ -1,14 +1,13 @@
 import csv
 from enum import Enum
 import os
-from entryParsing.common.headerInterface import HeaderInterface
-from entryParsing.common.headerWithQueryNumber import HeaderWithQueryNumber
+from entryParsing.headerInterface import HeaderInterface
+from entryParsing.headerInterface import HeaderWithQueryNumber
 from entryParsing.common.utils import nextRow
-from entryParsing.entry import EntryInterface
-from entryParsing.entryOSCount import EntryOSCount
+from entryParsing.messagePart import MessagePartInterface
+from entryParsing.reducedEntries import EntryOSCount
 from packetTracker.defaultTracker import DefaultTracker
 from packetTracker.multiTracker import MultiTracker
-from packetTracker.packetTracker import PacketTracker
 
 class AggregatorTypes(Enum):
     OS = 0
@@ -31,11 +30,11 @@ class AggregatorTypes(Enum):
             case _:
                 return None
 
-    def storeEntry(self, entry: EntryInterface, storageFile):
+    def storeEntry(self, entry: MessagePartInterface, storageFile):
         writer = csv.writer(storageFile, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(entry.__dict__.values())
 
-    def getEnglishCountResults(self, entries: list[EntryInterface], priorEntriesGenerator, storageFile):
+    def getEnglishCountResults(self, entries: list[MessagePartInterface], priorEntriesGenerator, storageFile):
         toSend = []
         requiredReviews = int(os.getenv('REQUIRED_REVIEWS'))
         
@@ -74,7 +73,7 @@ class AggregatorTypes(Enum):
 
         return toSend
 
-    def getOSCountResults(self, entry: EntryInterface, priorEntriesGenerator, storageFile, isDone: bool):
+    def getOSCountResults(self, entry: MessagePartInterface, priorEntriesGenerator, storageFile, isDone: bool):
         row = nextRow(priorEntriesGenerator)
         if row is None:
             priorResult = self.getInitialResults()
@@ -86,7 +85,7 @@ class AggregatorTypes(Enum):
             return []
         return [priorResult]
 
-    def handleResults(self, entries: list[EntryInterface], priorEntriesGenerator, storageFile, isDone: bool) -> list[EntryInterface]:
+    def handleResults(self, entries: list[MessagePartInterface], priorEntriesGenerator, storageFile, isDone: bool) -> list[MessagePartInterface]:
         match self:
             case AggregatorTypes.ENGLISH:
                 return self.getEnglishCountResults(entries, priorEntriesGenerator, storageFile)
@@ -95,7 +94,7 @@ class AggregatorTypes(Enum):
             case AggregatorTypes.INDIE:
                 return entries
 
-    def getResultingHeader(self, header: HeaderInterface) -> EntryInterface:
+    def getResultingHeader(self, header: HeaderInterface) -> MessagePartInterface:
         match self:
             case AggregatorTypes.OS | AggregatorTypes.ENGLISH:
                 return HeaderWithQueryNumber.fromAnother(header, _queryNumber=int(os.getenv('QUERY_NUMBER')))

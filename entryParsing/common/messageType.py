@@ -19,6 +19,8 @@ class MessageType(Enum):
     # client, for announcing to server they wont send more data. this is used for client
     # to ensure server wont think it got disconnected
     FINISH_DATA_TRANSFER = 7 
+    # server, for telling client it deleted him correctly
+    ACK_END_OF_DATA = 8
 
     def serialize(self):
         return self.value.to_bytes(MESSAGE_TYPE_LEN,'big')
