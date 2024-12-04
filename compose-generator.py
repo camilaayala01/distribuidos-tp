@@ -28,9 +28,9 @@ def add_client_with_id(compose: dict[str, Any], client_id: int):
             'REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv',
             'GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv',
             'AMOUNT_OF_EXECUTIONS=1',
-            f'BORDER_NODE_ADDR=tcp://border-node:{os.getenv('CLIENT_PORT')}',
+            f'BORDER_NODE_ADDR=tcp://border-node:{os.getenv("CLIENT_PORT")}',
             'MAX_TIMEOUTS=10',
-            'TIMEOUTS=2000'
+            'TIMEOUT=2000'
         ],
         'volumes':[
             './entryParsing:/entryParsing',
@@ -216,7 +216,11 @@ def add_border_node(compose: dict[str, Any]):
             'context': './borderNode',
             'dockerfile': '../zmqUser.Dockerfile'
         },
-        'environment': default_environment(os.getenv("DISP")) +  ['NODE_NAME=border-node','STORAGE_PATH=/data/', f'CLIENT_PORT={os.getenv('CLIENT_PORT')}'],
+        'environment': default_environment(os.getenv("DISP")) +
+          ['NODE_NAME=border-node',
+           'STORAGE_PATH=/data/', 
+           f'CLIENT_PORT={os.getenv("CLIENT_PORT")}',
+           ],
         'env_file': default_env_file(),
         'volumes': default_volumes() + ['./borderNode/data:/data'],
         'networks': default_network()
