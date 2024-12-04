@@ -4,6 +4,7 @@ import logging
 import os
 from entryParsing.common.fieldParsing import getClientIdUUID
 import uuid
+from entryParsing.common.table import Table
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextRow
 from entryParsing.messagePart import MessagePartInterface
 from eofController.eofController import EofController
@@ -128,8 +129,6 @@ class Joiner(StatefulNode):
         return self.joinReviews(reviews) 
 
     def handleGamesMessage(self, data: bytes):
-        if self._currentClient.isGamesDone():
-            return
         entries = self._gamesEntry.deserialize(data)
         self._currentClient.storeGamesEntries(entries)
 
@@ -158,20 +157,22 @@ class Joiner(StatefulNode):
         self._currentClient._fragment = newFragment
     
     def setAccumulatedBatches(self, tag, header, batch):
-        accumulator = AccumulatedBatches(header.getClient())
+        accumulator = AccumulatedBatches(header.getClient(), header.getTable())
         accumulator.accumulate(tag, header, batch)
         self._accumulatedBatches = accumulator
 
     def processPendingBatches(self):
-        self.handleGamesMessage(self._accumulatedBatches.getGamesBatches())
-        joinedEntries = self.handleReviewsMessage(self._accumulatedBatches.getReviewsBatches())
+        if self._accumulatedBatches.getCorrespondingTable() == Table.GAMES:
+            self.handleGamesMessage(self._accumulatedBatches.getPendingBatches())
+        else:
+            joinedEntries = self.handleReviewsMessage(self._accumulatedBatches.getPendingBatches())
 
-        self.handleSending(joinedEntries)
+            self.handleSending(joinedEntries)
 
-        if self._currentClient.isGamesDone():
-            self._currentClient.storeFragment()
-            self._currentClient.saveNewResults(self._currentClient.joinedPath())
-            self._currentClient.removeUnjoinedReviews() 
+            if self._currentClient.isGamesDone():
+                self._currentClient.storeFragment()
+                self._currentClient.saveNewResults(self._currentClient.joinedPath())
+                self._currentClient.removeUnjoinedReviews() 
 
         toAck = self._accumulatedBatches.toAck()
         self._activeClients[self._currentClient.getClientIdBytes()] = self._currentClient
@@ -193,7 +194,7 @@ class Joiner(StatefulNode):
             self.setAccumulatedBatches(tag, header, batch)
         elif not self._accumulatedBatches.accumulate(header=header, tag=tag, batch=batch):
             self._internalCommunication.ackAll(self.processPendingBatches())
-            self.setAccumulatedBatches(tag, header, batch)
+            self.setAccumulatedBatches(tag, header, batch) 
             self.setNewClient(clientId)
 
         self._currentClient.updateTracker(header)
