@@ -1,7 +1,6 @@
 import os
 from uuid import UUID
-from entryParsing.common.fieldParsing import getClientIdUUID, serializeBoolean
-from internalCommunication.internalMessageType import InternalMessageType
+from entryParsing.common.fieldParsing import getClientIdUUID
 from packetTracker.tracker import TrackerInterface
 from statefulNode.statefulNode import StatefulNode
 from .activeClient import AggregatorClient

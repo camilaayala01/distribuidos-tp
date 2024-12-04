@@ -4,1146 +4,1129 @@ services:
       context: ./client
       dockerfile: ../zmqUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - MAX_DATA_BYTES=51200
-    - REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv
-    - GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv
-    - AMOUNT_OF_EXECUTIONS=1
+      - PYTHONUNBUFFERED=1
+      - MAX_DATA_BYTES=51200
+      - REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv
+      - GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv
+      - AMOUNT_OF_EXECUTIONS=1
     volumes:
-    - ./entryParsing:/entryParsing
-    - ~/.kaggle/distribuidos:/datasets
-    - ./client-1/responses:/responses
+      - ./entryParsing:/entryParsing
+      - ~/.kaggle/distribuidos:/datasets
+      - ./client-1/responses:/responses
     networks:
-    - sa_net
+      - sa_net
     depends_on:
-    - border-node
-  client-2:
-    build:
-      context: ./client
-      dockerfile: ../zmqUser.Dockerfile
-    environment:
-    - PYTHONUNBUFFERED=1
-    - MAX_DATA_BYTES=51200
-    - REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv
-    - GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv
-    - AMOUNT_OF_EXECUTIONS=1
-    volumes:
-    - ./entryParsing:/entryParsing
-    - ~/.kaggle/distribuidos:/datasets
-    - ./client-2/responses:/responses
-    networks:
-    - sa_net
-    depends_on:
-    - border-node
+      - border-node
+
   initializer-0:
     build:
       context: ./initializer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=Initializer
-    - HEADER_TYPE=HeaderWithTable
-    - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
-    - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
-    - GAMES_NEXT_HEADERS=Header;;
-    - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
-    - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
-    - NODE_NAME=initializer-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=Initializer
+      - HEADER_TYPE=HeaderWithTable
+      - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
+      - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
+      - GAMES_NEXT_HEADERS=Header;;
+      - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
+      - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
+      - NODE_NAME=initializer-0
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   initializer-1:
     build:
       context: ./initializer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=Initializer
-    - HEADER_TYPE=HeaderWithTable
-    - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
-    - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
-    - GAMES_NEXT_HEADERS=Header;;
-    - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
-    - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
-    - NODE_NAME=initializer-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=Initializer
+      - HEADER_TYPE=HeaderWithTable
+      - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
+      - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
+      - GAMES_NEXT_HEADERS=Header;;
+      - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
+      - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
+      - NODE_NAME=initializer-1
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   initializer-2:
     build:
       context: ./initializer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=Initializer
-    - HEADER_TYPE=HeaderWithTable
-    - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
-    - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
-    - GAMES_NEXT_HEADERS=Header;;
-    - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
-    - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
-    - NODE_NAME=initializer-2
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=Initializer
+      - HEADER_TYPE=HeaderWithTable
+      - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
+      - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
+      - GAMES_NEXT_HEADERS=Header;;
+      - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
+      - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
+      - NODE_NAME=initializer-2
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   grouper-os-0:
     build:
       context: ./grouper
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=GrouperOSCounts
-    - GROUPER_TYPE=0
-    - NEXT_NODES=AggregatorOs
-    - HEADER_TYPE=Header
-    - ENTRY_TYPE=EntryOSSupport
-    - NODE_NAME=grouper-os-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=GrouperOSCounts
+      - GROUPER_TYPE=0
+      - NEXT_NODES=AggregatorOs
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryOSSupport
+      - NODE_NAME=grouper-os-0
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   grouper-os-1:
     build:
       context: ./grouper
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=GrouperOSCounts
-    - GROUPER_TYPE=0
-    - NEXT_NODES=AggregatorOs
-    - HEADER_TYPE=Header
-    - ENTRY_TYPE=EntryOSSupport
-    - NODE_NAME=grouper-os-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=GrouperOSCounts
+      - GROUPER_TYPE=0
+      - NEXT_NODES=AggregatorOs
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryOSSupport
+      - NODE_NAME=grouper-os-1
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   aggregator-os:
     build:
       context: ./aggregator
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=AggregatorOs
-    - NEXT_NODES=Dispatcher
-    - HEADER_TYPE=Header
-    - ENTRY_TYPE=EntryOSCount
-    - AGGREGATOR_TYPE=0
-    - QUERY_NUMBER=1
-    - NODE_NAME=aggregator-os
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=AggregatorOs
+      - NEXT_NODES=Dispatcher
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryOSCount
+      - AGGREGATOR_TYPE=0
+      - QUERY_NUMBER=1
+      - NODE_NAME=aggregator-os
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./aggregator/AggregatorOs:/AggregatorOs
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./aggregator/AggregatorOs:/AggregatorOs
     networks:
-    - sa_net
+      - sa_net
   filterer-indie:
     build:
       context: ./filterer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=FilterIndie
-    - FILTERER_TYPE=1
-    - NEXT_NODES=FilterDecade;JoinerIndie,3,0
-    - NEXT_ENTRIES=EntryNameDateAvgPlaytime;EntryAppIDName
-    - NEXT_HEADERS=Header;
-    - HEADER_TYPE=HeaderWithTable
-    - ENTRY_TYPE=EntryAppIDNameGenresReleaseDateAvgPlaytime
-    - NODE_NAME=filterer-indie
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterIndie
+      - FILTERER_TYPE=1
+      - NEXT_NODES=FilterDecade;JoinerIndie,3,0
+      - NEXT_ENTRIES=EntryNameDateAvgPlaytime;EntryAppIDName
+      - NEXT_HEADERS=Header;
+      - HEADER_TYPE=HeaderWithTable
+      - ENTRY_TYPE=EntryAppIDNameGenresReleaseDateAvgPlaytime
+      - NODE_NAME=filterer-indie
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   filterer-date:
     build:
       context: ./filterer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=FilterDecade
-    - FILTERER_TYPE=0
-    - NEXT_NODES=SorterAvgPlaytime,2,1
-    - NEXT_ENTRIES=EntryNameAvgPlaytime
-    - HEADER_TYPE=Header
-    - ENTRY_TYPE=EntryNameDateAvgPlaytime
-    - NODE_NAME=filterer-date
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterDecade
+      - FILTERER_TYPE=0
+      - NEXT_NODES=SorterAvgPlaytime,2,1
+      - NEXT_ENTRIES=EntryNameAvgPlaytime
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryNameDateAvgPlaytime
+      - NODE_NAME=filterer-date
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   sorter-playtime-0:
     build:
       context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=SorterAvgPlaytime
-    - NEXT_NODES=ConsolidatorSorterPlaytime
-    - HEADER_TYPE=Header
-    - ENTRY_TYPE=EntryNameAvgPlaytime
-    - NODE_ID=0
-    - SORTER_TYPE=0
-    - TOP_AMOUNT=10
-    - NODE_COUNT=2
-    - NEXT_HEADERS=HeaderWithSender
-    - NODE_NAME=sorter-playtime-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=SorterAvgPlaytime
+      - NEXT_NODES=ConsolidatorSorterPlaytime
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryNameAvgPlaytime
+      - NODE_ID=0
+      - SORTER_TYPE=0
+      - TOP_AMOUNT=10
+      - NODE_COUNT=2
+      - NEXT_HEADERS=HeaderWithSender
+      - NODE_NAME=sorter-playtime-0
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./sorter/SorterAvgPlaytime0:/SorterAvgPlaytime
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./sorter/SorterAvgPlaytime0:/SorterAvgPlaytime
     networks:
-    - sa_net
+      - sa_net
   sorter-playtime-1:
     build:
       context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=SorterAvgPlaytime
-    - NEXT_NODES=ConsolidatorSorterPlaytime
-    - HEADER_TYPE=Header
-    - ENTRY_TYPE=EntryNameAvgPlaytime
-    - NODE_ID=1
-    - SORTER_TYPE=0
-    - TOP_AMOUNT=10
-    - NODE_COUNT=2
-    - NEXT_HEADERS=HeaderWithSender
-    - NODE_NAME=sorter-playtime-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=SorterAvgPlaytime
+      - NEXT_NODES=ConsolidatorSorterPlaytime
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryNameAvgPlaytime
+      - NODE_ID=1
+      - SORTER_TYPE=0
+      - TOP_AMOUNT=10
+      - NODE_COUNT=2
+      - NEXT_HEADERS=HeaderWithSender
+      - NODE_NAME=sorter-playtime-1
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./sorter/SorterAvgPlaytime1:/SorterAvgPlaytime
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./sorter/SorterAvgPlaytime1:/SorterAvgPlaytime
     networks:
-    - sa_net
+      - sa_net
   sorter-consolidator-playtime:
     build:
       context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=ConsolidatorSorterPlaytime
-    - NEXT_NODES=Dispatcher
-    - NEXT_HEADERS=HeaderWithQueryNumber
-    - HEADER_TYPE=HeaderWithSender
-    - ENTRY_TYPE=EntryNameAvgPlaytime
-    - SORTER_TYPE=2
-    - TOP_AMOUNT=10
-    - QUERY_NUMBER=2
-    - NODE_NAME=sorter-consolidator-playtime
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=ConsolidatorSorterPlaytime
+      - NEXT_NODES=Dispatcher
+      - NEXT_HEADERS=HeaderWithQueryNumber
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryNameAvgPlaytime
+      - SORTER_TYPE=2
+      - TOP_AMOUNT=10
+      - QUERY_NUMBER=2
+      - NODE_NAME=sorter-consolidator-playtime
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./sorter/ConsolidatorSorterPlaytime:/ConsolidatorSorterPlaytime
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./sorter/ConsolidatorSorterPlaytime:/ConsolidatorSorterPlaytime
     networks:
-    - sa_net
+      - sa_net
   grouper-indie:
     build:
       context: ./grouper
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=GrouperIndie
-    - GROUPER_TYPE=1
-    - NEXT_NODES=JoinerIndie,3,0
-    - HEADER_TYPE=HeaderWithTable
-    - ENTRY_TYPE=EntryAppID
-    - NODE_NAME=grouper-indie
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=GrouperIndie
+      - GROUPER_TYPE=1
+      - NEXT_NODES=JoinerIndie,3,0
+      - HEADER_TYPE=HeaderWithTable
+      - ENTRY_TYPE=EntryAppID
+      - NODE_NAME=grouper-indie
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   joiner-indie-0:
     build:
       context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
-    - LISTENING_QUEUE=JoinerIndie
-    - JOINER_TYPE=0
-    - NEXT_NODES=AggregatorIndie
-    - NEXT_HEADERS=HeaderWithSender
-    - NEXT_ENTRIES=EntryNameReviewCount
-    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
-    - GAMES_ENTRY_TYPE=EntryAppIDName
-    - HEADER_TYPE=HeaderWithTable
-    - NODE_ID=0
-    - NODE_COUNT=3
-    - NODE_NAME=joiner-indie-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=200
+      - LISTENING_QUEUE=JoinerIndie
+      - JOINER_TYPE=0
+      - NEXT_NODES=AggregatorIndie
+      - NEXT_HEADERS=HeaderWithSender
+      - NEXT_ENTRIES=EntryNameReviewCount
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - HEADER_TYPE=HeaderWithTable
+      - NODE_ID=0
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-indie-0
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./joiner/JoinerIndie0:/JoinerIndie
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./joiner/JoinerIndie0:/JoinerIndie
     networks:
-    - sa_net
+      - sa_net
   joiner-indie-1:
     build:
       context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
-    - LISTENING_QUEUE=JoinerIndie
-    - JOINER_TYPE=0
-    - NEXT_NODES=AggregatorIndie
-    - NEXT_HEADERS=HeaderWithSender
-    - NEXT_ENTRIES=EntryNameReviewCount
-    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
-    - GAMES_ENTRY_TYPE=EntryAppIDName
-    - HEADER_TYPE=HeaderWithTable
-    - NODE_ID=1
-    - NODE_COUNT=3
-    - NODE_NAME=joiner-indie-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=200
+      - LISTENING_QUEUE=JoinerIndie
+      - JOINER_TYPE=0
+      - NEXT_NODES=AggregatorIndie
+      - NEXT_HEADERS=HeaderWithSender
+      - NEXT_ENTRIES=EntryNameReviewCount
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - HEADER_TYPE=HeaderWithTable
+      - NODE_ID=1
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-indie-1
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./joiner/JoinerIndie1:/JoinerIndie
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./joiner/JoinerIndie1:/JoinerIndie
     networks:
-    - sa_net
+      - sa_net
   joiner-indie-2:
     build:
       context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
-    - LISTENING_QUEUE=JoinerIndie
-    - JOINER_TYPE=0
-    - NEXT_NODES=AggregatorIndie
-    - NEXT_HEADERS=HeaderWithSender
-    - NEXT_ENTRIES=EntryNameReviewCount
-    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
-    - GAMES_ENTRY_TYPE=EntryAppIDName
-    - HEADER_TYPE=HeaderWithTable
-    - NODE_ID=2
-    - NODE_COUNT=3
-    - NODE_NAME=joiner-indie-2
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=200
+      - LISTENING_QUEUE=JoinerIndie
+      - JOINER_TYPE=0
+      - NEXT_NODES=AggregatorIndie
+      - NEXT_HEADERS=HeaderWithSender
+      - NEXT_ENTRIES=EntryNameReviewCount
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - HEADER_TYPE=HeaderWithTable
+      - NODE_ID=2
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-indie-2
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./joiner/JoinerIndie2:/JoinerIndie
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./joiner/JoinerIndie2:/JoinerIndie
     networks:
-    - sa_net
+      - sa_net
   aggregator-indie:
     build:
       context: ./aggregator
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=AggregatorIndie
-    - NEXT_NODES=SorterIndie,2,1
-    - HEADER_TYPE=HeaderWithSender
-    - ENTRY_TYPE=EntryNameReviewCount
-    - AGGREGATOR_TYPE=2
-    - NODE_NAME=aggregator-indie
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=AggregatorIndie
+      - NEXT_NODES=SorterIndie,2,1
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryNameReviewCount
+      - AGGREGATOR_TYPE=2
+      - NODE_NAME=aggregator-indie
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./aggregator/AggregatorIndie:/AggregatorIndie
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./aggregator/AggregatorIndie:/AggregatorIndie
     networks:
-    - sa_net
+      - sa_net
   sorter-indie-0:
     build:
       context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=SorterIndie
-    - NEXT_NODES=ConsolidatorSorterIndie
-    - NODE_ID=0
-    - HEADER_TYPE=Header
-    - ENTRY_TYPE=EntryNameReviewCount
-    - SORTER_TYPE=1
-    - TOP_AMOUNT=5
-    - NODE_COUNT=2
-    - NEXT_HEADERS=HeaderWithSender
-    - NODE_NAME=sorter-indie-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=SorterIndie
+      - NEXT_NODES=ConsolidatorSorterIndie
+      - NODE_ID=0
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryNameReviewCount
+      - SORTER_TYPE=1
+      - TOP_AMOUNT=5
+      - NODE_COUNT=2
+      - NEXT_HEADERS=HeaderWithSender
+      - NODE_NAME=sorter-indie-0
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./sorter/SorterIndie0:/SorterIndie
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./sorter/SorterIndie0:/SorterIndie
     networks:
-    - sa_net
+      - sa_net
   sorter-indie-1:
     build:
       context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=SorterIndie
-    - NEXT_NODES=ConsolidatorSorterIndie
-    - NODE_ID=1
-    - HEADER_TYPE=Header
-    - ENTRY_TYPE=EntryNameReviewCount
-    - SORTER_TYPE=1
-    - TOP_AMOUNT=5
-    - NODE_COUNT=2
-    - NEXT_HEADERS=HeaderWithSender
-    - NODE_NAME=sorter-indie-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=SorterIndie
+      - NEXT_NODES=ConsolidatorSorterIndie
+      - NODE_ID=1
+      - HEADER_TYPE=Header
+      - ENTRY_TYPE=EntryNameReviewCount
+      - SORTER_TYPE=1
+      - TOP_AMOUNT=5
+      - NODE_COUNT=2
+      - NEXT_HEADERS=HeaderWithSender
+      - NODE_NAME=sorter-indie-1
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./sorter/SorterIndie1:/SorterIndie
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./sorter/SorterIndie1:/SorterIndie
     networks:
-    - sa_net
+      - sa_net
   sorter-consolidator-indie:
     build:
       context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=ConsolidatorSorterIndie
-    - NEXT_NODES=Dispatcher
-    - NEXT_HEADERS=HeaderWithQueryNumber
-    - HEADER_TYPE=HeaderWithSender
-    - ENTRY_TYPE=EntryNameReviewCount
-    - SORTER_TYPE=3
-    - TOP_AMOUNT=5
-    - QUERY_NUMBER=3
-    - NODE_NAME=sorter-consolidator-indie
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=ConsolidatorSorterIndie
+      - NEXT_NODES=Dispatcher
+      - NEXT_HEADERS=HeaderWithQueryNumber
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryNameReviewCount
+      - SORTER_TYPE=3
+      - TOP_AMOUNT=5
+      - QUERY_NUMBER=3
+      - NODE_NAME=sorter-consolidator-indie
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./sorter/ConsolidatorSorterIndie:/ConsolidatorSorterIndie
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./sorter/ConsolidatorSorterIndie:/ConsolidatorSorterIndie
     networks:
-    - sa_net
+      - sa_net
   filterer-action:
     build:
       context: ./filterer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=FilterAction
-    - FILTERER_TYPE=2
-    - NEXT_NODES=JoinerActionEnglish,3,0;JoinerActionPercentile,3,0
-    - NEXT_ENTRIES=EntryAppIDName;EntryAppIDName
-    - HEADER_TYPE=HeaderWithTable
-    - ENTRY_TYPE=EntryAppIDNameGenres
-    - NODE_NAME=filterer-action
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterAction
+      - FILTERER_TYPE=2
+      - NEXT_NODES=JoinerActionEnglish,3,0;JoinerActionPercentile,3,0
+      - NEXT_ENTRIES=EntryAppIDName;EntryAppIDName
+      - HEADER_TYPE=HeaderWithTable
+      - ENTRY_TYPE=EntryAppIDNameGenres
+      - NODE_NAME=filterer-action
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   joiner-english-0:
     build:
       context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
-    - LISTENING_QUEUE=JoinerActionEnglish
-    - JOINER_TYPE=1
-    - NEXT_NODES=FilterEnglish
-    - NEXT_HEADERS=HeaderWithSender
-    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
-    - HEADER_TYPE=HeaderWithTable
-    - GAMES_ENTRY_TYPE=EntryAppIDName
-    - NODE_ID=0
-    - NODE_COUNT=3
-    - NODE_NAME=joiner-english-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=200
+      - LISTENING_QUEUE=JoinerActionEnglish
+      - JOINER_TYPE=1
+      - NEXT_NODES=FilterEnglish
+      - NEXT_HEADERS=HeaderWithSender
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
+      - HEADER_TYPE=HeaderWithTable
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - NODE_ID=0
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-english-0
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./joiner/JoinerActionEnglish0:/JoinerActionEnglish
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./joiner/JoinerActionEnglish0:/JoinerActionEnglish
     networks:
-    - sa_net
+      - sa_net
   joiner-english-1:
     build:
       context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
-    - LISTENING_QUEUE=JoinerActionEnglish
-    - JOINER_TYPE=1
-    - NEXT_NODES=FilterEnglish
-    - NEXT_HEADERS=HeaderWithSender
-    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
-    - HEADER_TYPE=HeaderWithTable
-    - GAMES_ENTRY_TYPE=EntryAppIDName
-    - NODE_ID=1
-    - NODE_COUNT=3
-    - NODE_NAME=joiner-english-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=200
+      - LISTENING_QUEUE=JoinerActionEnglish
+      - JOINER_TYPE=1
+      - NEXT_NODES=FilterEnglish
+      - NEXT_HEADERS=HeaderWithSender
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
+      - HEADER_TYPE=HeaderWithTable
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - NODE_ID=1
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-english-1
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./joiner/JoinerActionEnglish1:/JoinerActionEnglish
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./joiner/JoinerActionEnglish1:/JoinerActionEnglish
     networks:
-    - sa_net
+      - sa_net
   joiner-english-2:
     build:
       context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
-    - LISTENING_QUEUE=JoinerActionEnglish
-    - JOINER_TYPE=1
-    - NEXT_NODES=FilterEnglish
-    - NEXT_HEADERS=HeaderWithSender
-    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
-    - HEADER_TYPE=HeaderWithTable
-    - GAMES_ENTRY_TYPE=EntryAppIDName
-    - NODE_ID=2
-    - NODE_COUNT=3
-    - NODE_NAME=joiner-english-2
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=200
+      - LISTENING_QUEUE=JoinerActionEnglish
+      - JOINER_TYPE=1
+      - NEXT_NODES=FilterEnglish
+      - NEXT_HEADERS=HeaderWithSender
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewText
+      - HEADER_TYPE=HeaderWithTable
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - NODE_ID=2
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-english-2
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./joiner/JoinerActionEnglish2:/JoinerActionEnglish
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./joiner/JoinerActionEnglish2:/JoinerActionEnglish
     networks:
-    - sa_net
+      - sa_net
   filterer-english-0:
     build:
       context: ./filterer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=FilterEnglish
-    - FILTERER_TYPE=3
-    - NEXT_NODES=GrouperActionEnglish
-    - NEXT_ENTRIES=EntryAppIDName
-    - HEADER_TYPE=HeaderWithSender
-    - ENTRY_TYPE=EntryAppIDNameReviewText
-    - NODE_NAME=filterer-english-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-0
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   filterer-english-1:
     build:
       context: ./filterer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=FilterEnglish
-    - FILTERER_TYPE=3
-    - NEXT_NODES=GrouperActionEnglish
-    - NEXT_ENTRIES=EntryAppIDName
-    - HEADER_TYPE=HeaderWithSender
-    - ENTRY_TYPE=EntryAppIDNameReviewText
-    - NODE_NAME=filterer-english-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-1
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   filterer-english-2:
     build:
       context: ./filterer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=FilterEnglish
-    - FILTERER_TYPE=3
-    - NEXT_NODES=GrouperActionEnglish
-    - NEXT_ENTRIES=EntryAppIDName
-    - HEADER_TYPE=HeaderWithSender
-    - ENTRY_TYPE=EntryAppIDNameReviewText
-    - NODE_NAME=filterer-english-2
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-2
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   filterer-english-3:
     build:
       context: ./filterer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=FilterEnglish
-    - FILTERER_TYPE=3
-    - NEXT_NODES=GrouperActionEnglish
-    - NEXT_ENTRIES=EntryAppIDName
-    - HEADER_TYPE=HeaderWithSender
-    - ENTRY_TYPE=EntryAppIDNameReviewText
-    - NODE_NAME=filterer-english-3
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-3
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   filterer-english-4:
     build:
       context: ./filterer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=FilterEnglish
-    - FILTERER_TYPE=3
-    - NEXT_NODES=GrouperActionEnglish
-    - NEXT_ENTRIES=EntryAppIDName
-    - HEADER_TYPE=HeaderWithSender
-    - ENTRY_TYPE=EntryAppIDNameReviewText
-    - NODE_NAME=filterer-english-4
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-4
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   filterer-english-5:
     build:
       context: ./filterer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=FilterEnglish
-    - FILTERER_TYPE=3
-    - NEXT_NODES=GrouperActionEnglish
-    - NEXT_ENTRIES=EntryAppIDName
-    - HEADER_TYPE=HeaderWithSender
-    - ENTRY_TYPE=EntryAppIDNameReviewText
-    - NODE_NAME=filterer-english-5
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-5
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   filterer-english-6:
     build:
       context: ./filterer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=FilterEnglish
-    - FILTERER_TYPE=3
-    - NEXT_NODES=GrouperActionEnglish
-    - NEXT_ENTRIES=EntryAppIDName
-    - HEADER_TYPE=HeaderWithSender
-    - ENTRY_TYPE=EntryAppIDNameReviewText
-    - NODE_NAME=filterer-english-6
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-6
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   filterer-english-7:
     build:
       context: ./filterer
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=FilterEnglish
-    - FILTERER_TYPE=3
-    - NEXT_NODES=GrouperActionEnglish
-    - NEXT_ENTRIES=EntryAppIDName
-    - HEADER_TYPE=HeaderWithSender
-    - ENTRY_TYPE=EntryAppIDNameReviewText
-    - NODE_NAME=filterer-english-7
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=FilterEnglish
+      - FILTERER_TYPE=3
+      - NEXT_NODES=GrouperActionEnglish
+      - NEXT_ENTRIES=EntryAppIDName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewText
+      - NODE_NAME=filterer-english-7
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   grouper-english:
     build:
       context: ./grouper
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=GrouperActionEnglish
-    - GROUPER_TYPE=2
-    - NEXT_NODES=AggregatorEnglish
-    - HEADER_TYPE=HeaderWithSender
-    - ENTRY_TYPE=EntryAppIDName
-    - NODE_NAME=grouper-english
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=GrouperActionEnglish
+      - GROUPER_TYPE=2
+      - NEXT_NODES=AggregatorEnglish
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDName
+      - NODE_NAME=grouper-english
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   aggregator-english:
     build:
       context: ./aggregator
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=AggregatorEnglish
-    - NEXT_NODES=Dispatcher
-    - NEXT_ENTRIES=EntryName
-    - HEADER_TYPE=HeaderWithSender
-    - ENTRY_TYPE=EntryAppIDNameReviewCount
-    - AGGREGATOR_TYPE=1
-    - QUERY_NUMBER=4
-    - REQUIRED_REVIEWS=5000
-    - NODE_NAME=aggregator-english
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=AggregatorEnglish
+      - NEXT_NODES=Dispatcher
+      - NEXT_ENTRIES=EntryName
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewCount
+      - AGGREGATOR_TYPE=1
+      - QUERY_NUMBER=4
+      - REQUIRED_REVIEWS=5000
+      - NODE_NAME=aggregator-english
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./aggregator/AggregatorEnglish:/AggregatorEnglish
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./aggregator/AggregatorEnglish:/AggregatorEnglish
     networks:
-    - sa_net
+      - sa_net
   grouper-percentile:
     build:
       context: ./grouper
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=GrouperActionPercentile
-    - GROUPER_TYPE=1
-    - NEXT_NODES=JoinerActionPercentile,3,0
-    - HEADER_TYPE=HeaderWithTable
-    - ENTRY_TYPE=EntryAppID
-    - NODE_NAME=grouper-percentile
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=GrouperActionPercentile
+      - GROUPER_TYPE=1
+      - NEXT_NODES=JoinerActionPercentile,3,0
+      - HEADER_TYPE=HeaderWithTable
+      - ENTRY_TYPE=EntryAppID
+      - NODE_NAME=grouper-percentile
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
   joiner-percentile-0:
     build:
       context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
-    - LISTENING_QUEUE=JoinerActionPercentile
-    - JOINER_TYPE=0
-    - NEXT_NODES=ConsolidatorSorterPercentile
-    - NEXT_HEADERS=HeaderWithSender
-    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
-    - GAMES_ENTRY_TYPE=EntryAppIDName
-    - HEADER_TYPE=HeaderWithTable
-    - NODE_ID=0
-    - NODE_COUNT=3
-    - NODE_NAME=joiner-percentile-0
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=200
+      - LISTENING_QUEUE=JoinerActionPercentile
+      - JOINER_TYPE=0
+      - NEXT_NODES=ConsolidatorSorterPercentile
+      - NEXT_HEADERS=HeaderWithSender
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - HEADER_TYPE=HeaderWithTable
+      - NODE_ID=0
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-percentile-0
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./joiner/JoinerActionPercentile0:/JoinerActionPercentile
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./joiner/JoinerActionPercentile0:/JoinerActionPercentile
     networks:
-    - sa_net
+      - sa_net
   joiner-percentile-1:
     build:
       context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
-    - LISTENING_QUEUE=JoinerActionPercentile
-    - JOINER_TYPE=0
-    - NEXT_NODES=ConsolidatorSorterPercentile
-    - NEXT_HEADERS=HeaderWithSender
-    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
-    - GAMES_ENTRY_TYPE=EntryAppIDName
-    - HEADER_TYPE=HeaderWithTable
-    - NODE_ID=1
-    - NODE_COUNT=3
-    - NODE_NAME=joiner-percentile-1
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=200
+      - LISTENING_QUEUE=JoinerActionPercentile
+      - JOINER_TYPE=0
+      - NEXT_NODES=ConsolidatorSorterPercentile
+      - NEXT_HEADERS=HeaderWithSender
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - HEADER_TYPE=HeaderWithTable
+      - NODE_ID=1
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-percentile-1
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./joiner/JoinerActionPercentile1:/JoinerActionPercentile
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./joiner/JoinerActionPercentile1:/JoinerActionPercentile
     networks:
-    - sa_net
+      - sa_net
   joiner-percentile-2:
     build:
       context: ./joiner
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
-    - LISTENING_QUEUE=JoinerActionPercentile
-    - JOINER_TYPE=0
-    - NEXT_NODES=ConsolidatorSorterPercentile
-    - NEXT_HEADERS=HeaderWithSender
-    - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
-    - GAMES_ENTRY_TYPE=EntryAppIDName
-    - HEADER_TYPE=HeaderWithTable
-    - NODE_ID=2
-    - NODE_COUNT=3
-    - NODE_NAME=joiner-percentile-2
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=200
+      - LISTENING_QUEUE=JoinerActionPercentile
+      - JOINER_TYPE=0
+      - NEXT_NODES=ConsolidatorSorterPercentile
+      - NEXT_HEADERS=HeaderWithSender
+      - REVIEWS_ENTRY_TYPE=EntryAppIDReviewCount
+      - GAMES_ENTRY_TYPE=EntryAppIDName
+      - HEADER_TYPE=HeaderWithTable
+      - NODE_ID=2
+      - NODE_COUNT=3
+      - NODE_NAME=joiner-percentile-2
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./joiner/JoinerActionPercentile2:/JoinerActionPercentile
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./joiner/JoinerActionPercentile2:/JoinerActionPercentile
     networks:
-    - sa_net
+      - sa_net
   sorter-consolidator-percentile:
     build:
       context: ./sorter
       dockerfile: ../rabbitUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=ConsolidatorSorterPercentile
-    - NEXT_NODES=Dispatcher
-    - HEADER_TYPE=HeaderWithSender
-    - ENTRY_TYPE=EntryAppIDNameReviewCount
-    - SORTER_TYPE=4
-    - PERCENTILE=90
-    - QUERY_NUMBER=5
-    - NEXT_HEADERS=HeaderWithQueryNumber
-    - NODE_NAME=sorter-consolidator-percentile
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=ConsolidatorSorterPercentile
+      - NEXT_NODES=Dispatcher
+      - HEADER_TYPE=HeaderWithSender
+      - ENTRY_TYPE=EntryAppIDNameReviewCount
+      - SORTER_TYPE=4
+      - PERCENTILE=90
+      - QUERY_NUMBER=5
+      - NEXT_HEADERS=HeaderWithQueryNumber
+      - NODE_NAME=sorter-consolidator-percentile
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./packetTracker:/packetTracker
-    - ./statefulNode:/statefulNode
-    - ./eofController:/eofController
-    - ./sorter/ConsolidatorSorterPercentile:/ConsolidatorSorterPercentile
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./packetTracker:/packetTracker
+      - ./statefulNode:/statefulNode
+      - ./eofController:/eofController
+      - ./sorter/ConsolidatorSorterPercentile:/ConsolidatorSorterPercentile
     networks:
-    - sa_net
+      - sa_net
   border-node:
     build:
       context: ./borderNode
       dockerfile: ../zmqUser.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=Dispatcher
-    - NODE_NAME=border-node
-    - STORAGE_PATH=/data/
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - LISTENING_QUEUE=Dispatcher
+      - NODE_NAME=border-node
+      - STORAGE_PATH=/data/
     env_file:
-    - .env
+      - .env
     volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    - ./borderNode/data:/data
+      - ./internalCommunication:/internalCommunication
+      - ./entryParsing:/entryParsing
+      - ./healthcheckAnswerController:/healthcheckAnswerController
+      - ./borderNode/data:/data
     networks:
-    - sa_net
+      - sa_net
   monitor-1:
     build:
       context: ./monitor
       dockerfile: ../monitor.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - ID=1
-    - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
-    - RETRIES=4
-    - TIMER_DURATION=5
-    - CONTAINER_NAME=distribuidos-tp
-    - ELECTION_PORT=9500
-    - MONITOR_COUNT=4
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - ID=1
+      - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
+      - RETRIES=4
+      - TIMER_DURATION=5
+      - CONTAINER_NAME=distribuidos-tp
+      - ELECTION_PORT=9500
+      - MONITOR_COUNT=4
     env_file:
-    - .env
+      - .env
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
     depends_on: &id001
-    - initializer-0
-    - initializer-1
-    - initializer-2
-    - grouper-os-0
-    - grouper-os-1
-    - aggregator-os
-    - filterer-indie
-    - filterer-date
-    - sorter-playtime-0
-    - sorter-playtime-1
-    - sorter-consolidator-playtime
-    - grouper-indie
-    - joiner-indie-0
-    - joiner-indie-1
-    - joiner-indie-2
-    - aggregator-indie
-    - sorter-indie-0
-    - sorter-indie-1
-    - sorter-consolidator-indie
-    - filterer-action
-    - joiner-english-0
-    - joiner-english-1
-    - joiner-english-2
-    - filterer-english-0
-    - filterer-english-1
-    - filterer-english-2
-    - filterer-english-3
-    - filterer-english-4
-    - filterer-english-5
-    - filterer-english-6
-    - filterer-english-7
-    - grouper-english
-    - aggregator-english
-    - grouper-percentile
-    - joiner-percentile-0
-    - joiner-percentile-1
-    - joiner-percentile-2
-    - sorter-consolidator-percentile
-    - border-node
+      - initializer-0
+      - initializer-1
+      - initializer-2
+      - grouper-os-0
+      - grouper-os-1
+      - aggregator-os
+      - filterer-indie
+      - filterer-date
+      - sorter-playtime-0
+      - sorter-playtime-1
+      - sorter-consolidator-playtime
+      - grouper-indie
+      - joiner-indie-0
+      - joiner-indie-1
+      - joiner-indie-2
+      - aggregator-indie
+      - sorter-indie-0
+      - sorter-indie-1
+      - sorter-consolidator-indie
+      - filterer-action
+      - joiner-english-0
+      - joiner-english-1
+      - joiner-english-2
+      - filterer-english-0
+      - filterer-english-1
+      - filterer-english-2
+      - filterer-english-3
+      - filterer-english-4
+      - filterer-english-5
+      - filterer-english-6
+      - filterer-english-7
+      - grouper-english
+      - aggregator-english
+      - grouper-percentile
+      - joiner-percentile-0
+      - joiner-percentile-1
+      - joiner-percentile-2
+      - sorter-consolidator-percentile
+      - border-node
   monitor-2:
     build:
       context: ./monitor
       dockerfile: ../monitor.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - ID=2
-    - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
-    - RETRIES=4
-    - TIMER_DURATION=5
-    - CONTAINER_NAME=distribuidos-tp
-    - ELECTION_PORT=9500
-    - MONITOR_COUNT=4
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - ID=2
+      - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
+      - RETRIES=4
+      - TIMER_DURATION=5
+      - CONTAINER_NAME=distribuidos-tp
+      - ELECTION_PORT=9500
+      - MONITOR_COUNT=4
     env_file:
-    - .env
+      - .env
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
     depends_on: *id001
   monitor-3:
     build:
       context: ./monitor
       dockerfile: ../monitor.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - ID=3
-    - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
-    - RETRIES=4
-    - TIMER_DURATION=5
-    - CONTAINER_NAME=distribuidos-tp
-    - ELECTION_PORT=9500
-    - MONITOR_COUNT=4
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - ID=3
+      - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
+      - RETRIES=4
+      - TIMER_DURATION=5
+      - CONTAINER_NAME=distribuidos-tp
+      - ELECTION_PORT=9500
+      - MONITOR_COUNT=4
     env_file:
-    - .env
+      - .env
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
     depends_on: *id001
   monitor-4:
     build:
       context: ./monitor
       dockerfile: ../monitor.Dockerfile
     environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - ID=4
-    - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
-    - RETRIES=4
-    - TIMER_DURATION=5
-    - CONTAINER_NAME=distribuidos-tp
-    - ELECTION_PORT=9500
-    - MONITOR_COUNT=4
+      - PYTHONUNBUFFERED=1
+      - PREFETCH_COUNT=1
+      - ID=4
+      - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
+      - RETRIES=4
+      - TIMER_DURATION=5
+      - CONTAINER_NAME=distribuidos-tp
+      - ELECTION_PORT=9500
+      - MONITOR_COUNT=4
     env_file:
-    - .env
+      - .env
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./healthcheckAnswerController:/healthcheckAnswerController
     networks:
-    - sa_net
+      - sa_net
     depends_on: *id001
 networks:
   sa_net:
     ipam:
       driver: default
       config:
-      - subnet: 172.25.125.0/24
+        - subnet: 172.25.125.0/24
