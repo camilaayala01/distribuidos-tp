@@ -6,8 +6,8 @@ services:
     environment:
     - PYTHONUNBUFFERED=1
     - MAX_DATA_BYTES=51200
-    - REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv
-    - GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv
+    - REVIEWS_STORAGE_FILEPATH=./datasets/dataset.csv
+    - GAMES_STORAGE_FILEPATH=./datasets/games.csv
     - AMOUNT_OF_EXECUTIONS=1
     volumes:
     - ./entryParsing:/entryParsing

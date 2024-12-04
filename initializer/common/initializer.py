@@ -9,7 +9,7 @@ import os
 
 from internalCommunication.internalMessageType import InternalMessageType
 
-PRINT_FREQUENCY = 300
+PRINT_FREQUENCY = 1000
 
 class Initializer:
     def __init__(self): 

@@ -7,7 +7,6 @@ import uuid
 from entryParsing.common.utils import getGamesEntryTypeFromEnv, getHeaderTypeFromEnv, getReviewsEntryTypeFromEnv, nextRow
 from entryParsing.messagePart import MessagePartInterface
 from eofController.eofController import EofController
-from internalCommunication.internalMessageType import InternalMessageType
 from packetTracker.defaultTracker import DefaultTracker
 from statefulNode.statefulNode import StatefulNode
 from .accumulatedBatches import AccumulatedBatches
@@ -64,16 +63,20 @@ class Joiner(StatefulNode):
             gamesTracker, reviewsTracker = DefaultTracker(), DefaultTracker()
             
             if path + '/games.csv' in filepaths:
-                gamesTracker = self.loadTrackerFromFile(path + '/games.csv')                
+                print(f"loading games from storage {clientUUID}")
+                gamesTracker = self.loadTrackerFromFile(path + '/games.csv')  
+                print(gamesTracker)              
                 filepaths.remove(path + '/games.csv')
             
             if path + '/joined.csv' in filepaths:
                 print("loading joined from storage")
                 reviewsTracker = self.loadTrackerFromFile(path + '/joined.csv')
+                print(reviewsTracker) 
                 filepaths.remove(path + '/joined.csv')
             elif path + '/reviews.csv' in filepaths:
                 print("loading reviews from storage")
                 reviewsTracker = self.loadTrackerFromFile(path + '/reviews.csv')
+                print(reviewsTracker) 
                 filepaths.remove(path + '/reviews.csv')
                     
             self._activeClients[clientUUID.bytes] = self.createClient(clientUUID, gamesTracker, reviewsTracker)
@@ -194,7 +197,8 @@ class Joiner(StatefulNode):
             self.setNewClient(clientId)
 
         self._currentClient.updateTracker(header)
-
+        if header.isGamesTable() and self._currentClient.isGamesDone():
+            print(f"just finished processing all games for {header.getClient()}")
         if not self.shouldProcessAccumulated():
             self._activeClients[self._currentClient.getClientIdBytes()] = self._currentClient
             return

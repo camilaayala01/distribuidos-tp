@@ -14,7 +14,7 @@ from internalCommunication.internalMessageType import InternalMessageType
 from packetTracker.tracker import TrackerInterface
 
 PRINT_FREQUENCY = 1000
-DELETE_TIMEOUT = 10
+DELETE_TIMEOUT = 20
 
 class StatefulNode(ABC):
     def __init__(self):
@@ -99,7 +99,6 @@ class StatefulNode(ABC):
         self.deleteAccumulated(clientToRemove)
         if clientToRemove in self._activeClients:
             client = self._activeClients.pop(clientToRemove)
-            print(f"deleting {client._clientId}")
             client.destroy()
             
         self.handleFlushQueuingAndPropagation(clientToRemove, tag, channel, propagate)
