@@ -1023,8 +1023,8 @@ services:
     - PREFETCH_COUNT=1
     - ID=1
     - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
-    - RETRIES=3
-    - TIMER_DURATION=1
+    - RETRIES=4
+    - TIMER_DURATION=5
     - CONTAINER_NAME=distribuidos-tp
     - ELECTION_PORT=9500
     - MONITOR_COUNT=4
@@ -1084,8 +1084,8 @@ services:
     - PREFETCH_COUNT=1
     - ID=2
     - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
-    - RETRIES=3
-    - TIMER_DURATION=1
+    - RETRIES=4
+    - TIMER_DURATION=5
     - CONTAINER_NAME=distribuidos-tp
     - ELECTION_PORT=9500
     - MONITOR_COUNT=4
@@ -1106,8 +1106,8 @@ services:
     - PREFETCH_COUNT=1
     - ID=3
     - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
-    - RETRIES=3
-    - TIMER_DURATION=1
+    - RETRIES=4
+    - TIMER_DURATION=5
     - CONTAINER_NAME=distribuidos-tp
     - ELECTION_PORT=9500
     - MONITOR_COUNT=4
@@ -1128,8 +1128,8 @@ services:
     - PREFETCH_COUNT=1
     - ID=4
     - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
-    - RETRIES=3
-    - TIMER_DURATION=1
+    - RETRIES=4
+    - TIMER_DURATION=5
     - CONTAINER_NAME=distribuidos-tp
     - ELECTION_PORT=9500
     - MONITOR_COUNT=4

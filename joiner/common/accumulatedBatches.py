@@ -15,7 +15,7 @@ class AccumulatedBatches:
         return self._pendingTags
     
     """
-    returns true if could accumulate (same client same table),
+    returns true if could accumulate (same client),
     false if it should already process this entries and begin a new
     accumulator
     """

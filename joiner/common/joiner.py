@@ -68,9 +68,11 @@ class Joiner(StatefulNode):
                 filepaths.remove(path + '/games.csv')
             
             if path + '/joined.csv' in filepaths:
+                print("loading joined from storage")
                 reviewsTracker = self.loadTrackerFromFile(path + '/joined.csv')
                 filepaths.remove(path + '/joined.csv')
             elif path + '/reviews.csv' in filepaths:
+                print("loading reviews from storage")
                 reviewsTracker = self.loadTrackerFromFile(path + '/reviews.csv')
                 filepaths.remove(path + '/reviews.csv')
                     
@@ -112,13 +114,13 @@ class Joiner(StatefulNode):
                     joinedEntries[id] = self._joinerType.applyJoining(id, name, priorJoined, review)
         
         self._currentClient.storeJoinedEntries(self._joinerType.entriesToSave(joinedEntries), self._joinerType.joinedEntryType())
+        # print(f"stored tracker {self._currentClient._reviewsTracker}")
         return joinedEntries
         
     def handleReviewsMessage(self, data: bytes):
         reviews = self._reviewsEntry.deserialize(data)
         if not self._currentClient.isGamesDone():
-            if reviews:
-                self._currentClient.storeUnjoinedReviews(reviews)
+            self._currentClient.storeUnjoinedReviews(reviews)
             return
         return self.joinReviews(reviews) 
 
@@ -167,7 +169,7 @@ class Joiner(StatefulNode):
             self._currentClient.removeUnjoinedReviews() 
 
         toAck = self._accumulatedBatches.toAck()
-        self._activeClients[self._accumulatedBatches._clientId] = self._currentClient
+        self._activeClients[self._currentClient.getClientIdBytes()] = self._currentClient
         self._accumulatedBatches = None
         return toAck
     
@@ -191,7 +193,7 @@ class Joiner(StatefulNode):
         self._currentClient.updateTracker(header)
 
         if not self.shouldProcessAccumulated():
-            self._activeClients[self._accumulatedBatches.getClient()] = self._currentClient
+            self._activeClients[self._currentClient.getClientIdBytes()] = self._currentClient
             return
 
         self._internalCommunication.ackAll(self.processPendingBatches())
