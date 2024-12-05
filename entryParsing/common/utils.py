@@ -3,7 +3,7 @@ import importlib
 import logging
 import hashlib
 
-MAX_PACKET_SIZE = 8192
+MAX_PACKET_SIZE = 16384
 
 def initializeLog():
     """

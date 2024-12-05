@@ -14,7 +14,7 @@ services:
       - TIMEOUT=2000
     volumes:
       - ./entryParsing:/entryParsing
-      - ~/.kaggle/distribuidos:/datasets
+      - /home/camila/.kaggle/distribuidos/reducido:/datasets
       - ./client-1/responses:/responses
     networks:
       - sa_net
@@ -35,7 +35,7 @@ services:
       - TIMEOUT=2000
     volumes:
       - ./entryParsing:/entryParsing
-      - ~/.kaggle/distribuidos:/datasets
+      - /home/camila/.kaggle/distribuidos/reducido:/datasets
       - ./client-2/responses:/responses
     networks:
       - sa_net

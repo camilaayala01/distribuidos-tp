@@ -1,6 +1,7 @@
 import csv
 import logging
 import uuid
+from entryParsing.common.fieldLen import CLIENT_ID_LEN
 from entryParsing.headerInterface import HeaderInterface
 from entryParsing.reducedGameEntry import ReducedGameEntry
 from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
@@ -132,6 +133,10 @@ class Initializer:
         else:
             raise ValueError("Table is not one of the two allowed tables")
         
+        if accumulatedBatches.clientIsDone():
+            self._accumulatedBatchesByID.pop(accumulatedBatches.getClient()).destroy()
+            return 
+            
         self._accumulatedBatchesByID[header.getClient()] = accumulatedBatches
         if not self.reachedCapacity():
             return
@@ -142,17 +147,27 @@ class Initializer:
         accumulatedBatches.storeMetadata()
         self._internalCommunication.ackAll(accumulatedBatches.consumePacketsToAck())
         self._accumulatedBatchesByID[header.getClient()] = accumulatedBatches
+    
+    def handleClientFlush(self, clientToRemove):
+        # only to games receivers, as they all end up in the same place -> a joiner
+        for strategy in self._gamesSendingStrategies:
+            strategy.sendFlush(middleware=self._internalCommunication, clientId=clientToRemove)
 
+        accumulatedBatches = self._accumulatedBatchesByID.pop(clientToRemove, None)
+        if accumulatedBatches is None:
+            return
+        self._internalCommunication.ackAll(accumulatedBatches.consumePacketsToAck())
+        accumulatedBatches.destroy()
+        
+        
     def handleMessage(self, ch, method, _properties, body):
         msgType, msg = InternalMessageType.deserialize(body)
         match msgType:
             case InternalMessageType.DATA_TRANSFER:
                 self.handleDataMessage(msg, method.delivery_tag)
             case InternalMessageType.CLIENT_FLUSH:
-                # only to games receivers, as they all end up in the same place -> a joiner
-                for strategy in self._gamesSendingStrategies:
-                    strategy.sendFlush(middleware=self._internalCommunication, clientId=msg)
-                ch.basic_ack(delivery_tag = method.delivery_tag)
+                self.handleClientFlush(msg[:CLIENT_ID_LEN])
+                ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)
