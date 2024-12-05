@@ -1,41 +1,31 @@
 # distribuidos-tp
 Trabajo Practico para la materia Sistemas Distribuidos (7574). 
-
-La primera vez correr: base-images/build.sh
-
-## Ejecución de los tests
-Para ejecutar los tests unitarios creados para todos los módulos, correr el comando:
-```
-./run-test.sh
-```
-Si recibe un warning que dice `bash: ./run-test.sh: Permission denied`, probablemente sea porque no tiene permisos de ejecución sobre el script. Para otorgarse estos permisos, debe correr:
-```
-chmod +x run-test.sh
-```
-y luego volver a correr el script
-
-# Descargar datasets 
+Integrantes: Noah Masri 108814, Tomas Danko 107431, Camila Ayala 107440
+# Descarga de datasets
+## Configurar cuenta kaggle
 ```
 pip install --user kaggle
 mkdir ~/.kaggle
 cd ~/.kaggle
 touch kaggle.json
 echo "{"username":"camilaayala01","key":"1a21e47d2d693e4ab96853cad6149bd3"}" > kaggle.json
-kaggle datasets download -d fronkongames/steam-games-dataset
-kaggle datasets download -d andrewmvd/steam-reviews
 mkdir distribuidos
-mv ./steam-games-dataset.zip ./distribuidos ; mv ./steam-reviews.zip ./distribuidos
+```
+## Descargar datasets completos
+```
+kaggle datasets download -d camilaayala01/queries-responses
+mv ./queries-responses.zip ./distribuidos
 cd distribuidos
-unzip steam-games-dataset.zip ; unzip steam-reviews.zip
-rm games.json ; rm steam-games-dataset.zip ; rm steam-reviews.zip
-
+unzip queries-responses.zip
 ```
-# Reducir datasets
+## Descargar datasets reducidos
 ```
-head -n 100 games.csv > games-reducido.csv
-head -n 10000 dataset.csv > reviews-reducido.csv
+kaggle datasets download -d camilaayala01/distribuidos-tp
+mkdir distribuidos/reducido
+mv ./distribuidos-tp.zip ./distribuidos/reducido
+cd distribuidos/reducido
+unzip distribuidos-tp.zip
 ```
-
 # Ejecución
 ## Prerequisites
 Se debe contar con la imagen base. Para descargar esta, se debe correr desde el root
@@ -63,7 +53,28 @@ Una vez que este está prendido, ahora sí se debe correr a las otras querys, ej
 Cuando se desee que se frene la ejecución, se debe correr:
 * Para cortar rabbit: `./stop-rabbit.sh`
 * Para cortar los nodos y el cliente: `./stop.sh`
+## Multiples ejecuciones de un cliente
+Una vez generado en compose se puede apreciar que cada cliente tiene una variable de entorno `AMOUNT_OF_EXECUTIONS` mediante la cual se puede configurar cuantas veces el cliente se ejecuta 
+## Correr con distintos dataset
+En el compose en el cliente se tiene tambien las variable de entorno `REVIEWS_STORAGE_FILEPATH` y `GAMES_STORAGE_FILEPATH` en las cuales se puede configurar respectivamente sobre que dataset se ejecutara el programa. 
+En caso de querer correrlo con el dataset completo el valor seria:
 
+```
+    REVIEWS_STORAGE_FILEPATH=./datasets/reviews.csv
+    GAMES_STORAGE_FILEPATH=./datasets/games.csv
+```
+
+y de querer correrlo con el reducido seria:
+
+```
+    REVIEWS_STORAGE_FILEPATH=./datasets/reducido/reviews-reducido.csv
+    GAMES_STORAGE_FILEPATH=./datasets/reducido/games-reducido.csv
+```
+# Para borrar las carpetas
+Si se quierer borrar las carpetas correspondientes a los volumenes se puede ejecutar el siguiente script:
+```
+sudo delete-files.sh
+```
 # Correr script para testear el programa
 Para correr este script, se debe correr el comando 
 ```
@@ -71,9 +82,15 @@ Para correr este script, se debe correr el comando
 ```
 En particular, está configurado para correrlo como
 ```
-./comparison.sh client/expectedResponses client/responses
+./comparison.sh ~/.kaggle/distribuidos client/exec{exec-number}/responses
+```
+
+o en caso de ser el reducido seria
+```
+./comparison.sh ~/.kaggle/distribuidos/reducido client/exec{exec-number}/responses
 ```
 pero pueden ubicar los archivos en donde deseen
+
 
 ## Como interpretar los resultados de las querys 4 y 5
 Si se obtiene un mensaje como
@@ -98,4 +115,5 @@ Por último, el mensaje
 < Viejo contenido
 ```
 implica que al contenido del archivo original se le eliminó una línea.
+
 

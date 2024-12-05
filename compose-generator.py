@@ -10,6 +10,8 @@ from joiner.common.joinerTypes import JoinerType
 from sorter.common.sorterTypes import SorterType
 load_dotenv('compose.env')
 
+
+
 def add_to_list(list, new_list):
     list.extend(new_list)
     return list
@@ -25,7 +27,10 @@ def add_client_with_id(compose: dict[str, Any], client_id: int):
             'MAX_DATA_BYTES=51200',
             'REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv',
             'GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv',
-            'AMOUNT_OF_EXECUTIONS=1'
+            'AMOUNT_OF_EXECUTIONS=1',
+            f'BORDER_NODE_ADDR=tcp://border-node:{os.getenv("CLIENT_PORT")}',
+            'MAX_TIMEOUTS=10',
+            'TIMEOUT=2000'
         ],
         'volumes':[
             './entryParsing:/entryParsing',
@@ -211,7 +216,11 @@ def add_border_node(compose: dict[str, Any]):
             'context': './borderNode',
             'dockerfile': '../zmqUser.Dockerfile'
         },
-        'environment': default_environment(os.getenv("DISP")) +  ['NODE_NAME=border-node','STORAGE_PATH=/data/'],
+        'environment': default_environment(os.getenv("DISP")) +
+          ['NODE_NAME=border-node',
+           'STORAGE_PATH=/data/', 
+           f'CLIENT_PORT={os.getenv("CLIENT_PORT")}',
+           ],
         'env_file': default_env_file(),
         'volumes': default_volumes() + ['./borderNode/data:/data'],
         'networks': default_network()
