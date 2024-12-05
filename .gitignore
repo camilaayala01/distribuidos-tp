@@ -1,6 +1,4 @@
 **/__pycache__/
-mockProducer
-mockJoiner
 initializer/clients
 client/responses
 client-[0-9]*/
@@ -10,3 +8,4 @@ sorter/Sorter*
 aggregator/Aggregator*
 joiner/Joiner*
 borderNode/data*
+docker-compose-cami.yaml

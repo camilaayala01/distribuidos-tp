@@ -30,7 +30,14 @@ class AccumulatedBatches:
                 return self._gamesTracker.isDuplicate(header)
             case Table.REVIEWS:
                 return self._reviewsTracker.isDuplicate(header)
-    
+                
+    def clientIsDone(self):
+        return self._gamesTracker.isDone() and self._reviewsTracker.isDone()
+
+    def destroy(self):
+        if os.path.exists(self._path + '.csv'):
+            os.remove(self._path + '.csv')
+
     def packetsToAck(self):
         return self._gamesPendingTags + self._reviewsPendingTags
     
