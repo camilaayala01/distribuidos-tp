@@ -2,7 +2,6 @@ import zmq
 from entryParsing.common.utils import initializeLog
 from threading import Lock
 import os
-PRINT_FREQUENCY = 1000
 
 class BorderNodeCommunication:
     def __init__(self):
