@@ -1,5 +1,7 @@
 import csv
 import logging
+import uuid
+from entryParsing.headerInterface import HeaderInterface
 from entryParsing.reducedGameEntry import ReducedGameEntry
 from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 from packetTracker.defaultTracker import DefaultTracker
@@ -13,6 +15,7 @@ import os
 from internalCommunication.internalMessageType import InternalMessageType
 
 PRINT_FREQUENCY = 1000
+PREFETCH_COUNT = int(os.getenv('PREFETCH_COUNT'))
 
 class Initializer:
     def __init__(self): 
@@ -27,6 +30,22 @@ class Initializer:
         self._healthcheckAnswerController = HealthcheckAnswerController()
         self._healthcheckAnswerController.execute()
         self._accumulatedBatchesByID = {}     
+        os.makedirs(f"/{os.getenv('STORAGE')}/", exist_ok=True)
+
+    def loadStatesFromDisk(self):
+        dataDirectory = f"/{os.getenv('STORAGE')}/"
+        if not os.path.exists(dataDirectory) or not os.path.isdir(dataDirectory):
+            return
+        for filename in os.listdir(dataDirectory):
+            path = os.path.join(dataDirectory, filename)
+            if not os.path.isfile(path): 
+                continue
+
+            if path.endswith('.csv'):
+                accumulatedBatches = AccumulatedBatches.loadFromStorage(filename)
+                self._accumulatedBatchesByID[accumulatedBatches.getClient()] = accumulatedBatches
+            else:
+                os.remove(path)
 
     def stop(self, _signum, _frame):
         self._internalCommunication.stop()
@@ -49,75 +68,84 @@ class Initializer:
             reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
             packetTrackerRow = nextRow(reader)
         return self.createTrackerFromRow(packetTrackerRow)
-    
-    def loadActiveClientsFromDisk(self):
-        dataDirectory = f"/{os.getenv('LISTENING_QUEUE')}/"
-        if not os.path.exists(dataDirectory) or not os.path.isdir(dataDirectory):
+
+    def reachedCapacity(self):
+        return sum(batches.accumulatedLen() for batches in self._accumulatedBatchesByID.values()) >= PREFETCH_COUNT
+
+    def handleGames(self, accumulatedBatches: AccumulatedBatches, tag: int, header: HeaderInterface, data: bytes):
+        gameEntries = self._gamesEntry.deserialize(data)
+        accumulatedBatches.accumulateGames(tag, gameEntries, header)
+        if accumulatedBatches.shouldSendGames():
+            self.sendGames(accumulatedBatches)
+            print("sent games")
+            return True
+        return False
+
+    def sendGames(self, accumulatedBatches):
+        if not accumulatedBatches.gamesToAck():
             return
-        
-        for dirname in os.listdir(dataDirectory):
-            path = os.path.join(dataDirectory, dirname)
-            
-            filepaths = {os.path.join(path, filename) for filename in os.listdir(path)}
-            clientUUID = uuid.UUID(dirname)
-            tracker = DefaultTracker()
-            
-            if path + '/games.csv' in filepaths:
-                print(f"loading games from storage {clientUUID}")
-                gamesTracker = self.loadTrackerFromFile(path + '/games.csv')  
-                print(gamesTracker)              
-                filepaths.remove(path + '/games.csv')
-            
-            if path + '/joined.csv' in filepaths:
-                print("loading joined from storage")
-                reviewsTracker = self.loadTrackerFromFile(path + '/joined.csv')
-                print(reviewsTracker) 
-                filepaths.remove(path + '/joined.csv')
-            elif path + '/reviews.csv' in filepaths:
-                print("loading reviews from storage")
-                reviewsTracker = self.loadTrackerFromFile(path + '/reviews.csv')
-                print(reviewsTracker) 
-                filepaths.remove(path + '/reviews.csv')
-                    
-            self._activeClients[clientUUID.bytes] = self.createClient(clientUUID, gamesTracker, reviewsTracker)
-            for filepath in filepaths:
-                os.remove(filepath)
+        header, gameEntries = accumulatedBatches.getGames()
+        for _, strategy in enumerate(self._gamesSendingStrategies):
+            strategy.sendData(self._internalCommunication, header, gameEntries)
+        accumulatedBatches.resetAccumulatedGames()
+        print("resetted games")
+
+    def handleReviews(self, accumulatedBatches: AccumulatedBatches, tag: int, header: HeaderInterface, data: bytes):
+        reviewEntries = self._reviewsEntry.deserialize(data)
+        positiveReviewEntries, negativeReviewEntries = self.separatePositiveAndNegative(reviewEntries)
+        accumulatedBatches.accumulateReviews(tag, positiveReviewEntries, negativeReviewEntries, header)
+        if accumulatedBatches.shouldSendReviews():
+            self.sendReviews(accumulatedBatches)
+            print("sent reviews")
+            return True
+        return False
+    
+    def sendReviews(self, accumulatedBatches):
+        if not accumulatedBatches.reviewsToAck():
+            return
+        header, positiveReviewEntries, negativeReviewEntries = accumulatedBatches.getReviews()
+        toSend = [positiveReviewEntries, negativeReviewEntries, negativeReviewEntries]
+        for index, strategy in enumerate(self._reviewsSendingStrategies):
+            strategy.sendData(self._internalCommunication, header, toSend[index])
+        accumulatedBatches.resetAccumulatedReviews()
+        print("resetted reviews")
 
     def handleDataMessage(self, body, tag):
         header, data = self._headerType.deserialize(body)
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0 or header.getFragmentNumber() == 1:
             logging.info(f'action: received msg corresponding to table {header.getTable()} | {header}')
 
-        if header.getFragmentNumber() == 1:
-            self._accumulatedBatchesByID[header.getClient()] = AccumulatedBatches()
+        accumulatedBatches = self._accumulatedBatchesByID.setdefault(header.getClient(), AccumulatedBatches(clientId=header.getClient()))
 
-        accumulatedBatches = self._accumulatedBatchesByID[header.getClient()]
-
+        if accumulatedBatches.isPacketDuplicate(header):
+            self._internalCommunication.ackAll([tag])
+            return
+        
         if header.isGamesTable():
-            gameEntries = self._gamesEntry.deserialize(data)
-            accumulatedBatches.accumulateGames(tag, gameEntries, header.isEOF())
-            if accumulatedBatches.shouldSend():
-                gameEntries = accumulatedBatches.getGames()
-                header._fragment = accumulatedBatches.getFragment()
-                for index, strategy in enumerate(self._gamesSendingStrategies):
-                    strategy.sendData(self._internalCommunication, header, gameEntries)
-                accumulatedBatches.resetAccumulatedGames()
-                self._internalCommunication.ackAll(accumulatedBatches.toAck())
+            sentGames = self.handleGames(accumulatedBatches, tag, header, data)
+            accumulatedBatches.storeMetadata()
+            if sentGames:
+                self._internalCommunication.ackAll(accumulatedBatches.consumeGamesToAck())
         elif header.isReviewsTable():
-            reviewEntries = self._reviewsEntry.deserialize(data)
-            positiveReviewEntries, negativeReviewEntries = self.separatePositiveAndNegative(reviewEntries)
-            accumulatedBatches.accumulateReviews(tag, positiveReviewEntries, negativeReviewEntries, header.isEOF())
-            if accumulatedBatches.shouldSend():
-                positiveReviewEntries, negativeReviewEntries = accumulatedBatches.getReviews()
-                header._fragment = accumulatedBatches.getFragment()
-                toSend = [positiveReviewEntries, negativeReviewEntries, negativeReviewEntries]
-                for index, strategy in enumerate(self._reviewsSendingStrategies):
-                    strategy.sendData(self._internalCommunication, header, toSend[index])
-                accumulatedBatches.resetAccumulatedReviews()
-                self._internalCommunication.ackAll(accumulatedBatches.toAck())
+            sentReviews = self.handleReviews(accumulatedBatches, tag, header, data)
+            accumulatedBatches.storeMetadata()
+            if sentReviews:
+                self._internalCommunication.ackAll(accumulatedBatches.consumeReviewsToAck())
         else:
             raise ValueError("Table is not one of the two allowed tables")
         
+        self._accumulatedBatchesByID[header.getClient()] = accumulatedBatches
+        if not self.reachedCapacity():
+            return
+
+        self.sendGames(accumulatedBatches)
+        self.sendReviews(accumulatedBatches)
+        accumulatedBatches.storeMetadata()
+        toack = accumulatedBatches.consumePacketsToAck()
+        print(toack)
+        self._internalCommunication.ackAll(toack)
+        self._accumulatedBatchesByID[header.getClient()] = accumulatedBatches
+
     def handleMessage(self, ch, method, _properties, body):
         msgType, msg = InternalMessageType.deserialize(body)
         match msgType:
@@ -127,7 +155,7 @@ class Initializer:
                 # only to games receivers, as they all end up in the same place -> a joiner
                 for strategy in self._gamesSendingStrategies:
                     strategy.sendFlush(middleware=self._internalCommunication, clientId=msg)
-        ch.basic_ack(delivery_tag = method.delivery_tag)
+                ch.basic_ack(delivery_tag = method.delivery_tag)
 
     def execute(self):
         self._internalCommunication.defineMessageHandler(self.handleMessage)

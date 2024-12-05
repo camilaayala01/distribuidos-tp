@@ -126,17 +126,22 @@ def default_config_with_tracker(compose: dict[str, Any], container_name, entrypo
 
 def add_initializer(compose: dict[str, Any], id):
     container_name = f'initializer-{id}' 
-    compose = default_config(compose, container_name, './initializer', os.getenv('INIT'),
+    compose = default_config(compose, container_name, './initializer', os.getenv('INIT'), 40,
                              header_type='HeaderWithTable',
                              games_next_nodes=f'{os.getenv("GROUP_OS")};{os.getenv("FILT_INDIE")};{os.getenv("FILT_ACT")}',
                              games_next_entries='EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres',
                              games_next_headers='Header;;',
                              reviews_next_nodes=f'{os.getenv("GROUP_INDIE")};{os.getenv("JOIN_ACT")},{os.getenv("JOIN_ACT_COUNT")},{ShardingAttribute.APP_ID.value};{os.getenv("GROUP_PERC")}',
-                             reviews_next_entries='EntryAppID;EntryAppIDReviewText;EntryAppID')
+                             reviews_next_entries='EntryAppID;EntryAppIDReviewText;EntryAppID',
+                             storage='clients')
+    
+    compose['services'][container_name]['volumes'].extend([
+        './packetTracker:/packetTracker',
+        './initializer/clients:/clients',       
+    ])
     return compose, container_name
 
 def add_initializers(compose: dict[str, Any]):
-    count = int(os.getenv('INIT_COUNT'))
     containers = []
     for i in range(0, 1):
         compose, new_container = add_initializer(compose, i)
@@ -414,7 +419,7 @@ def add_monitor(compose: dict[str, Any], cluster_nodes: list[str], id, monitors_
             f'ID={id}',
             f'TO_CHECK={";".join(cluster_nodes)}',
             'RETRIES=3',
-            'TIMER_DURATION=2',
+            'TIMER_DURATION=5',
             'CONTAINER_NAME=distribuidos-tp',
             'ELECTION_PORT=9500',
             f'MONITOR_COUNT={monitors_amount}',

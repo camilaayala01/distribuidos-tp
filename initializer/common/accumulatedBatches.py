@@ -1,95 +1,140 @@
 import csv
 import os
 import uuid
-from entryParsing.headerInterface import HeaderInterface
+from entryParsing.common.fieldParsing import getClientIdUUID
+from entryParsing.common.utils import nextRow
+from entryParsing.headerInterface import HeaderInterface, HeaderWithTable
 from entryParsing.common.table import Table
 from packetTracker.defaultTracker import DefaultTracker
 
 MAX_ENTRIES = 300
 
 class AccumulatedBatches:
-    def __init__(self, clientId):
-        self._pendingTags = []
+    def __init__(self, clientId: bytes, gamesTracker = DefaultTracker(), gamesFragment = 1, reviewsTracker = DefaultTracker(), reviewsFragment = 1):
+        self._gamesPendingTags = []
+        self._reviewsPendingTags = []
         self._accumulatedGames = []
         self._accumulatedPositiveReviews = []
         self._accumulatedNegativeReviews = []
-        self._fragment = 1
-        self._eof = False
-        self._packetTracker = DefaultTracker()
+        self._gamesFragment = gamesFragment
+        self._reviewsFragment = reviewsFragment
+        self._gamesTracker = gamesTracker
+        self._reviewsTracker = reviewsTracker
         self._clientId = clientId
-        self._path = f"/{os.getenv('LISTENING_QUEUE')}/{self._clientId}/"
+        self._path = f"/{os.getenv('STORAGE')}/{getClientIdUUID(self._clientId)}"
 
-    def accumulatedLen(self):
-        return len(self._pendingTags)
-
-    def toAck(self):
-        self._pendingTags = []
-        return self._pendingTags
+    def isPacketDuplicate(self, header: HeaderWithTable):
+        match header.getTable():
+            case Table.GAMES:
+                return self._gamesTracker.isDuplicate(header)
+            case Table.REVIEWS:
+                return self._reviewsTracker.isDuplicate(header)
     
-    """
-    returns true if could accumulate (same client),
-    false if it should already process this entries and begin a new
-    accumulator
-    """
-    def accumulateGames(self, tag, batch, eof, header):
-        self._packetTracker.update(header)
+    def packetsToAck(self):
+        return self._gamesPendingTags + self._reviewsPendingTags
+    
+    def accumulatedLen(self):
+        return len(self._gamesPendingTags) + len(self._reviewsPendingTags)
+
+    def gamesToAck(self):
+        return self._gamesPendingTags
+    
+    def reviewsToAck(self):
+        return self._reviewsPendingTags
+    
+    def consumeGamesToAck(self):
+        tags = self._gamesPendingTags
+        self._gamesPendingTags = []
+        return tags
+    
+    def consumeReviewsToAck(self):
+        tags = self._reviewsPendingTags
+        self._reviewsPendingTags = []
+        return tags
+    
+    def consumePacketsToAck(self):
+        return self.consumeGamesToAck() + self.consumeReviewsToAck()
+    
+    def accumulateGames(self, tag, batch, header):
+        self._gamesTracker.update(header)
         self._accumulatedGames += batch
-        self._pendingTags.append(tag)
-        self._eof = eof
+        self._gamesPendingTags.append(tag)
 
     def getGames(self):
-        return self._accumulatedGames
+        return HeaderWithTable(self._clientId, self._gamesFragment, self._gamesTracker.isDone(), Table.GAMES),\
+                self._accumulatedGames
 
-    def accumulateReviews(self, tag, positive, negative, eof, header):
-        self._packetTracker.update(header)
+    def accumulateReviews(self, tag, positive, negative, header):
+        self._reviewsTracker.update(header)
         self._accumulatedPositiveReviews += positive
         self._accumulatedNegativeReviews += negative
-        self._pendingTags.append(tag)
-        self._eof = eof
+        self._reviewsPendingTags.append(tag)
     
     def getReviews(self):
-        return (self._accumulatedPositiveReviews, self._accumulatedNegativeReviews)
+        return HeaderWithTable(self._clientId, self._reviewsFragment, self._reviewsTracker.isDone(), Table.REVIEWS),\
+                self._accumulatedPositiveReviews,\
+                self._accumulatedNegativeReviews
 
-    def shouldSend(self) -> bool:
-        return MAX_ENTRIES <= len(self._accumulatedGames) or MAX_ENTRIES <= len(self._accumulatedPositiveReviews) or MAX_ENTRIES <= len(self._accumulatedNegativeReviews) or self._eof
+    def shouldSendGames(self) -> bool:
+        return MAX_ENTRIES <= len(self._accumulatedGames) or self._gamesTracker.isDone()
 
+    def shouldSendReviews(self) -> bool:
+        return MAX_ENTRIES <= len(self._accumulatedPositiveReviews)\
+            or MAX_ENTRIES <= len(self._accumulatedNegativeReviews)\
+            or self._reviewsTracker.isDone()
+    
     def __str__(self):
-        return f"tags: {self._pendingTags} client: {self._clientId}"
+        return f"tags: {self._gamesPendingTags} | client: {self._clientId}"
 
     def resetAccumulatedGames(self):
         self._accumulatedGames = []
-        self._fragment += 1
-        if self._eof == True:
-            self._eof = False
-            self._fragment = 1
-            self._packetTracker = DefaultTracker()
+        self._gamesFragment += 1
 
     def storeTracker(self, file, tracker):
         writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(tracker.asCSVRow())
 
-    def storeFragment(self):
-        with open(self.joinedPath() + '.tmp', 'a') as storageFile:
-            writer = csv.writer(storageFile, quoting=csv.QUOTE_MINIMAL)
-            writer.writerow([self._fragment])
+    def storeFragment(self, file, fragment):
+        writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
+        writer.writerow([fragment])
+        
+    def storeMetadata(self):
+        with open(self._path + '.tmp', 'w+') as newResults:
+            self.storeTracker(file=newResults, tracker=self._gamesTracker)
+            self.storeFragment(file=newResults, fragment=self._gamesFragment)
+            self.storeTracker(file=newResults, tracker=self._reviewsTracker)
+            self.storeFragment(file=newResults, fragment=self._reviewsFragment) 
+        os.rename(self._path + '.tmp', self._path + '.csv')
 
-    def storeMetadata(self, clientID):
-        newResults = open(self._path + '.tmp', 'w+')
-        self.storeTracker(newResults, self._packetTracker)
-        self.storeFragment()   
-        newResults.close()
-        return os.rename(self._path + '.tmp', self._path + '.csv')
+    @staticmethod
+    def loadFromStorage(filename)->'AccumulatedBatches':
+        path = f"/{os.getenv('STORAGE')}/{filename}"
+        clientId = uuid.UUID(filename.removesuffix('.csv')).bytes
+        with open(path, 'r') as file:
+            reader = csv.reader(file, quoting=csv.QUOTE_MINIMAL)
+            gamesTrackerRow = nextRow(reader)
+            gamesFragment = nextRow(reader)
+            reviewsTrackerRow = nextRow(reader)
+            reviewsFragment = nextRow(reader)
 
+        return AccumulatedBatches(
+            clientId=clientId, 
+            gamesTracker= DefaultTracker.fromStorage(gamesTrackerRow),
+            gamesFragment=int(gamesFragment),
+            reviewsTracker=DefaultTracker.fromStorage(reviewsTrackerRow),
+            reviewsFragment=int(reviewsFragment)
+            )
+            
     def resetAccumulatedReviews(self):
         self._accumulatedPositiveReviews = []
         self._accumulatedNegativeReviews = []
-        self._fragment += 1
-
-    def getCorrespondingTable(self):
-        return self._table
-
-    def getFragment(self):
-        return self._fragment
+        self._reviewsFragment += 1
 
     def getClient(self):
         return self._clientId
+    
+    def getGamesFragment(self): 
+        return self._gamesFragment
+    
+    def getReviewsFragment(self): 
+        return self._reviewsFragment
