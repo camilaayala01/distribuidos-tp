@@ -1,15 +1,17 @@
 import zmq
 from entryParsing.common.utils import initializeLog
 from threading import Lock
+import os
+PRINT_FREQUENCY = 1000
 
 class BorderNodeCommunication:
     def __init__(self):
         initializeLog()
         context = zmq.Context()
         socket = context.socket(zmq.ROUTER)
-        socket.bind("tcp://*:5556") #TODO: SACAR HARDCODEO
+        socket.bind(f"tcp://*:{os.getenv('CLIENT_PORT')}") 
         self._clientSocket = socket
-        self._clientSocket.setsockopt(zmq.RCVTIMEO, 1000) #TODO: PENSARLO
+        self._clientSocket.setsockopt(zmq.RCVTIMEO, 1000)
         self._clientSocket.setsockopt(zmq.HEARTBEAT_IVL, 1000)
         self._lock = Lock()
 

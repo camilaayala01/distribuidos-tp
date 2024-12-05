@@ -1,6 +1,7 @@
 **/__pycache__/
 mockProducer
 mockJoiner
+initializer/clients
 client/responses
 client-[0-9]*/
 client[0-9]*/

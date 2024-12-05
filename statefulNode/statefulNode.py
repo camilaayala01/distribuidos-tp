@@ -5,7 +5,7 @@ import time
 from uuid import UUID
 import uuid
 from entryParsing.common.fieldLen import CLIENT_ID_LEN
-from entryParsing.common.fieldParsing import deserializeBoolean, getClientIdUUID, serializeBoolean
+from entryParsing.common.fieldParsing import deserializeBoolean, getClientIdUUID
 from entryParsing.common.utils import initializeLog, nextRow
 from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 from internalCommunication.common.utils import createStrategiesFromNextNodes
@@ -13,7 +13,7 @@ from internalCommunication.internalCommunication import InternalCommunication
 from internalCommunication.internalMessageType import InternalMessageType
 from packetTracker.tracker import TrackerInterface
 
-DELETE_TIMEOUT = 10
+DELETE_TIMEOUT = 20
 
 class StatefulNode(ABC):
     def __init__(self):
@@ -108,8 +108,7 @@ class StatefulNode(ABC):
     def handleDataMessage(self, channel, tag, body):
         header, batch = self._headerType.deserialize(body)
         clientId = header.getClient()
-        self.setCurrentClient(clientId)
-
+    
         if clientId in self._deletedClients:
             channel.basic_ack(delivery_tag=tag)
             return
@@ -119,6 +118,7 @@ class StatefulNode(ABC):
             channel.basic_ack(delivery_tag=tag)
             return
         
+        self.setCurrentClient(clientId)
         self.processDataPacket(header, batch, tag, channel)
         
 

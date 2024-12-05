@@ -18,10 +18,13 @@ class MultiTracker(TrackerInterface):
         self.getProcessingTracker(header).update(header)
     
     def isDone(self) -> bool:
+        eof = False
         for tracker in self._trackers.values():
+            if tracker._pending:
+                return False
             if tracker.isDone():
-                return True
-        return False
+                eof = True
+        return eof
     
     def reset(self):
         for tracker in self._trackers:

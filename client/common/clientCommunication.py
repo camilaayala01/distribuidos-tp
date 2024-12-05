@@ -1,19 +1,18 @@
 import logging
 from entryParsing.headerInterface import ClientHeader
 import zmq
-
+import os
 from entryParsing.common.messageType import MessageType
 from entryParsing.common.table import Table
 
-MAX_TIMEOUTS = 10
-TIMEOUT = 2000
+MAX_TIMEOUTS = int(os.getenv('MAX_TIMEOUTS'))
 class ClientCommunication:
     def __init__(self):
         self._context = zmq.Context()
-        socketaddr = "tcp://border-node:%s" % "5556" # TODO: SACAR HARDCODEO
+        socketaddr = os.getenv('BORDER_NODE_ADDR') 
         id, socket  = ClientCommunication.manageHandshake(self._context, socketaddr)
         socket.setsockopt(zmq.IDENTITY, id)
-        socket.setsockopt(zmq.RCVTIMEO, TIMEOUT) # TODO: SACAR HARDCODEO
+        socket.setsockopt(zmq.RCVTIMEO, int(os.getenv('TIMEOUT')))
         socket.connect(socketaddr) 
         self._socket = socket
         self._responsesObtained = []

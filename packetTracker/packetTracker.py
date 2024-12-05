@@ -17,7 +17,7 @@ class PacketTracker(TrackerInterface):
         return tracker
 
     def setFromRow(self, row):
-        self.setArgs(biggestFragment=int(row[0]), pending=eval(row[1]), receivedEnd=bool(row[2]))
+        self.setArgs(biggestFragment=int(row[0]), pending=eval(row[1]), receivedEnd=eval(row[2]))
 
     def setArgs(self, biggestFragment: int, pending: set, receivedEnd: bool):
         self._biggestFragment = biggestFragment

@@ -21,6 +21,7 @@ def kill(node):
 def main():
     nodesToKill = set(re.split(r';', os.getenv('TO_CHECK')) if os.getenv('TO_CHECK') else [])
     while True:
+        time.sleep(10)
         node_to_kill = random.choice(list(nodesToKill))
         kill(node_to_kill)
         time.sleep(INTERVAL)
