@@ -13,6 +13,7 @@ mkdir distribuidos
 ```
 ## Descargar datasets completos
 ```
+cd ~/.kaggle
 kaggle datasets download -d camilaayala01/queries-responses
 mv ./queries-responses.zip ./distribuidos
 cd distribuidos
@@ -20,6 +21,7 @@ unzip queries-responses.zip
 ```
 ## Descargar datasets reducidos
 ```
+cd ~/.kaggle
 kaggle datasets download -d camilaayala01/distribuidos-tp
 mkdir distribuidos/reducido
 mv ./distribuidos-tp.zip ./distribuidos/reducido
@@ -63,12 +65,20 @@ En caso de querer correrlo con el dataset completo el valor seria:
     REVIEWS_STORAGE_FILEPATH=./datasets/reviews.csv
     GAMES_STORAGE_FILEPATH=./datasets/games.csv
 ```
+y el volumen a montar seria:
 
+```
+ ~/.kaggle/distribuidos:/datasets 
+```
 y de querer correrlo con el reducido seria:
 
 ```
     REVIEWS_STORAGE_FILEPATH=./datasets/reducido/reviews-reducido.csv
     GAMES_STORAGE_FILEPATH=./datasets/reducido/games-reducido.csv
+```
+con el volumen:
+```
+ ~/.kaggle/distribuidos/reducido:/datasets 
 ```
 # Para borrar las carpetas
 Si se quierer borrar las carpetas correspondientes a los volumenes se puede ejecutar el siguiente script:
