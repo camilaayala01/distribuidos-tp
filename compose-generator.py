@@ -138,7 +138,7 @@ def add_initializer(compose: dict[str, Any], id):
 def add_initializers(compose: dict[str, Any]):
     count = int(os.getenv('INIT_COUNT'))
     containers = []
-    for i in range(0, count):
+    for i in range(0, 1):
         compose, new_container = add_initializer(compose, i)
         containers.append(new_container)
     return compose, containers
