@@ -82,12 +82,12 @@ Para correr este script, se debe correr el comando
 ```
 En particular, está configurado para correrlo como
 ```
-./comparison.sh ~/.kaggle/distribuidos client/exec{exec-number}/responses
+./comparison.sh ~/.kaggle/distribuidos client-{clientnumber}/responses/exec-{exec-number}
 ```
 
 o en caso de ser el reducido seria
 ```
-./comparison.sh ~/.kaggle/distribuidos/reducido client/exec{exec-number}/responses
+./comparison.sh ~/.kaggle/distribuidos/reducido client-{clientnumber}/responses/exec-{exec-number}
 ```
 pero pueden ubicar los archivos en donde deseen
 

@@ -11,7 +11,7 @@ from statefulNode.statefulNode import StatefulNode
 from .sorterTypes import SorterType
 from .activeClient import SorterClient
 
-PRINT_FREQUENCY=500
+
 DELETE_TIMEOUT = 5
 
 class Sorter(StatefulNode):

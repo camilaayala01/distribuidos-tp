@@ -14,9 +14,8 @@ import os
 
 from internalCommunication.internalMessageType import InternalMessageType
 
-PRINT_FREQUENCY = 1000
 PREFETCH_COUNT = int(os.getenv('PREFETCH_COUNT'))
-
+PRINT_FREQUENCY = 500
 class Initializer:
     def __init__(self): 
         initializeLog()
@@ -109,7 +108,6 @@ class Initializer:
 
     def handleDataMessage(self, body, tag):
         header, data = self._headerType.deserialize(body)
-    
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0 or header.getFragmentNumber() == 1:
             logging.info(f'action: received msg corresponding to table {header.getTable()} | {header}')
 

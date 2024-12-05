@@ -9,7 +9,6 @@ from entryParsing.common.utils import getReducedEntryTypeFromEnv, getHeaderTypeF
 import logging
 import os
 
-PRINT_FREQUENCY = 1000
 
 class Grouper:
     def __init__(self):
@@ -35,8 +34,6 @@ class Grouper:
 
     def handleDataMessage(self, body):
         header, data = self._headerType.deserialize(body)
-        if header.getFragmentNumber() % PRINT_FREQUENCY == 0 | header.isEOF():
-            logging.info(f'action: received batch | {header} | result: success')
         entries = self._entryType.deserialize(data)
         result = self._grouperType.getResults(entries)
         self._sendToNext(header, result)

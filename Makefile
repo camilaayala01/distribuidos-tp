@@ -27,3 +27,21 @@ stop:
 	docker compose -f docker-compose-dev.yaml down
 	docker image prune -f
 .PHONY: stop
+
+destroy:
+	docker compose -f docker-compose-dev.yaml stop -t 10
+	docker compose -f docker-compose-dev.yaml down
+	docker image prune -f
+	@queues=$$(docker exec "$(CONTAINER_NAME)" rabbitmqctl list_queues | awk '{print $$1}' | tail -n +4); \
+	for queue in $$queues; do \
+		echo "Purging queue: $$queue"; \
+		docker exec "$(CONTAINER_NAME)" rabbitmqctl purge_queue "$$queue"; \
+	done
+	sudo rm -rf aggregator/Aggregator*/
+	sudo rm -rf sorter/Consolidator*/
+	sudo rm -rf sorter/Sorter*/
+	sudo rm -rf joiner/Joiner*/
+	sudo rm -rf client-*/
+	sudo rm -rf borderNode/data/
+	sudo rm -rf initializer/clients/
+.PHONY: destroy

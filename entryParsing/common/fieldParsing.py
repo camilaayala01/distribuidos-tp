@@ -5,7 +5,7 @@ from entryParsing.common.table import Table
 from entryParsing.common.utils import boolToInt, intToBool
 from entryParsing.common import fieldLen
 
-MAX_REVIEW_TEXT = 150
+MAX_REVIEW_TEXT = 100
 
 def floatToInt(number) -> int:
     return int(number * 100)

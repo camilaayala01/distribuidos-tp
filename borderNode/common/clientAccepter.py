@@ -74,7 +74,7 @@ class ClientAccepter:
     def handleTimeoutSignal(self, _signum, _):
         self._currentTimer, expired = self._activeClients.getExpiredTimers(lastTimer=self._currentTimer)
         for clientId in expired:
-            logging.info(f"oops, client {getClientIdUUID(clientId)} expired :( so sad for him")
+            logging.info(f"client {getClientIdUUID(clientId)} expired, starting flush")
             self._internalCommunication.sendToInitializer(InternalMessageType.CLIENT_FLUSH.serialize() + clientId)
         self._activeClients.removeClientsFromActive(expired)
 

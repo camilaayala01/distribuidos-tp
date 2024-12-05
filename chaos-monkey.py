@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 load_dotenv('chaos.env')
 TO_CHECK = os.getenv("TO_CHECK")
 CONTAINER = os.getenv("CONTAINER_NAME")
+INTERVAL=10
 
 def container(node):
     return f'{CONTAINER}-{node}-1'
@@ -23,6 +24,7 @@ def main():
         time.sleep(10)
         node_to_kill = random.choice(list(nodesToKill))
         kill(node_to_kill)
+        time.sleep(INTERVAL)
 
 if __name__ == '__main__':
     main()

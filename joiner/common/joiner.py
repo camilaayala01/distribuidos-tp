@@ -14,7 +14,7 @@ from .accumulatedBatches import AccumulatedBatches
 from .activeClient import JoinerClient
 from .joinerTypes import JoinerType
 from statefulNode.statefulNode import StatefulNode
-PRINT_FREQUENCY = 1000
+
 PREFETCH_COUNT = int(os.getenv('PREFETCH_COUNT'))
 
 
