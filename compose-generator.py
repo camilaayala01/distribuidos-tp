@@ -436,7 +436,8 @@ def add_monitor(compose: dict[str, Any], cluster_nodes: list[str], id, monitors_
         'env_file': default_env_file(),
         'volumes':[
             '/var/run/docker.sock:/var/run/docker.sock',
-            './healthcheckAnswerController:/healthcheckAnswerController'
+            './healthcheckAnswerController:/healthcheckAnswerController',
+            './entryParsing:/entryParsing'
         ],
         'networks': default_network(),
         'depends_on': cluster_nodes

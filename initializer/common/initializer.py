@@ -15,7 +15,7 @@ import os
 from internalCommunication.internalMessageType import InternalMessageType
 
 PREFETCH_COUNT = int(os.getenv('PREFETCH_COUNT'))
-
+PRINT_FREQUENCY = 500
 class Initializer:
     def __init__(self): 
         initializeLog()
