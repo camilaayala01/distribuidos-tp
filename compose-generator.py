@@ -131,19 +131,24 @@ def default_config_with_tracker(compose: dict[str, Any], container_name, entrypo
 
 def add_initializer(compose: dict[str, Any], id):
     container_name = f'initializer-{id}' 
-    compose = default_config(compose, container_name, './initializer', os.getenv('INIT'),
+    compose = default_config(compose, container_name, './initializer', os.getenv('INIT'), 40,
                              header_type='HeaderWithTable',
                              games_next_nodes=f'{os.getenv("GROUP_OS")};{os.getenv("FILT_INDIE")};{os.getenv("FILT_ACT")}',
                              games_next_entries='EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres',
                              games_next_headers='Header;;',
                              reviews_next_nodes=f'{os.getenv("GROUP_INDIE")};{os.getenv("JOIN_ACT")},{os.getenv("JOIN_ACT_COUNT")},{ShardingAttribute.APP_ID.value};{os.getenv("GROUP_PERC")}',
-                             reviews_next_entries='EntryAppID;EntryAppIDReviewText;EntryAppID')
+                             reviews_next_entries='EntryAppID;EntryAppIDReviewText;EntryAppID',
+                             storage='clients')
+    
+    compose['services'][container_name]['volumes'].extend([
+        './packetTracker:/packetTracker',
+        './initializer/clients:/clients',       
+    ])
     return compose, container_name
 
 def add_initializers(compose: dict[str, Any]):
-    count = int(os.getenv('INIT_COUNT'))
     containers = []
-    for i in range(0, count):
+    for i in range(0, 1):
         compose, new_container = add_initializer(compose, i)
         containers.append(new_container)
     return compose, containers
@@ -169,7 +174,7 @@ def add_sorter_consolidator_percentile(compose: dict[str, Any], **kwargs):
 
 def add_joiner(compose: dict[str, Any], name, queue, **kwargs):
     container_name = f'joiner-{name}'
-    compose = default_config_with_tracker(compose, container_name, './joiner', queue, 'joiner', 200, **kwargs)
+    compose = default_config_with_tracker(compose, container_name, './joiner', queue, 'joiner', 50, **kwargs)
     return compose, container_name
     
 def add_filterer(compose: dict[str, Any], name, queue, **kwargs):
@@ -423,7 +428,7 @@ def add_monitor(compose: dict[str, Any], cluster_nodes: list[str], id, monitors_
             f'ID={id}',
             f'TO_CHECK={";".join(cluster_nodes)}',
             'RETRIES=3',
-            'TIMER_DURATION=1',
+            'TIMER_DURATION=2',
             'CONTAINER_NAME=distribuidos-tp',
             'ELECTION_PORT=9500',
             f'MONITOR_COUNT={monitors_amount}',
@@ -499,7 +504,7 @@ def generate_compose(output_file: str, client_number: int):
     compose, containers = add_container(compose, containers, generation=add_aggregator_english)
 
     # Query 5
-    #filter action
+    # filter action
     compose, containers = add_container(compose, containers, generation=add_groupers_action_percentile)
     compose, containers = add_container(compose, containers, generation=add_joiners_action_percentile)
     compose, containers = add_container(compose, containers, generation=add_sorter_consolidator_action_percentile)

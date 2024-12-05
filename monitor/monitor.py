@@ -1,16 +1,20 @@
+import logging
 import re
 import os
 import subprocess
 from threading import Thread, Lock
 from election.election import ElectionHandler
+from entryParsing.common.utils import initializeLog
 from healthcheckAnswerController.messages import HeartbeatMessage
 from utils import container, getSocket, monitorName, sendall
 from status import Status
 
 TIMER_DURATION = int(os.getenv('TIMER_DURATION'))
 HEALTHCHECK_PORT = int(os.getenv('HEALTHCHECK_PORT'))
+
 class Monitor:
     def __init__(self):
+        initializeLog()
         self._running = True
         self._id = int(os.getenv('ID'))
         self._electionHandler = ElectionHandler()
@@ -28,9 +32,9 @@ class Monitor:
         self._electionHandler.stop()
     
     def revive(self, node):
-        print(f"Reviving node {node}")
+        logging.info(f"action: reviving node {node}")
         result = subprocess.run(['docker', 'start', container(node)], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        print('Command executed. Result={}. Output={}. Error={}'.format(result.returncode, result.stdout, result.stderr))
+        logging.info('action: command executed. Result={}. Output={}. Error={}'.format(result.returncode, result.stdout, result.stderr))
 
     def checkLeader(self):
         if not self._electionHandler.isLeaderRunning():
@@ -126,10 +130,10 @@ class Monitor:
         match self._electionHandler.iAmLeader():
             case True:
                 self._electionHandler.sendCoordinator()
-                print("soy lider, iniciando healthcheck")
+                logging.info("action: starting execution as leader monitor | success")
                 self.listenForHealthcheckAnswer()
             case False:
-                print("no soy lider, esperando healthcheck")
+                logging.info("action: starting execution as not leader monitor | success")
                 self.listenForLeader()
 
     def run(self):

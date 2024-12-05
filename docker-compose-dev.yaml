@@ -6,8 +6,8 @@ services:
     environment:
     - PYTHONUNBUFFERED=1
     - MAX_DATA_BYTES=51200
-    - REVIEWS_STORAGE_FILEPATH=./datasets/reviews-reducido.csv
-    - GAMES_STORAGE_FILEPATH=./datasets/games-reducido.csv
+    - REVIEWS_STORAGE_FILEPATH=./datasets/dataset.csv
+    - GAMES_STORAGE_FILEPATH=./datasets/games.csv
     - AMOUNT_OF_EXECUTIONS=1
     - BORDER_NODE_ADDR=tcp://border-node:5556
     - MAX_TIMEOUTS=10
@@ -26,7 +26,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
+    - PREFETCH_COUNT=40
     - LISTENING_QUEUE=Initializer
     - HEADER_TYPE=HeaderWithTable
     - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
@@ -34,6 +34,7 @@ services:
     - GAMES_NEXT_HEADERS=Header;;
     - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
     - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
+    - STORAGE=clients
     - NODE_NAME=initializer-0
     env_file:
     - .env
@@ -41,52 +42,8 @@ services:
     - ./internalCommunication:/internalCommunication
     - ./entryParsing:/entryParsing
     - ./healthcheckAnswerController:/healthcheckAnswerController
-    networks:
-    - sa_net
-  initializer-1:
-    build:
-      context: ./initializer
-      dockerfile: ../rabbitUser.Dockerfile
-    environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=Initializer
-    - HEADER_TYPE=HeaderWithTable
-    - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
-    - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
-    - GAMES_NEXT_HEADERS=Header;;
-    - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
-    - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
-    - NODE_NAME=initializer-1
-    env_file:
-    - .env
-    volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
-    networks:
-    - sa_net
-  initializer-2:
-    build:
-      context: ./initializer
-      dockerfile: ../rabbitUser.Dockerfile
-    environment:
-    - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=1
-    - LISTENING_QUEUE=Initializer
-    - HEADER_TYPE=HeaderWithTable
-    - GAMES_NEXT_NODES=GrouperOSCounts;FilterIndie;FilterAction
-    - GAMES_NEXT_ENTRIES=EntryOSSupport;EntryAppIDNameGenresReleaseDateAvgPlaytime;EntryAppIDNameGenres
-    - GAMES_NEXT_HEADERS=Header;;
-    - REVIEWS_NEXT_NODES=GrouperIndie;JoinerActionEnglish,3,0;GrouperActionPercentile
-    - REVIEWS_NEXT_ENTRIES=EntryAppID;EntryAppIDReviewText;EntryAppID
-    - NODE_NAME=initializer-2
-    env_file:
-    - .env
-    volumes:
-    - ./internalCommunication:/internalCommunication
-    - ./entryParsing:/entryParsing
-    - ./healthcheckAnswerController:/healthcheckAnswerController
+    - ./packetTracker:/packetTracker
+    - ./initializer/clients:/clients
     networks:
     - sa_net
   grouper-os-0:
@@ -315,7 +272,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerIndie
     - JOINER_TYPE=0
     - NEXT_NODES=AggregatorIndie
@@ -345,7 +302,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerIndie
     - JOINER_TYPE=0
     - NEXT_NODES=AggregatorIndie
@@ -375,7 +332,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerIndie
     - JOINER_TYPE=0
     - NEXT_NODES=AggregatorIndie
@@ -538,7 +495,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerActionEnglish
     - JOINER_TYPE=1
     - NEXT_NODES=FilterEnglish
@@ -567,7 +524,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerActionEnglish
     - JOINER_TYPE=1
     - NEXT_NODES=FilterEnglish
@@ -596,7 +553,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerActionEnglish
     - JOINER_TYPE=1
     - NEXT_NODES=FilterEnglish
@@ -871,7 +828,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerActionPercentile
     - JOINER_TYPE=0
     - NEXT_NODES=ConsolidatorSorterPercentile
@@ -900,7 +857,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerActionPercentile
     - JOINER_TYPE=0
     - NEXT_NODES=ConsolidatorSorterPercentile
@@ -929,7 +886,7 @@ services:
       dockerfile: ../rabbitUser.Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
-    - PREFETCH_COUNT=200
+    - PREFETCH_COUNT=50
     - LISTENING_QUEUE=JoinerActionPercentile
     - JOINER_TYPE=0
     - NEXT_NODES=ConsolidatorSorterPercentile
@@ -1008,9 +965,9 @@ services:
     - PYTHONUNBUFFERED=1
     - PREFETCH_COUNT=1
     - ID=1
-    - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
+    - TO_CHECK=initializer-0;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
     - RETRIES=3
-    - TIMER_DURATION=1
+    - TIMER_DURATION=2
     - CONTAINER_NAME=distribuidos-tp
     - ELECTION_PORT=9500
     - MONITOR_COUNT=4
@@ -1023,8 +980,6 @@ services:
     - sa_net
     depends_on: &id001
     - initializer-0
-    - initializer-1
-    - initializer-2
     - grouper-os-0
     - grouper-os-1
     - aggregator-os
@@ -1069,9 +1024,9 @@ services:
     - PYTHONUNBUFFERED=1
     - PREFETCH_COUNT=1
     - ID=2
-    - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
+    - TO_CHECK=initializer-0;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
     - RETRIES=3
-    - TIMER_DURATION=1
+    - TIMER_DURATION=2
     - CONTAINER_NAME=distribuidos-tp
     - ELECTION_PORT=9500
     - MONITOR_COUNT=4
@@ -1091,9 +1046,9 @@ services:
     - PYTHONUNBUFFERED=1
     - PREFETCH_COUNT=1
     - ID=3
-    - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
+    - TO_CHECK=initializer-0;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
     - RETRIES=3
-    - TIMER_DURATION=1
+    - TIMER_DURATION=2
     - CONTAINER_NAME=distribuidos-tp
     - ELECTION_PORT=9500
     - MONITOR_COUNT=4
@@ -1113,9 +1068,9 @@ services:
     - PYTHONUNBUFFERED=1
     - PREFETCH_COUNT=1
     - ID=4
-    - TO_CHECK=initializer-0;initializer-1;initializer-2;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
+    - TO_CHECK=initializer-0;grouper-os-0;grouper-os-1;aggregator-os;filterer-indie;filterer-date;sorter-playtime-0;sorter-playtime-1;sorter-consolidator-playtime;grouper-indie;joiner-indie-0;joiner-indie-1;joiner-indie-2;aggregator-indie;sorter-indie-0;sorter-indie-1;sorter-consolidator-indie;filterer-action;joiner-english-0;joiner-english-1;joiner-english-2;filterer-english-0;filterer-english-1;filterer-english-2;filterer-english-3;filterer-english-4;filterer-english-5;filterer-english-6;filterer-english-7;grouper-english;aggregator-english;grouper-percentile;joiner-percentile-0;joiner-percentile-1;joiner-percentile-2;sorter-consolidator-percentile;border-node
     - RETRIES=3
-    - TIMER_DURATION=1
+    - TIMER_DURATION=2
     - CONTAINER_NAME=distribuidos-tp
     - ELECTION_PORT=9500
     - MONITOR_COUNT=4

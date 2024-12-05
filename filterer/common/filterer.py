@@ -9,7 +9,7 @@ from internalCommunication.internalCommunication import InternalCommunication
 import logging
 from entryParsing.common.utils import getReducedEntryTypeFromEnv, getHeaderTypeFromEnv, initializeLog
 
-PRINT_FREQUENCY = 1000
+PRINT_FREQUENCY = 250
 
 class Filterer:
     def __init__(self):
