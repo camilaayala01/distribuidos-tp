@@ -5,7 +5,7 @@ import time
 from uuid import UUID
 import uuid
 from entryParsing.common.fieldLen import CLIENT_ID_LEN
-from entryParsing.common.fieldParsing import deserializeBoolean, getClientIdUUID, serializeBoolean
+from entryParsing.common.fieldParsing import deserializeBoolean, getClientIdUUID
 from entryParsing.common.utils import initializeLog, nextRow
 from healthcheckAnswerController.healthcheckAnswerController import HealthcheckAnswerController
 from internalCommunication.common.utils import createStrategiesFromNextNodes

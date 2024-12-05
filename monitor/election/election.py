@@ -1,3 +1,4 @@
+import logging
 import os
 from threading import Lock, Semaphore
 from .messages import ElectionMessage
@@ -83,6 +84,7 @@ class ElectionHandler:
         listeningSock.close()
        
     def startElection(self):
+        logging.info(f"action: leader down, participarting of an election")
         self._leaderIsRunning = False 
         candidates = 0
         for id in range(self._id + 1, MONITOR_COUNT + 1):

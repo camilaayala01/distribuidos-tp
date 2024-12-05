@@ -30,6 +30,7 @@ class Initializer:
         self._healthcheckAnswerController = HealthcheckAnswerController()
         self._healthcheckAnswerController.execute()
         self._accumulatedBatchesByID = {}     
+        self.loadStatesFromDisk()
         os.makedirs(f"/{os.getenv('STORAGE')}/", exist_ok=True)
 
     def loadStatesFromDisk(self):
@@ -77,7 +78,6 @@ class Initializer:
         accumulatedBatches.accumulateGames(tag, gameEntries, header)
         if accumulatedBatches.shouldSendGames():
             self.sendGames(accumulatedBatches)
-            print("sent games")
             return True
         return False
 
@@ -88,7 +88,6 @@ class Initializer:
         for _, strategy in enumerate(self._gamesSendingStrategies):
             strategy.sendData(self._internalCommunication, header, gameEntries)
         accumulatedBatches.resetAccumulatedGames()
-        print("resetted games")
 
     def handleReviews(self, accumulatedBatches: AccumulatedBatches, tag: int, header: HeaderInterface, data: bytes):
         reviewEntries = self._reviewsEntry.deserialize(data)
@@ -96,7 +95,6 @@ class Initializer:
         accumulatedBatches.accumulateReviews(tag, positiveReviewEntries, negativeReviewEntries, header)
         if accumulatedBatches.shouldSendReviews():
             self.sendReviews(accumulatedBatches)
-            print("sent reviews")
             return True
         return False
     
@@ -108,28 +106,30 @@ class Initializer:
         for index, strategy in enumerate(self._reviewsSendingStrategies):
             strategy.sendData(self._internalCommunication, header, toSend[index])
         accumulatedBatches.resetAccumulatedReviews()
-        print("resetted reviews")
 
     def handleDataMessage(self, body, tag):
         header, data = self._headerType.deserialize(body)
+    
         if header.getFragmentNumber() % PRINT_FREQUENCY == 0 or header.getFragmentNumber() == 1:
             logging.info(f'action: received msg corresponding to table {header.getTable()} | {header}')
 
-        accumulatedBatches = self._accumulatedBatchesByID.setdefault(header.getClient(), AccumulatedBatches(clientId=header.getClient()))
+        if header.getClient() not in self._accumulatedBatchesByID:
+            self._accumulatedBatchesByID[header.getClient()] = AccumulatedBatches(header.getClient())
+        accumulatedBatches = self._accumulatedBatchesByID[header.getClient()]
 
         if accumulatedBatches.isPacketDuplicate(header):
             self._internalCommunication.ackAll([tag])
             return
-        
+
         if header.isGamesTable():
             sentGames = self.handleGames(accumulatedBatches, tag, header, data)
-            accumulatedBatches.storeMetadata()
             if sentGames:
+                accumulatedBatches.storeMetadata()
                 self._internalCommunication.ackAll(accumulatedBatches.consumeGamesToAck())
         elif header.isReviewsTable():
             sentReviews = self.handleReviews(accumulatedBatches, tag, header, data)
-            accumulatedBatches.storeMetadata()
             if sentReviews:
+                accumulatedBatches.storeMetadata()
                 self._internalCommunication.ackAll(accumulatedBatches.consumeReviewsToAck())
         else:
             raise ValueError("Table is not one of the two allowed tables")
@@ -138,12 +138,11 @@ class Initializer:
         if not self.reachedCapacity():
             return
 
+        logging.info(f'action: reached full capacity, sending all accumulated batches')
         self.sendGames(accumulatedBatches)
         self.sendReviews(accumulatedBatches)
         accumulatedBatches.storeMetadata()
-        toack = accumulatedBatches.consumePacketsToAck()
-        print(toack)
-        self._internalCommunication.ackAll(toack)
+        self._internalCommunication.ackAll(accumulatedBatches.consumePacketsToAck())
         self._accumulatedBatchesByID[header.getClient()] = accumulatedBatches
 
     def handleMessage(self, ch, method, _properties, body):

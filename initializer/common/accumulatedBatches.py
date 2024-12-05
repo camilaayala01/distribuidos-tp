@@ -7,19 +7,20 @@ from entryParsing.headerInterface import HeaderInterface, HeaderWithTable
 from entryParsing.common.table import Table
 from packetTracker.defaultTracker import DefaultTracker
 
-MAX_ENTRIES = 300
+MAX_ENTRIES_GAMES = 200
+MAX_ENTRIES_REVIEWS = 500
 
 class AccumulatedBatches:
-    def __init__(self, clientId: bytes, gamesTracker = DefaultTracker(), gamesFragment = 1, reviewsTracker = DefaultTracker(), reviewsFragment = 1):
+    def __init__(self, clientId: bytes, gamesTracker = None, gamesFragment = 1, reviewsTracker = None, reviewsFragment = 1):
         self._gamesPendingTags = []
         self._reviewsPendingTags = []
         self._accumulatedGames = []
         self._accumulatedPositiveReviews = []
         self._accumulatedNegativeReviews = []
+        self._gamesTracker = gamesTracker if gamesTracker else DefaultTracker()
         self._gamesFragment = gamesFragment
-        self._reviewsFragment = reviewsFragment
-        self._gamesTracker = gamesTracker
-        self._reviewsTracker = reviewsTracker
+        self._reviewsTracker = reviewsTracker if reviewsTracker else DefaultTracker()
+        self._reviewsFragment = reviewsFragment 
         self._clientId = clientId
         self._path = f"/{os.getenv('STORAGE')}/{getClientIdUUID(self._clientId)}"
 
@@ -76,15 +77,15 @@ class AccumulatedBatches:
                 self._accumulatedNegativeReviews
 
     def shouldSendGames(self) -> bool:
-        return MAX_ENTRIES <= len(self._accumulatedGames) or self._gamesTracker.isDone()
+        return MAX_ENTRIES_GAMES <= len(self._accumulatedGames) or self._gamesTracker.isDone()
 
     def shouldSendReviews(self) -> bool:
-        return MAX_ENTRIES <= len(self._accumulatedPositiveReviews)\
-            or MAX_ENTRIES <= len(self._accumulatedNegativeReviews)\
+        return MAX_ENTRIES_REVIEWS <= len(self._accumulatedPositiveReviews)\
+            or MAX_ENTRIES_REVIEWS <= len(self._accumulatedNegativeReviews)\
             or self._reviewsTracker.isDone()
     
     def __str__(self):
-        return f"tags: {self._gamesPendingTags} | client: {self._clientId}"
+        return f"tags: {self._gamesPendingTags} | client: {self._clientId} | games tracker: {self._gamesTracker}"
 
     def resetAccumulatedGames(self):
         self._accumulatedGames = []
@@ -120,9 +121,9 @@ class AccumulatedBatches:
         return AccumulatedBatches(
             clientId=clientId, 
             gamesTracker= DefaultTracker.fromStorage(gamesTrackerRow),
-            gamesFragment=int(gamesFragment),
+            gamesFragment=int(gamesFragment[0]),
             reviewsTracker=DefaultTracker.fromStorage(reviewsTrackerRow),
-            reviewsFragment=int(reviewsFragment)
+            reviewsFragment=int(reviewsFragment[0])
             )
             
     def resetAccumulatedReviews(self):
